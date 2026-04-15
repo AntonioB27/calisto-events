@@ -1,0 +1,50 @@
+import { notFound } from "next/navigation";
+import { AppPreviewWindow } from "@/components/AppPreviewWindow";
+import { FeatureGrid } from "@/components/FeatureGrid";
+import { FutureRoadmap } from "@/components/FutureRoadmap";
+import { Hero } from "@/components/Hero";
+import { HowItWorks } from "@/components/HowItWorks";
+import { LanguageSelectorBar } from "@/components/LanguageSelectorBar";
+import { LanguageSelectorPopup } from "@/components/LanguageSelectorPopup";
+import { Lifecycle } from "@/components/Lifecycle";
+import { PlanCards } from "@/components/PlanCards";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
+import { WaitlistForm } from "@/components/WaitlistForm";
+import { getLandingCopy, isLocale, LOCALES, type Locale } from "@/lib/i18n";
+
+type LocalePageProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export function generateStaticParams() {
+  return LOCALES.map((locale) => ({ locale }));
+}
+
+export default async function LocalePage({ params }: LocalePageProps) {
+  const { locale } = await params;
+  if (!isLocale(locale)) {
+    notFound();
+  }
+
+  const copy = getLandingCopy(locale);
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col bg-[var(--background)]">
+      <LanguageSelectorPopup copy={copy} locale={locale as Locale} />
+      <SiteHeader copy={copy} />
+      <main className="flex-1">
+        <Hero copy={copy} />
+        <AppPreviewWindow />
+        <FeatureGrid copy={copy} />
+        <HowItWorks copy={copy} />
+        <PlanCards copy={copy} />
+        <Lifecycle copy={copy} />
+        <FutureRoadmap copy={copy} />
+        <WaitlistForm copy={copy.waitlist} />
+        <LanguageSelectorBar copy={copy} locale={locale as Locale} className="pb-6 pt-4" />
+      </main>
+      <SiteFooter copy={copy} />
+    </div>
+  );
+}

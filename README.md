@@ -1,37 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Calisto Events Landing
 
-## Getting Started
+## Development
 
-First, run the development server:
+Run the app locally:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Waitlist backend (Supabase)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The waitlist form posts to `POST /api/waitlist`, which inserts into Supabase.
 
-## Learn More
+Set these environment variables in `.env.local`:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Important: `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never be exposed in client code.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Required table
 
-## Deploy on Vercel
+Create this table in Supabase:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```sql
+create table if not exists public.waitlist (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  created_at timestamptz not null default now()
+);
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# calisto-events
+create unique index if not exists waitlist_email_lower_unique
+  on public.waitlist (lower(email));
+```
+
+## Quality checks
+
+```bash
+npm run lint
+npm run build
+```
+

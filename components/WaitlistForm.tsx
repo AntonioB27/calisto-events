@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import type { LandingCopy } from "@/lib/i18n";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -9,30 +10,48 @@ function isValidEmail(value: string): boolean {
   return t.length > 0 && EMAIL_RE.test(t);
 }
 
-export function WaitlistForm() {
+type WaitlistFormProps = {
+  copy: LandingCopy["waitlist"];
+};
+
+export function WaitlistForm({ copy }: WaitlistFormProps) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const onSubmit = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
+    async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setError(null);
       const trimmed = email.trim();
       if (!isValidEmail(trimmed)) {
-        setError("Enter a valid email address.");
+        setError(copy.invalidEmail);
         return;
       }
       setBusy(true);
-      // TODO: POST to API / Supabase waitlist endpoint
-      window.setTimeout(() => {
-        console.log("[waitlist] placeholder submit:", trimmed);
-        setBusy(false);
+      try {
+        const response = await fetch("/api/waitlist", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: trimmed }),
+        });
+
+        if (!response.ok) {
+          setError(copy.submitFailed);
+          return;
+        }
+
         setSubmitted(true);
-      }, 400);
+      } catch {
+        setError(copy.submitFailed);
+      } finally {
+        setBusy(false);
+      }
     },
-    [email],
+    [copy.invalidEmail, copy.submitFailed, email],
   );
 
   return (
@@ -42,14 +61,10 @@ export function WaitlistForm() {
     >
       <div className="mx-auto max-w-5xl">
         <div className="rounded-3xl border border-primary/25 bg-white p-8 shadow-lg sm:p-10">
-          <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl">Join the waitlist</h2>
-          <p className="mt-3 max-w-2xl text-lg text-zinc-600">
-            Be first to know when Calisto opens up more broadly. Leave your email—we&apos;ll only use it for
-            launch updates.
-          </p>
+          <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl">{copy.title}</h2>
+          <p className="mt-3 max-w-2xl text-lg text-zinc-600">{copy.description}</p>
           <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-950">
-            The first 10 people on the waiting list get <strong>20% off</strong> any paid plan (Standard,
-            Premium, or Max).
+            {copy.discount}
           </p>
 
           {submitted ? (
@@ -57,13 +72,13 @@ export function WaitlistForm() {
               className="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-emerald-900"
               role="status"
             >
-              You&apos;re on the list—we&apos;ll be in touch.
+              {copy.submitted}
             </p>
           ) : (
             <form onSubmit={onSubmit} className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-start" noValidate>
               <div className="min-w-0 flex-1">
                 <label htmlFor="waitlist-email" className="sr-only">
-                  Email
+                  {copy.inputLabel}
                 </label>
                 <input
                   id="waitlist-email"
@@ -71,7 +86,7 @@ export function WaitlistForm() {
                   type="email"
                   autoComplete="email"
                   inputMode="email"
-                  placeholder="you@example.com"
+                  placeholder={copy.inputPlaceholder}
                   value={email}
                   onChange={(ev) => {
                     setEmail(ev.target.value);
@@ -92,15 +107,12 @@ export function WaitlistForm() {
                 disabled={busy}
                 className="shrink-0 rounded-xl bg-primary px-8 py-3 text-base font-bold text-white shadow-md transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {busy ? "Joining…" : "Join the waitlist"}
+                {busy ? copy.buttonBusy : copy.buttonIdle}
               </button>
             </form>
           )}
 
-          <p className="mt-6 text-xs text-zinc-500">
-            Discount details and eligibility may be updated before launch. No spam—unsubscribe anytime once we
-            send real emails.
-          </p>
+          <p className="mt-6 text-xs text-zinc-500">{copy.note}</p>
         </div>
       </div>
     </section>
