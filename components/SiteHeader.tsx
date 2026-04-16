@@ -25,27 +25,27 @@ export function SiteHeader({ copy }: SiteHeaderProps) {
               {copy.joinWaitlistShort}
             </a>
           </div>
-        <nav
-          className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 sm:flex-1"
-          aria-label={copy.navAriaLabel}
-        >
-          {copy.nav.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-600 transition-colors hover:bg-primary-tint hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:px-3 sm:py-2 sm:text-sm"
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
-        <a
-          href="#waitlist"
-          className="hidden rounded-full bg-primary px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:inline-flex sm:shrink-0"
-        >
-          {copy.joinWaitlistShort}
-        </a>
-      </div>
+          <nav
+            className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 sm:flex-1"
+            aria-label={copy.navAriaLabel}
+          >
+            {copy.nav.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-600 transition-colors hover:bg-primary-tint hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:px-3 sm:py-2 sm:text-sm"
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+          <a
+            href="#waitlist"
+            className="hidden rounded-full bg-primary px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:inline-flex sm:shrink-0"
+          >
+            {copy.joinWaitlistShort}
+          </a>
+        </div>
       </div>
     </header>
   );
