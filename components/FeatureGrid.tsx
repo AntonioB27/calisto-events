@@ -47,7 +47,7 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
           {copy.features.map((f, i) => (
             <li
               key={f.title}
-              className="group rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition hover:border-primary/30 hover:shadow-lg"
+              className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition hover:border-primary/30 hover:shadow-lg"
             >
               <span className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary-tint text-xl">
                 {FEATURE_ICONS[i] ?? "✨"}
