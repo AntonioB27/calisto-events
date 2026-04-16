@@ -135,7 +135,7 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
           </div>
 
           {/* Aurora on dark */}
-          <div className="relative mx-auto w-full max-w-[200px] shrink-0 lg:mx-0">
+          <div className="relative mx-auto mt-20 w-full max-w-[200px] shrink-0 lg:mx-0 lg:mt-0">
             <div className="pointer-events-none absolute left-1/2 top-0 z-10 flex w-[200%] max-w-[260px] -translate-x-1/2 -translate-y-full justify-center px-2">
               <p className="pointer-events-auto relative rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-center text-sm font-semibold leading-snug text-white shadow-md backdrop-blur-md">
                 {copy.featuresAuroraBubble}
