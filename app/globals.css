@@ -112,6 +112,28 @@ body {
   }
 }
 
+/* Phone mockup float animation */
+@keyframes floatPhone {
+  0%, 100% {
+    transform: rotateX(8deg) rotateY(-14deg) rotateZ(2deg) translateY(0px);
+  }
+  50% {
+    transform: rotateX(8deg) rotateY(-14deg) rotateZ(2deg) translateY(-14px);
+  }
+}
+
+.phone-float {
+  animation: floatPhone 6s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone-float {
+    animation: none;
+    transform: rotateX(8deg) rotateY(-14deg) rotateZ(2deg);
+  }
+}
+
 /* Lifecycle timeline */
 .lifecycle-rule {
   position: relative;
