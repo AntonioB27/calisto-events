@@ -35,32 +35,35 @@ function LightbulbIcon() {
   );
 }
 
-// Derive status from description keywords — keeps it flexible without hardcoding per-item
+// Derive status from description prefixes (aligned across EN / HR / DE copy)
 function deriveStatus(description: string): "roadmap" | "planned" | "idea" {
   const lower = description.toLowerCase();
   if (lower.startsWith("roadmap")) return "roadmap";
-  if (lower.startsWith("planned")) return "planned";
+  if (
+    lower.startsWith("planned") ||
+    lower.startsWith("planirano") ||
+    lower.startsWith("geplant")
+  ) {
+    return "planned";
+  }
   return "idea";
 }
 
 const STATUS_STYLES = {
   roadmap: {
     badge: "bg-violet-400/15 text-violet-300 border border-violet-400/25",
-    label: "Roadmap",
     icon: MapIcon,
     topBar: "bg-violet-400/60",
     glow: "rgba(167,139,250,0.08)",
   },
   planned: {
     badge: "bg-blue-400/15 text-blue-300 border border-blue-400/25",
-    label: "Planned",
     icon: CalendarIcon,
     topBar: "bg-blue-400/60",
     glow: "rgba(96,165,250,0.08)",
   },
   idea: {
     badge: "bg-amber-400/15 text-amber-300 border border-amber-400/25",
-    label: "Idea",
     icon: LightbulbIcon,
     topBar: "bg-amber-400/60",
     glow: "rgba(245,158,11,0.08)",
@@ -109,7 +112,7 @@ export function FutureRoadmap({ copy }: FutureRoadmapProps) {
                     <h3 className="text-sm font-bold text-white">{item.title}</h3>
                     <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${style.badge}`}>
                       <Icon />
-                      {style.label}
+                      {copy.futureStatusLabels[statusKey]}
                     </span>
                   </div>
                   <p className="mt-2 text-sm leading-relaxed text-zinc-400">{item.description}</p>

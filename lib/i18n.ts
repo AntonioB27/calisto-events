@@ -48,7 +48,11 @@ type WaitlistCopy = {
 
 export type LandingCopy = {
   languageLabel: string;
+  languagePopupSubtitle: string;
   langContinue: string;
+  themeLabel: string;
+  themeLight: string;
+  themeDark: string;
   navAriaLabel: string;
   nav: NavItem[];
   joinWaitlistShort: string;
@@ -58,6 +62,13 @@ export type LandingCopy = {
   heroDescription: string;
   heroPrimaryCta: string;
   heroSecondaryCta: string;
+  statBar: { value: string; label: string }[];
+  appPreviewEyebrow: string;
+  appPreviewAriaSection: string;
+  appPreviewAriaThumbs: string;
+  appPreviewCaptions: readonly [string, string, string];
+  appPreviewViewAriaTemplate: string;
+  appPreviewImageAltTemplate: string;
   featuresTitle: string;
   featuresDescription: string;
   featuresAuroraBubble: string;
@@ -69,20 +80,29 @@ export type LandingCopy = {
   plansDescriptionStrong: string;
   plansDescriptionRest: string;
   plansAuroraBubble: string;
+  plansMascotAlt: string;
   popularBadge: string;
   plans: Plan[];
   planFootnote: string;
   lifecycleTitle: string;
   lifecycleDescription: string;
   lifecycleRules: string[];
+  auroraQuote: string;
+  auroraQuoteIntro: string;
+  auroraQuoteSectionAria: string;
+  auroraLabel: string;
+  auroraJobTitle: string;
+  auroraMascotAlt: string;
   futureTitle: string;
   futureDescription: string;
   futureItems: FutureItem[];
+  futureStatusLabels: { roadmap: string; planned: string; idea: string };
   waitlist: WaitlistCopy;
   footerText: string;
+  footerRightsLine: string;
+  brandIconAlt: string;
   pageTitle: string;
   pageDescription: string;
-  auroraQuote: string;
 };
 
 export const LOCALES: Locale[] = ["en", "hr", "de"];
@@ -95,7 +115,11 @@ export function isLocale(value: string): value is Locale {
 const copy: Record<Locale, LandingCopy> = {
   en: {
     languageLabel: "Language",
+    languagePopupSubtitle: "Choose your language and appearance to continue.",
     langContinue: "Continue",
+    themeLabel: "Appearance",
+    themeLight: "Light",
+    themeDark: "Dark",
     navAriaLabel: "Page sections",
     nav: [
       { href: "#features", label: "Features" },
@@ -111,6 +135,17 @@ const copy: Record<Locale, LandingCopy> = {
       "Calisto helps your guests upload and browse photos and videos in one place. I'll help you keep memories organized with a simple access code, optional QR invite, and storage plans that match your celebration—priced once per event, not as a monthly subscription.",
     heroPrimaryCta: "Join the waitlist",
     heroSecondaryCta: "Compare plans",
+    statBar: [
+      { value: "50+", label: "guests on Free plan" },
+      { value: "100 GB", label: "max storage available" },
+      { value: "3", label: "steps to your gallery" },
+    ],
+    appPreviewEyebrow: "See it in action",
+    appPreviewAriaSection: "App preview",
+    appPreviewAriaThumbs: "Screenshot thumbnails",
+    appPreviewCaptions: ["Gallery view", "Event details", "Upload flow"],
+    appPreviewViewAriaTemplate: "View {name}",
+    appPreviewImageAltTemplate: "Calisto app — {name}",
     featuresTitle: "What you can do",
     featuresDescription:
       "Built for big days when everyone is taking pictures—Calisto keeps uploads organized and easy to share.",
@@ -171,6 +206,7 @@ const copy: Record<Locale, LandingCopy> = {
     plansDescriptionStrong: "One-time payment per event",
     plansDescriptionRest: "choose a tier when you create the event. Upgrade later if you need more storage, guests, or retention.",
     plansAuroraBubble: "Choose what fits your event now—you can upgrade whenever you need more.",
+    plansMascotAlt: "Aurora choosing a storage plan",
     popularBadge: "Popular",
     plans: [
       {
@@ -260,6 +296,7 @@ const copy: Record<Locale, LandingCopy> = {
         description: "Ideas on the roadmap: professional photo editing, filter packs, print-on-demand.",
       },
     ],
+    futureStatusLabels: { roadmap: "Roadmap", planned: "Planned", idea: "Idea" },
     waitlist: {
       title: "Join the waitlist",
       description:
@@ -279,10 +316,21 @@ const copy: Record<Locale, LandingCopy> = {
     pageDescription:
       "Calisto lets wedding and event guests upload and browse photos and videos in one place. Organizers share a code or QR; plans are one-time per event.",
     auroraQuote: "Every memory deserves a home. I'll make sure yours is beautiful, organized, and yours forever.",
+    auroraQuoteIntro: "From Aurora · Your Calisto guide",
+    auroraQuoteSectionAria: "A message from Aurora",
+    auroraLabel: "Aurora",
+    auroraJobTitle: "Calisto guide",
+    auroraMascotAlt: "Aurora, your Calisto guide",
+    footerRightsLine: "All rights reserved.",
+    brandIconAlt: "Calisto logo",
   },
   hr: {
     languageLabel: "Jezik",
+    languagePopupSubtitle: "Odaberi jezik i izgled da nastaviš.",
     langContinue: "Nastavi",
+    themeLabel: "Izgled",
+    themeLight: "Svijetla",
+    themeDark: "Tamna",
     navAriaLabel: "Sekcije stranice",
     nav: [
       { href: "#features", label: "Mogućnosti" },
@@ -298,6 +346,17 @@ const copy: Record<Locale, LandingCopy> = {
       "Calisto omogućuje tvojim gostima da na jednom mjestu učitavaju i pregledavaju fotografije i videa. Pomažem ti da uspomene ostanu organizirane uz jednostavan pristupni kod, opcionalni QR poziv i pakete pohrane prema veličini događaja — jednokratno plaćanje po događaju, bez mjesečne pretplate.",
     heroPrimaryCta: "Pridruži se listi čekanja",
     heroSecondaryCta: "Usporedi pakete",
+    statBar: [
+      { value: "50+", label: "gostiju na Free paketu" },
+      { value: "100 GB", label: "maks. dostupna pohrana" },
+      { value: "3", label: "koraka do galerije" },
+    ],
+    appPreviewEyebrow: "Vidi kako radi",
+    appPreviewAriaSection: "Pregled aplikacije",
+    appPreviewAriaThumbs: "Minijature snimki zaslona",
+    appPreviewCaptions: ["Pregled galerije", "Detalji događaja", "Tok učitavanja"],
+    appPreviewViewAriaTemplate: "Pogledaj: {name}",
+    appPreviewImageAltTemplate: "Calisto aplikacija — {name}",
     featuresTitle: "Što možeš raditi",
     featuresDescription: "Stvoreno za velike dane kada svi fotografiraju — Calisto drži uploadove organiziranima i lakima za dijeljenje.",
     featuresAuroraBubble:
@@ -351,6 +410,7 @@ const copy: Record<Locale, LandingCopy> = {
     plansDescriptionStrong: "Jednokratno plaćanje po događaju",
     plansDescriptionRest: "odaberi paket pri kreiranju događaja. Nadogradnja je moguća kasnije ako trebaš više prostora, gostiju ili duže čuvanje.",
     plansAuroraBubble: "Odaberi što sada odgovara tvom događaju — nadogradnja je uvijek opcija.",
+    plansMascotAlt: "Aurora bira paket pohrane",
     popularBadge: "Najpopularniji",
     plans: [
       {
@@ -440,6 +500,7 @@ const copy: Record<Locale, LandingCopy> = {
         description: "Ideje na roadmapu: profesionalno uređivanje fotografija, filter paketi i print-on-demand.",
       },
     ],
+    futureStatusLabels: { roadmap: "Roadmap", planned: "Planirano", idea: "Ideja" },
     waitlist: {
       title: "Pridruži se listi čekanja",
       description: "Budi među prvima koji će saznati kad Calisto krene šire. Ostavi email za novosti o lansiranju.",
@@ -458,10 +519,21 @@ const copy: Record<Locale, LandingCopy> = {
     pageDescription:
       "Calisto omogućuje gostima vjenčanja i događaja da učitavaju i pregledavaju fotografije i videa na jednom mjestu.",
     auroraQuote: "Svaka uspomena zaslužuje dom. Pobrinut ću se da bude lijepa, organizirana i zauvijek vaša.",
+    auroraQuoteIntro: "Od Aurore · Tvoj Calisto vodič",
+    auroraQuoteSectionAria: "Poruka od Aurore",
+    auroraLabel: "Aurora",
+    auroraJobTitle: "Calisto vodič",
+    auroraMascotAlt: "Aurora, tvoj Calisto vodič",
+    footerRightsLine: "Sva prava pridržana.",
+    brandIconAlt: "Calisto logotip",
   },
   de: {
     languageLabel: "Sprache",
+    languagePopupSubtitle: "Wähle Sprache und Darstellung, um fortzufahren.",
     langContinue: "Weiter",
+    themeLabel: "Darstellung",
+    themeLight: "Hell",
+    themeDark: "Dunkel",
     navAriaLabel: "Seitenabschnitte",
     nav: [
       { href: "#features", label: "Funktionen" },
@@ -477,6 +549,17 @@ const copy: Record<Locale, LandingCopy> = {
       "Calisto hilft deinen Gästen, Fotos und Videos an einem Ort hochzuladen und anzusehen. Ich helfe dir, Erinnerungen organisiert zu halten – mit einfachem Zugangscode, optionalem QR-Invite und Speichertarifen passend zur Eventgröße – einmalige Zahlung pro Event statt Abo.",
     heroPrimaryCta: "Zur Warteliste",
     heroSecondaryCta: "Tarife vergleichen",
+    statBar: [
+      { value: "50+", label: "Gäste im Free-Tarif" },
+      { value: "100 GB", label: "max. verfügbarer Speicher" },
+      { value: "3", label: "Schritte zur Galerie" },
+    ],
+    appPreviewEyebrow: "Sieh es in Aktion",
+    appPreviewAriaSection: "App-Vorschau",
+    appPreviewAriaThumbs: "Screenshot-Vorschau",
+    appPreviewCaptions: ["Galerieansicht", "Eventdetails", "Upload-Ablauf"],
+    appPreviewViewAriaTemplate: "{name} ansehen",
+    appPreviewImageAltTemplate: "Calisto-App — {name}",
     featuresTitle: "Was du machen kannst",
     featuresDescription:
       "Für große Tage, an denen alle fotografieren – Calisto hält Uploads organisiert und leicht teilbar.",
@@ -532,6 +615,7 @@ const copy: Record<Locale, LandingCopy> = {
     plansDescriptionRest: "wähle einen Tarif beim Erstellen des Events. Späteres Upgrade für mehr Speicher, Gäste oder Aufbewahrung ist möglich.",
     plansAuroraBubble:
       "Such dir den passenden Tarif – upgraden kannst du später, wenn du mehr brauchst.",
+    plansMascotAlt: "Aurora wählt einen Speichertarif",
     popularBadge: "Beliebt",
     plans: [
       {
@@ -621,6 +705,7 @@ const copy: Record<Locale, LandingCopy> = {
         description: "Ideen auf der Roadmap: professionelle Bildbearbeitung, Filterpakete und Print-on-Demand.",
       },
     ],
+    futureStatusLabels: { roadmap: "Roadmap", planned: "Geplant", idea: "Idee" },
     waitlist: {
       title: "Zur Warteliste",
       description: "Erfahre als Erste oder Erster, wenn Calisto breiter startet. Hinterlasse deine E-Mail für Launch-Updates.",
@@ -639,6 +724,13 @@ const copy: Record<Locale, LandingCopy> = {
     pageDescription:
       "Calisto hilft Hochzeits- und Eventgästen, Fotos und Videos an einem Ort hochzuladen und zu durchsuchen.",
     auroraQuote: "Jede Erinnerung verdient ein Zuhause. Ich sorge dafür, dass deines schön, geordnet und für immer deins ist.",
+    auroraQuoteIntro: "Von Aurora · Dein Calisto-Guide",
+    auroraQuoteSectionAria: "Eine Nachricht von Aurora",
+    auroraLabel: "Aurora",
+    auroraJobTitle: "Calisto-Guide",
+    auroraMascotAlt: "Aurora, dein Calisto-Guide",
+    footerRightsLine: "Alle Rechte vorbehalten.",
+    brandIconAlt: "Calisto-Logo",
   },
 };
 

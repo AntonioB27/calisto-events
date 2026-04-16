@@ -147,7 +147,7 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
             </div>
             <Image
               src="/brand/aurora-photo.png"
-              alt="Aurora"
+              alt={copy.auroraLabel}
               width={520}
               height={520}
               className="h-auto w-full object-contain drop-shadow-[0_16px_32px_rgba(180,83,201,0.25)]"

@@ -37,15 +37,15 @@ export default async function LocalePage({ params }: LocalePageProps) {
       <SiteHeader copy={copy} />
       <main className="flex-1">
         <Hero copy={copy} />
-        <AppPreviewWindow />
-        <StatBar />
+        <AppPreviewWindow copy={copy} />
+        <StatBar copy={copy} />
         <FeatureGrid copy={copy} />
         <HowItWorks copy={copy} />
         <PlanCards copy={copy} />
         <Lifecycle copy={copy} />
         <AuroraQuote copy={copy} />
         <FutureRoadmap copy={copy} />
-        <WaitlistForm copy={copy.waitlist} />
+        <WaitlistForm copy={copy.waitlist} mascotAlt={copy.auroraMascotAlt} />
         <LanguageSelectorBar copy={copy} locale={locale as Locale} className="bg-ink pb-6 pt-4" />
       </main>
       <SiteFooter copy={copy} />

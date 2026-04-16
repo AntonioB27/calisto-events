@@ -9,7 +9,7 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
   return (
     <section
       className="relative overflow-hidden bg-ink px-4 py-0 sm:px-6"
-      aria-label="A message from Aurora"
+      aria-label={copy.auroraQuoteSectionAria}
     >
       {/* ── Warm spotlight emanating from the right ── */}
       <div
@@ -73,7 +73,7 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
           <blockquote className="relative">
             {/* Label above */}
             <p className="mb-6 text-xs font-bold uppercase tracking-[0.25em] text-amber-400/70">
-              From Aurora &middot; Your Calisto guide
+              {copy.auroraQuoteIntro}
             </p>
 
             {/* Quote text — the hero element */}
@@ -92,8 +92,8 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
             <footer className="mt-8 flex items-center gap-4">
               <div className="h-px w-10 bg-gradient-to-r from-amber-400/60 to-amber-400/10" />
               <cite className="not-italic">
-                <span className="text-sm font-bold text-amber-300">Aurora</span>
-                <span className="ml-2 text-xs text-zinc-500">Calisto guide</span>
+                <span className="text-sm font-bold text-amber-300">{copy.auroraLabel}</span>
+                <span className="ml-2 text-xs text-zinc-500">{copy.auroraJobTitle}</span>
               </cite>
             </footer>
           </blockquote>
@@ -114,8 +114,8 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
           />
 
           <Image
-            src="/brand/mascot.png"
-            alt="Aurora, your Calisto guide"
+            src="/brand/aurora_photo.png"
+            alt={copy.auroraMascotAlt}
             width={500}
             height={500}
             className="relative z-10 h-auto w-full max-w-[260px] object-contain drop-shadow-[0_-8px_48px_rgba(245,158,11,0.2)] lg:max-w-[320px]"

@@ -113,7 +113,7 @@ export function Hero({ copy }: HeroProps) {
 
           <Image
             src="/brand/mascot.png"
-            alt="Aurora, your Calisto guide"
+            alt={copy.auroraMascotAlt}
             width={500}
             height={500}
             priority

@@ -1,19 +1,19 @@
-const STATS = [
-  { value: "50+",    label: "guests on Free plan" },
-  { value: "100 GB", label: "max storage available" },
-  { value: "3",      label: "steps to your gallery" },
-] as const;
+import type { LandingCopy } from "@/lib/i18n";
 
-export function StatBar() {
+type StatBarProps = {
+  copy: LandingCopy;
+};
+
+export function StatBar({ copy }: StatBarProps) {
   return (
     <section className="bg-primary-dark px-4 py-12 sm:px-6">
       <div className="mx-auto max-w-5xl">
         <dl className="grid grid-cols-1 gap-8 sm:grid-cols-3">
-          {STATS.map((stat, i) => (
+          {copy.statBar.map((stat, i) => (
             <div
               key={stat.label}
               className={`flex flex-col items-center text-center ${
-                i < STATS.length - 1
+                i < copy.statBar.length - 1
                   ? "sm:border-r sm:border-white/10"
                   : ""
               }`}

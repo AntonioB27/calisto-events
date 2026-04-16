@@ -1,21 +1,43 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import type { LandingCopy } from "@/lib/i18n";
 
-const SCREENSHOTS = [
-  { src: "/brand/screenshots/p1.jpeg", label: "Gallery view" },
-  { src: "/brand/screenshots/p2.jpeg", label: "Event details" },
-  { src: "/brand/screenshots/p3.jpeg", label: "Upload flow" },
+const PREVIEW_SOURCES = [
+  "/brand/screenshots/p1.jpeg",
+  "/brand/screenshots/p2.jpeg",
+  "/brand/screenshots/p3.jpeg",
 ] as const;
 
-export function AppPreviewWindow() {
+type AppPreviewWindowProps = {
+  copy: LandingCopy;
+};
+
+function ariaViewShot(copy: LandingCopy, caption: string) {
+  return copy.appPreviewViewAriaTemplate.replace("{name}", caption);
+}
+
+function altForShot(copy: LandingCopy, caption: string) {
+  return copy.appPreviewImageAltTemplate.replace("{name}", caption);
+}
+
+export function AppPreviewWindow({ copy }: AppPreviewWindowProps) {
   const [active, setActive] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
+  const shots = useMemo(
+    () =>
+      PREVIEW_SOURCES.map((src, i) => ({
+        src,
+        label: copy.appPreviewCaptions[i],
+      })),
+    [copy],
+  );
+
   const advance = useCallback(() => {
-    setActive((i) => (i + 1) % SCREENSHOTS.length);
-  }, []);
+    setActive((i) => (i + 1) % shots.length);
+  }, [shots.length]);
 
   useEffect(() => {
     if (isHovered) return;
@@ -26,7 +48,7 @@ export function AppPreviewWindow() {
   return (
     <section
       className="relative overflow-hidden px-4 py-16 sm:px-6 sm:py-24"
-      aria-label="App preview"
+      aria-label={copy.appPreviewAriaSection}
     >
       {/* Ambient mesh background */}
       <div
@@ -50,24 +72,18 @@ export function AppPreviewWindow() {
       />
 
       <div className="mx-auto max-w-5xl">
-        {/* Section label */}
         <p className="mb-10 text-center text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-400 sm:mb-14">
-          See it in action
+          {copy.appPreviewEyebrow}
         </p>
 
-        {/* Phone + side thumbnails layout */}
         <div className="flex flex-col items-center gap-10 lg:flex-row lg:items-center lg:justify-center lg:gap-16">
-
-          {/* Thumbnail strip — hidden on mobile, left side on desktop */}
-          <div
-            className="hidden flex-col gap-3 lg:flex"
-            aria-label="Screenshot thumbnails"
-          >
-            {SCREENSHOTS.map((shot, i) => (
+          <div className="hidden flex-col gap-3 lg:flex" aria-label={copy.appPreviewAriaThumbs}>
+            {shots.map((shot, i) => (
               <button
                 key={shot.src}
+                type="button"
                 onClick={() => setActive(i)}
-                aria-label={`View ${shot.label}`}
+                aria-label={ariaViewShot(copy, shot.label)}
                 aria-pressed={i === active}
                 className={`group relative h-20 w-10 overflow-hidden rounded-xl border-2 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                   i === active
@@ -75,24 +91,17 @@ export function AppPreviewWindow() {
                     : "border-zinc-200 opacity-50 hover:opacity-80"
                 }`}
               >
-                <Image
-                  src={shot.src}
-                  alt={shot.label}
-                  fill
-                  className="object-cover object-top"
-                />
+                <Image src={shot.src} alt={shot.label} fill className="object-cover object-top" />
               </button>
             ))}
           </div>
 
-          {/* Phone mockup */}
           <div
             className="relative"
             style={{ perspective: "1100px" }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
-            {/* Ground shadow */}
             <div
               aria-hidden
               className="absolute -bottom-6 left-1/2 -translate-x-1/2"
@@ -105,7 +114,6 @@ export function AppPreviewWindow() {
               }}
             />
 
-            {/* The phone itself */}
             <div
               className="phone-float relative"
               style={{
@@ -113,7 +121,6 @@ export function AppPreviewWindow() {
                   "drop-shadow(0 32px 48px rgba(0,0,0,0.22)) drop-shadow(0 8px 20px rgba(180,83,201,0.18))",
               }}
             >
-              {/* Outer bezel */}
               <div
                 className="relative overflow-hidden bg-zinc-900"
                 style={{
@@ -125,13 +132,11 @@ export function AppPreviewWindow() {
                     "inset 0 0 0 1px rgba(255,255,255,0.12), inset 0 0 0 2px rgba(0,0,0,0.8)",
                 }}
               >
-                {/* Screen */}
                 <div
                   className="relative h-full w-full overflow-hidden bg-black"
                   style={{ borderRadius: "36px" }}
                 >
-                  {/* Screenshots */}
-                  {SCREENSHOTS.map((shot, i) => (
+                  {shots.map((shot, i) => (
                     <div
                       key={shot.src}
                       className="absolute inset-0"
@@ -142,7 +147,7 @@ export function AppPreviewWindow() {
                     >
                       <Image
                         src={shot.src}
-                        alt={`Calisto app — ${shot.label}`}
+                        alt={altForShot(copy, shot.label)}
                         fill
                         className="object-cover object-top"
                         priority={i === 0}
@@ -150,7 +155,6 @@ export function AppPreviewWindow() {
                     </div>
                   ))}
 
-                  {/* Vignette at bottom */}
                   <div
                     aria-hidden
                     className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
@@ -161,7 +165,6 @@ export function AppPreviewWindow() {
                   />
                 </div>
 
-                {/* Physical side buttons */}
                 <div
                   aria-hidden
                   className="absolute -right-[5px] top-24 w-[4px] rounded-r-sm bg-zinc-700"
@@ -184,7 +187,6 @@ export function AppPreviewWindow() {
                 />
               </div>
 
-              {/* Glass glare */}
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0"
@@ -197,13 +199,13 @@ export function AppPreviewWindow() {
             </div>
           </div>
 
-          {/* Mobile dot nav — below phone on mobile */}
           <div className="flex items-center gap-2.5 lg:hidden">
-            {SCREENSHOTS.map((shot, i) => (
+            {shots.map((shot, i) => (
               <button
                 key={shot.src}
+                type="button"
                 onClick={() => setActive(i)}
-                aria-label={`View ${shot.label}`}
+                aria-label={ariaViewShot(copy, shot.label)}
                 aria-pressed={i === active}
                 className={`h-1.5 rounded-full transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                   i === active ? "w-6 bg-primary" : "w-1.5 bg-zinc-300 hover:bg-zinc-400"
@@ -212,9 +214,8 @@ export function AppPreviewWindow() {
             ))}
           </div>
 
-          {/* Right side: caption */}
           <div className="hidden max-w-[180px] flex-col gap-5 lg:flex">
-            {SCREENSHOTS.map((shot, i) => (
+            {shots.map((shot, i) => (
               <div
                 key={shot.src}
                 className="transition-all duration-500"

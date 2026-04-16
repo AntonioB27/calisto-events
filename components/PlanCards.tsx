@@ -98,7 +98,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
             </div>
             <Image
               src="/brand/mascot/aurora_planning.png"
-              alt="Aurora planning"
+              alt={copy.plansMascotAlt}
               width={1000}
               height={1000}
               className="h-auto w-full object-contain drop-shadow-[0_16px_32px_rgba(180,83,201,0.25)]"

@@ -13,9 +13,10 @@ function isValidEmail(value: string): boolean {
 
 type WaitlistFormProps = {
   copy: LandingCopy["waitlist"];
+  mascotAlt: string;
 };
 
-export function WaitlistForm({ copy }: WaitlistFormProps) {
+export function WaitlistForm({ copy, mascotAlt }: WaitlistFormProps) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -73,7 +74,7 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
             <div className="hidden items-end justify-center bg-gradient-to-b from-primary/20 to-primary/5 px-6 pt-10 lg:flex">
               <Image
                 src="/brand/mascot.png"
-                alt="Aurora"
+                alt={mascotAlt}
                 width={400}
                 height={400}
                 className="h-auto w-full max-w-[220px] object-contain"

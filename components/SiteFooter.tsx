@@ -13,7 +13,7 @@ export function SiteFooter({ copy }: SiteFooterProps) {
           <div className="flex items-center gap-2">
             <Image
               src="/brand/calisto-icon.png"
-              alt="Calisto icon"
+              alt={copy.brandIconAlt}
               width={24}
               height={24}
               className="rounded-md opacity-80"
@@ -26,7 +26,7 @@ export function SiteFooter({ copy }: SiteFooterProps) {
         </div>
         <div className="mt-8 border-t border-white/10 pt-6">
           <p className="text-xs text-zinc-600">
-            © {new Date().getFullYear()} Calisto. All rights reserved.
+            © {new Date().getFullYear()} Calisto. {copy.footerRightsLine}
           </p>
         </div>
       </div>

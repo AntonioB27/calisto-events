@@ -17,7 +17,7 @@ export function SiteHeader({ copy }: SiteHeaderProps) {
             >
               <Image
                 src="/brand/calisto-icon.png"
-                alt="Calisto icon"
+                alt={copy.brandIconAlt}
                 width={28}
                 height={28}
                 className="rounded-md"
