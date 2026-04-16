@@ -19,8 +19,7 @@ export function SiteFooter({ copy }: SiteFooterProps) {
               className="rounded-md opacity-80"
             />
             <span className="text-sm font-extrabold tracking-tight">
-              <span className="text-amber-400">Cal</span>
-              <span className="text-white">isto</span>
+              <span className="text-white">Calisto</span>
             </span>
           </div>
           <p className="max-w-md text-sm leading-relaxed text-zinc-400">{copy.footerText}</p>

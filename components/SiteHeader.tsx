@@ -23,8 +23,7 @@ export function SiteHeader({ copy }: SiteHeaderProps) {
                 className="rounded-md"
               />
               <span className="text-lg font-extrabold tracking-tight">
-                <span className="text-amber-400">Cal</span>
-                <span className="text-white">isto</span>
+                <span className="text-white">Calisto</span>
               </span>
             </a>
             <a
