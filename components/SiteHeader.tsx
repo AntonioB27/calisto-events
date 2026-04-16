@@ -13,10 +13,19 @@ export function SiteHeader({ copy }: SiteHeaderProps) {
           <div className="flex items-center justify-between gap-4 sm:min-w-[170px]">
             <a
               href="#top"
-              className="inline-flex items-center gap-2 text-lg font-extrabold tracking-tight text-zinc-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              className="inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
-              <Image src="/brand/calisto-icon.png" alt="Calisto icon" width={28} height={28} className="rounded-md" />
-              Calisto
+              <Image
+                src="/brand/calisto-icon.png"
+                alt="Calisto icon"
+                width={28}
+                height={28}
+                className="rounded-md"
+              />
+              <span className="text-lg font-extrabold tracking-tight">
+                <span className="text-primary">Cal</span>
+                <span className="text-zinc-900">isto</span>
+              </span>
             </a>
             <a
               href="#waitlist"
