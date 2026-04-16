@@ -7,7 +7,7 @@ type SiteFooterProps = {
 
 export function SiteFooter({ copy }: SiteFooterProps) {
   return (
-    <footer className="border-t border-zinc-200 bg-white px-4 py-10 sm:px-6">
+    <footer className="bg-[#1a0a2e] px-4 py-10 sm:px-6">
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-2">
@@ -19,15 +19,17 @@ export function SiteFooter({ copy }: SiteFooterProps) {
               className="rounded-md opacity-80"
             />
             <span className="text-sm font-extrabold tracking-tight">
-              <span className="text-primary">Cal</span>
-              <span className="text-zinc-900">isto</span>
+              <span className="text-amber-400">Cal</span>
+              <span className="text-white">isto</span>
             </span>
           </div>
-          <p className="max-w-md text-sm leading-relaxed text-zinc-500">{copy.footerText}</p>
+          <p className="max-w-md text-sm leading-relaxed text-zinc-400">{copy.footerText}</p>
         </div>
-        <p className="mt-8 text-xs text-zinc-400">
-          © {new Date().getFullYear()} Calisto. All rights reserved.
-        </p>
+        <div className="mt-8 border-t border-white/10 pt-6">
+          <p className="text-xs text-zinc-600">
+            © {new Date().getFullYear()} Calisto. All rights reserved.
+          </p>
+        </div>
       </div>
     </footer>
   );
