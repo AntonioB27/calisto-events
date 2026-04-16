@@ -46,7 +46,7 @@ export function LanguageSelectorPopup({ copy, locale }: LanguageSelectorPopupPro
           onClick={() => setOpen(false)}
           className="w-full rounded-lg bg-zinc-100 px-4 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-200"
         >
-          Continue
+          {copy.langContinue}
         </button>
       </div>
     </div>

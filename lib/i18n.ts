@@ -48,6 +48,7 @@ type WaitlistCopy = {
 
 export type LandingCopy = {
   languageLabel: string;
+  langContinue: string;
   navAriaLabel: string;
   nav: NavItem[];
   joinWaitlistShort: string;
@@ -59,6 +60,7 @@ export type LandingCopy = {
   heroSecondaryCta: string;
   featuresTitle: string;
   featuresDescription: string;
+  featuresAuroraBubble: string;
   features: Feature[];
   howTitle: string;
   howDescription: string;
@@ -66,6 +68,7 @@ export type LandingCopy = {
   plansTitle: string;
   plansDescriptionStrong: string;
   plansDescriptionRest: string;
+  plansAuroraBubble: string;
   popularBadge: string;
   plans: Plan[];
   planFootnote: string;
@@ -91,6 +94,7 @@ export function isLocale(value: string): value is Locale {
 const copy: Record<Locale, LandingCopy> = {
   en: {
     languageLabel: "Language",
+    langContinue: "Continue",
     navAriaLabel: "Page sections",
     nav: [
       { href: "#features", label: "Features" },
@@ -109,6 +113,8 @@ const copy: Record<Locale, LandingCopy> = {
     featuresTitle: "What you can do",
     featuresDescription:
       "Built for big days when everyone is taking pictures—Calisto keeps uploads organized and easy to share.",
+    featuresAuroraBubble:
+      "Every guest upload lands in one gallery—I'll help you keep it tidy.",
     features: [
       {
         title: "Unique access code",
@@ -163,6 +169,7 @@ const copy: Record<Locale, LandingCopy> = {
     plansTitle: "Plans",
     plansDescriptionStrong: "One-time payment per event",
     plansDescriptionRest: "choose a tier when you create the event. Upgrade later if you need more storage, guests, or retention.",
+    plansAuroraBubble: "Choose what fits your event now—you can upgrade whenever you need more.",
     popularBadge: "Popular",
     plans: [
       {
@@ -273,6 +280,7 @@ const copy: Record<Locale, LandingCopy> = {
   },
   hr: {
     languageLabel: "Jezik",
+    langContinue: "Nastavi",
     navAriaLabel: "Sekcije stranice",
     nav: [
       { href: "#features", label: "Mogućnosti" },
@@ -290,6 +298,8 @@ const copy: Record<Locale, LandingCopy> = {
     heroSecondaryCta: "Usporedi pakete",
     featuresTitle: "Što možeš raditi",
     featuresDescription: "Stvoreno za velike dane kada svi fotografiraju — Calisto drži uploadove organiziranima i lakima za dijeljenje.",
+    featuresAuroraBubble:
+      "Svaki gost učitava u jednu galeriju — pomažem da sve ostane uredno.",
     features: [
       {
         title: "Jedinstveni pristupni kod",
@@ -338,6 +348,7 @@ const copy: Record<Locale, LandingCopy> = {
     plansTitle: "Paketi",
     plansDescriptionStrong: "Jednokratno plaćanje po događaju",
     plansDescriptionRest: "odaberi paket pri kreiranju događaja. Nadogradnja je moguća kasnije ako trebaš više prostora, gostiju ili duže čuvanje.",
+    plansAuroraBubble: "Odaberi što sada odgovara tvom događaju — nadogradnja je uvijek opcija.",
     popularBadge: "Najpopularniji",
     plans: [
       {
@@ -447,6 +458,7 @@ const copy: Record<Locale, LandingCopy> = {
   },
   de: {
     languageLabel: "Sprache",
+    langContinue: "Weiter",
     navAriaLabel: "Seitenabschnitte",
     nav: [
       { href: "#features", label: "Funktionen" },
@@ -465,6 +477,8 @@ const copy: Record<Locale, LandingCopy> = {
     featuresTitle: "Was du machen kannst",
     featuresDescription:
       "Für große Tage, an denen alle fotografieren – Calisto hält Uploads organisiert und leicht teilbar.",
+    featuresAuroraBubble:
+      "Alle Uploads landen in einer Galerie – ich helfe, alles ordentlich zu halten.",
     features: [
       {
         title: "Einzigartiger Zugangscode",
@@ -513,6 +527,8 @@ const copy: Record<Locale, LandingCopy> = {
     plansTitle: "Tarife",
     plansDescriptionStrong: "Einmalige Zahlung pro Event",
     plansDescriptionRest: "wähle einen Tarif beim Erstellen des Events. Späteres Upgrade für mehr Speicher, Gäste oder Aufbewahrung ist möglich.",
+    plansAuroraBubble:
+      "Such dir den passenden Tarif – upgraden kannst du später, wenn du mehr brauchst.",
     popularBadge: "Beliebt",
     plans: [
       {
