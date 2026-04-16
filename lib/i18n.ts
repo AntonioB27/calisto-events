@@ -82,6 +82,7 @@ export type LandingCopy = {
   footerText: string;
   pageTitle: string;
   pageDescription: string;
+  auroraQuote: string;
 };
 
 export const LOCALES: Locale[] = ["en", "hr", "de"];
@@ -277,6 +278,7 @@ const copy: Record<Locale, LandingCopy> = {
     pageTitle: "Calisto — shared event photos & videos",
     pageDescription:
       "Calisto lets wedding and event guests upload and browse photos and videos in one place. Organizers share a code or QR; plans are one-time per event.",
+    auroraQuote: "Every memory deserves a home. I'll make sure yours is beautiful, organized, and yours forever.",
   },
   hr: {
     languageLabel: "Jezik",
@@ -455,6 +457,7 @@ const copy: Record<Locale, LandingCopy> = {
     pageTitle: "Calisto — zajedničke fotografije i videa događaja",
     pageDescription:
       "Calisto omogućuje gostima vjenčanja i događaja da učitavaju i pregledavaju fotografije i videa na jednom mjestu.",
+    auroraQuote: "Svaka uspomena zaslužuje dom. Pobrinut ću se da bude lijepa, organizirana i zauvijek vaša.",
   },
   de: {
     languageLabel: "Sprache",
@@ -635,6 +638,7 @@ const copy: Record<Locale, LandingCopy> = {
     pageTitle: "Calisto — gemeinsame Event-Fotos & Videos",
     pageDescription:
       "Calisto hilft Hochzeits- und Eventgästen, Fotos und Videos an einem Ort hochzuladen und zu durchsuchen.",
+    auroraQuote: "Jede Erinnerung verdient ein Zuhause. Ich sorge dafür, dass deines schön, geordnet und für immer deins ist.",
   },
 };
 
