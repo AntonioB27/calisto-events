@@ -7,7 +7,7 @@ type SiteFooterProps = {
 
 export function SiteFooter({ copy }: SiteFooterProps) {
   return (
-    <footer className="bg-[#1a0a2e] px-4 py-10 sm:px-6">
+    <footer className="bg-ink px-4 py-10 sm:px-6">
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-2">

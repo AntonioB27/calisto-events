@@ -8,7 +8,7 @@ type AuroraQuoteProps = {
 export function AuroraQuote({ copy }: AuroraQuoteProps) {
   return (
     <section
-      className="relative overflow-hidden bg-[#1a0a2e] px-4 py-0 sm:px-6"
+      className="relative overflow-hidden bg-ink px-4 py-0 sm:px-6"
       aria-label="A message from Aurora"
     >
       {/* ── Warm spotlight emanating from the right ── */}

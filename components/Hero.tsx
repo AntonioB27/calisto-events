@@ -22,7 +22,7 @@ export function Hero({ copy }: HeroProps) {
   return (
     <section
       id="top"
-      className="relative overflow-hidden bg-[#1a0a2e] px-4 py-20 sm:px-6 sm:py-28"
+      className="relative overflow-hidden bg-ink px-4 py-20 sm:px-6 sm:py-28"
     >
       {/* Confetti dots */}
       {CONFETTI.map((dot, i) => (
@@ -75,13 +75,13 @@ export function Hero({ copy }: HeroProps) {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <a
               href="#waitlist"
-              className="inline-flex items-center justify-center rounded-full bg-amber-400 px-8 py-4 text-base font-bold text-zinc-900 shadow-[0_6px_24px_rgba(245,158,11,0.4)] transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e]"
+              className="inline-flex items-center justify-center rounded-full bg-amber-400 px-8 py-4 text-base font-bold text-zinc-900 shadow-[0_6px_24px_rgba(245,158,11,0.4)] transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               {copy.heroPrimaryCta}
             </a>
             <a
               href="#plans"
-              className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e]"
+              className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               {copy.heroSecondaryCta}
             </a>
@@ -106,7 +106,7 @@ export function Hero({ copy }: HeroProps) {
               {copy.heroIntro}
               <span
                 aria-hidden
-                className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-white/20 bg-[#1a0a2e]"
+                className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-white/20 bg-ink"
               />
             </p>
           </div>

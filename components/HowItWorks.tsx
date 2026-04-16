@@ -6,7 +6,7 @@ type HowItWorksProps = {
 
 export function HowItWorks({ copy }: HowItWorksProps) {
   return (
-    <section className="bg-[#7c2d9e] px-4 py-20 sm:px-6 sm:py-24">
+    <section className="bg-primary-dark px-4 py-20 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-5xl">
         <h2
           className="font-extrabold tracking-tight text-white"

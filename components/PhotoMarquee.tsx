@@ -14,7 +14,7 @@ export function PhotoMarquee() {
   return (
     <section
       aria-hidden
-      className="overflow-hidden bg-[#1a0a2e] py-6 sm:py-8"
+      className="overflow-hidden bg-ink py-6 sm:py-8"
     >
       {/* Row 1: scrolls left */}
       <div className="relative flex overflow-hidden">

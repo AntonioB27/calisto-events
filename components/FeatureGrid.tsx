@@ -105,7 +105,7 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
   return (
     <section
       id="features"
-      className="scroll-mt-20 bg-[#1a0a2e] px-4 py-20 sm:px-6 sm:py-24"
+      className="scroll-mt-20 bg-ink px-4 py-20 sm:px-6 sm:py-24"
     >
       {/* Subtle radial ambient behind the cards */}
       <div
@@ -141,7 +141,7 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
                 {copy.featuresAuroraBubble}
                 <span
                   aria-hidden
-                  className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-white/15 bg-[#1a0a2e]"
+                  className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-white/15 bg-ink"
                 />
               </p>
             </div>

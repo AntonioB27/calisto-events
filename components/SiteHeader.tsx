@@ -7,13 +7,13 @@ type SiteHeaderProps = {
 
 export function SiteHeader({ copy }: SiteHeaderProps) {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#1a0a2e]/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-ink/90 backdrop-blur-md">
       <div className="mx-auto max-w-5xl px-4 py-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div className="flex items-center justify-between gap-4 sm:min-w-[170px]">
             <a
               href="#top"
-              className="inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e]"
+              className="inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               <Image
                 src="/brand/calisto-icon.png"
@@ -28,7 +28,7 @@ export function SiteHeader({ copy }: SiteHeaderProps) {
             </a>
             <a
               href="#waitlist"
-              className="rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-900 transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e] sm:hidden"
+              className="rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-900 transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink sm:hidden"
             >
               {copy.joinWaitlistShort}
             </a>
@@ -41,7 +41,7 @@ export function SiteHeader({ copy }: SiteHeaderProps) {
               <a
                 key={item.href}
                 href={item.href}
-                className="group relative rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-300 transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e] sm:px-3 sm:py-2 sm:text-sm"
+                className="group relative rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-300 transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink sm:px-3 sm:py-2 sm:text-sm"
               >
                 {item.label}
                 <span
@@ -53,7 +53,7 @@ export function SiteHeader({ copy }: SiteHeaderProps) {
           </nav>
           <a
             href="#waitlist"
-            className="hidden rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-900 transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e] sm:inline-flex sm:shrink-0"
+            className="hidden rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-900 transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink sm:inline-flex sm:shrink-0"
           >
             {copy.joinWaitlistShort}
           </a>

@@ -58,7 +58,7 @@ const PLAN_CONFIG: Record<string, PlanConfig> = {
 
 export function PlanCards({ copy }: PlanCardsProps) {
   return (
-    <section id="plans" className="scroll-mt-20 bg-[#1a0a2e] px-4 py-20 sm:px-6 sm:py-24">
+    <section id="plans" className="scroll-mt-20 bg-ink px-4 py-20 sm:px-6 sm:py-24">
       {/* Ambient glow */}
       <div
         aria-hidden
@@ -92,7 +92,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
                 {copy.plansAuroraBubble}
                 <span
                   aria-hidden
-                  className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-white/15 bg-[#1a0a2e]"
+                  className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-white/15 bg-ink"
                 />
               </p>
             </div>
@@ -116,7 +116,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
               <article
                 key={plan.id}
                 tabIndex={0}
-                className={`plan-card group relative overflow-hidden rounded-2xl outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e] ${
+                className={`plan-card group relative overflow-hidden rounded-2xl outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink ${
                   config.popular
                     ? "border border-amber-400/50 bg-white/8 shadow-[0_0_0_1px_rgba(245,158,11,0.15),0_8px_32px_rgba(245,158,11,0.12)]"
                     : "border border-white/10 bg-white/5 hover:bg-white/8"

@@ -71,7 +71,7 @@ export function FutureRoadmap({ copy }: FutureRoadmapProps) {
   return (
     <section
       id="future"
-      className="scroll-mt-20 bg-[#1a0a2e] px-4 py-20 sm:px-6 sm:py-24"
+      className="scroll-mt-20 bg-ink px-4 py-20 sm:px-6 sm:py-24"
     >
       <div className="mx-auto max-w-5xl">
         <h2

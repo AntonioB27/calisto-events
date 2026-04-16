@@ -54,7 +54,7 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
   return (
     <section
       id="waitlist"
-      className="relative scroll-mt-20 bg-[#1a0a2e] px-4 py-20 sm:px-6 sm:py-24"
+      className="relative scroll-mt-20 bg-ink px-4 py-20 sm:px-6 sm:py-24"
     >
       {/* Ambient glow */}
       <div
@@ -139,7 +139,7 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
                   <button
                     type="submit"
                     disabled={busy}
-                    className="shrink-0 rounded-xl bg-amber-400 px-8 py-3 text-base font-bold text-zinc-900 shadow-[0_4px_20px_rgba(245,158,11,0.35)] transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e] disabled:cursor-not-allowed disabled:opacity-70"
+                    className="shrink-0 rounded-xl bg-amber-400 px-8 py-3 text-base font-bold text-zinc-900 shadow-[0_4px_20px_rgba(245,158,11,0.35)] transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {busy ? copy.buttonBusy : copy.buttonIdle}
                   </button>

@@ -32,7 +32,7 @@ export default async function LocalePage({ params }: LocalePageProps) {
   const copy = getLandingCopy(locale);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-[#1a0a2e]">
+    <div className="flex min-h-0 flex-1 flex-col bg-ink">
       <LanguageSelectorPopup copy={copy} locale={locale as Locale} />
       <SiteHeader copy={copy} />
       <main className="flex-1">
@@ -46,7 +46,7 @@ export default async function LocalePage({ params }: LocalePageProps) {
         <AuroraQuote copy={copy} />
         <FutureRoadmap copy={copy} />
         <WaitlistForm copy={copy.waitlist} />
-        <LanguageSelectorBar copy={copy} locale={locale as Locale} className="bg-[#1a0a2e] pb-6 pt-4" />
+        <LanguageSelectorBar copy={copy} locale={locale as Locale} className="bg-ink pb-6 pt-4" />
       </main>
       <SiteFooter copy={copy} />
     </div>
