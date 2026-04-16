@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Image from "next/image";
 import type { LandingCopy } from "@/lib/i18n";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -33,17 +34,13 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
       try {
         const response = await fetch("/api/waitlist", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: trimmed }),
         });
-
         if (!response.ok) {
           setError(copy.submitFailed);
           return;
         }
-
         setSubmitted(true);
       } catch {
         setError(copy.submitFailed);
@@ -57,62 +54,88 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
   return (
     <section
       id="waitlist"
-      className="scroll-mt-20 border-t border-zinc-200 bg-gradient-to-b from-primary-tint/40 to-white px-4 py-16 sm:px-6 sm:py-20"
+      className="scroll-mt-20 border-t border-zinc-200/60 bg-gradient-to-b from-primary-tint/30 to-white px-4 py-20 sm:px-6 sm:py-24"
     >
       <div className="mx-auto max-w-5xl">
-        <div className="rounded-3xl border border-primary/25 bg-white p-8 shadow-lg sm:p-10">
-          <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl">{copy.title}</h2>
-          <p className="mt-3 max-w-2xl text-lg text-zinc-600">{copy.description}</p>
-          <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-950">
-            {copy.discount}
-          </p>
+        <div className="overflow-hidden rounded-3xl border border-primary/20 bg-white shadow-xl">
+          <div className="grid lg:grid-cols-[1fr_1.6fr]">
+            {/* Aurora mascot panel */}
+            <div className="hidden items-end justify-center bg-gradient-to-b from-primary-tint/60 to-primary-tint/20 px-6 pt-10 lg:flex">
+              <Image
+                src="/brand/mascot.png"
+                alt="Aurora"
+                width={400}
+                height={400}
+                className="h-auto w-full max-w-[220px] object-contain"
+              />
+            </div>
 
-          {submitted ? (
-            <p
-              className="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-emerald-900"
-              role="status"
-            >
-              {copy.submitted}
-            </p>
-          ) : (
-            <form onSubmit={onSubmit} className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-start" noValidate>
-              <div className="min-w-0 flex-1">
-                <label htmlFor="waitlist-email" className="sr-only">
-                  {copy.inputLabel}
-                </label>
-                <input
-                  id="waitlist-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  inputMode="email"
-                  placeholder={copy.inputPlaceholder}
-                  value={email}
-                  onChange={(ev) => {
-                    setEmail(ev.target.value);
-                    if (error) setError(null);
-                  }}
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-                  aria-invalid={error ? true : undefined}
-                  aria-describedby={error ? "waitlist-email-error" : undefined}
-                />
-                {error ? (
-                  <p id="waitlist-email-error" className="mt-2 text-sm text-red-600" role="alert">
-                    {error}
-                  </p>
-                ) : null}
-              </div>
-              <button
-                type="submit"
-                disabled={busy}
-                className="shrink-0 rounded-xl bg-primary px-8 py-3 text-base font-bold text-white shadow-md transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {busy ? copy.buttonBusy : copy.buttonIdle}
-              </button>
-            </form>
-          )}
+            {/* Form panel */}
+            <div className="px-8 py-10 sm:px-10 sm:py-12">
+              <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl">
+                {copy.title}
+              </h2>
+              <p className="mt-3 text-lg text-zinc-600">{copy.description}</p>
+              <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-950">
+                {copy.discount}
+              </p>
 
-          <p className="mt-6 text-xs text-zinc-500">{copy.note}</p>
+              {submitted ? (
+                <p
+                  className="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-emerald-900"
+                  role="status"
+                >
+                  {copy.submitted}
+                </p>
+              ) : (
+                <form
+                  onSubmit={onSubmit}
+                  className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-start"
+                  noValidate
+                >
+                  <div className="min-w-0 flex-1">
+                    <label htmlFor="waitlist-email" className="sr-only">
+                      {copy.inputLabel}
+                    </label>
+                    <input
+                      id="waitlist-email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      inputMode="email"
+                      placeholder={copy.inputPlaceholder}
+                      value={email}
+                      onChange={(ev) => {
+                        setEmail(ev.target.value);
+                        if (error) setError(null);
+                      }}
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      aria-invalid={error ? true : undefined}
+                      aria-describedby={error ? "waitlist-email-error" : undefined}
+                    />
+                    {error ? (
+                      <p
+                        id="waitlist-email-error"
+                        className="mt-2 text-sm text-red-600"
+                        role="alert"
+                      >
+                        {error}
+                      </p>
+                    ) : null}
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={busy}
+                    className="shrink-0 rounded-xl bg-primary px-8 py-3 text-base font-bold text-white shadow-[0_4px_16px_rgba(180,83,201,0.3)] transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {busy ? copy.buttonBusy : copy.buttonIdle}
+                  </button>
+                </form>
+              )}
+
+              <p className="mt-6 text-xs text-zinc-500">{copy.note}</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
