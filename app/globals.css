@@ -7,6 +7,9 @@
   --primary-tint: #ede4f5;
   --rose: #f43f5e;
   --warm-surface: #fdf8f0;
+  --ink: #1a0a2e;
+  --primary-dark: #7c2d9e;
+  --cream: #fdf6ec;
 }
 
 @theme inline {
@@ -16,6 +19,9 @@
   --color-primary-tint: var(--primary-tint);
   --color-rose: var(--rose);
   --color-warm-surface: var(--warm-surface);
+  --color-ink: var(--ink);
+  --color-primary-dark: var(--primary-dark);
+  --color-cream: var(--cream);
   --font-sans: "SF Pro Display", "SF Pro Text", "SF Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
@@ -164,4 +170,36 @@ body {
   background: var(--primary);
   border: 2px solid white;
   box-shadow: 0 0 0 2px rgba(180, 83, 201, 0.25);
+}
+
+/* Photo marquee */
+@keyframes marqueeLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes marqueeRight {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.marquee-left {
+  animation: marqueeLeft 26s linear infinite;
+}
+
+.marquee-right {
+  animation: marqueeRight 32s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-left,
+  .marquee-right {
+    animation: none;
+  }
 }
