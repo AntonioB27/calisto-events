@@ -130,17 +130,6 @@ export function AppPreviewWindow() {
                   className="relative h-full w-full overflow-hidden bg-black"
                   style={{ borderRadius: "36px" }}
                 >
-                  {/* Dynamic island */}
-                  <div
-                    aria-hidden
-                    className="absolute left-1/2 top-2.5 z-20 -translate-x-1/2 bg-black"
-                    style={{
-                      width: "92px",
-                      height: "28px",
-                      borderRadius: "20px",
-                    }}
-                  />
-
                   {/* Screenshots */}
                   {SCREENSHOTS.map((shot, i) => (
                     <div

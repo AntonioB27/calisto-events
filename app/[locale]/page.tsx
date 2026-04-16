@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { AppPreviewWindow } from "@/components/AppPreviewWindow";
 import { AuroraQuote } from "@/components/AuroraQuote";
 import { FeatureGrid } from "@/components/FeatureGrid";
 import { FutureRoadmap } from "@/components/FutureRoadmap";
@@ -8,7 +7,7 @@ import { HowItWorks } from "@/components/HowItWorks";
 import { LanguageSelectorBar } from "@/components/LanguageSelectorBar";
 import { LanguageSelectorPopup } from "@/components/LanguageSelectorPopup";
 import { Lifecycle } from "@/components/Lifecycle";
-import { PhotoMarquee } from "@/components/PhotoMarquee";
+import { AppPreviewWindow } from "@/components/AppPreviewWindow";
 import { PlanCards } from "@/components/PlanCards";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -38,7 +37,7 @@ export default async function LocalePage({ params }: LocalePageProps) {
       <SiteHeader copy={copy} />
       <main className="flex-1">
         <Hero copy={copy} />
-        <PhotoMarquee />
+        <AppPreviewWindow />
         <StatBar />
         <FeatureGrid copy={copy} />
         <HowItWorks copy={copy} />
