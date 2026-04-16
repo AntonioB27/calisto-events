@@ -54,13 +54,23 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
   return (
     <section
       id="waitlist"
-      className="scroll-mt-20 border-t border-zinc-200/60 bg-gradient-to-b from-primary-tint/30 to-white px-4 py-20 sm:px-6 sm:py-24"
+      className="relative scroll-mt-20 bg-[#1a0a2e] px-4 py-20 sm:px-6 sm:py-24"
     >
-      <div className="mx-auto max-w-5xl">
-        <div className="overflow-hidden rounded-3xl border border-primary/20 bg-white shadow-xl">
+      {/* Ambient glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+        style={{
+          background:
+            "radial-gradient(ellipse 50% 40% at 50% 100%, rgba(180,83,201,0.10) 0%, transparent 70%)",
+        }}
+      />
+
+      <div className="relative mx-auto max-w-5xl">
+        <div className="overflow-hidden rounded-[32px] border border-white/10 bg-white/5 shadow-2xl backdrop-blur-sm">
           <div className="grid lg:grid-cols-[1fr_1.6fr]">
-            {/* Aurora mascot panel */}
-            <div className="hidden items-end justify-center bg-gradient-to-b from-primary-tint/60 to-primary-tint/20 px-6 pt-10 lg:flex">
+            {/* Aurora panel */}
+            <div className="hidden items-end justify-center bg-gradient-to-b from-primary/20 to-primary/5 px-6 pt-10 lg:flex">
               <Image
                 src="/brand/mascot.png"
                 alt="Aurora"
@@ -72,17 +82,20 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
 
             {/* Form panel */}
             <div className="px-8 py-10 sm:px-10 sm:py-12">
-              <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl">
+              <h2
+                className="font-extrabold tracking-tight text-white"
+                style={{ fontSize: "clamp(1.7rem, 3.5vw, 2.6rem)" }}
+              >
                 {copy.title}
               </h2>
-              <p className="mt-3 text-lg text-zinc-600">{copy.description}</p>
-              <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-950">
+              <p className="mt-3 text-lg text-zinc-300">{copy.description}</p>
+              <p className="mt-4 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-200">
                 {copy.discount}
               </p>
 
               {submitted ? (
                 <p
-                  className="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-emerald-900"
+                  className="mt-8 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-4 text-emerald-300"
                   role="status"
                 >
                   {copy.submitted}
@@ -109,14 +122,14 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
                         setEmail(ev.target.value);
                         if (error) setError(null);
                       }}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-                      aria-invalid={error !== null}
+                      className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white shadow-sm placeholder:text-zinc-500 focus:border-amber-400/60 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
+                      aria-invalid={error !== null ? true : false}
                       aria-describedby={error ? "waitlist-email-error" : undefined}
                     />
                     {error ? (
                       <p
                         id="waitlist-email-error"
-                        className="mt-2 text-sm text-red-600"
+                        className="mt-2 text-sm text-red-400"
                         role="alert"
                       >
                         {error}
@@ -126,7 +139,7 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
                   <button
                     type="submit"
                     disabled={busy}
-                    className="shrink-0 rounded-xl bg-primary px-8 py-3 text-base font-bold text-white shadow-[0_4px_16px_rgba(180,83,201,0.3)] transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="shrink-0 rounded-xl bg-amber-400 px-8 py-3 text-base font-bold text-zinc-900 shadow-[0_4px_20px_rgba(245,158,11,0.35)] transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a0a2e] disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {busy ? copy.buttonBusy : copy.buttonIdle}
                   </button>
