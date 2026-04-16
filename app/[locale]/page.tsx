@@ -32,7 +32,7 @@ export default async function LocalePage({ params }: LocalePageProps) {
   const copy = getLandingCopy(locale);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-ink">
+    <div className="flex min-h-0 flex-1 flex-col overflow-x-clip bg-ink">
       <LanguageSelectorPopup copy={copy} locale={locale as Locale} />
       <SiteHeader copy={copy} />
       <main className="flex-1">

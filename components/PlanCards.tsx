@@ -58,14 +58,15 @@ const PLAN_CONFIG: Record<string, PlanConfig> = {
 
 export function PlanCards({ copy }: PlanCardsProps) {
   return (
-    <section id="plans" className="scroll-mt-20 bg-ink px-4 py-20 sm:px-6 sm:py-24">
-      {/* Ambient glow */}
+    <section
+      id="plans"
+      className="relative overflow-x-clip scroll-mt-20 bg-ink px-4 py-20 sm:px-6 sm:py-24"
+    >
+      {/* Ambient glow — capped to section width for narrow viewports */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 -translate-x-1/2"
+        className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[min(800px,100%)] max-w-full -translate-x-1/2"
         style={{
-          width: "800px",
-          height: "400px",
           background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(245,158,11,0.05) 0%, transparent 70%)",
         }}
       />

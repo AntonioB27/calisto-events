@@ -105,15 +105,13 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
   return (
     <section
       id="features"
-      className="scroll-mt-20 bg-ink px-4 py-20 sm:px-6 sm:py-24"
+      className="relative overflow-x-clip scroll-mt-20 bg-ink px-4 py-20 sm:px-6 sm:py-24"
     >
-      {/* Subtle radial ambient behind the cards */}
+      {/* Subtle radial ambient behind the cards — width capped to section so mobile does not scroll horizontally */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 -translate-x-1/2"
+        className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[min(900px,100%)] max-w-full -translate-x-1/2"
         style={{
-          width: "900px",
-          height: "500px",
           background:
             "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(180,83,201,0.07) 0%, transparent 70%)",
         }}
@@ -136,7 +134,7 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
 
           {/* Aurora on dark */}
           <div className="relative mx-auto mt-20 w-full max-w-[200px] shrink-0 lg:mx-0 lg:mt-0">
-            <div className="pointer-events-none absolute left-1/2 top-0 z-10 flex w-[200%] max-w-[260px] -translate-x-1/2 -translate-y-full justify-center px-2">
+            <div className="pointer-events-none absolute left-1/2 top-0 z-10 flex w-[min(100%,20rem)] max-w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-full justify-center px-2 sm:max-w-sm">
               <p className="pointer-events-auto relative rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-center text-sm font-semibold leading-snug text-white shadow-md backdrop-blur-md">
                 {copy.featuresAuroraBubble}
                 <span
