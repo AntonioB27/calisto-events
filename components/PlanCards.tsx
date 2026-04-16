@@ -14,12 +14,15 @@ const PLAN_ICONS: Record<string, string> = {
 
 export function PlanCards({ copy }: PlanCardsProps) {
   return (
-    <section id="plans" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-24">
+    <section id="plans" className="scroll-mt-20 bg-[#fdf6ec] px-4 py-20 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
           <div className="min-w-0 max-w-2xl">
-            <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl">
+            <h2
+              className="font-extrabold tracking-tight text-zinc-900"
+              style={{ fontSize: "clamp(1.9rem, 4vw, 3rem)" }}
+            >
               {copy.plansTitle}
             </h2>
             <p className="mt-3 text-lg text-zinc-600">
@@ -40,7 +43,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
             </div>
             <Image
               src="/brand/mascot/aurora_planning.png"
-              alt="Aurora"
+              alt="Aurora planning"
               width={1000}
               height={1000}
               className="h-auto w-full object-contain"
@@ -57,9 +60,9 @@ export function PlanCards({ copy }: PlanCardsProps) {
               <article
                 key={plan.id}
                 tabIndex={0}
-                className={`plan-card overflow-hidden rounded-2xl outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-xl ${
+                className={`plan-card overflow-hidden rounded-[28px] outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-xl ${
                   isPopular
-                    ? "border-2 border-primary shadow-[0_4px_24px_rgba(180,83,201,0.18)]"
+                    ? "border-2 border-amber-400 shadow-[0_4px_24px_rgba(245,158,11,0.2)]"
                     : "border border-zinc-200 shadow-sm"
                 }`}
                 aria-labelledby={`plan-${plan.id}`}
@@ -68,7 +71,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
                 <div
                   className={`px-6 py-5 ${
                     isPopular
-                      ? "bg-gradient-to-r from-primary to-violet-500"
+                      ? "bg-gradient-to-r from-amber-400 to-orange-400"
                       : "bg-white"
                   }`}
                 >
@@ -77,29 +80,27 @@ export function PlanCards({ copy }: PlanCardsProps) {
                       <span className="text-xl">{PLAN_ICONS[plan.id] ?? "📋"}</span>
                       <h3
                         id={`plan-${plan.id}`}
-                        className={`text-xl font-extrabold tracking-wide ${
-                          isPopular ? "text-white" : "text-zinc-900"
-                        }`}
+                        className="text-xl font-extrabold tracking-wide text-zinc-900"
                       >
                         {plan.name}
                       </h3>
                     </div>
                     {isPopular && (
-                      <span className="rounded-full bg-white/20 px-3 py-0.5 text-xs font-bold text-white ring-1 ring-white/30">
+                      <span className="rounded-full bg-zinc-900/15 px-3 py-0.5 text-xs font-bold text-zinc-900">
                         {copy.popularBadge}
                       </span>
                     )}
                   </div>
-                  <p className={`mt-1 text-3xl font-extrabold ${isPopular ? "text-white" : "text-zinc-900"}`}>
+                  <p className="mt-1 text-3xl font-extrabold text-zinc-900">
                     {priceRow.value}
                   </p>
-                  <p className={`text-sm ${isPopular ? "text-white/70" : "text-zinc-500"}`}>
+                  <p className={`text-sm ${isPopular ? "text-zinc-700" : "text-zinc-500"}`}>
                     {storageRow.label}: {storageRow.value}
                   </p>
                 </div>
 
                 {/* Card body */}
-                <div className={`px-6 py-4 ${isPopular ? "bg-primary-tint/30" : "bg-white"}`}>
+                <div className={`px-6 py-4 ${isPopular ? "bg-amber-50" : "bg-white"}`}>
                   <div className="plan-card-extras">
                     <div className="plan-card-extras-inner">
                       <dl className="space-y-3">
@@ -120,7 +121,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
             );
           })}
         </div>
-        <p className="mt-6 rounded-xl border border-zinc-100 bg-zinc-50 px-4 py-3 text-sm italic leading-relaxed text-zinc-500">
+        <p className="mt-6 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm italic leading-relaxed text-zinc-600">
           {copy.planFootnote}
         </p>
       </div>
