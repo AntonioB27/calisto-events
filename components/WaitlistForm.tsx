@@ -110,7 +110,7 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
                         if (error) setError(null);
                       }}
                       className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-                      aria-invalid={error ? true : undefined}
+                      aria-invalid={error !== null}
                       aria-describedby={error ? "waitlist-email-error" : undefined}
                     />
                     {error ? (
