@@ -110,7 +110,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
         {/* Cards */}
         <div className="mt-10 grid gap-4 lg:grid-cols-2">
           {copy.plans.map((plan) => {
-            const [priceRow, storageRow, ...restRows] = plan.rows;
+            const [priceRow, ...restRows] = plan.rows;
             const config = PLAN_CONFIG[plan.id] ?? PLAN_CONFIG.free!;
             const Icon = config.icon;
             return (
@@ -172,8 +172,8 @@ export function PlanCards({ copy }: PlanCardsProps) {
                       {priceRow?.value}
                     </p>
                   </div>
-                  <p className="mt-1 text-sm text-zinc-400">
-                    {storageRow?.label}: <span className="text-zinc-300">{storageRow?.value}</span>
+                  <p className="mt-2 text-sm text-zinc-400">
+                    {plan.tailoredFor}
                   </p>
 
                   {/* Divider */}
