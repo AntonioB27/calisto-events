@@ -1,11 +1,13 @@
-import type { LandingCopy } from "@/lib/i18n";
+import { LanguageSelectorBar } from "@/components/LanguageSelectorBar";
+import type { LandingCopy, Locale } from "@/lib/i18n";
 import Image from "next/image";
 
 type SiteHeaderProps = {
   copy: LandingCopy;
+  locale: Locale;
 };
 
-export function SiteHeader({ copy }: SiteHeaderProps) {
+export function SiteHeader({ copy, locale }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-ink/90 backdrop-blur-md">
       <div className="mx-auto max-w-5xl px-4 py-3">
@@ -51,12 +53,15 @@ export function SiteHeader({ copy }: SiteHeaderProps) {
               </a>
             ))}
           </nav>
-          <a
-            href="#waitlist"
-            className="hidden rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-900 transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink sm:inline-flex sm:shrink-0"
-          >
-            {copy.joinWaitlistShort}
-          </a>
+          <div className="flex items-center justify-center gap-3 sm:shrink-0 sm:justify-end">
+            <LanguageSelectorBar copy={copy} locale={locale} variant="header" />
+            <a
+              href="#waitlist"
+              className="hidden rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-900 transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink sm:inline-flex"
+            >
+              {copy.joinWaitlistShort}
+            </a>
+          </div>
         </div>
       </div>
     </header>

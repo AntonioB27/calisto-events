@@ -4,7 +4,6 @@ import { FeatureGrid } from "@/components/FeatureGrid";
 import { FutureRoadmap } from "@/components/FutureRoadmap";
 import { Hero } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
-import { LanguageSelectorBar } from "@/components/LanguageSelectorBar";
 import { LanguageSelectorPopup } from "@/components/LanguageSelectorPopup";
 import { Lifecycle } from "@/components/Lifecycle";
 import { AppPreviewWindow } from "@/components/AppPreviewWindow";
@@ -34,7 +33,7 @@ export default async function LocalePage({ params }: LocalePageProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-x-clip bg-ink">
       <LanguageSelectorPopup copy={copy} locale={locale as Locale} />
-      <SiteHeader copy={copy} />
+      <SiteHeader copy={copy} locale={locale as Locale} />
       <main className="flex-1">
         <Hero copy={copy} />
         <AppPreviewWindow copy={copy} />
@@ -46,7 +45,6 @@ export default async function LocalePage({ params }: LocalePageProps) {
         <AuroraQuote copy={copy} />
         <FutureRoadmap copy={copy} />
         <WaitlistForm copy={copy.waitlist} mascotAlt={copy.auroraMascotAlt} />
-        <LanguageSelectorBar copy={copy} locale={locale as Locale} className="bg-ink pb-6 pt-4" />
       </main>
       <SiteFooter copy={copy} />
     </div>
