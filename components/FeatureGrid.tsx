@@ -1,6 +1,4 @@
-"use client";
-
-import { useEffect, useRef, useState, type CSSProperties, type MutableRefObject } from "react";
+import type { CSSProperties } from "react";
 import type { LandingCopy } from "@/lib/i18n";
 
 type FeatureGridProps = { copy: LandingCopy };
@@ -24,56 +22,6 @@ const ICONS = [
 ];
 
 export function FeatureGrid({ copy }: FeatureGridProps) {
-  const [mobileActiveFeature, setMobileActiveFeature] = useState<string | null>(null);
-  const featureRefs: MutableRefObject<Record<string, HTMLElement | null>> = useRef({});
-  const activeFeatureRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    let raf = 0;
-    const updateActiveFeature = () => {
-      if (window.innerWidth > 640) return;
-      const centerY = window.innerHeight / 2;
-      let closestId: string | null = null;
-      let closestDistance = Number.POSITIVE_INFINITY;
-
-      for (const [id, el] of Object.entries(featureRefs.current)) {
-        if (!el) continue;
-        const rect = el.getBoundingClientRect();
-        const cardCenter = rect.top + rect.height / 2;
-        const distance = Math.abs(cardCenter - centerY);
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestId = id;
-        }
-      }
-
-      if (closestId && closestId !== activeFeatureRef.current) {
-        activeFeatureRef.current = closestId;
-        setMobileActiveFeature(closestId);
-      }
-    };
-
-    const onScrollOrResize = () => {
-      if (raf) return;
-      raf = window.requestAnimationFrame(() => {
-        raf = 0;
-        updateActiveFeature();
-      });
-    };
-
-    updateActiveFeature();
-    window.addEventListener("scroll", onScrollOrResize, { passive: true });
-    window.addEventListener("resize", onScrollOrResize);
-
-    return () => {
-      if (raf) window.cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScrollOrResize);
-      window.removeEventListener("resize", onScrollOrResize);
-    };
-  }, []);
-
   return (
     <section
       id="features"
@@ -92,7 +40,7 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
               <span>{copy.featuresSectionLabel}</span>
             </div>
             <h2 className="features-section__title">{copy.featuresTitle}</h2>
-            <p className="features-section__lede">{copy.featuresDescription}</p>
+            {/* <p className="features-section__lede">{copy.featuresDescription}</p> */}
           </div>
         </header>
 
@@ -100,16 +48,9 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
           {copy.features.map((f, i) => {
             const accent = ACCENTS[i % ACCENTS.length]!;
             const Icon = ICONS[i] ?? ICONS[0];
-            const idx = String(i + 1).padStart(2, "0");
+            const idx = String(i + 1);
             return (
-              <li
-                key={f.title}
-                className="feature-card"
-                data-mobile-active={mobileActiveFeature === f.title ? "true" : "false"}
-                ref={(el) => {
-                  featureRefs.current[f.title] = el;
-                }}
-              >
+              <li key={f.title} className="feature-card">
                 <div
                   className="features-lane__plate"
                   style={
@@ -119,7 +60,7 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
                   }
                 >
                   <div className="features-lane__top">
-                    <span className="features-lane__index">{idx}</span>
+                    {/* <span className="features-lane__index">{idx}</span> */}
                     <div className="features-lane__iconRing">{Icon}</div>
                     <h3 className="features-lane__title">{f.title}</h3>
                   </div>

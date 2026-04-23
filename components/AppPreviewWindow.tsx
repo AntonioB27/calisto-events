@@ -27,7 +27,7 @@ const SCREEN_COMPONENTS = [
   ShareQRScreen,
   DownloadScreen,
 ] as const;
-const PREVIEW_SEQUENCE = [0, 9, 1, 6] as const; // Gallery, Download, Guest welcome, Guest list
+const PREVIEW_SEQUENCE = [1, 0, 9, 6] as const; // Guest welcome, Gallery, Download, Guest list
 
 type AppPreviewWindowProps = { copy: LandingCopy };
 
@@ -88,7 +88,7 @@ export function AppPreviewWindow({ copy }: AppPreviewWindowProps) {
                 marginBottom: 14,
               }}
             >
-              01 · {copy.appPreviewEyebrow}
+              1 · {copy.appPreviewEyebrow}
             </div>
             <h2
               style={{
@@ -102,21 +102,9 @@ export function AppPreviewWindow({ copy }: AppPreviewWindowProps) {
               }}
             >
               {copy.appPreviewTitlePrefix}{" "}
-              <em style={{ fontStyle: "italic", color: "var(--plum-2, #A584A6)" }}>{copy.appPreviewTitleEmphasis}</em>
+              <em style={{ fontStyle: "italic", color: "var(--plum-2, #A584A6)" }}><br></br>{copy.appPreviewTitleEmphasis}</em>
               {" "}{copy.appPreviewTitleSuffix}
             </h2>
-          </div>
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              color: "var(--cream-4, #6E6758)",
-              letterSpacing: "0.1em",
-              paddingBottom: 8,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {copy.appPreviewMetaLabel}
           </div>
         </div>
 

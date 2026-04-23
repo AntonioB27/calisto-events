@@ -19,18 +19,18 @@ function CreateEventStepVisual({ copy }: HowItWorksProps) {
         <div
           className="mb-0.5 flex items-center justify-between gap-2"
         >
-          <div
+          {/* <div
             className="font-mono text-[7.5px] sm:text-[8px] uppercase"
             style={{ letterSpacing: "0.12em", color: "var(--plum-2, #A584A6)" }}
           >
             {copy.howStepPrefix} 1
-          </div>
-          <div
+          </div> */}
+          {/* <div
             className="font-mono text-[7.5px] sm:text-[8px]"
             style={{ color: "var(--cream-4, #6E6758)" }}
           >
             {copy.howSetupHint}
-          </div>
+          </div> */}
         </div>
         <p
           className="m-0"
@@ -76,7 +76,7 @@ function CreateEventStepVisual({ copy }: HowItWorksProps) {
           </span>
         </div>
       </div>
-      <p
+      {/* <p
         className="m-0 flex items-center gap-1.5 font-mono text-[8.5px] sm:text-[9px]"
         style={{ color: "var(--plum-2, #A584A6)", letterSpacing: "0.08em" }}
       >
@@ -93,58 +93,76 @@ function CreateEventStepVisual({ copy }: HowItWorksProps) {
           ·
         </span>
         {copy.howVisualGuests}
-      </p>
+      </p> */}
     </div>
   );
 }
 
 function UploadStepVisual({ copy }: HowItWorksProps) {
-  const bars = [
-    { thumb: "#5c3d1f", name: "IMG_4021.heic", pct: 100, label: copy.howUploadDone },
-    { thumb: "#4a3347", name: "IMG_4022.heic", pct: 72, label: "72%" },
-    { thumb: "#5a3436", name: "IMG_4023.heic", pct: 34, label: "34%" },
-  ];
   return (
-    <div className="flex h-full w-full flex-col justify-end gap-1.5">
-      {bars.map((b) => (
-        <div
-          key={b.name}
-          className="flex min-h-0 items-center gap-2 rounded-lg px-2.5 py-2"
-          style={{
-            background: "color-mix(in srgb, var(--ink) 88%, var(--plum) 2%)",
-            border: "1px solid var(--hair)",
-            fontSize: 10,
-            color: "var(--cream-2, #E8DCC6)",
-          }}
-        >
-          <div
-            className="h-6 w-6 shrink-0 rounded"
-            style={{ background: `linear-gradient(135deg, ${b.thumb}, var(--ink-3, #1C1724))` }}
-          />
-          <span
-            className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
-            style={{ fontFamily: "var(--font-sans)", fontSize: 10 }}
+    <div className="flex h-full w-full items-center justify-center">
+      <div
+        className="relative flex h-[150px] w-[92px] flex-col overflow-hidden rounded-[18px] border p-2"
+        style={{
+          borderColor: "color-mix(in srgb, var(--plum-2) 45%, var(--hair))",
+          background: "linear-gradient(160deg, var(--ink-2) 0%, var(--ink) 100%)",
+          boxShadow: "0 12px 28px -18px rgba(0,0,0,0.55)",
+        }}
+      >
+        <span
+          className="mx-auto mb-2 h-1.5 w-8 rounded-full"
+          style={{ background: "color-mix(in srgb, var(--cream) 10%, transparent)" }}
+          aria-hidden
+        />
+        <div className="rounded-[12px] border px-2 pb-2 pt-2.5" style={{ borderColor: "var(--hair)" }}>
+          <p className="m-0 text-center text-[9px]" style={{ color: "var(--cream-3, #B5AB99)" }}>
+            {copy.heroMockJoinAlbum}
+          </p>
+          <p
+            className="m-0 mt-1 text-center font-mono text-[9px] uppercase"
+            style={{ letterSpacing: "0.12em", color: "var(--cream)" }}
           >
-            {b.name}
-          </span>
-          <div
-            className="relative h-0.5 min-w-[32px] flex-1 overflow-hidden rounded-full"
-            style={{ background: "var(--ink-3)" }}
-          >
-            <div
-              className="absolute inset-y-0 left-0 rounded-full"
-              style={{
-                width: `${b.pct}%`,
-                background: "var(--plum-2, #A584A6)",
-                boxShadow: "0 0 8px rgba(165,132,166,0.35)",
-              }}
-            />
-          </div>
-          <span className="w-6 shrink-0 text-right font-mono text-[8px]" style={{ color: "var(--cream-4, #6E6758)" }}>
-            {b.label}
-          </span>
+            WEDDING2026
+          </p>
         </div>
-      ))}
+        <div className="mt-2 flex flex-1 flex-col items-center justify-center rounded-[12px] border p-1.5" style={{ borderColor: "var(--hair)" }}>
+          <svg viewBox="0 0 33 33" width="44" height="44" role="presentation">
+            <rect width="33" height="33" fill="var(--ink-2)" />
+            <rect x="2" y="2" width="9" height="9" fill="var(--cream)" />
+            <rect x="4" y="4" width="5" height="5" fill="var(--ink-2)" />
+            <rect x="22" y="2" width="9" height="9" fill="var(--cream)" />
+            <rect x="24" y="4" width="5" height="5" fill="var(--ink-2)" />
+            <rect x="2" y="22" width="9" height="9" fill="var(--cream)" />
+            <rect x="4" y="24" width="5" height="5" fill="var(--ink-2)" />
+            <rect x="14" y="2" width="3" height="3" fill="var(--cream)" />
+            <rect x="12" y="8" width="3" height="3" fill="var(--cream)" />
+            <rect x="16" y="8" width="3" height="3" fill="var(--cream)" />
+            <rect x="12" y="12" width="3" height="3" fill="var(--cream)" />
+            <rect x="16" y="12" width="3" height="3" fill="var(--cream)" />
+            <rect x="20" y="12" width="3" height="3" fill="var(--cream)" />
+            <rect x="12" y="16" width="3" height="3" fill="var(--cream)" />
+            <rect x="18" y="16" width="3" height="3" fill="var(--cream)" />
+            <rect x="14" y="20" width="3" height="3" fill="var(--cream)" />
+            <rect x="18" y="20" width="3" height="3" fill="var(--cream)" />
+            <rect x="22" y="18" width="3" height="3" fill="var(--cream)" />
+            <rect x="26" y="16" width="3" height="3" fill="var(--cream)" />
+            <rect x="24" y="22" width="3" height="3" fill="var(--cream)" />
+            <rect x="18" y="24" width="3" height="3" fill="var(--cream)" />
+            <rect x="14" y="26" width="3" height="3" fill="var(--cream)" />
+            <rect x="22" y="28" width="3" height="3" fill="var(--cream)" />
+          </svg>
+          <p className="m-0 mt-1 text-center text-[8px]" style={{ color: "var(--cream-4)" }}>
+            {copy.heroMockScanToUpload}
+          </p>
+        </div>
+      </div>
+      <div className="ml-3 flex flex-col gap-1.5 text-[9px]" style={{ color: "var(--cream-3, #B5AB99)" }}>
+        <div className="rounded-full border px-2 py-0.5 font-mono text-[8px] uppercase" style={{ letterSpacing: "0.12em", borderColor: "var(--hair)" }}>
+          {copy.heroMockNoAppNoAccount}
+        </div>
+        <div className="h-1 w-10 rounded-full" style={{ background: "color-mix(in srgb, var(--plum-2) 40%, transparent)" }} />
+        <div className="h-1 w-6 rounded-full" style={{ background: "color-mix(in srgb, var(--cream) 20%, transparent)" }} />
+      </div>
     </div>
   );
 }
@@ -250,7 +268,7 @@ export function HowItWorks({ copy }: HowItWorksProps) {
               >
                 {copy.howTitle}
               </h2>
-              <p
+              {/* <p
                 className="m-0 mt-3.5"
                 style={{
                   fontFamily: "var(--font-sans)",
@@ -261,9 +279,9 @@ export function HowItWorks({ copy }: HowItWorksProps) {
                 }}
               >
                 {copy.howDescription}
-              </p>
+              </p> */}
             </div>
-            <div
+            {/* <div
               className="shrink-0 self-start rounded-full border font-mono text-[10.5px] sm:min-w-0 sm:self-end sm:text-right sm:text-xs"
               style={{
                 borderColor: "var(--hair-strong)",
@@ -276,7 +294,7 @@ export function HowItWorks({ copy }: HowItWorksProps) {
               }}
             >
               {copy.howSetupHint}
-            </div>
+            </div> */}
           </div>
         </header>
 
@@ -293,6 +311,12 @@ export function HowItWorks({ copy }: HowItWorksProps) {
                   className="how-section__card reveal h-full"
                   style={{ animationDelay: `${0.05 + idx * 0.09}s` }}
                 >
+                  <p
+                    className="m-0 px-4 pb-3 pt-5 font-mono text-[10.5px] tracking-[0.2em] sm:px-6 sm:pb-4 sm:pt-6"
+                    style={{ textTransform: "uppercase", color: "var(--plum-2, #A584A6)" }}
+                  >
+                    {copy.howStepPrefix} {item.step}
+                  </p>
                   <div className="how-section__frame relative overflow-hidden">
                     <div className="how-section__frame-glow" aria-hidden />
                     <div className="relative h-full w-full" style={{ minHeight: 124 }}>
@@ -300,12 +324,6 @@ export function HowItWorks({ copy }: HowItWorksProps) {
                     </div>
                   </div>
                   <div className="px-4 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
-                    <p
-                      className="m-0 mb-3 font-mono text-[10.5px] tracking-[0.2em]"
-                      style={{ textTransform: "uppercase", color: "var(--plum-2, #A584A6)" }}
-                    >
-                      {copy.howStepPrefix} 0{item.step}
-                    </p>
                     <h3
                       className="m-0"
                       style={{

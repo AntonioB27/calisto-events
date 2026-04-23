@@ -91,7 +91,7 @@ export function Hero({ copy }: HeroProps) {
             </div>
 
             {/* Signal lines */}
-            <div className="flex flex-col" style={{ marginTop: 52, gap: 16 }}>
+            {/*<div className="flex flex-col" style={{ marginTop: 52, gap: 16 }}>
               {copy.heroSignals.map((signal, i) => (
                 <div key={i} className="flex items-start gap-2.5">
                   <svg
@@ -119,7 +119,7 @@ export function Hero({ copy }: HeroProps) {
                   </span>
                 </div>
               ))}
-            </div>
+            </div> */}
           </div>
 
           {/* ── Right: Aurora welcome panel ── */}
@@ -203,19 +203,6 @@ export function Hero({ copy }: HeroProps) {
                 }}
               >
                 {copy.heroIntro}
-              </p>
-              <p
-                style={{
-                  margin: 0,
-                  textAlign: "center",
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 13,
-                  color: "var(--cream-3, #B5AB99)",
-                  lineHeight: 1.55,
-                  maxWidth: 320,
-                }}
-              >
-                {copy.heroDescription}
               </p>
             </div>
           </div>

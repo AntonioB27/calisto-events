@@ -93,7 +93,7 @@ export function FAQ({ copy }: FAQProps) {
               marginBottom: 14,
             }}
           >
-            05 · Questions
+            {copy.faqSectionLabel}
           </div>
           <h2
             style={{
@@ -126,7 +126,7 @@ export function FAQ({ copy }: FAQProps) {
                 maxWidth: 320,
               }}
             >
-              If something isn{"'"}t here, write to{" "}
+              {copy.faqContactPrefix}{" "}
               <a
                 href="mailto:info@calisto.com"
                 style={{
@@ -137,7 +137,7 @@ export function FAQ({ copy }: FAQProps) {
               >
                 info@calisto.com
               </a>
-              . We answer within a day, usually faster.
+              . {copy.faqContactSuffix}
             </p>
           </div>
 

@@ -68,6 +68,8 @@ export type LandingCopy = {
   heroIntro: string;
   heroTitle: string;
   heroDescription: string;
+  /** Aurora's voice in the hero mascot card—separate from the factual hero subhead. */
+  heroAuroraCardBlurb: string;
   heroPrimaryCta: string;
   heroSecondaryCta: string;
   heroSignals: readonly [string, string, string];
@@ -128,6 +130,9 @@ export type LandingCopy = {
   futureItems: FutureItem[];
   futureStatusLabels: { roadmap: string; planned: string; idea: string };
   faqTitle: string;
+  faqSectionLabel: string;
+  faqContactPrefix: string;
+  faqContactSuffix: string;
   faq: FaqItem[];
   waitlist: WaitlistCopy;
   footerText: string;
@@ -164,10 +169,12 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     joinWaitlistShort: "Join waitlist",
     heroBadge: "Meet Aurora",
-    heroIntro: "Hi, I'm Aurora — I'll guide you through Calisto.",
+    heroIntro: "Hi, I'm Aurora, I'll guide you through Calisto.",
     heroTitle: "One shared album for your wedding or event!",
     heroDescription:
       "Calisto helps guests upload and browse photos and videos in one place. No app download is required, and guests can upload without creating an account. Access is by code or QR, with one-time event pricing.",
+    heroAuroraCardBlurb:
+      "I'd rather you be in the moment than digging through camera rolls on Monday. I'm here so the messy, wonderful parts of your day—the toasts, the candid grins, the kid with cake on his face—stay in one story you can reopen without a scavenger hunt.",
     heroPrimaryCta: "Join the waitlist",
     heroSecondaryCta: "Compare plans",
     heroSignals: [
@@ -193,11 +200,11 @@ const copy: Record<Locale, LandingCopy> = {
     appPreviewMetaLabel: "calisto · organizer",
     appPreviewAriaSection: "App preview",
     appPreviewAriaThumbs: "Screenshot thumbnails",
-    appPreviewCaptions: ["Gallery view", "Download", "Guest welcome", "Guest list"],
+    appPreviewCaptions: ["Guest welcome", "Gallery view", "Download", "Guest list"],
     appPreviewViewAriaTemplate: "View {name}",
     appPreviewImageAltTemplate: "Calisto app — {name}",
     featuresTitle: "What you can do",
-    featuresSectionLabel: "02 · Features",
+    featuresSectionLabel: "2 · Features",
     featuresDescription:
       "Built for big days when everyone is taking pictures—Calisto keeps uploads organized and easy to share.",
     featuresAuroraBubble:
@@ -234,12 +241,12 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         title: "ZIP export (paid plans)",
-        description: "Organizers can download the full album as a ZIP after the event—timing depends on your plan.",
+        description: "Organizers can download the full album as a ZIP after the event, and guests can too on a paid plan.",
         mascotBubble: "Zip the memories when you're ready.",
       },
     ],
     howTitle: "How it works",
-    howSectionLabel: "03 · Three quiet steps",
+    howSectionLabel: "3 · Three quiet steps",
     howSetupHint: "< 90 seconds to set up",
     howStepPrefix: "STEP",
     howVisualLive: "LIVE",
@@ -268,7 +275,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     plansTitle: "Plans",
-    plansSectionLabel: "04 · Pricing",
+    plansSectionLabel: "4 · Pricing",
     plansPerEventSuffix: "/ event",
     plansDescriptionStrong: "One-time payment per event",
     plansDescriptionRest: "choose a tier when you create the event. Upgrade later if you need more storage, guests, or retention.",
@@ -369,6 +376,9 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     futureStatusLabels: { roadmap: "Roadmap", planned: "Planned", idea: "Idea" },
     faqTitle: "Questions",
+    faqSectionLabel: "5 · Questions",
+    faqContactPrefix: "If something isn't here, write to",
+    faqContactSuffix: "We answer within a day, usually faster.",
     faq: [
       {
         q: "Do guests need to download an app?",
@@ -380,7 +390,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         q: "Are photos uploaded at full quality?",
-        a: "We compress photos so uploads stay fast and storage stays efficient. The settings we use are tuned so the change in image quality is not noticeable in normal viewing—your collection still looks great on phones and the web.",
+        a: "We use smart compression so uploads stay fast and reliable. Your photos still look beautiful on phones and the web, while the app keeps everything smooth and snappy.",
       },
       {
         q: "What if a guest uploads something I don't want?",
@@ -437,10 +447,12 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     joinWaitlistShort: "Pridruži se listi",
     heroBadge: "Upoznaj Auroru",
-    heroIntro: "Bok, ja sam Aurora — predstavljam ti Calisto.",
+    heroIntro: "Bok, ja sam Aurora, predstavljam ti Calisto.",
     heroTitle: "Jedan zajednički album za tvoje vjenčanje ili događaj!",
     heroDescription:
       "Gosti na jednom mjestu učitavaju i gledaju fotografije i videa. Nije potrebno preuzeti aplikaciju, a upload ide i bez korisničkog računa. Pristup je kodom ili QR-om, uz jednokratno plaćanje po događaju.",
+    heroAuroraCardBlurb:
+      "Želim da budeš na plesu, a ne da u ponedjeljak pretražuješ deset mapi s fotkama. Tu sam da taj neuredno lijepi dan — toaste, prvi ples, taj tren s kolačem — ostane jedna priča koju možeš otvoriti bez detektivskog posla.",
     heroPrimaryCta: "Pridruži se listi čekanja",
     heroSecondaryCta: "Usporedi pakete",
     heroSignals: [
@@ -459,25 +471,25 @@ const copy: Record<Locale, LandingCopy> = {
       { value: "0 instalacija", label: "potrebno gostima" },
       { value: "24h", label: "do početka ZIP izvoza" },
     ],
-    appPreviewEyebrow: "Vidi kako radi",
+    appPreviewEyebrow: "Izgled aplikacije",
     appPreviewTitlePrefix: "Jedan album.",
     appPreviewTitleEmphasis: "Svaki",
     appPreviewTitleSuffix: "kutak dana.",
     appPreviewMetaLabel: "calisto · organizator",
     appPreviewAriaSection: "Pregled aplikacije",
     appPreviewAriaThumbs: "Minijature snimki zaslona",
-    appPreviewCaptions: ["Pregled galerije", "Preuzimanje", "Dobrodošlica", "Popis gostiju"],
+    appPreviewCaptions: ["Dobrodošlica", "Pregled galerije", "Preuzimanje", "Popis gostiju"],
     appPreviewViewAriaTemplate: "Pogledaj: {name}",
     appPreviewImageAltTemplate: "Calisto aplikacija — {name}",
-    featuresTitle: "Što možeš raditi",
-    featuresSectionLabel: "02 · Mogućnosti",
+    featuresTitle: "Što sve uključuje",
+    featuresSectionLabel: "2 · Mogućnosti",
     featuresDescription: "Za dane kad svi fotografiraju — uploadovi ostaju uredni i lako dijeljivi.",
     featuresAuroraBubble:
       "Svaki gost učitava u jednu galeriju — pomažem da sve ostane uredno.",
     features: [
       {
         title: "Jedinstveni pristupni kod",
-        description: "Svaki događaj ima svoj kod (npr. WEDDING2026). Gosti ulaze bez kompliciranog setupa.",
+        description: "Svaki događaj ima svoj kod (npr. WEDDING2026).",
         mascotBubble: "Tvoj događaj, tvoj kod—lako.",
       },
       {
@@ -491,23 +503,23 @@ const copy: Record<Locale, LandingCopy> = {
         mascotBubble: "Jedna galerija, svi u istom trenu.",
       },
       {
-        title: "Uloge koje imaju smisla",
-        description: "Gosti učitavaju i gledaju, a organizatori vode pristup i na plaćenim paketima izvoze arhivu.",
+        title: "Uloge",
+        description: "Gosti učitavaju i gledaju, a organizatori vode pristup.",
         mascotBubble: "Uloge koje drže red.",
       },
       {
         title: "Fotografije i videa po paketu",
-        description: "Free pokriva fotografije; plaćeni paketi dodaju videa, veće limite i duže čuvanje.",
+        description: "Fotografije su uključene u svaki paket, a plaćeni otključavaju videa, veće limite i duže čuvanje.",
         mascotBubble: "Paket uskladim s pričom.",
       },
       {
         title: "ZIP izvoz (plaćeni paketi)",
-        description: "Organizatori mogu preuzeti cijeli album kao ZIP, ovisno o paketu.",
+        description: "Organizatori mogu preuzeti cijeli album kao ZIP, a gosti također ako plate dodatnu uslugu.",
         mascotBubble: "Preuzmi album kad si spreman.",
       },
     ],
-    howTitle: "Kako radi",
-    howSectionLabel: "03 · Tri jednostavna koraka",
+    howTitle: "Kako funkcionira?",
+    howSectionLabel: "3 · Tri jednostavna koraka",
     howSetupHint: "< 90 sekundi za postavljanje",
     howStepPrefix: "KORAK",
     howVisualLive: "UŽIVO",
@@ -529,12 +541,12 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         step: "3",
-        title: "Skupljaj i uživaj",
-        description: "Gosti zajedno učitavaju i pregledavaju. Nakon događaja vrijede pravila tvog paketa.",
+        title: "Pregledavaj slike i uživaj",
+        description: "Gosti zajedno učitavaju i pregledavaju slike i videozapise.",
       },
     ],
     plansTitle: "Paketi",
-    plansSectionLabel: "04 · Cijene",
+    plansSectionLabel: "4 · Cijene",
     plansPerEventSuffix: "/ događaj",
     plansDescriptionStrong: "Jednokratno plaćanje po događaju",
     plansDescriptionRest: "odaberi paket pri kreiranju događaja. Nadogradnja je moguća kasnije za više prostora, gostiju ili dulje čuvanje.",
@@ -634,23 +646,22 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     futureStatusLabels: { roadmap: "Roadmap", planned: "Planirano", idea: "Ideja" },
-    faqTitle: "Pitanja",
+    faqTitle: "Česta pitanja",
+    faqSectionLabel: "5 · Pitanja",
+    faqContactPrefix: "Ako ovdje nema odgovora, piši na",
+    faqContactSuffix: "Odgovaramo unutar jednog dana, često i brže.",
     faq: [
       {
         q: "Trebaju li gosti preuzeti aplikaciju?",
-        a: "Ne. Gosti skeniraju QR kod ili otvore link i učitavaju izravno iz preglednika. Ništa za instalirati.",
+        a: "Ne. Gosti skeniraju QR kod ili otvore link i učitavaju izravno iz preglednika.",
       },
       {
         q: "Trebaju li gosti stvoriti račun?",
-        a: "Ni račun ni email nije potreban. Gosti mogu po želji dodati ime kako bi znali tko je što učitao — to je sve što tražimo.",
+        a: "Ni račun ni email nije potreban. Gosti mogu po želji dodati ime kako bi znali tko je što učitao.",
       },
       {
         q: "Učitavaju li se fotografije u punoj kvaliteti?",
-        a: "Fotografije se komprimiraju kako bi upload bio brz i pohrana učinkovita. Kompresija je podešena tako da pad kvalitete u uobičajenom gledanju nije primjetan — slike i dalje izgledaju odlično na telefonu i u pregledniku.",
-      },
-      {
-        q: "Tko može vidjeti album?",
-        a: "Samo ti, organizator, dok sam ne odlučiš podijeliti. Možeš poslati gostima link za čitanje kada si spreman.",
+        a: "Koristimo pametnu kompresiju kako bi upload bio brz i pouzdan. Fotografije i dalje izgledaju odlično na mobitelu i u pregledniku, a aplikacija sve drži glatkim i brzim.",
       },
       {
         q: "Što ako gost učita nešto što ne želim?",
@@ -681,7 +692,7 @@ const copy: Record<Locale, LandingCopy> = {
     pageDescription:
       "Calisto omogućuje gostima vjenčanja i događaja da učitavaju i pregledavaju fotografije i videa na jednom mjestu.",
     auroraQuote: "Svaka uspomena zaslužuje dom. Pobrinut ću se da bude lijepa, organizirana i zauvijek vaša.",
-    auroraQuoteIntro: "Od Aurore · Tvoj Calisto vodič",
+    auroraQuoteIntro: "",
     auroraQuoteSectionAria: "Poruka od Aurore",
     auroraLabel: "Aurora",
     auroraJobTitle: "Calisto vodič",
@@ -706,10 +717,12 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     joinWaitlistShort: "Zur Warteliste",
     heroBadge: "Lerne Aurora kennen",
-    heroIntro: "Hi, ich bin Aurora — ich stelle dir Calisto vor.",
+    heroIntro: "Hi, ich bin Aurora, ich stelle dir Calisto vor.",
     heroTitle: "Ein gemeinsames Album für deine Hochzeit oder dein Event!",
     heroDescription:
       "Calisto hilft Gästen, Fotos und Videos an einem Ort hochzuladen und anzusehen. Kein App-Download nötig, und Uploads funktionieren ohne Konto. Der Zugriff läuft per Code oder QR – mit einmaliger Zahlung pro Event statt Abo.",
+    heroAuroraCardBlurb:
+      "Lieber tanzt du auf der Feier, als dass du am Montag hundert Chatverläufe durchsuchst. Ich will, dass der Tag als eine lebendige Geschichte bleibt — Reden, Umarmungen, das schiefe Gruppenfoto — die man wiederfindet, ohne Schatzsuche.",
     heroPrimaryCta: "Zur Warteliste",
     heroSecondaryCta: "Tarife vergleichen",
     heroSignals: [
@@ -735,11 +748,11 @@ const copy: Record<Locale, LandingCopy> = {
     appPreviewMetaLabel: "calisto · organizer",
     appPreviewAriaSection: "App-Vorschau",
     appPreviewAriaThumbs: "Screenshot-Vorschau",
-    appPreviewCaptions: ["Galerieansicht", "Download", "Gast-Begrüßung", "Gästeliste"],
+    appPreviewCaptions: ["Gast-Begrüßung", "Galerieansicht", "Download", "Gästeliste"],
     appPreviewViewAriaTemplate: "{name} ansehen",
     appPreviewImageAltTemplate: "Calisto-App — {name}",
     featuresTitle: "Was du machen kannst",
-    featuresSectionLabel: "02 · Funktionen",
+    featuresSectionLabel: "2 · Funktionen",
     featuresDescription:
       "Für große Tage, an denen alle fotografieren – Calisto hält Uploads organisiert und leicht teilbar.",
     featuresAuroraBubble:
@@ -777,7 +790,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     howTitle: "So funktioniert es",
-    howSectionLabel: "03 · Drei einfache Schritte",
+    howSectionLabel: "3 · Drei einfache Schritte",
     howSetupHint: "< 90 Sekunden zum Einrichten",
     howStepPrefix: "SCHRITT",
     howVisualLive: "LIVE",
@@ -804,7 +817,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     plansTitle: "Tarife",
-    plansSectionLabel: "04 · Preise",
+    plansSectionLabel: "4 · Preise",
     plansPerEventSuffix: "/ Event",
     plansDescriptionStrong: "Einmalige Zahlung pro Event",
     plansDescriptionRest: "wähle einen Tarif beim Erstellen des Events. Späteres Upgrade für mehr Speicher, Gäste oder Aufbewahrung ist möglich.",
@@ -906,6 +919,9 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     futureStatusLabels: { roadmap: "Roadmap", planned: "Geplant", idea: "Idee" },
     faqTitle: "Fragen",
+    faqSectionLabel: "5 · Fragen",
+    faqContactPrefix: "Wenn etwas fehlt, schreib an",
+    faqContactSuffix: "Wir antworten innerhalb eines Tages, oft schneller.",
     faq: [
       {
         q: "Müssen Gäste eine App herunterladen?",
@@ -917,7 +933,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         q: "Werden Fotos in voller Qualität hochgeladen?",
-        a: "Fotos werden komprimiert, damit Uploads schnell bleiben und der Speicher effizient genutzt wird. Die Einstellungen sind so gewählt, dass der Qualitätsverlust im normalen Anschauen praktisch nicht auffällt – auf dem Handy und im Web sehen deine Bilder weiterhin hervorragend aus.",
+        a: "Wir nutzen smarte Kompression, damit Uploads schnell und zuverlässig bleiben. Deine Fotos sehen auf dem Handy und im Web weiterhin großartig aus, während die App alles angenehm flüssig hält.",
       },
       {
         q: "Wer kann das Album sehen?",

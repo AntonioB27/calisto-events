@@ -12,32 +12,34 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|------|--------|----------------|
-| `app/globals.css` | Modify | New CSS tokens (`--ink`, `--primary-dark`, `--cream`), marquee keyframes |
-| `lib/i18n.ts` | Modify | Add `auroraQuote: string` to `LandingCopy` type + 3 locale values |
-| `components/SiteHeader.tsx` | Modify | Dark glass header, amber CTA, coral underline nav hover |
-| `components/Hero.tsx` | Modify | Ink bg, confetti dots, display type, amber CTAs, Aurora on dark |
-| `components/PhotoMarquee.tsx` | **Create** | Dual-row auto-scrolling screenshot strip |
-| `components/StatBar.tsx` | **Create** | 3-stat amber-on-purple strip |
-| `components/FeatureGrid.tsx` | Modify | Cream bg, colored left-border cards, hover lift |
-| `components/HowItWorks.tsx` | Modify | Deep-purple inverted bg, white text, amber step circles |
-| `components/PlanCards.tsx` | Modify | Cream bg, amber gradient on popular card |
-| `components/Lifecycle.tsx` | Modify | White bg, amber timeline dots |
-| `components/AuroraQuote.tsx` | **Create** | Full-width warm quote panel with Aurora portrait |
-| `components/FutureRoadmap.tsx` | Modify | Colored left-border on card hover per status |
-| `components/WaitlistForm.tsx` | Modify | Ink bg, glassmorphism card, amber CTAs |
-| `components/SiteFooter.tsx` | Modify | Ink bg, amber/white wordmark |
-| `app/[locale]/page.tsx` | Modify | Import + place PhotoMarquee, StatBar, AuroraQuote |
+
+| File                           | Action     | Responsibility                                                           |
+| ------------------------------ | ---------- | ------------------------------------------------------------------------ |
+| `app/globals.css`              | Modify     | New CSS tokens (`--ink`, `--primary-dark`, `--cream`), marquee keyframes |
+| `lib/i18n.ts`                  | Modify     | Add `auroraQuote: string` to `LandingCopy` type + 3 locale values        |
+| `components/SiteHeader.tsx`    | Modify     | Dark glass header, amber CTA, coral underline nav hover                  |
+| `components/Hero.tsx`          | Modify     | Ink bg, confetti dots, display type, amber CTAs, Aurora on dark          |
+| `components/PhotoMarquee.tsx`  | **Create** | Dual-row auto-scrolling screenshot strip                                 |
+| `components/StatBar.tsx`       | **Create** | 3-stat amber-on-purple strip                                             |
+| `components/FeatureGrid.tsx`   | Modify     | Cream bg, colored left-border cards, hover lift                          |
+| `components/HowItWorks.tsx`    | Modify     | Deep-purple inverted bg, white text, amber step circles                  |
+| `components/PlanCards.tsx`     | Modify     | Cream bg, amber gradient on popular card                                 |
+| `components/Lifecycle.tsx`     | Modify     | White bg, amber timeline dots                                            |
+| `components/AuroraQuote.tsx`   | **Create** | Full-width warm quote panel with Aurora portrait                         |
+| `components/FutureRoadmap.tsx` | Modify     | Colored left-border on card hover per status                             |
+| `components/WaitlistForm.tsx`  | Modify     | Ink bg, glassmorphism card, amber CTAs                                   |
+| `components/SiteFooter.tsx`    | Modify     | Ink bg, amber/white wordmark                                             |
+| `app/[locale]/page.tsx`        | Modify     | Import + place PhotoMarquee, StatBar, AuroraQuote                        |
+
 
 ---
 
 ## Task 1: Design Tokens & Marquee CSS
 
 **Files:**
-- Modify: `app/globals.css`
 
-- [ ] **Step 1: Add new CSS custom properties to `:root`**
+- Modify: `app/globals.css`
+- **Step 1: Add new CSS custom properties to `:root`**
 
 Open `app/globals.css`. Inside the `:root { }` block, after `--warm-surface: #fdf8f0;`, add:
 
@@ -47,7 +49,7 @@ Open `app/globals.css`. Inside the `:root { }` block, after `--warm-surface: #fd
   --cream: #fdf6ec;
 ```
 
-- [ ] **Step 2: Register new tokens in `@theme inline`**
+- **Step 2: Register new tokens in `@theme inline`**
 
 Inside the `@theme inline { }` block, after `--color-warm-surface: var(--warm-surface);`, add:
 
@@ -57,7 +59,7 @@ Inside the `@theme inline { }` block, after `--color-warm-surface: var(--warm-su
   --color-cream: var(--cream);
 ```
 
-- [ ] **Step 3: Add marquee keyframes and utility classes**
+- **Step 3: Add marquee keyframes and utility classes**
 
 At the end of `app/globals.css`, append:
 
@@ -95,7 +97,7 @@ At the end of `app/globals.css`, append:
 }
 ```
 
-- [ ] **Step 4: Run TypeScript check**
+- **Step 4: Run TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -103,7 +105,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 5: Commit**
+- **Step 5: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add app/globals.css && git commit -m "feat: add ink/cream/primary-dark tokens and marquee CSS"
@@ -114,9 +116,9 @@ cd /home/antonio/repo/calisto-landing && git add app/globals.css && git commit -
 ## Task 2: i18n — Add `auroraQuote`
 
 **Files:**
-- Modify: `lib/i18n.ts`
 
-- [ ] **Step 1: Add field to `LandingCopy` type**
+- Modify: `lib/i18n.ts`
+- **Step 1: Add field to `LandingCopy` type**
 
 In `lib/i18n.ts`, inside the `LandingCopy` type (after `langContinue: string;`), add:
 
@@ -124,7 +126,7 @@ In `lib/i18n.ts`, inside the `LandingCopy` type (after `langContinue: string;`),
   auroraQuote: string;
 ```
 
-- [ ] **Step 2: Add English value**
+- **Step 2: Add English value**
 
 In the `en` locale object, after `langContinue: "Continue",`, add:
 
@@ -132,7 +134,7 @@ In the `en` locale object, after `langContinue: "Continue",`, add:
     auroraQuote: "Every memory deserves a home. I'll make sure yours is beautiful, organized, and yours forever.",
 ```
 
-- [ ] **Step 3: Add Croatian value**
+- **Step 3: Add Croatian value**
 
 In the `hr` locale object, after `langContinue: "Nastavi",`, add:
 
@@ -140,7 +142,7 @@ In the `hr` locale object, after `langContinue: "Nastavi",`, add:
     auroraQuote: "Svaka uspomena zaslužuje dom. Pobrinut ću se da bude lijepa, organizirana i zauvijek vaša.",
 ```
 
-- [ ] **Step 4: Add German value**
+- **Step 4: Add German value**
 
 In the `de` locale object, after `langContinue: "Weiter",`, add:
 
@@ -148,7 +150,7 @@ In the `de` locale object, after `langContinue: "Weiter",`, add:
     auroraQuote: "Jede Erinnerung verdient ein Zuhause. Ich sorge dafür, dass deines schön, geordnet und für immer deins ist.",
 ```
 
-- [ ] **Step 5: Run TypeScript check**
+- **Step 5: Run TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -156,7 +158,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 6: Commit**
+- **Step 6: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add lib/i18n.ts && git commit -m "feat: add auroraQuote i18n key to all 3 locales"
@@ -167,9 +169,9 @@ cd /home/antonio/repo/calisto-landing && git add lib/i18n.ts && git commit -m "f
 ## Task 3: SiteHeader — Dark Glass
 
 **Files:**
-- Modify: `components/SiteHeader.tsx`
 
-- [ ] **Step 1: Replace `components/SiteHeader.tsx` entirely**
+- Modify: `components/SiteHeader.tsx`
+- **Step 1: Replace `components/SiteHeader.tsx` entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -239,7 +241,7 @@ export function SiteHeader({ copy }: SiteHeaderProps) {
 }
 ```
 
-- [ ] **Step 2: TypeScript check**
+- **Step 2: TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -247,7 +249,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add components/SiteHeader.tsx && git commit -m "feat: SiteHeader — dark glass, amber CTA, coral underline nav"
@@ -258,9 +260,9 @@ cd /home/antonio/repo/calisto-landing && git add components/SiteHeader.tsx && gi
 ## Task 4: Hero — Ink Background, Confetti, Display Type
 
 **Files:**
-- Modify: `components/Hero.tsx`
 
-- [ ] **Step 1: Replace `components/Hero.tsx` entirely**
+- Modify: `components/Hero.tsx`
+- **Step 1: Replace `components/Hero.tsx` entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -391,7 +393,7 @@ export function Hero({ copy }: HeroProps) {
 }
 ```
 
-- [ ] **Step 2: TypeScript check**
+- **Step 2: TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -399,7 +401,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add components/Hero.tsx && git commit -m "feat: Hero — ink bg, confetti dots, display type, amber CTAs, Aurora on dark"
@@ -410,9 +412,9 @@ cd /home/antonio/repo/calisto-landing && git add components/Hero.tsx && git comm
 ## Task 5: PhotoMarquee — New Component
 
 **Files:**
-- Create: `components/PhotoMarquee.tsx`
 
-- [ ] **Step 1: Create `components/PhotoMarquee.tsx`**
+- Create: `components/PhotoMarquee.tsx`
+- **Step 1: Create `components/PhotoMarquee.tsx`**
 
 ```tsx
 import Image from "next/image";
@@ -477,7 +479,7 @@ export function PhotoMarquee() {
 }
 ```
 
-- [ ] **Step 2: TypeScript check**
+- **Step 2: TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -485,7 +487,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add components/PhotoMarquee.tsx && git commit -m "feat: PhotoMarquee — dual-row scrolling screenshot strip"
@@ -496,9 +498,9 @@ cd /home/antonio/repo/calisto-landing && git add components/PhotoMarquee.tsx && 
 ## Task 6: StatBar — New Component
 
 **Files:**
-- Create: `components/StatBar.tsx`
 
-- [ ] **Step 1: Create `components/StatBar.tsx`**
+- Create: `components/StatBar.tsx`
+- **Step 1: Create `components/StatBar.tsx`**
 
 ```tsx
 const STATS = [
@@ -539,7 +541,7 @@ export function StatBar() {
 }
 ```
 
-- [ ] **Step 2: TypeScript check**
+- **Step 2: TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -547,7 +549,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add components/StatBar.tsx && git commit -m "feat: StatBar — 3-stat amber-on-purple strip"
@@ -558,9 +560,9 @@ cd /home/antonio/repo/calisto-landing && git add components/StatBar.tsx && git c
 ## Task 7: FeatureGrid — Cream Background, Colored Borders
 
 **Files:**
-- Modify: `components/FeatureGrid.tsx`
 
-- [ ] **Step 1: Replace `components/FeatureGrid.tsx` entirely**
+- Modify: `components/FeatureGrid.tsx`
+- **Step 1: Replace `components/FeatureGrid.tsx` entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -649,7 +651,7 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
 }
 ```
 
-- [ ] **Step 2: TypeScript check**
+- **Step 2: TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -657,7 +659,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add components/FeatureGrid.tsx && git commit -m "feat: FeatureGrid — cream bg, cycling colored borders, hover lift"
@@ -668,9 +670,9 @@ cd /home/antonio/repo/calisto-landing && git add components/FeatureGrid.tsx && g
 ## Task 8: HowItWorks — Inverted Deep Purple
 
 **Files:**
-- Modify: `components/HowItWorks.tsx`
 
-- [ ] **Step 1: Replace `components/HowItWorks.tsx` entirely**
+- Modify: `components/HowItWorks.tsx`
+- **Step 1: Replace `components/HowItWorks.tsx` entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -724,7 +726,7 @@ export function HowItWorks({ copy }: HowItWorksProps) {
 }
 ```
 
-- [ ] **Step 2: TypeScript check**
+- **Step 2: TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -732,7 +734,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add components/HowItWorks.tsx && git commit -m "feat: HowItWorks — inverted deep-purple bg, amber step circles, white text"
@@ -743,9 +745,9 @@ cd /home/antonio/repo/calisto-landing && git add components/HowItWorks.tsx && gi
 ## Task 9: PlanCards — Cream Background, Amber Popular
 
 **Files:**
-- Modify: `components/PlanCards.tsx`
 
-- [ ] **Step 1: Replace `components/PlanCards.tsx` entirely**
+- Modify: `components/PlanCards.tsx`
+- **Step 1: Replace `components/PlanCards.tsx` entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -882,7 +884,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
 }
 ```
 
-- [ ] **Step 2: TypeScript check**
+- **Step 2: TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -890,7 +892,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add components/PlanCards.tsx && git commit -m "feat: PlanCards — cream bg, amber gradient popular card"
@@ -901,9 +903,9 @@ cd /home/antonio/repo/calisto-landing && git add components/PlanCards.tsx && git
 ## Task 10: Lifecycle — White Background, Amber Dots
 
 **Files:**
-- Modify: `components/Lifecycle.tsx`
 
-- [ ] **Step 1: Replace `components/Lifecycle.tsx` entirely**
+- Modify: `components/Lifecycle.tsx`
+- **Step 1: Replace `components/Lifecycle.tsx` entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -944,7 +946,7 @@ export function Lifecycle({ copy }: LifecycleProps) {
 }
 ```
 
-- [ ] **Step 2: TypeScript check**
+- **Step 2: TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -952,7 +954,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add components/Lifecycle.tsx && git commit -m "feat: Lifecycle — white bg, amber timeline dots"
@@ -963,9 +965,9 @@ cd /home/antonio/repo/calisto-landing && git add components/Lifecycle.tsx && git
 ## Task 11: AuroraQuote — New Component
 
 **Files:**
-- Create: `components/AuroraQuote.tsx`
 
-- [ ] **Step 1: Create `components/AuroraQuote.tsx`**
+- Create: `components/AuroraQuote.tsx`
+- **Step 1: Create `components/AuroraQuote.tsx`**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -1024,7 +1026,7 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
 }
 ```
 
-- [ ] **Step 2: TypeScript check**
+- **Step 2: TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -1032,7 +1034,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add components/AuroraQuote.tsx && git commit -m "feat: AuroraQuote — full-width warm quote panel with Aurora portrait"
@@ -1043,9 +1045,9 @@ cd /home/antonio/repo/calisto-landing && git add components/AuroraQuote.tsx && g
 ## Task 12: FutureRoadmap — Colored Hover Borders
 
 **Files:**
-- Modify: `components/FutureRoadmap.tsx`
 
-- [ ] **Step 1: Replace `components/FutureRoadmap.tsx` entirely**
+- Modify: `components/FutureRoadmap.tsx`
+- **Step 1: Replace `components/FutureRoadmap.tsx` entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -1103,7 +1105,7 @@ export function FutureRoadmap({ copy }: FutureRoadmapProps) {
 }
 ```
 
-- [ ] **Step 2: TypeScript check**
+- **Step 2: TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -1111,7 +1113,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add components/FutureRoadmap.tsx && git commit -m "feat: FutureRoadmap — colored left-border on hover per status"
@@ -1122,9 +1124,9 @@ cd /home/antonio/repo/calisto-landing && git add components/FutureRoadmap.tsx &&
 ## Task 13: WaitlistForm — Ink Background, Glassmorphism, Amber CTAs
 
 **Files:**
-- Modify: `components/WaitlistForm.tsx`
 
-- [ ] **Step 1: Replace `components/WaitlistForm.tsx` entirely**
+- Modify: `components/WaitlistForm.tsx`
+- **Step 1: Replace `components/WaitlistForm.tsx` entirely**
 
 ```tsx
 "use client";
@@ -1285,7 +1287,7 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
 }
 ```
 
-- [ ] **Step 2: TypeScript check**
+- **Step 2: TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -1293,7 +1295,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add components/WaitlistForm.tsx && git commit -m "feat: WaitlistForm — ink bg, glassmorphism card, amber CTAs"
@@ -1304,9 +1306,9 @@ cd /home/antonio/repo/calisto-landing && git add components/WaitlistForm.tsx && 
 ## Task 14: SiteFooter — Ink Background
 
 **Files:**
-- Modify: `components/SiteFooter.tsx`
 
-- [ ] **Step 1: Replace `components/SiteFooter.tsx` entirely**
+- Modify: `components/SiteFooter.tsx`
+- **Step 1: Replace `components/SiteFooter.tsx` entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -1347,7 +1349,7 @@ export function SiteFooter({ copy }: SiteFooterProps) {
 }
 ```
 
-- [ ] **Step 2: TypeScript check**
+- **Step 2: TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -1355,7 +1357,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add components/SiteFooter.tsx && git commit -m "feat: SiteFooter — ink bg, amber/white wordmark, border separator"
@@ -1366,9 +1368,9 @@ cd /home/antonio/repo/calisto-landing && git add components/SiteFooter.tsx && gi
 ## Task 15: Page Assembly — Add New Sections
 
 **Files:**
-- Modify: `app/[locale]/page.tsx`
 
-- [ ] **Step 1: Replace `app/[locale]/page.tsx` entirely**
+- Modify: `app/[locale]/page.tsx`
+- **Step 1: Replace `app/[locale]/page.tsx` entirely**
 
 ```tsx
 import { notFound } from "next/navigation";
@@ -1428,7 +1430,7 @@ export default async function LocalePage({ params }: LocalePageProps) {
 }
 ```
 
-- [ ] **Step 2: TypeScript check**
+- **Step 2: TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -1436,7 +1438,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git add app/[locale]/page.tsx && git commit -m "feat: page assembly — add PhotoMarquee, StatBar, AuroraQuote; ink bg on wrapper"
@@ -1448,7 +1450,7 @@ cd /home/antonio/repo/calisto-landing && git add app/[locale]/page.tsx && git co
 
 **Files:** Read-only verification pass
 
-- [ ] **Step 1: Run TypeScript**
+- **Step 1: Run TypeScript**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -1456,7 +1458,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: 0 errors
 
-- [ ] **Step 2: Run ESLint**
+- **Step 2: Run ESLint**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx eslint . --ext .ts,.tsx 2>&1 | head -60
@@ -1464,7 +1466,7 @@ cd /home/antonio/repo/calisto-landing && npx eslint . --ext .ts,.tsx 2>&1 | head
 
 Expected: 0 errors
 
-- [ ] **Step 3: Print git log of all redesign commits**
+- **Step 3: Print git log of all redesign commits**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && git log --oneline -20
@@ -1472,7 +1474,7 @@ cd /home/antonio/repo/calisto-landing && git log --oneline -20
 
 Expected: 15+ commits including all tasks above
 
-- [ ] **Step 4: Check all new component files exist**
+- **Step 4: Check all new component files exist**
 
 ```bash
 ls /home/antonio/repo/calisto-landing/components/PhotoMarquee.tsx /home/antonio/repo/calisto-landing/components/StatBar.tsx /home/antonio/repo/calisto-landing/components/AuroraQuote.tsx
@@ -1480,7 +1482,7 @@ ls /home/antonio/repo/calisto-landing/components/PhotoMarquee.tsx /home/antonio/
 
 Expected: all 3 files listed
 
-- [ ] **Step 5: Verify `auroraQuote` key in all 3 locales**
+- **Step 5: Verify `auroraQuote` key in all 3 locales**
 
 ```bash
 grep -n "auroraQuote" /home/antonio/repo/calisto-landing/lib/i18n.ts
@@ -1493,6 +1495,7 @@ Expected: 4 lines (1 type definition + 3 locale values)
 ## Self-Review
 
 **Spec coverage:**
+
 - ✅ Ink bg on hero, footer, header — Tasks 3, 4, 14
 - ✅ Amber CTA buttons everywhere — Tasks 3, 4, 13
 - ✅ Coral nav underline — Task 3

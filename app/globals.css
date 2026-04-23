@@ -58,7 +58,7 @@
   --color-foreground: var(--foreground);
   --color-primary:    var(--primary);
 
-  --font-display: "Playfair Display", "Times New Roman", serif;
+  --font-display: "Lora", "Georgia", "Times New Roman", serif;
   --font-sans:    "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
   --font-mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
 }
@@ -512,10 +512,17 @@ html[data-theme="light"] body::after {
 @media (max-width: 640px) {
   .features-lane__plate {
     padding: 18px 18px 20px;
+    /* No entrance animation on small screens — cards render static */
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .features-showcase .feature-card:nth-child(n) .features-lane__plate {
+    animation-delay: 0s;
   }
 }
 
-/* ════════ Feature cards — mobile center reveal (grid row, same as plan extras) ════════ */
+/* ════════ Feature cards — desktop: description always open; mobile: same (no scroll “reveal”) ════════ */
 .feature-card-desc-wrap {
   display: grid;
   grid-template-rows: 1fr;
@@ -528,10 +535,8 @@ html[data-theme="light"] body::after {
 
 @media (max-width: 640px) {
   .feature-card .feature-card-desc-wrap {
-    grid-template-rows: 0fr;
-  }
-  .feature-card[data-mobile-active="true"] .feature-card-desc-wrap {
     grid-template-rows: 1fr;
+    transition: none;
   }
 }
 

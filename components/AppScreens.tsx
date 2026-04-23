@@ -1,5 +1,6 @@
 // Rendered app screen mockups — used in AppPreviewWindow in place of static screenshots.
 // Each component fills its container (position:absolute inset:0 from parent).
+import { PREVIEW_ALBUM_PHOTOS } from "@/lib/preview-album-photos";
 import type { LandingCopy } from "@/lib/i18n";
 
 type ScreenProps = { copy: LandingCopy };
@@ -309,24 +310,40 @@ const PH_GRADS: Record<string, { a: string; b: string }> = {
   teal:  { a: "#263a3a", b: "#101a1a" },
 };
 
-function Tile({ color, label, tall }: { color: string; label?: string; tall?: boolean }) {
-  const g = PH_GRADS[color] ?? { a: "#3a2f32", b: "#1a1218" };
+function PhotoTile({ src, label, tall }: { src: string; label?: string; tall?: boolean }) {
   return (
     <div
       aria-hidden
       style={{
-        background: `linear-gradient(135deg, ${g.a}, ${g.b})`,
+        background: "linear-gradient(135deg, #3a2f32, #1a1218)",
         gridRow: tall ? "span 2" : undefined,
         aspectRatio: tall ? "1/2" : "1",
         position: "relative",
         overflow: "hidden",
       }}
     >
+      <img
+        src={src}
+        alt=""
+        width={480}
+        height={tall ? 960 : 480}
+        loading="lazy"
+        decoding="async"
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          display: "block",
+        }}
+      />
       <div
         style={{
           position: "absolute",
           inset: 0,
-          background: "radial-gradient(circle at 50% 40%, transparent 40%, rgba(0,0,0,0.4) 100%)",
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 38%, transparent 65%), radial-gradient(circle at 50% 40%, transparent 28%, rgba(0,0,0,0.3) 100%)",
           pointerEvents: "none",
         }}
       />
@@ -339,9 +356,10 @@ function Tile({ color, label, tall }: { color: string; label?: string; tall?: bo
             fontFamily: "var(--font-mono)",
             fontSize: 5,
             letterSpacing: "0.1em",
-            color: "rgba(244,234,217,0.45)",
+            color: "rgba(244,234,217,0.5)",
             zIndex: 2,
             textTransform: "lowercase",
+            textShadow: "0 1px 2px rgba(0,0,0,0.6)",
           }}
         >
           {label}
@@ -477,17 +495,17 @@ export function AlbumGridScreen({ copy }: ScreenProps) {
           overflow: "hidden",
         }}
       >
-        <Tile color="amber" label="first dance" tall />
-        <Tile color="rose"  label="bouquet" />
-        <Tile color="plum"  label="table 4" />
-        <Tile color="gold"  label="candlelight" />
-        <Tile color="sage"  label="olive trees" />
-        <Tile color="ink"   label="late night" />
-        <Tile color="plum"  label="grandma" />
-        <Tile color="rose"  label="dance floor" tall />
-        <Tile color="amber" label="toast" />
-        <Tile color="teal"  label="sea view" />
-        <Tile color="gold"  label="cake" />
+        <PhotoTile src={PREVIEW_ALBUM_PHOTOS[0]!} label="first dance" tall />
+        <PhotoTile src={PREVIEW_ALBUM_PHOTOS[1]!} label="bouquet" />
+        <PhotoTile src={PREVIEW_ALBUM_PHOTOS[2]!} label="table 4" />
+        <PhotoTile src={PREVIEW_ALBUM_PHOTOS[3]!} label="candlelight" />
+        <PhotoTile src={PREVIEW_ALBUM_PHOTOS[4]!} label="olive trees" />
+        <PhotoTile src={PREVIEW_ALBUM_PHOTOS[5]!} label="late night" />
+        <PhotoTile src={PREVIEW_ALBUM_PHOTOS[6]!} label="grandma" />
+        <PhotoTile src={PREVIEW_ALBUM_PHOTOS[7]!} label="dance floor" tall />
+        <PhotoTile src={PREVIEW_ALBUM_PHOTOS[8]!} label="toast" />
+        <PhotoTile src={PREVIEW_ALBUM_PHOTOS[9]!} label="sea view" />
+        <PhotoTile src={PREVIEW_ALBUM_PHOTOS[10]!} label="cake" />
       </div>
       {/* FAB */}
       <div

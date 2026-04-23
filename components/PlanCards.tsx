@@ -199,9 +199,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
-            border: "1px solid var(--hair)",
-            borderRadius: 18,
-            overflow: "hidden",
+            gap: 20,
           }}
         >
           {copy.plans.map((plan, idx) => {
@@ -224,12 +222,14 @@ export function PlanCards({ copy }: PlanCardsProps) {
                   background: config.featured
                     ? `linear-gradient(180deg, rgba(245,199,107,0.16) 0%, rgba(240,179,75,0.08) 35%, var(--ink) 100%)`
                     : "var(--ink)",
-                  borderRight: !isLast ? "1px solid var(--hair)" : undefined,
+                  border: "1px solid var(--hair)",
+                  borderRadius: 18,
                   display: "flex",
                   flexDirection: "column",
                   gap: 20,
                   position: "relative",
                   outline: "none",
+                  boxShadow: "0 18px 48px -32px rgba(0,0,0,0.65)",
                 }}
               >
                 {/* Featured inset ring */}
@@ -240,6 +240,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
                       position: "absolute",
                       inset: 0,
                       pointerEvents: "none",
+                      borderRadius: 18,
                       boxShadow: "inset 0 0 0 1px rgba(245,199,107,0.35)",
                     }}
                   />
@@ -380,16 +381,9 @@ export function PlanCards({ copy }: PlanCardsProps) {
       <style>{`
         @media (max-width: 1100px) {
           #plans > div > div:nth-child(2) { grid-template-columns: repeat(2, 1fr) !important; }
-          #plans > div > div:nth-child(2) > article:nth-child(2) { border-right: none !important; }
-          #plans > div > div:nth-child(2) > article:nth-child(3),
-          #plans > div > div:nth-child(2) > article:nth-child(4) {
-            border-top: 1px solid var(--hair);
-          }
         }
         @media (max-width: 640px) {
           #plans > div > div:nth-child(2) { grid-template-columns: 1fr !important; }
-          #plans > div > div:nth-child(2) > article { border-right: none !important; border-top: 1px solid var(--hair); }
-          #plans > div > div:nth-child(2) > article:first-child { border-top: none; }
         }
       `}</style>
     </section>

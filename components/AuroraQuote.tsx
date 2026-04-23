@@ -40,6 +40,7 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
           gap: 0,
           paddingTop: 80,
           paddingBottom: 80,
+          overflow: "visible",
         }}
       >
         {/* Left: quote */}
@@ -63,7 +64,13 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
             &ldquo;
           </div>
 
-          <blockquote style={{ position: "relative" }}>
+          <blockquote
+            style={{
+              position: "relative",
+              paddingLeft: 24,
+              borderLeft: "1px solid rgba(230,167,96,0.4)",
+            }}
+          >
             <p
               style={{
                 fontFamily: "var(--font-mono)",
@@ -118,7 +125,17 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
         </div>
 
         {/* Right: Aurora */}
-        <div className="aurora-quote-mascot-wrap" style={{ position: "relative", display: "flex", justifyContent: "center", alignSelf: "flex-end" }}>
+        <div
+          className="aurora-quote-mascot-wrap"
+          style={{
+            position: "relative",
+            display: "flex",
+            justifyContent: "center",
+            alignSelf: "flex-end",
+            overflow: "visible",
+            width: "100%",
+          }}
+        >
           <div
             aria-hidden
             style={{
@@ -164,6 +181,7 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
             grid-template-columns: 1fr !important;
             padding-top: 56px !important;
             padding-bottom: 56px !important;
+            padding-right: 40px !important;
           }
           .aurora-quote-copy {
             padding-right: 0 !important;
