@@ -224,6 +224,26 @@ html[data-theme="light"] body::after {
 .live-dot { animation: livePulse 2s ease-in-out infinite; }
 .nav-link:hover { color: var(--cream) !important; }
 
+/* In-page nav: current section (scroll-spy) */
+.nav-link--active {
+  position: relative;
+  color: var(--cream) !important;
+  font-weight: 600;
+}
+.nav-link--active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--plum-2, #A584A6), var(--amber, #E6A760));
+  border-radius: 1px;
+  opacity: 0.92;
+  pointer-events: none;
+}
+.nav-link--active:hover { color: var(--cream) !important; }
+
 /* Sticky header: follows theme tokens (avoids hardcoded dark-only RGBA) */
 .site-header {
   padding: 18px 0;

@@ -380,7 +380,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         q: "Are photos uploaded at full quality?",
-        a: "Calisto compresses you photos, but they are still high quality and you barely notice the difference.",
+        a: "We compress photos so uploads stay fast and storage stays efficient. The settings we use are tuned so the change in image quality is not noticeable in normal viewing—your collection still looks great on phones and the web.",
       },
       {
         q: "What if a guest uploads something I don't want?",
@@ -646,7 +646,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         q: "Učitavaju li se fotografije u punoj kvaliteti?",
-        a: "Da. Calisto nikad ne komprimira originale. HEIC i RAW datoteke su podržane na plaćenim paketima.",
+        a: "Fotografije se komprimiraju kako bi upload bio brz i pohrana učinkovita. Kompresija je podešena tako da pad kvalitete u uobičajenom gledanju nije primjetan — slike i dalje izgledaju odlično na telefonu i u pregledniku.",
       },
       {
         q: "Tko može vidjeti album?",
@@ -917,7 +917,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         q: "Werden Fotos in voller Qualität hochgeladen?",
-        a: "Ja. Calisto komprimiert deine Originale niemals. HEIC- und RAW-Dateien werden bei bezahlten Tarifen vollständig unterstützt.",
+        a: "Fotos werden komprimiert, damit Uploads schnell bleiben und der Speicher effizient genutzt wird. Die Einstellungen sind so gewählt, dass der Qualitätsverlust im normalen Anschauen praktisch nicht auffällt – auf dem Handy und im Web sehen deine Bilder weiterhin hervorragend aus.",
       },
       {
         q: "Wer kann das Album sehen?",

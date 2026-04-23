@@ -1,4 +1,5 @@
 import { LanguageSelectorBar } from "@/components/LanguageSelectorBar";
+import { ScrollSpyNav } from "@/components/ScrollSpyNav";
 import type { LandingCopy, Locale } from "@/lib/i18n";
 
 type SiteHeaderProps = {
@@ -75,29 +76,7 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
         </div>
 
         {/* Nav: full-width row on mobile; between brand and tools on md+ */}
-        <nav
-          className="col-span-2 -mx-1 flex w-full min-w-0 flex-wrap items-center justify-center gap-x-2.5 gap-y-0.5 border-t border-[var(--hair-2)] pt-1.5 text-xs
-            md:order-2 md:col-span-1 md:mx-0 md:w-auto md:min-w-0 md:flex-1 md:flex-nowrap md:justify-center md:gap-x-[34px] md:gap-y-0 md:border-0 md:pt-0 md:text-[13px]"
-          aria-label={copy.navAriaLabel}
-        >
-          {copy.nav.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="nav-link"
-              style={{
-                fontFamily: "var(--font-sans)",
-                color: "var(--cream-2, #E8DCC6)",
-                letterSpacing: "0.02em",
-                padding: "6px 4px",
-                transition: "color 200ms",
-                textDecoration: "none",
-              }}
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
+        <ScrollSpyNav copy={copy} />
       </div>
     </header>
   );
