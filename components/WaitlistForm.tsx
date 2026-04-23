@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useState } from "react";
 import type { LandingCopy, Locale } from "@/lib/i18n";
 
@@ -14,7 +15,7 @@ type WaitlistFormProps = {
   locale: Locale;
 };
 
-export function WaitlistForm({ copy, locale }: WaitlistFormProps) {
+export function WaitlistForm({ copy, mascotAlt, locale }: WaitlistFormProps) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -96,6 +97,16 @@ export function WaitlistForm({ copy, locale }: WaitlistFormProps) {
         >
           {copy.description}
         </p>
+
+        <div style={{ margin: "32px auto 0", maxWidth: 240 }}>
+          <Image
+            src="/brand/mascot/aurora_planning.png"
+            alt={mascotAlt}
+            width={240}
+            height={240}
+            style={{ width: "100%", height: "auto", objectFit: "contain" }}
+          />
+        </div>
 
         {submitted ? (
           <p

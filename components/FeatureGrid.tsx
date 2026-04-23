@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { CSSProperties } from "react";
 import type { LandingCopy } from "@/lib/i18n";
 
@@ -39,7 +40,20 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
               <span className="features-section__eyebrow-mark" aria-hidden />
               <span>{copy.featuresSectionLabel}</span>
             </div>
-            <h2 className="features-section__title">{copy.featuresTitle}</h2>
+            <div className="flex w-full items-center gap-4">
+              <h2 className="features-section__title" style={{ flex: 1, minWidth: 0 }}>
+                {copy.featuresTitle}
+              </h2>
+              <div className="shrink-0">
+                <Image
+                  src="/brand/mascot/aurora_camera.png"
+                  alt={copy.auroraMascotAlt}
+                  width={140}
+                  height={140}
+                  style={{ width: 100, height: "auto", objectFit: "contain" }}
+                />
+              </div>
+            </div>
             {/* <p className="features-section__lede">{copy.featuresDescription}</p> */}
           </div>
         </header>

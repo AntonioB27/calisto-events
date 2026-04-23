@@ -203,17 +203,16 @@ const copy: Record<Locale, LandingCopy> = {
     appPreviewCaptions: ["Guest welcome", "Gallery view", "Download", "Guest list"],
     appPreviewViewAriaTemplate: "View {name}",
     appPreviewImageAltTemplate: "Calisto app — {name}",
-    featuresTitle: "What you can do",
+    featuresTitle: "What's included",
     featuresSectionLabel: "2 · Features",
     featuresDescription:
-      "Built for big days when everyone is taking pictures—Calisto keeps uploads organized and easy to share.",
+      "For days when everyone is taking photos—uploads stay organized and easy to share.",
     featuresAuroraBubble:
       "Every guest upload lands in one gallery—I'll help you keep it tidy.",
     features: [
       {
         title: "Unique access code",
-        description:
-          "Each event has its own code (for example WEDDING2026). Guests use it to join—no complicated setup.",
+        description: "Each event has its own code (for example WEDDING2026).",
         mascotBubble: "Your event, your code—simple.",
       },
       {
@@ -228,25 +227,24 @@ const copy: Record<Locale, LandingCopy> = {
         mascotBubble: "One gallery, all the magic.",
       },
       {
-        title: "Roles that make sense",
-        description:
-          "Guests upload and browse; organizers create events, manage access, and (on paid plans) export the archive.",
+        title: "Roles",
+        description: "Guests upload and browse, and organizers manage access.",
         mascotBubble: "Right people, right permissions.",
       },
       {
         title: "Photos & videos by plan",
         description:
-          "Start with photos on Free; paid plans unlock video uploads with generous limits and longer retention.",
+          "Photos are included in every plan, and paid plans unlock videos, higher limits, and longer retention.",
         mascotBubble: "I'll match the plan to your story.",
       },
       {
         title: "ZIP export (paid plans)",
-        description: "Organizers can download the full album as a ZIP after the event, and guests can too on a paid plan.",
+        description: "Organizers can download the full album as a ZIP, and guests can too if they purchase the add-on.",
         mascotBubble: "Zip the memories when you're ready.",
       },
     ],
-    howTitle: "How it works",
-    howSectionLabel: "3 · Three quiet steps",
+    howTitle: "How it works?",
+    howSectionLabel: "3 · Three simple steps",
     howSetupHint: "< 90 seconds to set up",
     howStepPrefix: "STEP",
     howVisualLive: "LIVE",
@@ -259,34 +257,32 @@ const copy: Record<Locale, LandingCopy> = {
       {
         step: "1",
         title: "Create your event",
-        description: "Pick a title, date, and storage plan. You become the organizer automatically.",
+        description: "Choose a name, date, and plan. You become the organizer automatically.",
       },
       {
         step: "2",
         title: "Share code or QR",
-        description:
-          "Send guests the access code, invite link, or let them scan your QR—matching is case-insensitive.",
+        description: "Send the code or link, or show them the QR.",
       },
       {
         step: "3",
-        title: "Collect & enjoy",
-        description:
-          "Guests upload and browse together. After the event, retention and export follow the rules of your plan.",
+        title: "Browse photos and enjoy",
+        description: "Guests upload and browse photos and videos together.",
       },
     ],
     plansTitle: "Plans",
     plansSectionLabel: "4 · Pricing",
     plansPerEventSuffix: "/ event",
     plansDescriptionStrong: "One-time payment per event",
-    plansDescriptionRest: "choose a tier when you create the event. Upgrade later if you need more storage, guests, or retention.",
-    plansAuroraBubble: "Choose what fits your event now—you can upgrade whenever you need more.",
+    plansDescriptionRest: "choose a plan when creating the event. Upgrade later for more storage, guests, or longer retention.",
+    plansAuroraBubble: "Choose what fits your event now — upgrading is always an option.",
     plansMascotAlt: "Aurora choosing a storage plan",
-    popularBadge: "Popular",
+    popularBadge: "Most popular",
     plans: [
       {
         id: "free",
         name: "Free",
-        tailoredFor: "Tailored for small birthdays and dinners",
+        tailoredFor: "For small birthdays and family gatherings",
         rows: [
           { label: "Price", value: "0€" },
           { label: "Guest limit", value: "5" },
@@ -300,7 +296,7 @@ const copy: Record<Locale, LandingCopy> = {
       {
         id: "standard",
         name: "Standard",
-        tailoredFor: "Tailored for birthdays and small weddings",
+        tailoredFor: "For birthdays and smaller weddings",
         rows: [
           { label: "Price", value: "15€" },
           { label: "Guest limit", value: "20" },
@@ -314,7 +310,7 @@ const copy: Record<Locale, LandingCopy> = {
       {
         id: "premium",
         name: "Premium",
-        tailoredFor: "Tailored for weddings and larger celebrations",
+        tailoredFor: "For weddings and larger celebrations",
         rows: [
           { label: "Price", value: "30€" },
           { label: "Guest limit", value: "70" },
@@ -351,7 +347,7 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     futureTitle: "On the roadmap",
     futureDescription:
-      "We're shipping the core experience first. Here's what we're planning next—timelines may change as we learn from early users.",
+      "We ship the core experience first. These are the features we plan next, and timelines can change.",
     futureItems: [
       {
         title: "Broader event types",
@@ -382,11 +378,11 @@ const copy: Record<Locale, LandingCopy> = {
     faq: [
       {
         q: "Do guests need to download an app?",
-        a: "No. Guests scan the QR code or open the invite link and upload directly from their phone's browser. Nothing to install, ever.",
+        a: "No. Guests scan the QR code or open the link and upload directly from their browser.",
       },
       {
         q: "Do guests need to create an account?",
-        a: "No account and no email required. Guests can optionally add their first name so you know who contributed which photos — that's the most we ask.",
+        a: "No account or email required. Guests can optionally add their name so you know who uploaded what.",
       },
       {
         q: "Are photos uploaded at full quality?",

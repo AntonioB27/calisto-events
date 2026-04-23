@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { LandingCopy } from "@/lib/i18n";
 import type { ReactNode } from "react";
 
@@ -255,19 +256,32 @@ export function HowItWorks({ copy }: HowItWorksProps) {
               >
                 {copy.howSectionLabel}
               </p>
-              <h2
-                className="m-0"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 400,
-                  fontSize: "clamp(34px, 4.5vw, 64px)",
-                  lineHeight: 1.02,
-                  letterSpacing: "-0.02em",
-                  color: "var(--cream)",
-                }}
-              >
-                {copy.howTitle}
-              </h2>
+              <div className="flex w-full items-center gap-4">
+                <h2
+                  className="m-0"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontWeight: 400,
+                    fontSize: "clamp(34px, 4.5vw, 64px)",
+                    lineHeight: 1.02,
+                    letterSpacing: "-0.02em",
+                    color: "var(--cream)",
+                    flex: 1,
+                    minWidth: 0,
+                  }}
+                >
+                  {copy.howTitle}
+                </h2>
+                <div className="shrink-0">
+                  <Image
+                    src="/brand/mascot/aurora_qr.png"
+                    alt={copy.auroraMascotAlt}
+                    width={140}
+                    height={140}
+                    style={{ width: 100, height: "auto", objectFit: "contain" }}
+                  />
+                </div>
+              </div>
               {/* <p
                 className="m-0 mt-3.5"
                 style={{
@@ -281,20 +295,7 @@ export function HowItWorks({ copy }: HowItWorksProps) {
                 {copy.howDescription}
               </p> */}
             </div>
-            {/* <div
-              className="shrink-0 self-start rounded-full border font-mono text-[10.5px] sm:min-w-0 sm:self-end sm:text-right sm:text-xs"
-              style={{
-                borderColor: "var(--hair-strong)",
-                background: "var(--glass-bg)",
-                color: "var(--cream-3, #B5AB99)",
-                letterSpacing: "0.1em",
-                padding: "10px 16px 10px 18px",
-                lineHeight: 1.3,
-                boxShadow: "inset 0 1px 0 color-mix(in srgb, var(--cream) 6%, transparent)",
-              }}
-            >
-              {copy.howSetupHint}
-            </div> */}
+            <div className="flex shrink-0 items-center justify-center lg:hidden" />
           </div>
         </header>
 

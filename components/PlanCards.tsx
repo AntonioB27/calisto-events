@@ -113,10 +113,10 @@ export function PlanCards({ copy }: PlanCardsProps) {
       <div className="mx-auto" style={{ maxWidth: 1280, padding: "0 32px" }}>
         {/* Header */}
         <div
-          className="flex justify-between items-start"
-          style={{ gap: 48, marginBottom: 56 }}
+          className="flex flex-col gap-6 lg:flex-row lg:items-start"
+          style={{ marginBottom: 56 }}
         >
-          <div style={{ maxWidth: 600 }}>
+          <div style={{ maxWidth: 720 }}>
             <div
               style={{
                 fontFamily: "var(--font-mono)",
@@ -129,68 +129,37 @@ export function PlanCards({ copy }: PlanCardsProps) {
             >
               {copy.plansSectionLabel}
             </div>
-            <h2
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 400,
-                fontSize: "clamp(36px, 5vw, 64px)",
-                lineHeight: 1.02,
-                letterSpacing: "-0.02em",
-                color: "var(--cream)",
-                margin: 0,
-              }}
-            >
-              {copy.plansTitle}
-            </h2>
+            <div className="flex w-full items-center gap-4">
+              <h2
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 400,
+                  fontSize: "clamp(36px, 5vw, 64px)",
+                  lineHeight: 1.02,
+                  letterSpacing: "-0.02em",
+                  color: "var(--cream)",
+                  margin: 0,
+                  flex: 1,
+                  minWidth: 0,
+                }}
+              >
+                {copy.plansTitle}
+              </h2>
+              <div className="ml-auto lg:ml-0 shrink-0">
+                <Image
+                  src="/brand/mascot/aurora_gallery.png"
+                  alt={copy.plansMascotAlt}
+                  width={200}
+                  height={200}
+                  style={{ width: 100, height: "auto", objectFit: "contain" }}
+                />
+              </div>
+            </div>
             <p style={{ marginTop: 14, fontFamily: "var(--font-sans)", fontSize: 16, color: "var(--cream-3, #B5AB99)", lineHeight: 1.6 }}>
               <strong style={{ color: "var(--cream)", fontWeight: 500 }}>{copy.plansDescriptionStrong}</strong>
               {" — "}
               {copy.plansDescriptionRest}
             </p>
-          </div>
-
-          {/* Aurora bubble + image */}
-          <div className="hidden lg:flex flex-col items-center shrink-0" style={{ gap: 10, maxWidth: 220 }}>
-            <p
-              style={{
-                position: "relative",
-                borderRadius: 14,
-                border: "1px solid var(--hair-2)",
-                background: "var(--glass-bg-2)",
-                padding: "10px 14px",
-                textAlign: "center",
-                fontFamily: "var(--font-sans)",
-                fontSize: 13,
-                fontWeight: 500,
-                color: "var(--cream)",
-                lineHeight: 1.4,
-                backdropFilter: "blur(12px)",
-                width: "100%",
-              }}
-            >
-              {copy.plansAuroraBubble}
-              <span
-                aria-hidden
-                style={{
-                  position: "absolute",
-                  bottom: -8,
-                  left: "50%",
-                  transform: "translateX(-50%) rotate(45deg)",
-                  width: 14,
-                  height: 14,
-                  borderBottom: "1px solid var(--hair-2)",
-                  borderRight: "1px solid var(--hair-2)",
-                  background: "var(--ink-2, #141019)",
-                }}
-              />
-            </p>
-            <Image
-              src="/brand/mascot/aurora_planning.png"
-              alt={copy.plansMascotAlt}
-              width={200}
-              height={200}
-              style={{ width: "100%", height: "auto", objectFit: "contain" }}
-            />
           </div>
         </div>
 

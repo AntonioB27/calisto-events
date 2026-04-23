@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import type { LandingCopy } from "@/lib/i18n";
 
 type FAQProps = { copy: LandingCopy };
@@ -77,6 +78,7 @@ export function FAQ({ copy }: FAQProps) {
       <div className="mx-auto" style={{ maxWidth: 1280, padding: "0 32px" }}>
         {/* Section head */}
         <div
+          className="flex flex-col gap-3"
           style={{
             marginBottom: 72,
             paddingBottom: 28,
@@ -95,19 +97,32 @@ export function FAQ({ copy }: FAQProps) {
           >
             {copy.faqSectionLabel}
           </div>
-          <h2
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 400,
-              fontSize: "clamp(36px, 5vw, 64px)",
-              lineHeight: 1.02,
-              letterSpacing: "-0.02em",
-              color: "var(--cream)",
-              margin: 0,
-            }}
-          >
-            {copy.faqTitle}
-          </h2>
+          <div className="flex w-full items-center gap-4">
+            <h2
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 400,
+                fontSize: "clamp(36px, 5vw, 64px)",
+                lineHeight: 1.02,
+                letterSpacing: "-0.02em",
+                color: "var(--cream)",
+                margin: 0,
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              {copy.faqTitle}
+            </h2>
+            <div className="shrink-0">
+              <Image
+                src="/brand/mascot/aurora_key.png"
+                alt={copy.auroraMascotAlt}
+                width={160}
+                height={160}
+                style={{ width: 100, height: "auto", objectFit: "contain" }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Two-column layout */}
