@@ -1,3 +1,6 @@
+ "use client";
+
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import type React from "react";
 import type { LandingCopy } from "@/lib/i18n";
 import Image from "next/image";
@@ -51,6 +54,54 @@ const PLAN_CONFIG: Record<string, PlanConfig> = {
 };
 
 export function PlanCards({ copy }: PlanCardsProps) {
+  const [mobileActivePlan, setMobileActivePlan] = useState<string>("free");
+  const planRefs: MutableRefObject<Record<string, HTMLElement | null>> = useRef({});
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let raf = 0;
+    const updateMobileActivePlan = () => {
+      if (window.innerWidth > 640) return;
+      const centerY = window.innerHeight / 2;
+      let closestId = mobileActivePlan;
+      let closestDistance = Number.POSITIVE_INFINITY;
+
+      for (const [planId, el] of Object.entries(planRefs.current)) {
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        const cardCenter = rect.top + rect.height / 2;
+        const distance = Math.abs(cardCenter - centerY);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestId = planId;
+        }
+      }
+
+      if (closestId && closestId !== mobileActivePlan) {
+        setMobileActivePlan(closestId);
+      }
+    };
+
+    const onScrollOrResize = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        updateMobileActivePlan();
+      });
+    };
+
+    updateMobileActivePlan();
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize);
+
+    return () => {
+      if (raf) window.cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [mobileActivePlan]);
+
   return (
     <section
       id="plans"
@@ -162,6 +213,10 @@ export function PlanCards({ copy }: PlanCardsProps) {
                 className="plan-card"
                 tabIndex={0}
                 aria-labelledby={`plan-${plan.id}`}
+                data-mobile-active={mobileActivePlan === plan.id ? "true" : "false"}
+                ref={(el) => {
+                  planRefs.current[plan.id] = el;
+                }}
                 style={{
                   padding: "40px 32px",
                   background: config.featured

@@ -228,7 +228,30 @@ export function Hero({ copy }: HeroProps) {
       {/* Mobile: stack copy above phone */}
       <style>{`
         @media (max-width: 960px) {
+          #top > div {
+            padding-left: 18px !important;
+            padding-right: 18px !important;
+          }
           #top > div > div { grid-template-columns: 1fr !important; }
+          #top > div > div > div:first-child {
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+          }
+          #top > div > div > div:first-child > p {
+            margin-left: auto !important;
+            margin-right: auto !important;
+          }
+          #top > div > div > div:first-child > div:first-child {
+            margin-left: auto !important;
+            margin-right: auto !important;
+          }
+          #top > div > div > div:first-child > div:nth-of-type(2) {
+            justify-content: center !important;
+          }
+          #top > div > div > div:first-child > div:last-child {
+            align-items: center !important;
+          }
           #top > div > div > div:last-child { min-height: 560px; }
         }
       `}</style>

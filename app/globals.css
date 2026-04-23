@@ -236,10 +236,10 @@ body::after {
   .plan-card:focus-within .plan-card-extras { grid-template-rows: 1fr; }
 }
 @media (hover: none), (pointer: coarse) {
-  .plan-card-extras { grid-template-rows: 1fr; }
+  .plan-card[data-mobile-active="true"] .plan-card-extras { grid-template-rows: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .plan-card-extras { transition: none; grid-template-rows: 1fr; }
+  .plan-card-extras { transition: none; }
 }
 
 /* ════════ FAQ accordion ════════ */
@@ -278,4 +278,30 @@ body::after {
 .appPreviewColSlow   { animation: appPreviewScrollUp 34s linear infinite; }
 @media (prefers-reduced-motion: reduce) {
   .appPreviewColFast, .appPreviewColMedium, .appPreviewColSlow { animation: none; }
+}
+
+/* ════════ Feature cards — mobile center reveal ════════ */
+.feature-card-desc {
+  max-height: 320px;
+  overflow: hidden;
+  transition: max-height 220ms ease, opacity 220ms ease;
+}
+
+@media (max-width: 640px) {
+  .feature-card .feature-card-desc {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0 !important;
+  }
+  .feature-card[data-mobile-active="true"] .feature-card-desc {
+    max-height: 320px;
+    opacity: 1;
+    margin-top: 8px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feature-card-desc {
+    transition: none;
+  }
 }

@@ -1,3 +1,6 @@
+ "use client";
+
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import type { LandingCopy } from "@/lib/i18n";
 import Image from "next/image";
 
@@ -22,6 +25,54 @@ const ICONS = [
 ];
 
 export function FeatureGrid({ copy }: FeatureGridProps) {
+  const [mobileActiveFeature, setMobileActiveFeature] = useState<string | null>(null);
+  const featureRefs: MutableRefObject<Record<string, HTMLElement | null>> = useRef({});
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let raf = 0;
+    const updateActiveFeature = () => {
+      if (window.innerWidth > 640) return;
+      const centerY = window.innerHeight / 2;
+      let closestId: string | null = mobileActiveFeature;
+      let closestDistance = Number.POSITIVE_INFINITY;
+
+      for (const [id, el] of Object.entries(featureRefs.current)) {
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        const cardCenter = rect.top + rect.height / 2;
+        const distance = Math.abs(cardCenter - centerY);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestId = id;
+        }
+      }
+
+      if (closestId && closestId !== mobileActiveFeature) {
+        setMobileActiveFeature(closestId);
+      }
+    };
+
+    const onScrollOrResize = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        updateActiveFeature();
+      });
+    };
+
+    updateActiveFeature();
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize);
+
+    return () => {
+      if (raf) window.cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [mobileActiveFeature]);
+
   return (
     <section
       id="features"
@@ -136,6 +187,11 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
             return (
               <li
                 key={f.title}
+                className="feature-card"
+                data-mobile-active={mobileActiveFeature === f.title ? "true" : "false"}
+                ref={(el) => {
+                  featureRefs.current[f.title] = el;
+                }}
                 style={{
                   position: "relative",
                   overflow: "hidden",
@@ -184,6 +240,7 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
                     {f.title}
                   </h3>
                   <p
+                    className="feature-card-desc"
                     style={{
                       marginTop: 8,
                       fontFamily: "var(--font-sans)",

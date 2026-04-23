@@ -132,6 +132,7 @@ export function AppPreviewWindow({ copy }: AppPreviewWindowProps) {
         >
           {/* Tabs — horizontally scrollable */}
           <div
+            className="app-preview-tabs"
             style={{
               display: "flex",
               gap: 4,
@@ -335,6 +336,13 @@ export function AppPreviewWindow({ copy }: AppPreviewWindowProps) {
           </div>
         </div>
       </div>
+      <style>{`
+        @media (max-width: 640px) {
+          .app-preview-tabs {
+            display: none !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }
