@@ -1,126 +1,566 @@
 import type { LandingCopy } from "@/lib/i18n";
-import Image from "next/image";
 
-type HeroProps = {
-  copy: LandingCopy;
-};
+type HeroProps = { copy: LandingCopy };
 
-const CONFETTI = [
-  { w: 10, h: 10, color: "#b453c9", top: "15%", left: "7%",  delay: "0s",   dur: "2.8s" },
-  { w: 7,  h: 7,  color: "#f59e0b", top: "28%", left: "91%", delay: "0.6s", dur: "3.1s" },
-  { w: 14, h: 5,  color: "#f97316", top: "60%", left: "4%",  delay: "1.1s", dur: "2.5s" },
-  { w: 8,  h: 8,  color: "#f59e0b", top: "72%", left: "86%", delay: "0.3s", dur: "3.4s" },
-  { w: 12, h: 12, color: "#b453c9", top: "42%", left: "95%", delay: "1.5s", dur: "2.9s" },
-  { w: 6,  h: 6,  color: "#f97316", top: "85%", left: "12%", delay: "0.9s", dur: "3.2s" },
-  { w: 9,  h: 9,  color: "#f59e0b", top: "10%", left: "55%", delay: "0.4s", dur: "2.6s" },
-  { w: 5,  h: 14, color: "#b453c9", top: "50%", left: "2%",  delay: "1.8s", dur: "3.0s" },
-  { w: 11, h: 4,  color: "#f59e0b", top: "80%", left: "75%", delay: "0.7s", dur: "2.7s" },
-  { w: 7,  h: 7,  color: "#f97316", top: "35%", left: "78%", delay: "1.3s", dur: "3.3s" },
+const PHOTO_TILES = [
+  { cls: "ph-amber ph-glow", label: "first dance",  tall: true  },
+  { cls: "ph-rose",          label: "bouquet",      tall: false },
+  { cls: "ph-plum",          label: "table 4",      tall: false },
+  { cls: "ph-gold",          label: "candlelight",  tall: false },
+  { cls: "ph-sage",          label: "olive trees",  tall: false },
+  { cls: "ph-ink",           label: "late night",   tall: false },
+  { cls: "ph-plum ph-glow",  label: "grandma",      tall: false },
+  { cls: "ph-rose",          label: "dance floor",  tall: true  },
+  { cls: "ph-amber",         label: "toast",        tall: false },
+  { cls: "ph-teal",          label: "sea view",     tall: false },
+  { cls: "ph-gold ph-glow",  label: "cake",         tall: false },
 ];
+
+function QrSvg({ size = 56 }: { size?: number }) {
+  return (
+    <svg
+      viewBox="0 0 29 29"
+      width={size}
+      height={size}
+      xmlns="http://www.w3.org/2000/svg"
+      shapeRendering="crispEdges"
+      style={{ display: "block", borderRadius: 4 }}
+    >
+      <rect width="29" height="29" fill="#F4EAD9" />
+      <g fill="#0C0A0F">
+        <rect x="0" y="0" width="7" height="7" />
+        <rect x="1" y="1" width="5" height="5" fill="#F4EAD9" />
+        <rect x="2" y="2" width="3" height="3" />
+        <rect x="22" y="0" width="7" height="7" />
+        <rect x="23" y="1" width="5" height="5" fill="#F4EAD9" />
+        <rect x="24" y="2" width="3" height="3" />
+        <rect x="0" y="22" width="7" height="7" />
+        <rect x="1" y="23" width="5" height="5" fill="#F4EAD9" />
+        <rect x="2" y="24" width="3" height="3" />
+        <rect x="9" y="1" width="1" height="1" /><rect x="11" y="1" width="1" height="1" /><rect x="13" y="2" width="2" height="1" /><rect x="17" y="1" width="1" height="2" /><rect x="19" y="2" width="1" height="1" />
+        <rect x="9" y="4" width="2" height="1" /><rect x="12" y="4" width="1" height="2" /><rect x="15" y="4" width="1" height="1" /><rect x="18" y="4" width="2" height="1" />
+        <rect x="8" y="8" width="1" height="1" /><rect x="10" y="8" width="2" height="1" /><rect x="14" y="8" width="1" height="2" /><rect x="17" y="8" width="1" height="1" /><rect x="20" y="8" width="1" height="1" /><rect x="22" y="9" width="2" height="1" />
+        <rect x="8" y="11" width="1" height="2" /><rect x="11" y="11" width="2" height="1" /><rect x="14" y="11" width="1" height="1" /><rect x="16" y="12" width="2" height="1" /><rect x="19" y="11" width="1" height="2" /><rect x="22" y="12" width="1" height="1" />
+        <rect x="9" y="14" width="1" height="1" /><rect x="11" y="15" width="2" height="1" /><rect x="14" y="14" width="1" height="2" /><rect x="17" y="14" width="2" height="1" /><rect x="20" y="15" width="1" height="1" /><rect x="22" y="14" width="1" height="2" />
+        <rect x="8" y="17" width="2" height="1" /><rect x="11" y="17" width="1" height="2" /><rect x="13" y="18" width="1" height="1" /><rect x="15" y="17" width="2" height="1" /><rect x="19" y="17" width="1" height="1" /><rect x="21" y="18" width="2" height="1" />
+        <rect x="8" y="21" width="1" height="1" /><rect x="10" y="21" width="1" height="1" /><rect x="12" y="20" width="2" height="2" /><rect x="15" y="21" width="1" height="1" /><rect x="17" y="20" width="1" height="2" /><rect x="19" y="21" width="2" height="1" />
+        <rect x="9" y="24" width="2" height="1" /><rect x="13" y="24" width="1" height="2" /><rect x="15" y="25" width="2" height="1" /><rect x="19" y="24" width="1" height="1" />
+        <rect x="10" y="27" width="1" height="1" /><rect x="12" y="27" width="2" height="1" /><rect x="16" y="27" width="1" height="1" /><rect x="18" y="27" width="2" height="1" />
+      </g>
+    </svg>
+  );
+}
 
 export function Hero({ copy }: HeroProps) {
   return (
     <section
       id="top"
-      className="relative overflow-hidden bg-ink px-4 py-20 sm:px-6 sm:py-28"
+      className="relative overflow-hidden"
+      style={{ padding: "72px 0 140px", zIndex: 2 }}
     >
-      {/* Confetti dots */}
-      {CONFETTI.map((dot, i) => (
-        <span
-          key={i}
-          aria-hidden
-          className="pointer-events-none absolute animate-pulse opacity-70"
-          style={{
-            width: dot.w,
-            height: dot.h,
-            background: dot.color,
-            top: dot.top,
-            left: dot.left,
-            animationDelay: dot.delay,
-            animationDuration: dot.dur,
-            borderRadius: dot.w === dot.h ? "50%" : "3px",
-          }}
-        />
-      ))}
-
-      {/* Ambient glow */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 50% at 30% 50%, rgba(180,83,201,0.12) 0%, transparent 65%)",
-        }}
-      />
-
-      <div className="relative mx-auto grid max-w-5xl gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-        {/* Left: text */}
-        <div>
-          <span className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-amber-300">
-            ✨ {copy.heroBadge}
-          </span>
-          <h1
-            className="font-black text-white"
-            style={{
-              fontSize: "clamp(2.5rem, 5.5vw, 4.6rem)",
-              letterSpacing: "-0.04em",
-              lineHeight: "1.06",
-            }}
-          >
-            {copy.heroTitle}
-          </h1>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-zinc-300">
-            {copy.heroDescription}
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <a
-              href="#waitlist"
-              className="inline-flex items-center justify-center rounded-full bg-amber-400 px-8 py-4 text-base font-bold text-zinc-900 shadow-[0_6px_24px_rgba(245,158,11,0.4)] transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+      <div className="mx-auto" style={{ maxWidth: 1280, padding: "0 32px" }}>
+        <div
+          className="grid items-center"
+          style={{ gridTemplateColumns: "1.05fr 1fr", gap: 60 }}
+        >
+          {/* ── Left: copy ── */}
+          <div style={{ position: "relative", zIndex: 3 }}>
+            {/* Eyebrow */}
+            <div
+              className="inline-flex items-center gap-2.5"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "10.5px",
+                letterSpacing: "0.28em",
+                textTransform: "uppercase",
+                color: "var(--cream-3, #B5AB99)",
+                padding: "7px 14px",
+                border: "1px solid var(--hair-2)",
+                borderRadius: 999,
+                background: "var(--glass-bg)",
+                marginBottom: 32,
+              }}
             >
-              {copy.heroPrimaryCta}
-            </a>
-            <a
-              href="#plans"
-              className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
-            >
-              {copy.heroSecondaryCta}
-            </a>
-          </div>
-        </div>
-
-        {/* Right: Aurora */}
-        <div className="relative mx-auto w-full max-w-sm">
-          {/* Decorative rings */}
-          <div
-            aria-hidden
-            className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/20"
-          />
-          <div
-            aria-hidden
-            className="absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/10"
-          />
-
-          {/* Speech bubble */}
-          <div className="pointer-events-none absolute left-1/2 top-[10%] z-10 flex w-full max-w-xs -translate-x-1/2 -translate-y-full justify-center px-2">
-            <p className="pointer-events-auto relative rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-center text-sm font-semibold leading-snug text-white shadow-md backdrop-blur-md">
-              {copy.heroIntro}
               <span
                 aria-hidden
-                className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-white/20 bg-ink"
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: "var(--plum-2, #A584A6)",
+                  boxShadow: "0 0 10px rgba(165,132,166,0.5)",
+                  display: "inline-block",
+                  flexShrink: 0,
+                }}
               />
+              {copy.heroBadge}
+            </div>
+
+            {/* Headline */}
+            <h1
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 400,
+                fontSize: "clamp(52px, 8.5vw, 120px)",
+                lineHeight: 0.97,
+                letterSpacing: "-0.025em",
+                color: "var(--cream)",
+                margin: 0,
+              }}
+            >
+              {copy.heroTitle}
+            </h1>
+
+            {/* Sub */}
+            <p
+              style={{
+                marginTop: 28,
+                fontFamily: "var(--font-sans)",
+                fontSize: 17,
+                lineHeight: 1.55,
+                color: "var(--cream-3, #B5AB99)",
+                maxWidth: 440,
+              }}
+            >
+              {copy.heroDescription}
             </p>
+
+            {/* CTAs */}
+            <div className="flex items-center flex-wrap" style={{ marginTop: 40, gap: 14 }}>
+              <a
+                href="#waitlist"
+                className="inline-flex items-center gap-2.5"
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  padding: "11px 22px",
+                  borderRadius: 999,
+                  background: "var(--plum)",
+                  color: "var(--cream)",
+                  boxShadow: "0 0 0 1px rgba(255,255,255,0.08) inset, 0 10px 40px -10px rgba(139,106,140,0.45)",
+                  transition: "all 250ms ease",
+                  textDecoration: "none",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                {copy.heroPrimaryCta}
+                <span aria-hidden>→</span>
+              </a>
+              <a
+                href="#plans"
+                className="inline-flex items-center"
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  padding: "11px 22px",
+                  borderRadius: 999,
+                  background: "transparent",
+                  color: "var(--cream)",
+                  border: "1px solid var(--hair-strong)",
+                  transition: "all 250ms ease",
+                  textDecoration: "none",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                {copy.heroSecondaryCta}
+              </a>
+            </div>
+
+            {/* Signal lines */}
+            <div className="flex flex-col" style={{ marginTop: 52, gap: 16 }}>
+              {copy.heroSignals.map((signal, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2.2}
+                    strokeLinecap="round"
+                    style={{ color: "var(--plum-2, #A584A6)", flexShrink: 0, marginTop: 2 }}
+                  >
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "12.5px",
+                      color: "var(--cream-3, #B5AB99)",
+                      lineHeight: 1.5,
+                      letterSpacing: "0.01em",
+                    }}
+                  >
+                    {signal}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <Image
-            src="/brand/mascot.png"
-            alt={copy.auroraMascotAlt}
-            width={500}
-            height={500}
-            priority
-            className="relative z-10 h-auto w-full drop-shadow-[0_20px_40px_rgba(180,83,201,0.3)]"
-          />
+          {/* ── Right: phone mockup ── */}
+          <div
+            className="relative flex justify-center items-center"
+            style={{ minHeight: 680, zIndex: 2 }}
+          >
+            {/* Warm radial glow behind phone */}
+            <div
+              aria-hidden
+              style={{
+                position: "absolute",
+                inset: -40,
+                background: "radial-gradient(circle at center, rgba(165,132,166,0.35), transparent 55%)",
+                filter: "blur(50px)",
+                opacity: 0.75,
+                zIndex: 0,
+              }}
+            />
+
+            {/* Phone bezel */}
+            <div
+              className="phone-float"
+              style={{
+                position: "relative",
+                zIndex: 1,
+                width: 300,
+                height: 614,
+                borderRadius: 46,
+                background: "#050308",
+                boxShadow:
+                  "0 0 0 1.5px #1e1822, 0 0 0 10px #0a070e, 0 0 0 11px #241b2c, 0 50px 120px -20px rgba(0,0,0,0.8), 0 30px 60px -15px rgba(165,132,166,0.28)",
+                padding: 10,
+              }}
+            >
+              {/* Notch */}
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  top: 12,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: 100,
+                  height: 26,
+                  background: "#050308",
+                  borderRadius: 999,
+                  zIndex: 5,
+                }}
+              />
+
+              {/* Screen */}
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: 37,
+                  overflow: "hidden",
+                  background: "#120E17",
+                  position: "relative",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                {/* Status bar */}
+                <div
+                  style={{
+                    padding: "18px 20px 6px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "var(--cream)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <span>9:41</span>
+                  <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                    <svg width="14" height="10" viewBox="0 0 18 12" fill="currentColor" style={{ color: "var(--cream)" }}>
+                      <rect x="0" y="3" width="3" height="6" rx="1" />
+                      <rect x="5" y="1" width="3" height="8" rx="1" />
+                      <rect x="10" y="0" width="3" height="9" rx="1" opacity="0.5" />
+                      <rect x="15" y="0" width="3" height="9" rx="1" opacity="0.3" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Album header */}
+                <div
+                  style={{
+                    padding: "22px 20px 12px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    flexShrink: 0,
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontStyle: "italic",
+                        fontSize: 20,
+                        fontWeight: 400,
+                        color: "var(--cream)",
+                        lineHeight: 1.1,
+                      }}
+                    >
+                      Maya &amp; Luka
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 9,
+                        color: "var(--cream-3, #B5AB99)",
+                        marginTop: 3,
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      12.06.26 · DUBROVNIK
+                    </div>
+                  </div>
+                  {/* Avatar stack */}
+                  <div style={{ display: "flex" }}>
+                    {["#E6A760", "#C08B8E", "#8B6A8C"].map((c, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: "50%",
+                          border: "1.5px solid #120E17",
+                          marginLeft: i === 0 ? 0 : -6,
+                          background: c,
+                        }}
+                      />
+                    ))}
+                    <div
+                      style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: "50%",
+                        border: "1.5px solid #120E17",
+                        marginLeft: -6,
+                        background: "var(--cream)",
+                        color: "var(--ink)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 8,
+                        fontWeight: 600,
+                      }}
+                    >
+                      +84
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tabs */}
+                <div
+                  style={{
+                    padding: "10px 20px",
+                    display: "flex",
+                    gap: 18,
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 10,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    borderBottom: "1px solid var(--hair)",
+                    flexShrink: 0,
+                  }}
+                >
+                  {["All · 247", "Mine · 18", "Starred"].map((tab, i) => (
+                    <span
+                      key={tab}
+                      style={{
+                        paddingBottom: 8,
+                        position: "relative",
+                        color: i === 0 ? "var(--cream)" : "var(--cream-4, #6E6758)",
+                      }}
+                    >
+                      {tab}
+                      {i === 0 && (
+                        <span
+                          style={{
+                            position: "absolute",
+                            bottom: -1,
+                            left: 0,
+                            right: 0,
+                            height: 1.5,
+                            background: "var(--plum-2, #A584A6)",
+                            boxShadow: "0 0 8px rgba(165,132,166,0.5)",
+                          }}
+                        />
+                      )}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Photo grid — matches Screen 1 layout */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gap: 2,
+                    flex: 1,
+                    overflow: "hidden",
+                  }}
+                >
+                  {PHOTO_TILES.map((tile, i) => (
+                    <div
+                      key={i}
+                      className={`ph ${tile.cls}`}
+                      style={{
+                        gridRow: tile.tall ? "span 2" : undefined,
+                        aspectRatio: tile.tall ? "1/2" : "1",
+                      }}
+                    >
+                      <span className="ph-label">{tile.label}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Upload FAB */}
+                <div
+                  aria-hidden
+                  style={{
+                    position: "absolute",
+                    bottom: 24,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: 52,
+                    height: 52,
+                    borderRadius: "50%",
+                    background: "var(--plum)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 10px 30px -5px rgba(139,106,140,0.45), 0 0 0 6px rgba(139,106,140,0.12)",
+                    color: "var(--cream)",
+                    zIndex: 4,
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Screen glare */}
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: 46,
+                  background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 40%, transparent 60%)",
+                  pointerEvents: "none",
+                }}
+              />
+            </div>
+
+            {/* Floating spec card — top left */}
+            <div
+              aria-hidden
+              style={{
+                position: "absolute",
+                top: 60,
+                left: -20,
+                background: "rgba(20,16,25,0.80)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid var(--hair-2)",
+                borderRadius: 14,
+                padding: "12px 14px",
+                color: "var(--cream-2, #E8DCC6)",
+                fontSize: 12,
+                zIndex: 4,
+                boxShadow: "0 20px 40px -10px rgba(0,0,0,0.6)",
+                maxWidth: 180,
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "9.5px",
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  color: "var(--cream-4, #6E6758)",
+                  marginBottom: 6,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <span
+                  className="live-dot"
+                  style={{
+                    width: 5,
+                    height: 5,
+                    borderRadius: "50%",
+                    background: "var(--plum-2, #A584A6)",
+                    boxShadow: "0 0 8px rgba(165,132,166,0.6)",
+                    display: "inline-block",
+                  }}
+                />
+                {copy.heroMockLiveUploading}
+              </div>
+              <div style={{ fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--cream-2, #E8DCC6)" }}>
+                {copy.heroMockGuestsContributing}<br />
+                <strong style={{ color: "var(--cream)", fontWeight: 500 }}>{copy.heroMockMediaSummary}</strong>
+              </div>
+            </div>
+
+            {/* Floating spec card — bottom right */}
+            <div
+              aria-hidden
+              style={{
+                position: "absolute",
+                bottom: 80,
+                right: -30,
+                background: "rgba(20,16,25,0.80)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid var(--hair-2)",
+                borderRadius: 14,
+                padding: "12px 14px",
+                color: "var(--cream-2, #E8DCC6)",
+                fontSize: 12,
+                zIndex: 4,
+                boxShadow: "0 20px 40px -10px rgba(0,0,0,0.6)",
+                maxWidth: 180,
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "9.5px",
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  color: "var(--cream-4, #6E6758)",
+                  marginBottom: 6,
+                }}
+              >
+                {copy.heroMockJoinAlbum}
+              </div>
+              <div style={{ fontFamily: "var(--font-sans)", fontSize: 12, marginBottom: 8 }}>
+                {copy.heroMockScanToUpload}{" "}
+                <strong style={{ color: "var(--cream)", fontWeight: 500 }}>{copy.heroMockNoAppNoAccount}</strong>
+              </div>
+              <QrSvg size={52} />
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Mobile: stack copy above phone */}
+      <style>{`
+        @media (max-width: 960px) {
+          #top > div > div { grid-template-columns: 1fr !important; }
+          #top > div > div > div:last-child { min-height: 560px; }
+        }
+      `}</style>
     </section>
   );
 }

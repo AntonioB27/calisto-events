@@ -1,11 +1,10 @@
 import { notFound } from "next/navigation";
 import { AuroraQuote } from "@/components/AuroraQuote";
+import { FAQ } from "@/components/FAQ";
 import { FeatureGrid } from "@/components/FeatureGrid";
-import { FutureRoadmap } from "@/components/FutureRoadmap";
 import { Hero } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
 import { LanguageSelectorPopup } from "@/components/LanguageSelectorPopup";
-import { Lifecycle } from "@/components/Lifecycle";
 import { AppPreviewWindow } from "@/components/AppPreviewWindow";
 import { PlanCards } from "@/components/PlanCards";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -31,7 +30,8 @@ export default async function LocalePage({ params }: LocalePageProps) {
   const copy = getLandingCopy(locale);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-x-clip bg-ink">
+    <div className="flex min-h-0 flex-1 flex-col overflow-x-clip" style={{ background: "var(--ink)" }}>
+      <div className="page-vignette" aria-hidden />
       <LanguageSelectorPopup copy={copy} locale={locale as Locale} />
       <SiteHeader copy={copy} locale={locale as Locale} />
       <main className="flex-1">
@@ -41,9 +41,8 @@ export default async function LocalePage({ params }: LocalePageProps) {
         <FeatureGrid copy={copy} />
         <HowItWorks copy={copy} />
         <PlanCards copy={copy} />
-        <Lifecycle copy={copy} />
         <AuroraQuote copy={copy} />
-        <FutureRoadmap copy={copy} />
+        <FAQ copy={copy} />
         <WaitlistForm copy={copy.waitlist} mascotAlt={copy.auroraMascotAlt} />
       </main>
       <SiteFooter copy={copy} />

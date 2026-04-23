@@ -1,14 +1,11 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import Image from "next/image";
 import type { LandingCopy } from "@/lib/i18n";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function isValidEmail(value: string): boolean {
-  const t = value.trim();
-  return t.length > 0 && EMAIL_RE.test(t);
+function isValidEmail(v: string) {
+  return v.trim().length > 0 && EMAIL_RE.test(v.trim());
 }
 
 type WaitlistFormProps = {
@@ -16,7 +13,7 @@ type WaitlistFormProps = {
   mascotAlt: string;
 };
 
-export function WaitlistForm({ copy, mascotAlt }: WaitlistFormProps) {
+export function WaitlistForm({ copy }: WaitlistFormProps) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -27,21 +24,15 @@ export function WaitlistForm({ copy, mascotAlt }: WaitlistFormProps) {
       e.preventDefault();
       setError(null);
       const trimmed = email.trim();
-      if (!isValidEmail(trimmed)) {
-        setError(copy.invalidEmail);
-        return;
-      }
+      if (!isValidEmail(trimmed)) { setError(copy.invalidEmail); return; }
       setBusy(true);
       try {
-        const response = await fetch("/api/waitlist", {
+        const res = await fetch("/api/waitlist", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: trimmed }),
         });
-        if (!response.ok) {
-          setError(copy.submitFailed);
-          return;
-        }
+        if (!res.ok) { setError(copy.submitFailed); return; }
         setSubmitted(true);
       } catch {
         setError(copy.submitFailed);
@@ -55,102 +46,168 @@ export function WaitlistForm({ copy, mascotAlt }: WaitlistFormProps) {
   return (
     <section
       id="waitlist"
-      className="relative scroll-mt-20 bg-ink px-4 py-20 sm:px-6 sm:py-24"
+      className="relative overflow-hidden"
+      style={{
+        borderTop: "1px solid var(--hair)",
+        padding: "140px 0 120px",
+        textAlign: "center",
+        zIndex: 2,
+      }}
     >
-      {/* Ambient glow */}
+      {/* Plum radial glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 overflow-hidden"
         style={{
-          background:
-            "radial-gradient(ellipse 50% 40% at 50% 100%, rgba(180,83,201,0.10) 0%, transparent 70%)",
+          position: "absolute",
+          inset: 0,
+          background: "radial-gradient(ellipse at center, rgba(139,106,140,0.30) 0%, transparent 60%)",
+          opacity: 0.7,
+          pointerEvents: "none",
         }}
       />
 
-      <div className="relative mx-auto max-w-5xl">
-        <div className="overflow-hidden rounded-[32px] border border-white/10 bg-white/5 shadow-2xl backdrop-blur-sm">
-          <div className="grid lg:grid-cols-[1fr_1.6fr]">
-            {/* Aurora panel */}
-            <div className="hidden items-end justify-center bg-gradient-to-b from-primary/20 to-primary/5 px-6 pt-10 lg:flex">
-              <Image
-                src="/brand/mascot.png"
-                alt={mascotAlt}
-                width={400}
-                height={400}
-                className="h-auto w-full max-w-[220px] object-contain"
+      <div className="mx-auto" style={{ maxWidth: 1280, padding: "0 32px", position: "relative", zIndex: 2 }}>
+        {/* Big title */}
+        <h2
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 400,
+            fontSize: "clamp(52px, 8vw, 108px)",
+            lineHeight: 0.97,
+            letterSpacing: "-0.022em",
+            color: "var(--cream)",
+            margin: 0,
+          }}
+        >
+          {copy.title}
+        </h2>
+
+        <p
+          style={{
+            margin: "28px auto 0",
+            maxWidth: 480,
+            fontFamily: "var(--font-sans)",
+            fontSize: 16,
+            lineHeight: 1.6,
+            color: "var(--cream-3, #B5AB99)",
+          }}
+        >
+          {copy.description}
+        </p>
+
+        {submitted ? (
+          <p
+            role="status"
+            style={{
+              margin: "40px auto 0",
+              maxWidth: 440,
+              padding: "16px 20px",
+              borderRadius: 14,
+              border: "1px solid rgba(165,132,166,0.35)",
+              background: "rgba(139,106,140,0.12)",
+              fontFamily: "var(--font-sans)",
+              fontSize: 15,
+              color: "var(--cream)",
+            }}
+          >
+            {copy.submitted}
+          </p>
+        ) : (
+          <form
+            onSubmit={onSubmit}
+            noValidate
+            style={{
+              margin: "40px auto 0",
+              maxWidth: 440,
+              display: "flex",
+              gap: 8,
+              padding: 6,
+              borderRadius: 999,
+              border: "1px solid var(--hair-strong)",
+              background: "var(--glass-bg-2)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <label htmlFor="waitlist-email" className="sr-only">{copy.inputLabel}</label>
+              <input
+                id="waitlist-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+                placeholder={copy.inputPlaceholder}
+                value={email}
+                onChange={(ev) => { setEmail(ev.target.value); if (error) setError(null); }}
+                aria-invalid={error !== null ? true : false}
+                aria-describedby={error ? "wl-err" : undefined}
+                style={{
+                  width: "100%",
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  color: "var(--cream)",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 14,
+                  padding: "10px 18px",
+                  caretColor: "var(--plum-2, #A584A6)",
+                }}
               />
             </div>
+            <button
+              type="submit"
+              disabled={busy}
+              style={{
+                flexShrink: 0,
+                padding: "11px 22px",
+                borderRadius: 999,
+                border: "none",
+                background: "var(--plum)",
+                color: "var(--cream)",
+                fontFamily: "var(--font-sans)",
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: busy ? "not-allowed" : "pointer",
+                opacity: busy ? 0.7 : 1,
+                transition: "all 250ms ease",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              {busy ? copy.buttonBusy : copy.buttonIdle}
+              {!busy && <span aria-hidden>→</span>}
+            </button>
+          </form>
+        )}
 
-            {/* Form panel */}
-            <div className="px-8 py-10 sm:px-10 sm:py-12">
-              <h2
-                className="font-extrabold tracking-tight text-white"
-                style={{ fontSize: "clamp(1.7rem, 3.5vw, 2.6rem)" }}
-              >
-                {copy.title}
-              </h2>
-              <p className="mt-3 text-lg text-zinc-300">{copy.description}</p>
-              <p className="mt-4 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-200">
-                {copy.discount}
-              </p>
+        {error && (
+          <p
+            id="wl-err"
+            role="alert"
+            style={{
+              marginTop: 10,
+              fontFamily: "var(--font-sans)",
+              fontSize: 13,
+              color: "rgba(248,113,113,0.9)",
+            }}
+          >
+            {error}
+          </p>
+        )}
 
-              {submitted ? (
-                <p
-                  className="mt-8 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-4 text-emerald-300"
-                  role="status"
-                >
-                  {copy.submitted}
-                </p>
-              ) : (
-                <form
-                  onSubmit={onSubmit}
-                  className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-start"
-                  noValidate
-                >
-                  <div className="min-w-0 flex-1">
-                    <label htmlFor="waitlist-email" className="sr-only">
-                      {copy.inputLabel}
-                    </label>
-                    <input
-                      id="waitlist-email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      inputMode="email"
-                      placeholder={copy.inputPlaceholder}
-                      value={email}
-                      onChange={(ev) => {
-                        setEmail(ev.target.value);
-                        if (error) setError(null);
-                      }}
-                      className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white shadow-sm placeholder:text-zinc-500 focus:border-amber-400/60 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
-                      aria-invalid={error !== null ? true : false}
-                      aria-describedby={error ? "waitlist-email-error" : undefined}
-                    />
-                    {error ? (
-                      <p
-                        id="waitlist-email-error"
-                        className="mt-2 text-sm text-red-400"
-                        role="alert"
-                      >
-                        {error}
-                      </p>
-                    ) : null}
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={busy}
-                    className="shrink-0 rounded-xl bg-amber-400 px-8 py-3 text-base font-bold text-zinc-900 shadow-[0_4px_20px_rgba(245,158,11,0.35)] transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {busy ? copy.buttonBusy : copy.buttonIdle}
-                  </button>
-                </form>
-              )}
-
-              <p className="mt-6 text-xs text-zinc-500">{copy.note}</p>
-            </div>
-          </div>
-        </div>
+        <p
+          style={{
+            marginTop: 20,
+            fontFamily: "var(--font-mono)",
+            fontSize: "10.5px",
+            color: "var(--cream-4, #6E6758)",
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+          }}
+        >
+          {copy.note}
+        </p>
       </div>
     </section>
   );

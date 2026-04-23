@@ -33,6 +33,11 @@ type FutureItem = {
   description: string;
 };
 
+type FaqItem = {
+  q: string;
+  a: string;
+};
+
 type WaitlistCopy = {
   title: string;
   description: string;
@@ -63,21 +68,43 @@ export type LandingCopy = {
   heroDescription: string;
   heroPrimaryCta: string;
   heroSecondaryCta: string;
+  heroSignals: readonly [string, string, string];
+  heroMockLiveUploading: string;
+  heroMockGuestsContributing: string;
+  heroMockMediaSummary: string;
+  heroMockJoinAlbum: string;
+  heroMockScanToUpload: string;
+  heroMockNoAppNoAccount: string;
   statBar: { value: string; label: string }[];
   appPreviewEyebrow: string;
+  appPreviewTitlePrefix: string;
+  appPreviewTitleEmphasis: string;
+  appPreviewTitleSuffix: string;
+  appPreviewMetaLabel: string;
   appPreviewAriaSection: string;
   appPreviewAriaThumbs: string;
-  appPreviewCaptions: readonly [string, string, string];
+  appPreviewCaptions: readonly string[];
   appPreviewViewAriaTemplate: string;
   appPreviewImageAltTemplate: string;
   featuresTitle: string;
+  featuresSectionLabel: string;
   featuresDescription: string;
   featuresAuroraBubble: string;
   features: Feature[];
   howTitle: string;
+  howSectionLabel: string;
+  howSetupHint: string;
+  howStepPrefix: string;
+  howVisualLive: string;
+  howVisualGuests: string;
+  howUploadDone: string;
+  howModerationApproved: string;
+  howModerationNewTemplate: string;
   howDescription: string;
   howItems: HowItWorksItem[];
   plansTitle: string;
+  plansSectionLabel: string;
+  plansPerEventSuffix: string;
   plansDescriptionStrong: string;
   plansDescriptionRest: string;
   plansAuroraBubble: string;
@@ -98,8 +125,12 @@ export type LandingCopy = {
   futureDescription: string;
   futureItems: FutureItem[];
   futureStatusLabels: { roadmap: string; planned: string; idea: string };
+  faqTitle: string;
+  faq: FaqItem[];
   waitlist: WaitlistCopy;
   footerText: string;
+  footerPrivacy: string;
+  footerTerms: string;
   footerRightsLine: string;
   brandIconAlt: string;
   pageTitle: string;
@@ -131,23 +162,39 @@ const copy: Record<Locale, LandingCopy> = {
     joinWaitlistShort: "Join waitlist",
     heroBadge: "Meet Aurora",
     heroIntro: "Hi, I'm Aurora — I'll guide you through Calisto.",
-    heroTitle: "One shared album for your wedding or event—guests join with a code, you stay in control.",
+    heroTitle: "One shared album for your wedding or event!",
     heroDescription:
-      "Calisto helps your guests upload and browse photos and videos in one place. I'll help you keep memories organized with a simple access code, optional QR invite, and storage plans that match your celebration—priced once per event, not as a monthly subscription.",
+      "Calisto helps guests upload and browse photos and videos in one place. No app download is required, and guests can upload without creating an account. Access is by code or QR, with one-time event pricing.",
     heroPrimaryCta: "Join the waitlist",
     heroSecondaryCta: "Compare plans",
+    heroSignals: [
+      "No app to download — guests scan and upload from the browser.",
+      "No account required, even for full-quality uploads.",
+      "Only the organizer sees, approves, and shares.",
+    ],
+    heroMockLiveUploading: "Live · 3 uploading",
+    heroMockGuestsContributing: "84 guests contributing",
+    heroMockMediaSummary: "247 photos · 16 videos",
+    heroMockJoinAlbum: "Join this album",
+    heroMockScanToUpload: "Scan to upload —",
+    heroMockNoAppNoAccount: "no app, no account.",
     statBar: [
       { value: "5-200", label: "guests per event" },
       { value: "20-2000", label: "photos by plan" },
       { value: "3-30", label: "days upload window" },
     ],
     appPreviewEyebrow: "See it in action",
+    appPreviewTitlePrefix: "One album.",
+    appPreviewTitleEmphasis: "Every",
+    appPreviewTitleSuffix: "angle of the day.",
+    appPreviewMetaLabel: "calisto · organizer",
     appPreviewAriaSection: "App preview",
     appPreviewAriaThumbs: "Screenshot thumbnails",
-    appPreviewCaptions: ["Gallery view", "Event details", "Upload flow"],
+    appPreviewCaptions: ["Gallery view", "Guest welcome", "Photo picker", "Upload flow", "Photo detail", "Event details", "Guest list", "Moderation", "Share & QR", "Download"],
     appPreviewViewAriaTemplate: "View {name}",
     appPreviewImageAltTemplate: "Calisto app — {name}",
     featuresTitle: "What you can do",
+    featuresSectionLabel: "02 · Features",
     featuresDescription:
       "Built for big days when everyone is taking pictures—Calisto keeps uploads organized and easy to share.",
     featuresAuroraBubble:
@@ -183,6 +230,14 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     howTitle: "How it works",
+    howSectionLabel: "03 · Three quiet steps",
+    howSetupHint: "< 90 seconds to set up",
+    howStepPrefix: "STEP",
+    howVisualLive: "LIVE",
+    howVisualGuests: "84 guests",
+    howUploadDone: "done",
+    howModerationApproved: "approved",
+    howModerationNewTemplate: "+{count} new",
     howDescription: "Three steps from empty album to shared memories.",
     howItems: [
       {
@@ -204,6 +259,8 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     plansTitle: "Plans",
+    plansSectionLabel: "04 · Pricing",
+    plansPerEventSuffix: "/ event",
     plansDescriptionStrong: "One-time payment per event",
     plansDescriptionRest: "choose a tier when you create the event. Upgrade later if you need more storage, guests, or retention.",
     plansAuroraBubble: "Choose what fits your event now—you can upgrade whenever you need more.",
@@ -302,6 +359,33 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     futureStatusLabels: { roadmap: "Roadmap", planned: "Planned", idea: "Idea" },
+    faqTitle: "Questions",
+    faq: [
+      {
+        q: "Do guests need to download an app?",
+        a: "No. Guests scan the QR code or open the invite link and upload directly from their phone's browser. Nothing to install, ever.",
+      },
+      {
+        q: "Do guests need to create an account?",
+        a: "No account and no email required. Guests can optionally add their first name so you know who contributed which photos — that's the most we ask.",
+      },
+      {
+        q: "Are photos uploaded at full quality?",
+        a: "Yes. Calisto never compresses your originals before you see them. HEIC and RAW files are fully supported on paid plans.",
+      },
+      {
+        q: "Who can see the album?",
+        a: "Only you, the organizer, until you decide to share. You can send guests a read-only link whenever you're ready.",
+      },
+      {
+        q: "What if a guest uploads something I don't want?",
+        a: "You can hide or permanently remove any photo at any time. On paid plans you can enable moderation mode, which holds every upload for your approval before it goes live.",
+      },
+      {
+        q: "How long are photos and videos stored?",
+        a: "It depends on your plan — from 7 days on Free to 60 days on Max. On paid plans you can download a full ZIP of originals before the retention period ends.",
+      },
+    ],
     waitlist: {
       title: "Join the waitlist",
       description:
@@ -317,6 +401,8 @@ const copy: Record<Locale, LandingCopy> = {
       note: "Discount details and eligibility may be updated before launch. No spam—unsubscribe anytime once we send real emails.",
     },
     footerText: "Event media for weddings and celebrations. Questions? Join the waitlist—we'll reach out.",
+    footerPrivacy: "Privacy",
+    footerTerms: "Terms",
     pageTitle: "Calisto — shared event photos & videos",
     pageDescription:
       "Calisto lets wedding and event guests upload and browse photos and videos in one place. Organizers share a code or QR; plans are one-time per event.",
@@ -346,74 +432,100 @@ const copy: Record<Locale, LandingCopy> = {
     joinWaitlistShort: "Pridruži se listi",
     heroBadge: "Upoznaj Auroru",
     heroIntro: "Bok, ja sam Aurora — predstavljam ti Calisto.",
-    heroTitle: "Jedan zajednički album za tvoje vjenčanje ili događaj — gosti se pridružuju kodom, a ti zadržavaš kontrolu.",
+    heroTitle: "Jedan zajednički album za tvoje vjenčanje ili događaj!",
     heroDescription:
-      "Calisto omogućuje tvojim gostima da na jednom mjestu učitavaju i pregledavaju fotografije i videa. Pomažem ti da uspomene ostanu organizirane uz jednostavan pristupni kod, opcionalni QR poziv i pakete pohrane prema veličini događaja — jednokratno plaćanje po događaju, bez mjesečne pretplate.",
+      "Gosti na jednom mjestu učitavaju i gledaju fotografije i videa. Nije potrebno preuzeti aplikaciju, a upload ide i bez računa. Pristup je kodom ili QR-om, uz jednokratno plaćanje po događaju.",
     heroPrimaryCta: "Pridruži se listi čekanja",
     heroSecondaryCta: "Usporedi pakete",
+    heroSignals: [
+      "Nema preuzimanja aplikacije — gosti skeniraju i učitavaju u pregledniku.",
+      "Nije potreban račun, ni za upload u punoj kvaliteti.",
+      "Samo organizator vidi, odobrava i dijeli sadržaj.",
+    ],
+    heroMockLiveUploading: "Uživo · 3 u prijenosu",
+    heroMockGuestsContributing: "84 gosta sudjeluju",
+    heroMockMediaSummary: "247 fotografija · 16 videa",
+    heroMockJoinAlbum: "Pridruži se albumu",
+    heroMockScanToUpload: "Skeniraj za upload —",
+    heroMockNoAppNoAccount: "bez aplikacije, bez računa.",
     statBar: [
       { value: "5-200", label: "gostiju po događaju" },
       { value: "20-2000", label: "fotografija po paketu" },
       { value: "3-30", label: "dana za upload" },
     ],
     appPreviewEyebrow: "Vidi kako radi",
+    appPreviewTitlePrefix: "Jedan album.",
+    appPreviewTitleEmphasis: "Svaki",
+    appPreviewTitleSuffix: "kutak dana.",
+    appPreviewMetaLabel: "calisto · organizator",
     appPreviewAriaSection: "Pregled aplikacije",
     appPreviewAriaThumbs: "Minijature snimki zaslona",
-    appPreviewCaptions: ["Pregled galerije", "Detalji događaja", "Tok učitavanja"],
+    appPreviewCaptions: ["Pregled galerije", "Dobrodošlica", "Odabir fotografija", "Tok učitavanja", "Detalj fotografije", "Detalji događaja", "Popis gostiju", "Moderacija", "Dijeli i QR", "Preuzimanje"],
     appPreviewViewAriaTemplate: "Pogledaj: {name}",
     appPreviewImageAltTemplate: "Calisto aplikacija — {name}",
     featuresTitle: "Što možeš raditi",
-    featuresDescription: "Stvoreno za velike dane kada svi fotografiraju — Calisto drži uploadove organiziranima i lakima za dijeljenje.",
+    featuresSectionLabel: "02 · Mogućnosti",
+    featuresDescription: "Za dane kad svi fotografiraju — uploadovi ostaju uredni i lako dijeljivi.",
     featuresAuroraBubble:
       "Svaki gost učitava u jednu galeriju — pomažem da sve ostane uredno.",
     features: [
       {
         title: "Jedinstveni pristupni kod",
-        description: "Svaki događaj ima svoj kod (npr. WEDDING2026). Gosti se uključuju bez kompliciranog setupa.",
+        description: "Svaki događaj ima svoj kod (npr. WEDDING2026). Gosti ulaze bez kompliciranog setupa.",
       },
       {
         title: "Pozivni linkovi i QR",
-        description: "Podijeli link ili pokaži QR kod da se gosti brzo pridruže albumu s mobitela.",
+        description: "Podijeli link ili QR i gosti se brzo pridružuju s mobitela.",
       },
       {
         title: "Zajednička galerija",
-        description: "Svi vide istu kolekciju u stvarnom vremenu dok stižu fotografije i videa — idealno za vjenčanja i proslave.",
+        description: "Svi vide istu galeriju u stvarnom vremenu dok stižu fotografije i videa.",
       },
       {
         title: "Uloge koje imaju smisla",
-        description: "Gosti učitavaju i pregledavaju, organizatori kreiraju događaje, upravljaju pristupom i (na plaćenim paketima) izvoze arhivu.",
+        description: "Gosti učitavaju i gledaju, a organizatori vode pristup i na plaćenim paketima izvoze arhivu.",
       },
       {
         title: "Fotografije i videa po paketu",
-        description: "Kreni s fotografijama na Free paketu; plaćeni paketi otključavaju videa, veće limite i duže čuvanje.",
+        description: "Free pokriva fotografije; plaćeni paketi dodaju videa, veće limite i duže čuvanje.",
       },
       {
         title: "ZIP izvoz (plaćeni paketi)",
-        description: "Organizatori mogu preuzeti cijeli album kao ZIP nakon događaja — dostupnost ovisi o paketu.",
+        description: "Organizatori mogu preuzeti cijeli album kao ZIP, ovisno o paketu.",
       },
     ],
     howTitle: "Kako radi",
-    howDescription: "Tri koraka od praznog albuma do zajedničkih uspomena.",
+    howSectionLabel: "03 · Tri jednostavna koraka",
+    howSetupHint: "< 90 sekundi za postavljanje",
+    howStepPrefix: "KORAK",
+    howVisualLive: "UŽIVO",
+    howVisualGuests: "84 gosta",
+    howUploadDone: "gotovo",
+    howModerationApproved: "odobreno",
+    howModerationNewTemplate: "+{count} novo",
+    howDescription: "Tri koraka do zajedničkog albuma.",
     howItems: [
       {
         step: "1",
         title: "Kreiraj događaj",
-        description: "Odaberi naziv, datum i paket pohrane. Automatski postaješ organizator.",
+        description: "Odaberi naziv, datum i paket. Automatski postaješ organizator.",
       },
       {
         step: "2",
         title: "Podijeli kod ili QR",
-        description: "Pošalji gostima pristupni kod, pozivni link ili ih pusti da skeniraju QR.",
+        description: "Pošalji kod ili link, ili im pokaži QR.",
       },
       {
         step: "3",
         title: "Skupljaj i uživaj",
-        description: "Gosti zajedno učitavaju i pregledavaju sadržaj. Nakon događaja vrijede pravila tvog paketa.",
+        description: "Gosti zajedno učitavaju i pregledavaju. Nakon događaja vrijede pravila tvog paketa.",
       },
     ],
     plansTitle: "Paketi",
+    plansSectionLabel: "04 · Cijene",
+    plansPerEventSuffix: "/ događaj",
     plansDescriptionStrong: "Jednokratno plaćanje po događaju",
-    plansDescriptionRest: "odaberi paket pri kreiranju događaja. Nadogradnja je moguća kasnije ako trebaš više prostora, gostiju ili duže čuvanje.",
+    plansDescriptionRest: "odaberi paket pri kreiranju događaja. Nadogradnja je moguća kasnije za više prostora, gostiju ili dulje čuvanje.",
     plansAuroraBubble: "Odaberi što sada odgovara tvom događaju — nadogradnja je uvijek opcija.",
     plansMascotAlt: "Aurora bira paket pohrane",
     popularBadge: "Najpopularniji",
@@ -510,10 +622,37 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     futureStatusLabels: { roadmap: "Roadmap", planned: "Planirano", idea: "Ideja" },
+    faqTitle: "Pitanja",
+    faq: [
+      {
+        q: "Trebaju li gosti preuzeti aplikaciju?",
+        a: "Ne. Gosti skeniraju QR kod ili otvore link i učitavaju izravno iz preglednika. Ništa za instalirati.",
+      },
+      {
+        q: "Trebaju li gosti stvoriti račun?",
+        a: "Ni račun ni email nije potreban. Gosti mogu po želji dodati ime kako bi znali tko je što učitao — to je sve što tražimo.",
+      },
+      {
+        q: "Učitavaju li se fotografije u punoj kvaliteti?",
+        a: "Da. Calisto nikad ne komprimira originale. HEIC i RAW datoteke su podržane na plaćenim paketima.",
+      },
+      {
+        q: "Tko može vidjeti album?",
+        a: "Samo ti, organizator, dok sam ne odlučiš podijeliti. Možeš poslati gostima link za čitanje kada si spreman.",
+      },
+      {
+        q: "Što ako gost učita nešto što ne želim?",
+        a: "Možeš sakriti ili trajno ukloniti svaku fotografiju u bilo koje vrijeme. Na plaćenim paketima možeš uključiti moderaciju koja zadržava sve uploade na tvojem odobrenju.",
+      },
+      {
+        q: "Koliko dugo su fotografije i videa pohranjeni?",
+        a: "Ovisi o paketu — od 7 dana na Free do 60 dana na Max. Na plaćenim paketima možeš preuzeti ZIP svih originala prije isteka roka.",
+      },
+    ],
     waitlist: {
       title: "Pridruži se listi čekanja",
-      description: "Budi među prvima koji će saznati kad Calisto krene šire. Ostavi email za novosti o lansiranju.",
-      discount: "Prvih 10 ljudi na listi čekanja dobiva 20% popusta na bilo koji plaćeni paket (Standard, Premium ili Max).",
+      description: "Ostavi email i saznaj među prvima kad Calisto krene šire.",
+      discount: "Prvih 10 na listi dobiva 20% popusta na Standard, Premium ili Max.",
       submitted: "Na listi si — javimo ti se uskoro.",
       submitFailed: "Trenutno se ne možeš prijaviti na listu čekanja. Pokušaj ponovno za trenutak.",
       inputLabel: "Email",
@@ -521,9 +660,11 @@ const copy: Record<Locale, LandingCopy> = {
       invalidEmail: "Unesi valjanu email adresu.",
       buttonIdle: "Pridruži se listi čekanja",
       buttonBusy: "Prijava...",
-      note: "Detalji popusta i uvjeti mogu se promijeniti prije lansiranja. Bez spama — možeš se odjaviti kad god poželiš.",
+      note: "Detalji popusta i uvjeti mogu se promijeniti prije lansiranja. Bez spama — odjava je uvijek moguća.",
     },
-    footerText: "Event media za vjenčanja i proslave. Imaš pitanja? Pridruži se listi čekanja i javimo ti se.",
+    footerText: "Calisto za vjenčanja i proslave. Imaš pitanje? Pridruži se listi čekanja.",
+    footerPrivacy: "Privatnost",
+    footerTerms: "Uvjeti",
     pageTitle: "Calisto — zajedničke fotografije i videa događaja",
     pageDescription:
       "Calisto omogućuje gostima vjenčanja i događaja da učitavaju i pregledavaju fotografije i videa na jednom mjestu.",
@@ -553,23 +694,39 @@ const copy: Record<Locale, LandingCopy> = {
     joinWaitlistShort: "Zur Warteliste",
     heroBadge: "Lerne Aurora kennen",
     heroIntro: "Hi, ich bin Aurora — ich stelle dir Calisto vor.",
-    heroTitle: "Ein gemeinsames Album für deine Hochzeit oder dein Event – Gäste treten per Code bei, du behältst die Kontrolle.",
+    heroTitle: "Ein gemeinsames Album für deine Hochzeit oder dein Event!",
     heroDescription:
-      "Calisto hilft deinen Gästen, Fotos und Videos an einem Ort hochzuladen und anzusehen. Ich helfe dir, Erinnerungen organisiert zu halten – mit einfachem Zugangscode, optionalem QR-Invite und Speichertarifen passend zur Eventgröße – einmalige Zahlung pro Event statt Abo.",
+      "Calisto hilft Gästen, Fotos und Videos an einem Ort hochzuladen und anzusehen. Kein App-Download nötig, und Uploads funktionieren ohne Konto. Der Zugriff läuft per Code oder QR – mit einmaliger Zahlung pro Event statt Abo.",
     heroPrimaryCta: "Zur Warteliste",
     heroSecondaryCta: "Tarife vergleichen",
+    heroSignals: [
+      "Keine App nötig — Gäste scannen und laden im Browser hoch.",
+      "Kein Konto erforderlich, auch für Uploads in voller Qualität.",
+      "Nur Organisatoren sehen, prüfen und teilen Inhalte.",
+    ],
+    heroMockLiveUploading: "Live · 3 Uploads",
+    heroMockGuestsContributing: "84 Gäste beteiligen sich",
+    heroMockMediaSummary: "247 Fotos · 16 Videos",
+    heroMockJoinAlbum: "Diesem Album beitreten",
+    heroMockScanToUpload: "Zum Upload scannen —",
+    heroMockNoAppNoAccount: "keine App, kein Konto.",
     statBar: [
       { value: "5-200", label: "Gäste pro Event" },
       { value: "20-2000", label: "Fotos je Tarif" },
       { value: "3-30", label: "Tage Upload-Fenster" },
     ],
     appPreviewEyebrow: "Sieh es in Aktion",
+    appPreviewTitlePrefix: "Ein Album.",
+    appPreviewTitleEmphasis: "Jeder",
+    appPreviewTitleSuffix: "Moment des Tages.",
+    appPreviewMetaLabel: "calisto · organizer",
     appPreviewAriaSection: "App-Vorschau",
     appPreviewAriaThumbs: "Screenshot-Vorschau",
-    appPreviewCaptions: ["Galerieansicht", "Eventdetails", "Upload-Ablauf"],
+    appPreviewCaptions: ["Galerieansicht", "Gast-Begrüßung", "Fotoauswahl", "Upload-Ablauf", "Fotodetail", "Eventdetails", "Gästeliste", "Moderation", "Teilen & QR", "Download"],
     appPreviewViewAriaTemplate: "{name} ansehen",
     appPreviewImageAltTemplate: "Calisto-App — {name}",
     featuresTitle: "Was du machen kannst",
+    featuresSectionLabel: "02 · Funktionen",
     featuresDescription:
       "Für große Tage, an denen alle fotografieren – Calisto hält Uploads organisiert und leicht teilbar.",
     featuresAuroraBubble:
@@ -601,6 +758,14 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     howTitle: "So funktioniert es",
+    howSectionLabel: "03 · Drei einfache Schritte",
+    howSetupHint: "< 90 Sekunden zum Einrichten",
+    howStepPrefix: "SCHRITT",
+    howVisualLive: "LIVE",
+    howVisualGuests: "84 Gäste",
+    howUploadDone: "fertig",
+    howModerationApproved: "freigegeben",
+    howModerationNewTemplate: "+{count} neu",
     howDescription: "Drei Schritte vom leeren Album zu gemeinsamen Erinnerungen.",
     howItems: [
       {
@@ -620,6 +785,8 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     plansTitle: "Tarife",
+    plansSectionLabel: "04 · Preise",
+    plansPerEventSuffix: "/ Event",
     plansDescriptionStrong: "Einmalige Zahlung pro Event",
     plansDescriptionRest: "wähle einen Tarif beim Erstellen des Events. Späteres Upgrade für mehr Speicher, Gäste oder Aufbewahrung ist möglich.",
     plansAuroraBubble:
@@ -719,6 +886,33 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     futureStatusLabels: { roadmap: "Roadmap", planned: "Geplant", idea: "Idee" },
+    faqTitle: "Fragen",
+    faq: [
+      {
+        q: "Müssen Gäste eine App herunterladen?",
+        a: "Nein. Gäste scannen den QR-Code oder öffnen den Einladungslink und laden direkt aus dem Browser hoch. Nichts zu installieren.",
+      },
+      {
+        q: "Müssen Gäste ein Konto erstellen?",
+        a: "Kein Konto, keine E-Mail erforderlich. Gäste können optional ihren Vornamen angeben, damit du siehst, wer welche Fotos beigetragen hat.",
+      },
+      {
+        q: "Werden Fotos in voller Qualität hochgeladen?",
+        a: "Ja. Calisto komprimiert deine Originale niemals. HEIC- und RAW-Dateien werden bei bezahlten Tarifen vollständig unterstützt.",
+      },
+      {
+        q: "Wer kann das Album sehen?",
+        a: "Nur du, der Organisator, bis du dich entscheidest zu teilen. Du kannst Gästen jederzeit einen Nur-Lesen-Link senden.",
+      },
+      {
+        q: "Was, wenn ein Gast etwas hochlädt, das ich nicht möchte?",
+        a: "Du kannst jedes Foto jederzeit ausblenden oder dauerhaft entfernen. Bei bezahlten Tarifen kannst du den Moderationsmodus aktivieren, der alle Uploads zur Genehmigung zurückhält.",
+      },
+      {
+        q: "Wie lange werden Fotos und Videos gespeichert?",
+        a: "Das hängt von deinem Tarif ab — von 7 Tagen beim Free-Tarif bis zu 60 Tagen beim Max-Tarif. Bei bezahlten Tarifen kannst du ein ZIP aller Originale herunterladen.",
+      },
+    ],
     waitlist: {
       title: "Zur Warteliste",
       description: "Erfahre als Erste oder Erster, wenn Calisto breiter startet. Hinterlasse deine E-Mail für Launch-Updates.",
@@ -733,6 +927,8 @@ const copy: Record<Locale, LandingCopy> = {
       note: "Rabattdetails und Teilnahmebedingungen können vor dem Launch angepasst werden. Kein Spam.",
     },
     footerText: "Event-Medien für Hochzeiten und Feiern. Fragen? Trag dich in die Warteliste ein.",
+    footerPrivacy: "Datenschutz",
+    footerTerms: "AGB",
     pageTitle: "Calisto — gemeinsame Event-Fotos & Videos",
     pageDescription:
       "Calisto hilft Hochzeits- und Eventgästen, Fotos und Videos an einem Ort hochzuladen und zu durchsuchen.",

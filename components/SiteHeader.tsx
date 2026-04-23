@@ -1,6 +1,5 @@
 import { LanguageSelectorBar } from "@/components/LanguageSelectorBar";
 import type { LandingCopy, Locale } from "@/lib/i18n";
-import Image from "next/image";
 
 type SiteHeaderProps = {
   copy: LandingCopy;
@@ -9,59 +8,118 @@ type SiteHeaderProps = {
 
 export function SiteHeader({ copy, locale }: SiteHeaderProps) {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-ink/90 backdrop-blur-md">
-      <div className="mx-auto max-w-5xl px-4 py-3">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <div className="flex items-center justify-between gap-4 sm:min-w-[170px]">
-            <a
-              href="#top"
-              className="inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
-            >
-              <Image
-                src="/brand/calisto-icon.png"
-                alt={copy.brandIconAlt}
-                width={28}
-                height={28}
-                className="rounded-md"
-              />
-              <span className="text-lg font-extrabold tracking-tight">
-                <span className="text-white">Calisto</span>
-              </span>
-            </a>
-            <a
-              href="#waitlist"
-              className="rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-900 transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink sm:hidden"
-            >
-              {copy.joinWaitlistShort}
-            </a>
-          </div>
-          <nav
-            className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 sm:flex-1"
-            aria-label={copy.navAriaLabel}
+    <header
+      className="sticky top-0 z-50"
+      style={{
+        padding: "18px 0",
+        background: "linear-gradient(to bottom, rgba(12,10,15,0.90) 0%, rgba(12,10,15,0.75) 70%, rgba(12,10,15,0) 100%)",
+        backdropFilter: "blur(14px) saturate(1.1)",
+        WebkitBackdropFilter: "blur(14px) saturate(1.1)",
+        borderBottom: "1px solid var(--hair)",
+      }}
+    >
+      <div
+        className="mx-auto flex items-center justify-between gap-6"
+        style={{ maxWidth: 1280, padding: "0 32px" }}
+      >
+        {/* Brand */}
+        <a
+          href="#top"
+          className="flex items-center gap-2.5 shrink-0 focus:outline-none"
+          style={{ textDecoration: "none" }}
+        >
+          <span
+            aria-hidden
+            style={{
+              display: "inline-block",
+              width: 22,
+              height: 22,
+              borderRadius: "50%",
+              background: "radial-gradient(circle at 30% 30%, var(--plum-2, #A584A6), var(--plum, #8B6A8C) 55%, #3d2640 100%)",
+              boxShadow: "0 0 20px rgba(165,132,166,0.4), inset 0 0 0 1px rgba(255,255,255,0.10)",
+              flexShrink: 0,
+            }}
+          />
+          <span
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: 22,
+              fontWeight: 500,
+              letterSpacing: "0.01em",
+              color: "var(--cream)",
+            }}
           >
-            {copy.nav.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="group relative rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-300 transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink sm:px-3 sm:py-2 sm:text-sm"
-              >
-                {item.label}
-                <span
-                  aria-hidden
-                  className="absolute bottom-0.5 left-2.5 h-0.5 w-0 rounded-full bg-orange-400 transition-all duration-200 group-hover:w-[calc(100%-1.25rem)] sm:left-3 sm:group-hover:w-[calc(100%-1.5rem)]"
-                />
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center justify-center gap-3 sm:shrink-0 sm:justify-end">
-            <LanguageSelectorBar copy={copy} locale={locale} variant="header" />
+            Calisto
+            <em style={{ fontStyle: "italic", color: "var(--cream-2, #E8DCC6)", fontWeight: 400 }}>.</em>
+          </span>
+        </a>
+
+        {/* Nav — hidden on mobile */}
+        <nav
+          className="hidden md:flex items-center"
+          aria-label={copy.navAriaLabel}
+          style={{ gap: 34 }}
+        >
+          {copy.nav.map((item) => (
             <a
-              href="#waitlist"
-              className="hidden rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-zinc-900 transition hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink sm:inline-flex"
+              key={item.href}
+              href={item.href}
+              className="nav-link"
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 13,
+                color: "var(--cream-2, #E8DCC6)",
+                letterSpacing: "0.02em",
+                padding: "6px 0",
+                transition: "color 200ms",
+                textDecoration: "none",
+              }}
             >
-              {copy.joinWaitlistShort}
+              {item.label}
             </a>
-          </div>
+          ))}
+        </nav>
+
+        {/* Right: lang + CTA */}
+        <div className="flex items-center gap-3 shrink-0">
+          <LanguageSelectorBar copy={copy} locale={locale} variant="header" />
+          <a
+            href="#waitlist"
+            className="hidden sm:inline-flex items-center gap-2"
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: 12,
+              fontWeight: 500,
+              padding: "9px 16px",
+              borderRadius: 999,
+              background: "var(--plum)",
+              color: "var(--cream)",
+              boxShadow: "0 0 0 1px rgba(255,255,255,0.08) inset, 0 8px 32px -8px rgba(139,106,140,0.45)",
+              transition: "all 250ms ease",
+              textDecoration: "none",
+              letterSpacing: "0.01em",
+            }}
+          >
+            {copy.joinWaitlistShort}
+            <span aria-hidden style={{ transition: "transform 300ms" }}>→</span>
+          </a>
+          {/* Mobile CTA */}
+          <a
+            href="#waitlist"
+            className="sm:hidden"
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: 12,
+              fontWeight: 500,
+              padding: "8px 14px",
+              borderRadius: 999,
+              background: "var(--plum)",
+              color: "var(--cream)",
+              textDecoration: "none",
+            }}
+          >
+            {copy.joinWaitlistShort}
+          </a>
         </div>
       </div>
     </header>
