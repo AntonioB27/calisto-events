@@ -70,7 +70,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
                 fontSize: "10.5px",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
-                color: "var(--plum-2, #A584A6)",
+                color: "var(--gold)",
                 marginBottom: 14,
               }}
             >
@@ -165,7 +165,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
                 style={{
                   padding: "40px 32px",
                   background: config.featured
-                    ? `linear-gradient(180deg, rgba(230,167,96,0.07) 0%, rgba(230,167,96,0.02) 40%, var(--ink) 100%)`
+                    ? `linear-gradient(180deg, rgba(245,199,107,0.16) 0%, rgba(240,179,75,0.08) 35%, var(--ink) 100%)`
                     : "var(--ink)",
                   borderRight: !isLast ? "1px solid var(--hair)" : undefined,
                   display: "flex",
@@ -183,7 +183,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
                       position: "absolute",
                       inset: 0,
                       pointerEvents: "none",
-                      boxShadow: "inset 0 0 0 1px rgba(230,167,96,0.22)",
+                      boxShadow: "inset 0 0 0 1px rgba(245,199,107,0.35)",
                     }}
                   />
                 )}
@@ -230,7 +230,8 @@ export function PlanCards({ copy }: PlanCardsProps) {
                         textTransform: "uppercase",
                         color: "var(--amber, #E6A760)",
                         padding: "4px 9px",
-                        border: "1px solid rgba(230,167,96,0.3)",
+                        border: "1px solid rgba(245,199,107,0.45)",
+                        background: "rgba(245,199,107,0.12)",
                         borderRadius: 999,
                         whiteSpace: "nowrap",
                       }}
@@ -254,10 +255,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
                       gap: 6,
                     }}
                   >
-                    <span style={{ fontFamily: "var(--font-sans)", fontSize: 20, color: "var(--cream-3, #B5AB99)" }}>
-                      {priceRow?.value?.charAt(0) === "0" ? "" : priceRow?.value?.charAt(0)}
-                    </span>
-                    {priceRow?.value?.replace(/[^0-9]/g, "")}
+                    {priceRow?.value}
                     <span style={{ fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--cream-4, #6E6758)", letterSpacing: "0.02em" }}>
                       {copy.plansPerEventSuffix}
                     </span>

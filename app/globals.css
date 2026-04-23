@@ -11,8 +11,10 @@
   --cream-2: #E8DCC6;
   --cream-3: #B5AB99;
   --cream-4: #6E6758;
-  --amber:  #E6A760;
-  --amber-2: #F2C08A;
+  --amber:  #F0B34B;
+  --amber-2: #FFD28E;
+  --gold: #F5C76B;
+  --gold-deep: #C9912E;
   --plum:   #8B6A8C;
   --plum-2: #A584A6;
 
@@ -70,7 +72,11 @@ html {
 }
 
 body {
-  background: var(--ink);
+  background:
+    radial-gradient(1300px 760px at 12% -8%, rgba(168, 95, 176, 0.34), transparent 58%),
+    radial-gradient(980px 560px at 96% 14%, rgba(240, 179, 75, 0.28), transparent 60%),
+    radial-gradient(900px 620px at 84% 92%, rgba(193, 95, 148, 0.2), transparent 58%),
+    linear-gradient(180deg, #140d1f 0%, #0d0a14 48%, #0c0a0f 100%);
   color: var(--cream);
   font-family: var(--font-sans);
   font-size: 16px;
@@ -103,15 +109,25 @@ body::after {
   z-index: 0;
   background:
     radial-gradient(1100px 700px at 80% 5%,  rgba(139, 106, 140, 0.28), transparent 58%),
+    radial-gradient(850px  520px at 92% 72%, rgba(240, 179, 75, 0.16), transparent 62%),
     radial-gradient(700px  500px at 5%  80%,  rgba(165, 132, 166, 0.18), transparent 58%),
     radial-gradient(600px  400px at 55% 50%,  rgba(139, 106, 140, 0.08), transparent 60%);
   opacity: 0.9;
 }
 
+.vibrant-page-bg {
+  background:
+    radial-gradient(1500px 760px at 10% -10%, rgba(165, 98, 180, 0.30), transparent 58%),
+    radial-gradient(900px 560px at 96% 22%, rgba(245, 199, 107, 0.26), transparent 60%),
+    radial-gradient(900px 520px at 88% 92%, rgba(185, 82, 140, 0.22), transparent 60%),
+    linear-gradient(180deg, rgba(22, 14, 34, 0.98) 0%, rgba(13, 10, 20, 0.98) 48%, rgba(12, 10, 15, 0.98) 100%);
+}
+
 [data-theme="light"] .page-vignette {
   background:
     radial-gradient(1100px 700px at 80% 5%,  rgba(139, 106, 140, 0.12), transparent 58%),
-    radial-gradient(700px  500px at 5%  80%,  rgba(165, 132, 166, 0.08), transparent 58%);
+    radial-gradient(700px  500px at 5%  80%,  rgba(165, 132, 166, 0.08), transparent 58%),
+    radial-gradient(600px  380px at 92% 74%, rgba(240, 179, 75, 0.10), transparent 60%);
 }
 
 /* ════════ Photo placeholder tiles (hero phone) ════════ */
@@ -181,6 +197,12 @@ body::after {
 }
 .live-dot { animation: livePulse 2s ease-in-out infinite; }
 .nav-link:hover { color: var(--cream) !important; }
+.gold-accent-text { color: var(--gold); }
+.gold-accent-border { border-color: color-mix(in srgb, var(--gold) 42%, transparent); }
+.gold-accent-bg {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--amber) 45%, var(--gold-deep) 100%);
+  color: #1b1208;
+}
 
 /* ════════ Photo marquee ════════ */
 @keyframes marqueeLeft  { from { transform: translateX(0); }    to { transform: translateX(-50%); } }

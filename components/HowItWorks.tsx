@@ -258,22 +258,6 @@ export function HowItWorks({ copy }: HowItWorksProps) {
                   {copy.howStepPrefix} 0{item.step}
                 </div>
 
-                {/* Visual card */}
-                <div
-                  style={{
-                    height: 200,
-                    borderRadius: 14,
-                    background: "var(--glass-bg)",
-                    border: "1px solid var(--hair)",
-                    padding: 18,
-                    marginBottom: 28,
-                    overflow: "hidden",
-                    position: "relative",
-                  }}
-                >
-                  {visual}
-                </div>
-
                 {/* Title */}
                 <h3
                   style={{

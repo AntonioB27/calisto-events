@@ -6,7 +6,7 @@ type AuroraQuoteProps = { copy: LandingCopy };
 export function AuroraQuote({ copy }: AuroraQuoteProps) {
   return (
     <section
-      className="relative overflow-hidden"
+      className="aurora-quote-section relative overflow-hidden"
       aria-label={copy.auroraQuoteSectionAria}
       style={{ borderTop: "1px solid var(--hair)", zIndex: 2 }}
     >
@@ -43,7 +43,7 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
         }}
       >
         {/* Left: quote */}
-        <div style={{ position: "relative", paddingRight: 48 }}>
+        <div className="aurora-quote-copy" style={{ position: "relative", paddingRight: 48 }}>
           {/* Giant open-quote */}
           <div
             aria-hidden
@@ -118,7 +118,7 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
         </div>
 
         {/* Right: Aurora */}
-        <div style={{ position: "relative", display: "flex", justifyContent: "center", alignSelf: "flex-end" }}>
+        <div className="aurora-quote-mascot-wrap" style={{ position: "relative", display: "flex", justifyContent: "center", alignSelf: "flex-end" }}>
           <div
             aria-hidden
             style={{
@@ -133,6 +133,7 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
             }}
           />
           <Image
+            className="aurora-quote-mascot"
             src="/brand/aurora_photo.png"
             alt={copy.auroraMascotAlt}
             width={400}
@@ -156,8 +157,24 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
 
       <style>{`
         @media (max-width: 960px) {
+          .aurora-quote-section {
+            overflow: visible;
+          }
           section[aria-label="${copy.auroraQuoteSectionAria}"] > div:last-of-type {
             grid-template-columns: 1fr !important;
+            padding-top: 56px !important;
+            padding-bottom: 56px !important;
+          }
+          .aurora-quote-copy {
+            padding-right: 0 !important;
+          }
+          .aurora-quote-mascot-wrap {
+            margin-top: 28px;
+            justify-content: center !important;
+          }
+          .aurora-quote-mascot {
+            width: min(78vw, 320px) !important;
+            max-width: 320px !important;
           }
         }
       `}</style>

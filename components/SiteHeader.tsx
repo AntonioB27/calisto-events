@@ -29,18 +29,6 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
           style={{ textDecoration: "none" }}
         >
           <span
-            aria-hidden
-            style={{
-              display: "inline-block",
-              width: 22,
-              height: 22,
-              borderRadius: "50%",
-              background: "radial-gradient(circle at 30% 30%, var(--plum-2, #A584A6), var(--plum, #8B6A8C) 55%, #3d2640 100%)",
-              boxShadow: "0 0 20px rgba(165,132,166,0.4), inset 0 0 0 1px rgba(255,255,255,0.10)",
-              flexShrink: 0,
-            }}
-          />
-          <span
             style={{
               fontFamily: "var(--font-display)",
               fontSize: 22,
@@ -92,9 +80,9 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
               fontWeight: 500,
               padding: "9px 16px",
               borderRadius: 999,
-              background: "var(--plum)",
-              color: "var(--cream)",
-              boxShadow: "0 0 0 1px rgba(255,255,255,0.08) inset, 0 8px 32px -8px rgba(139,106,140,0.45)",
+              background: "linear-gradient(135deg, var(--gold) 0%, var(--amber) 45%, var(--gold-deep) 100%)",
+              color: "#1b1208",
+              boxShadow: "0 0 0 1px rgba(255,255,255,0.28) inset, 0 10px 32px -8px rgba(240,179,75,0.45)",
               transition: "all 250ms ease",
               textDecoration: "none",
               letterSpacing: "0.01em",
@@ -113,8 +101,8 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
               fontWeight: 500,
               padding: "8px 14px",
               borderRadius: 999,
-              background: "var(--plum)",
-              color: "var(--cream)",
+              background: "linear-gradient(135deg, var(--gold) 0%, var(--amber) 45%, var(--gold-deep) 100%)",
+              color: "#1b1208",
               textDecoration: "none",
             }}
           >

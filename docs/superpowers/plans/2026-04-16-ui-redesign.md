@@ -12,44 +12,46 @@
 
 ## Code Review Findings (fix first in Task 1)
 
-1. **`Hero.tsx` indentation bug** — the inner `<div>` wrapping h1/p/CTAs has misaligned indentation (cosmetic but worth fixing).
-2. **`SiteHeader.tsx` indentation bug** — same issue inside the flex container.
-3. **`LanguageSelectorPopup.tsx`** — "Continue" button label is hardcoded English; not translated.
-4. **`AppPreviewWindow.tsx`** — the centered hover overlay is `pointer-events-none`, so the enlarged preview image can't be dismissed by mousing onto it; the `onMouseLeave` is on the column wrapper, which works, but the overlay itself can feel jumpy. Minor UX issue.
-5. **`app/layout.tsx`** — `<html lang="en">` is hard-coded; should match the active locale. (Not fixed in this plan—requires server component plumbing through layout; flag only.)
-6. **`LanguageSelectorPopup`** — `useState(true)` means it appears on every single page load with no persistence; users switching language see it again immediately. This is by design but should be noted.
+1. `**Hero.tsx` indentation bug** — the inner `<div>` wrapping h1/p/CTAs has misaligned indentation (cosmetic but worth fixing).
+2. `**SiteHeader.tsx` indentation bug** — same issue inside the flex container.
+3. `**LanguageSelectorPopup.tsx`** — "Continue" button label is hardcoded English; not translated.
+4. `**AppPreviewWindow.tsx**` — the centered hover overlay is `pointer-events-none`, so the enlarged preview image can't be dismissed by mousing onto it; the `onMouseLeave` is on the column wrapper, which works, but the overlay itself can feel jumpy. Minor UX issue.
+5. `**app/layout.tsx**` — `<html lang="en">` is hard-coded; should match the active locale. (Not fixed in this plan—requires server component plumbing through layout; flag only.)
+6. `**LanguageSelectorPopup**` — `useState(true)` means it appears on every single page load with no persistence; users switching language see it again immediately. This is by design but should be noted.
 
 ---
 
 ## File Map
 
-| File | Action | What changes |
-|------|--------|--------------|
-| `app/globals.css` | Modify | New CSS variables: `--rose`, `--warm-bg`; improved plan-card animation |
-| `components/SiteHeader.tsx` | Modify | Fix indentation; add subtle logo wordmark color |
-| `components/Hero.tsx` | Modify | Fix indentation; add warm-tinted radial glow; badge polish; CTA button visual refresh |
-| `components/AppPreviewWindow.tsx` | Modify | Richer frame—inner glow, softer border, label above frame |
-| `components/FeatureGrid.tsx` | Modify | Icon per card (emoji-based, no new dep); accent top-border on cards; asymmetric header layout |
-| `components/HowItWorks.tsx` | Modify | Dashed connector line between steps on desktop; warmer bg |
-| `components/PlanCards.tsx` | Modify | Popular plan gets prominent gradient header; other plans get subtle icon badges; footer note styled differently |
-| `components/Lifecycle.tsx` | Modify | Timeline layout—left border with dots, not bullet list |
-| `components/FutureRoadmap.tsx` | Modify | Status pill per item (`Roadmap` / `Planned` / `Idea`); horizontal card layout |
-| `components/WaitlistForm.tsx` | Modify | Split layout with Aurora mascot image on desktop; warmer card bg |
-| `components/SiteFooter.tsx` | Modify | Richer footer with social/brand row |
-| `components/LanguageSelectorPopup.tsx` | Modify | Fix hardcoded "Continue" label |
-| `lib/i18n.ts` | Modify | Add `langContinue` key to `LandingCopy` type and all three locale copies |
+
+| File                                   | Action | What changes                                                                                                    |
+| -------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------- |
+| `app/globals.css`                      | Modify | New CSS variables: `--rose`, `--warm-bg`; improved plan-card animation                                          |
+| `components/SiteHeader.tsx`            | Modify | Fix indentation; add subtle logo wordmark color                                                                 |
+| `components/Hero.tsx`                  | Modify | Fix indentation; add warm-tinted radial glow; badge polish; CTA button visual refresh                           |
+| `components/AppPreviewWindow.tsx`      | Modify | Richer frame—inner glow, softer border, label above frame                                                       |
+| `components/FeatureGrid.tsx`           | Modify | Icon per card (emoji-based, no new dep); accent top-border on cards; asymmetric header layout                   |
+| `components/HowItWorks.tsx`            | Modify | Dashed connector line between steps on desktop; warmer bg                                                       |
+| `components/PlanCards.tsx`             | Modify | Popular plan gets prominent gradient header; other plans get subtle icon badges; footer note styled differently |
+| `components/Lifecycle.tsx`             | Modify | Timeline layout—left border with dots, not bullet list                                                          |
+| `components/FutureRoadmap.tsx`         | Modify | Status pill per item (`Roadmap` / `Planned` / `Idea`); horizontal card layout                                   |
+| `components/WaitlistForm.tsx`          | Modify | Split layout with Aurora mascot image on desktop; warmer card bg                                                |
+| `components/SiteFooter.tsx`            | Modify | Richer footer with social/brand row                                                                             |
+| `components/LanguageSelectorPopup.tsx` | Modify | Fix hardcoded "Continue" label                                                                                  |
+| `lib/i18n.ts`                          | Modify | Add `langContinue` key to `LandingCopy` type and all three locale copies                                        |
+
 
 ---
 
 ## Task 1: Code Review Fixes
 
 **Files:**
+
 - Modify: `components/Hero.tsx`
 - Modify: `components/SiteHeader.tsx`
 - Modify: `components/LanguageSelectorPopup.tsx`
 - Modify: `lib/i18n.ts`
-
-- [ ] **Step 1: Fix Hero.tsx indentation**
+- **Step 1: Fix Hero.tsx indentation**
 
 Replace the inner div wrapper around h1/p/cta from its current misaligned indent to proper 8-space indent:
 
@@ -69,11 +71,11 @@ Replace the inner div wrapper around h1/p/cta from its current misaligned indent
         </div>
 ```
 
-- [ ] **Step 2: Fix SiteHeader.tsx indentation**
+- **Step 2: Fix SiteHeader.tsx indentation**
 
 The inner `<div className="flex items-center justify-between gap-4 ...">` and `<a href="#top">` have inconsistent indent. Fix both to align to 10 spaces (inside the outer div max-w-5xl → flex container).
 
-- [ ] **Step 3: Add `langContinue` to i18n**
+- **Step 3: Add `langContinue` to i18n**
 
 In `lib/i18n.ts`, add `langContinue: string` to `LandingCopy` type and populate all three locales:
 
@@ -91,7 +93,7 @@ In `lib/i18n.ts`, add `langContinue: string` to `LandingCopy` type and populate 
   langContinue: "Weiter",
 ```
 
-- [ ] **Step 4: Fix LanguageSelectorPopup hardcoded label**
+- **Step 4: Fix LanguageSelectorPopup hardcoded label**
 
 ```tsx
 // components/LanguageSelectorPopup.tsx
@@ -99,7 +101,7 @@ In `lib/i18n.ts`, add `langContinue: string` to `LandingCopy` type and populate 
           {copy.langContinue}
 ```
 
-- [ ] **Step 5: Verify TypeScript compiles**
+- **Step 5: Verify TypeScript compiles**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -107,7 +109,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 6: Commit**
+- **Step 6: Commit**
 
 ```bash
 git add components/Hero.tsx components/SiteHeader.tsx components/LanguageSelectorPopup.tsx lib/i18n.ts
@@ -119,9 +121,9 @@ git commit -m "fix: code review fixes — indentation, translate langContinue ke
 ## Task 2: Design Tokens & Global CSS
 
 **Files:**
-- Modify: `app/globals.css`
 
-- [ ] **Step 1: Add warm accent and subtle background**
+- Modify: `app/globals.css`
+- **Step 1: Add warm accent and subtle background**
 
 Replace the contents of `app/globals.css` with an expanded set of tokens. Keep all existing animations; add:
 
@@ -146,7 +148,7 @@ Replace the contents of `app/globals.css` with an expanded set of tokens. Keep a
 }
 ```
 
-- [ ] **Step 2: Add hero radial glow utility class**
+- **Step 2: Add hero radial glow utility class**
 
 Add after the existing keyframes:
 
@@ -157,7 +159,7 @@ Add after the existing keyframes:
 }
 ```
 
-- [ ] **Step 3: Add timeline CSS for Lifecycle section**
+- **Step 3: Add timeline CSS for Lifecycle section**
 
 ```css
 /* Lifecycle timeline */
@@ -193,7 +195,7 @@ Add after the existing keyframes:
 }
 ```
 
-- [ ] **Step 4: Commit**
+- **Step 4: Commit**
 
 ```bash
 git add app/globals.css
@@ -205,9 +207,9 @@ git commit -m "feat: expand design tokens — warm bg, hero glow, timeline CSS"
 ## Task 3: Redesign Hero Section
 
 **Files:**
-- Modify: `components/Hero.tsx`
 
-- [ ] **Step 1: Replace Hero.tsx entirely**
+- Modify: `components/Hero.tsx`
+- **Step 1: Replace Hero.tsx entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -288,14 +290,14 @@ export function Hero({ copy }: HeroProps) {
 }
 ```
 
-- [ ] **Step 2: Verify dev server renders hero correctly**
+- **Step 2: Verify dev server renders hero correctly**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npm run dev &
 # Open http://localhost:3000/en — check hero looks correct, no overflow issues
 ```
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add components/Hero.tsx
@@ -307,11 +309,12 @@ git commit -m "feat: redesign Hero — warmer bg, bigger type, cta shadow, decor
 ## Task 4: Redesign Feature Grid
 
 **Files:**
+
 - Modify: `components/FeatureGrid.tsx`
 
 The feature cards will get a colored top accent line and a relevant icon. Icons are hardcoded by feature index (no new deps, just emoji in a styled pill).
 
-- [ ] **Step 1: Replace FeatureGrid.tsx entirely**
+- **Step 1: Replace FeatureGrid.tsx entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -379,7 +382,7 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
 }
 ```
 
-- [ ] **Step 2: Commit**
+- **Step 2: Commit**
 
 ```bash
 git add components/FeatureGrid.tsx
@@ -391,9 +394,9 @@ git commit -m "feat: redesign FeatureGrid — icon pills, improved header layout
 ## Task 5: Redesign How It Works
 
 **Files:**
-- Modify: `components/HowItWorks.tsx`
 
-- [ ] **Step 1: Replace HowItWorks.tsx entirely**
+- Modify: `components/HowItWorks.tsx`
+- **Step 1: Replace HowItWorks.tsx entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -445,7 +448,7 @@ export function HowItWorks({ copy }: HowItWorksProps) {
 }
 ```
 
-- [ ] **Step 2: Commit**
+- **Step 2: Commit**
 
 ```bash
 git add components/HowItWorks.tsx
@@ -457,11 +460,12 @@ git commit -m "feat: redesign HowItWorks — dashed connector line, warm bg, mob
 ## Task 6: Redesign Plan Cards
 
 **Files:**
+
 - Modify: `components/PlanCards.tsx`
 
 The "popular" (premium) card gets a gradient header strip. Other cards get a cleaner summary line. Price is displayed prominently as a number.
 
-- [ ] **Step 1: Replace PlanCards.tsx entirely**
+- **Step 1: Replace PlanCards.tsx entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -595,7 +599,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
 }
 ```
 
-- [ ] **Step 2: Commit**
+- **Step 2: Commit**
 
 ```bash
 git add components/PlanCards.tsx
@@ -607,11 +611,12 @@ git commit -m "feat: redesign PlanCards — gradient popular header, icon badges
 ## Task 7: Redesign Lifecycle Section
 
 **Files:**
+
 - Modify: `components/Lifecycle.tsx`
 
 Use the `.lifecycle-rule`, `.lifecycle-dot` CSS classes added in Task 2.
 
-- [ ] **Step 1: Replace Lifecycle.tsx entirely**
+- **Step 1: Replace Lifecycle.tsx entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -645,7 +650,7 @@ export function Lifecycle({ copy }: LifecycleProps) {
 }
 ```
 
-- [ ] **Step 2: Commit**
+- **Step 2: Commit**
 
 ```bash
 git add components/Lifecycle.tsx
@@ -657,11 +662,12 @@ git commit -m "feat: redesign Lifecycle — timeline layout with gradient connec
 ## Task 8: Redesign Future Roadmap
 
 **Files:**
+
 - Modify: `components/FutureRoadmap.tsx`
 
 Add a colored status pill per item. Items follow the copy order: index 0–1 → "Roadmap", 2–3 → "Planned", 4 → "Idea". Pills are purely visual, not part of i18n copy (they match the copy text which already says "Roadmap:" / "Planned:" anyway).
 
-- [ ] **Step 1: Replace FutureRoadmap.tsx entirely**
+- **Step 1: Replace FutureRoadmap.tsx entirely**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -716,7 +722,7 @@ export function FutureRoadmap({ copy }: FutureRoadmapProps) {
 }
 ```
 
-- [ ] **Step 2: Commit**
+- **Step 2: Commit**
 
 ```bash
 git add components/FutureRoadmap.tsx
@@ -728,11 +734,12 @@ git commit -m "feat: redesign FutureRoadmap — status pills, 2-col grid layout"
 ## Task 9: Redesign Waitlist Form
 
 **Files:**
+
 - Modify: `components/WaitlistForm.tsx`
 
 On desktop, split layout: Aurora mascot on the left, form on the right. Warmer card background.
 
-- [ ] **Step 1: Replace WaitlistForm.tsx entirely**
+- **Step 1: Replace WaitlistForm.tsx entirely**
 
 ```tsx
 "use client";
@@ -880,7 +887,7 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
 }
 ```
 
-- [ ] **Step 2: Commit**
+- **Step 2: Commit**
 
 ```bash
 git add components/WaitlistForm.tsx
@@ -892,10 +899,10 @@ git commit -m "feat: redesign WaitlistForm — split layout with Aurora panel, r
 ## Task 10: Redesign Site Header & Footer
 
 **Files:**
+
 - Modify: `components/SiteHeader.tsx`
 - Modify: `components/SiteFooter.tsx`
-
-- [ ] **Step 1: Replace SiteHeader.tsx**
+- **Step 1: Replace SiteHeader.tsx**
 
 The logo wordmark gets a primary-tinted color on "Calisto" to add brand warmth.
 
@@ -963,7 +970,7 @@ export function SiteHeader({ copy }: SiteHeaderProps) {
 }
 ```
 
-- [ ] **Step 2: Replace SiteFooter.tsx**
+- **Step 2: Replace SiteFooter.tsx**
 
 ```tsx
 import type { LandingCopy } from "@/lib/i18n";
@@ -1002,7 +1009,7 @@ export function SiteFooter({ copy }: SiteFooterProps) {
 }
 ```
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add components/SiteHeader.tsx components/SiteFooter.tsx
@@ -1013,7 +1020,7 @@ git commit -m "feat: redesign Header (split wordmark color) and Footer (icon + c
 
 ## Task 11: Final Polish & Verify
 
-- [ ] **Step 1: Run TypeScript check**
+- **Step 1: Run TypeScript check**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
@@ -1021,7 +1028,7 @@ cd /home/antonio/repo/calisto-landing && npx tsc --noEmit
 
 Expected: no errors
 
-- [ ] **Step 2: Run lint**
+- **Step 2: Run lint**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npx eslint . --ext .ts,.tsx
@@ -1029,25 +1036,25 @@ cd /home/antonio/repo/calisto-landing && npx eslint . --ext .ts,.tsx
 
 Expected: no new errors introduced
 
-- [ ] **Step 3: Start dev server and visual check each section**
+- **Step 3: Start dev server and visual check each section**
 
 ```bash
 cd /home/antonio/repo/calisto-landing && npm run dev
 ```
 
 Check in browser at `http://localhost:3000/en`:
-- [ ] Hero: warm radial glow, decorative rings, mascot speech bubble, CTA shadow
-- [ ] Feature grid: icon pills visible, header layout correct
-- [ ] How It Works: dashed connector line visible on desktop, vertical on mobile
-- [ ] Plan Cards: Premium card has purple gradient header, price prominent, expand-on-hover works
-- [ ] Lifecycle: timeline dots and connector line visible
-- [ ] Future Roadmap: status pills visible, 2-col grid on sm+
-- [ ] Waitlist: Aurora mascot panel visible on lg, form works end-to-end
-- [ ] Header: "Cal" is purple, "isto" is dark
-- [ ] Footer: icon + split wordmark + copyright year
-- [ ] Test HR and DE locales — "Continue" button now shows translated text
 
-- [ ] **Step 4: Final commit if any polish tweaks were needed**
+- Hero: warm radial glow, decorative rings, mascot speech bubble, CTA shadow
+- Feature grid: icon pills visible, header layout correct
+- How It Works: dashed connector line visible on desktop, vertical on mobile
+- Plan Cards: Premium card has purple gradient header, price prominent, expand-on-hover works
+- Lifecycle: timeline dots and connector line visible
+- Future Roadmap: status pills visible, 2-col grid on sm+
+- Waitlist: Aurora mascot panel visible on lg, form works end-to-end
+- Header: "Cal" is purple, "isto" is dark
+- Footer: icon + split wordmark + copyright year
+- Test HR and DE locales — "Continue" button now shows translated text
+- **Step 4: Final commit if any polish tweaks were needed**
 
 ```bash
 git add -p
@@ -1059,6 +1066,7 @@ git commit -m "fix: final polish tweaks from visual review"
 ## Self-Review
 
 **Spec coverage:**
+
 - Code review issues 1–4: covered in Task 1
 - Code review issue 5 (`html lang`): flagged, not implemented (requires layout plumbing outside scope)
 - Warm, human aesthetic: Tasks 2–10 cover every section

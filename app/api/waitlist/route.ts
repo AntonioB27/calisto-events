@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n";
+import { sendWelcomeEmail } from "@/lib/welcome-email";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -25,6 +27,11 @@ export async function POST(request: Request) {
   }
 
   const email = normalizeEmail(payload.email);
+  const rawLocale =
+    "locale" in payload && typeof payload.locale === "string"
+      ? payload.locale
+      : DEFAULT_LOCALE;
+  const locale: Locale = isLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE;
   if (!isValidEmail(email)) {
     return NextResponse.json({ error: "Invalid email." }, { status: 400 });
   }
@@ -40,6 +47,16 @@ export async function POST(request: Request) {
       }
       console.error("[waitlist] insert failed", error);
       return NextResponse.json({ error: "Failed to join waitlist." }, { status: 500 });
+    }
+
+    const welcome = await sendWelcomeEmail(email, locale);
+    if (!welcome.ok) {
+      // Do not block waitlist signups on email delivery issues.
+      console.warn("[waitlist] welcome email not sent", {
+        email,
+        skipped: welcome.skipped ?? false,
+        error: welcome.error,
+      });
     }
 
     return NextResponse.json({ ok: true }, { status: 200 });

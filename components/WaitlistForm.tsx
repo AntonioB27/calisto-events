@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import type { LandingCopy } from "@/lib/i18n";
+import type { LandingCopy, Locale } from "@/lib/i18n";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function isValidEmail(v: string) {
@@ -11,9 +11,10 @@ function isValidEmail(v: string) {
 type WaitlistFormProps = {
   copy: LandingCopy["waitlist"];
   mascotAlt: string;
+  locale: Locale;
 };
 
-export function WaitlistForm({ copy }: WaitlistFormProps) {
+export function WaitlistForm({ copy, locale }: WaitlistFormProps) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -30,7 +31,7 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
         const res = await fetch("/api/waitlist", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: trimmed }),
+          body: JSON.stringify({ email: trimmed, locale }),
         });
         if (!res.ok) { setError(copy.submitFailed); return; }
         setSubmitted(true);
@@ -40,7 +41,7 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
         setBusy(false);
       }
     },
-    [copy.invalidEmail, copy.submitFailed, email],
+    [copy.invalidEmail, copy.submitFailed, email, locale],
   );
 
   return (
@@ -60,7 +61,8 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
         style={{
           position: "absolute",
           inset: 0,
-          background: "radial-gradient(ellipse at center, rgba(139,106,140,0.30) 0%, transparent 60%)",
+          background:
+            "radial-gradient(ellipse at center, rgba(139,106,140,0.30) 0%, transparent 60%), radial-gradient(ellipse at 85% 25%, rgba(240,179,75,0.22) 0%, transparent 55%)",
           opacity: 0.7,
           pointerEvents: "none",
         }}
@@ -124,7 +126,7 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
               padding: 6,
               borderRadius: 999,
               border: "1px solid var(--hair-strong)",
-              background: "var(--glass-bg-2)",
+              background: "color-mix(in srgb, var(--glass-bg-2) 86%, rgba(240,179,75,0.08))",
               backdropFilter: "blur(12px)",
             }}
           >
@@ -162,8 +164,8 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
                 padding: "11px 22px",
                 borderRadius: 999,
                 border: "none",
-                background: "var(--plum)",
-                color: "var(--cream)",
+                background: "linear-gradient(135deg, var(--gold) 0%, var(--amber) 45%, var(--gold-deep) 100%)",
+                color: "#1b1208",
                 fontFamily: "var(--font-sans)",
                 fontSize: 13,
                 fontWeight: 500,
@@ -196,18 +198,6 @@ export function WaitlistForm({ copy }: WaitlistFormProps) {
           </p>
         )}
 
-        <p
-          style={{
-            marginTop: 20,
-            fontFamily: "var(--font-mono)",
-            fontSize: "10.5px",
-            color: "var(--cream-4, #6E6758)",
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-          }}
-        >
-          {copy.note}
-        </p>
       </div>
     </section>
   );

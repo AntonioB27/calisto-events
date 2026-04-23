@@ -27,6 +27,7 @@ const SCREEN_COMPONENTS = [
   ShareQRScreen,
   DownloadScreen,
 ] as const;
+const PREVIEW_SEQUENCE = [0, 9, 1, 6] as const; // Gallery, Download, Guest welcome, Guest list
 
 type AppPreviewWindowProps = { copy: LandingCopy };
 
@@ -39,7 +40,12 @@ export function AppPreviewWindow({ copy }: AppPreviewWindowProps) {
   const [hovered, setHovered] = useState(false);
 
   const captions = useMemo(
-    () => copy.appPreviewCaptions.map((label, i) => ({ label, i })),
+    () =>
+      copy.appPreviewCaptions.map((label, i) => ({
+        label,
+        i,
+        screenIndex: PREVIEW_SEQUENCE[i] ?? 0,
+      })),
     [copy],
   );
 
@@ -233,8 +239,8 @@ export function AppPreviewWindow({ copy }: AppPreviewWindowProps) {
                       position: "relative",
                     }}
                   >
-                    {captions.map(({ i }) => {
-                      const Screen = SCREEN_COMPONENTS[i];
+                    {captions.map(({ i, screenIndex }) => {
+                      const Screen = SCREEN_COMPONENTS[screenIndex];
                       return (
                         <div
                           key={i}
