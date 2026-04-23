@@ -5,13 +5,73 @@ import type { LandingCopy } from "@/lib/i18n";
 
 type FAQProps = { copy: LandingCopy };
 
+function FaqToggleIcon({ isOpen }: { isOpen: boolean }) {
+  const stroke = 2.25;
+  return (
+    <span
+      style={{
+        position: "relative",
+        width: 12,
+        height: 12,
+        flexShrink: 0,
+        display: "block",
+        lineHeight: 0,
+      }}
+      aria-hidden
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width={12}
+        height={12}
+        fill="none"
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          opacity: isOpen ? 0 : 1,
+          transform: isOpen ? "scale(0.85)" : "scale(1)",
+          transition: "opacity 160ms ease, transform 160ms ease",
+        }}
+        stroke="currentColor"
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+      <svg
+        viewBox="0 0 24 24"
+        width={12}
+        height={12}
+        fill="none"
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          opacity: isOpen ? 1 : 0,
+          transform: isOpen ? "scale(1)" : "scale(0.85)",
+          transition: "opacity 160ms ease, transform 160ms ease",
+        }}
+        stroke="currentColor"
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <line x1="6" y1="6" x2="18" y2="18" />
+        <line x1="18" y1="6" x2="6" y2="18" />
+      </svg>
+    </span>
+  );
+}
+
 export function FAQ({ copy }: FAQProps) {
   const [openIdx, setOpenIdx] = useState<number>(0);
 
   return (
     <section
       id="faq"
-      className="relative"
+      className="relative scroll-mt-20"
       style={{ borderTop: "1px solid var(--hair)", padding: "120px 0", zIndex: 2 }}
     >
       <div className="mx-auto" style={{ maxWidth: 1280, padding: "0 32px" }}>
@@ -68,14 +128,14 @@ export function FAQ({ copy }: FAQProps) {
             >
               If something isn{"'"}t here, write to{" "}
               <a
-                href="mailto:hello@calisto.co"
+                href="mailto:info@calisto.com"
                 style={{
                   color: "var(--amber, #E6A760)",
                   borderBottom: "1px solid rgba(230,167,96,0.3)",
                   textDecoration: "none",
                 }}
               >
-                hello@calisto.co
+                info@calisto.com
               </a>
               . We answer within a day, usually faster.
             </p>
@@ -132,18 +192,16 @@ export function FAQ({ copy }: FAQProps) {
                         border: `1px solid ${isOpen ? "var(--plum)" : "var(--hair-strong)"}`,
                         background: isOpen ? "var(--plum)" : "transparent",
                         color: isOpen ? "var(--cream)" : "var(--cream-3, #B5AB99)",
-                        display: "flex",
+                        display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
                         flexShrink: 0,
-                        transition: "all 200ms",
-                        transform: isOpen ? "rotate(45deg)" : "rotate(0deg)",
-                        fontSize: 16,
-                        lineHeight: 1,
+                        transition:
+                          "border-color 200ms ease, background-color 200ms ease, color 200ms ease",
                       }}
                       aria-hidden
                     >
-                      +
+                      <FaqToggleIcon isOpen={isOpen} />
                     </span>
                   </button>
 

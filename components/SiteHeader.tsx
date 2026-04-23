@@ -8,24 +8,15 @@ type SiteHeaderProps = {
 
 export function SiteHeader({ copy, locale }: SiteHeaderProps) {
   return (
-    <header
-      className="sticky top-0 z-50"
-      style={{
-        padding: "18px 0",
-        background: "linear-gradient(to bottom, rgba(12,10,15,0.90) 0%, rgba(12,10,15,0.75) 70%, rgba(12,10,15,0) 100%)",
-        backdropFilter: "blur(14px) saturate(1.1)",
-        WebkitBackdropFilter: "blur(14px) saturate(1.1)",
-        borderBottom: "1px solid var(--hair)",
-      }}
-    >
+    <header className="site-header sticky top-0 z-50">
       <div
-        className="mx-auto flex items-center justify-between gap-6"
-        style={{ maxWidth: 1280, padding: "0 32px" }}
+        className="mx-auto grid w-full max-w-[1280px] grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1.5 px-4 sm:px-6
+          md:flex md:items-center md:justify-between md:gap-6 md:px-8"
       >
         {/* Brand */}
         <a
           href="#top"
-          className="flex items-center gap-2.5 shrink-0 focus:outline-none"
+          className="min-w-0 shrink-0 focus:outline-none"
           style={{ textDecoration: "none" }}
         >
           <span
@@ -42,34 +33,8 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
           </span>
         </a>
 
-        {/* Nav — hidden on mobile */}
-        <nav
-          className="hidden md:flex items-center"
-          aria-label={copy.navAriaLabel}
-          style={{ gap: 34 }}
-        >
-          {copy.nav.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="nav-link"
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 13,
-                color: "var(--cream-2, #E8DCC6)",
-                letterSpacing: "0.02em",
-                padding: "6px 0",
-                transition: "color 200ms",
-                textDecoration: "none",
-              }}
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
-
-        {/* Right: lang + CTA */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Right: lang + CTA (row 1 on mobile; end cap on md+) */}
+        <div className="flex items-center justify-self-end gap-3 shrink-0 md:order-3">
           <LanguageSelectorBar copy={copy} locale={locale} variant="header" />
           <a
             href="#waitlist"
@@ -91,7 +56,6 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
             {copy.joinWaitlistShort}
             <span aria-hidden style={{ transition: "transform 300ms" }}>→</span>
           </a>
-          {/* Mobile CTA */}
           <a
             href="#waitlist"
             className="sm:hidden"
@@ -109,6 +73,31 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
             {copy.joinWaitlistShort}
           </a>
         </div>
+
+        {/* Nav: full-width row on mobile; between brand and tools on md+ */}
+        <nav
+          className="col-span-2 -mx-1 flex w-full min-w-0 flex-wrap items-center justify-center gap-x-2.5 gap-y-0.5 border-t border-[var(--hair-2)] pt-1.5 text-xs
+            md:order-2 md:col-span-1 md:mx-0 md:w-auto md:min-w-0 md:flex-1 md:flex-nowrap md:justify-center md:gap-x-[34px] md:gap-y-0 md:border-0 md:pt-0 md:text-[13px]"
+          aria-label={copy.navAriaLabel}
+        >
+          {copy.nav.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className="nav-link"
+              style={{
+                fontFamily: "var(--font-sans)",
+                color: "var(--cream-2, #E8DCC6)",
+                letterSpacing: "0.02em",
+                padding: "6px 4px",
+                transition: "color 200ms",
+                textDecoration: "none",
+              }}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
       </div>
     </header>
   );

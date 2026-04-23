@@ -56,6 +56,7 @@ const PLAN_CONFIG: Record<string, PlanConfig> = {
 export function PlanCards({ copy }: PlanCardsProps) {
   const [mobileActivePlan, setMobileActivePlan] = useState<string>("free");
   const planRefs: MutableRefObject<Record<string, HTMLElement | null>> = useRef({});
+  const activePlanRef = useRef<string | null>(mobileActivePlan);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -64,7 +65,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
     const updateMobileActivePlan = () => {
       if (window.innerWidth > 640) return;
       const centerY = window.innerHeight / 2;
-      let closestId = mobileActivePlan;
+      let closestId: string | null = null;
       let closestDistance = Number.POSITIVE_INFINITY;
 
       for (const [planId, el] of Object.entries(planRefs.current)) {
@@ -78,7 +79,8 @@ export function PlanCards({ copy }: PlanCardsProps) {
         }
       }
 
-      if (closestId && closestId !== mobileActivePlan) {
+      if (closestId && closestId !== activePlanRef.current) {
+        activePlanRef.current = closestId;
         setMobileActivePlan(closestId);
       }
     };
@@ -100,12 +102,12 @@ export function PlanCards({ copy }: PlanCardsProps) {
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
     };
-  }, [mobileActivePlan]);
+  }, []);
 
   return (
     <section
       id="plans"
-      className="relative"
+      className="relative scroll-mt-20"
       style={{ borderTop: "1px solid var(--hair)", padding: "120px 0", zIndex: 2 }}
     >
       <div className="mx-auto" style={{ maxWidth: 1280, padding: "0 32px" }}>

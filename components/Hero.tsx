@@ -17,37 +17,6 @@ export function Hero({ copy }: HeroProps) {
         >
           {/* ── Left: copy ── */}
           <div style={{ position: "relative", zIndex: 3 }}>
-            {/* Eyebrow */}
-            <div
-              className="inline-flex items-center gap-2.5"
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "10.5px",
-                letterSpacing: "0.28em",
-                textTransform: "uppercase",
-                color: "var(--cream-3, #B5AB99)",
-                padding: "7px 14px",
-                border: "1px solid var(--hair-2)",
-                borderRadius: 999,
-                background: "var(--glass-bg)",
-                marginBottom: 32,
-              }}
-            >
-              <span
-                aria-hidden
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: "var(--plum-2, #A584A6)",
-                  boxShadow: "0 0 10px rgba(165,132,166,0.5)",
-                  display: "inline-block",
-                  flexShrink: 0,
-                }}
-              />
-              {copy.heroBadge}
-            </div>
-
             {/* Headline */}
             <h1
               style={{
@@ -178,8 +147,8 @@ export function Hero({ copy }: HeroProps) {
                 width: "min(420px, 92vw)",
                 borderRadius: 28,
                 border: "1px solid var(--hair-2)",
-                background: "linear-gradient(180deg, rgba(20,16,25,0.88) 0%, rgba(12,10,15,0.92) 100%)",
-                boxShadow: "0 30px 70px -24px rgba(0,0,0,0.65)",
+                background: "linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%)",
+                boxShadow: "0 28px 64px -22px rgba(0,0,0,0.28)",
                 padding: "24px 22px",
                 display: "flex",
                 flexDirection: "column",
@@ -187,6 +156,34 @@ export function Hero({ copy }: HeroProps) {
                 gap: 16,
               }}
             >
+              <div
+                className="inline-flex items-center gap-2.5"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "10.5px",
+                  letterSpacing: "0.28em",
+                  textTransform: "uppercase",
+                  color: "var(--cream-3, #B5AB99)",
+                  padding: "7px 14px",
+                  border: "1px solid var(--hair-2)",
+                  borderRadius: 999,
+                  background: "var(--glass-bg)",
+                }}
+              >
+                <span
+                  aria-hidden
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "var(--plum-2, #A584A6)",
+                    boxShadow: "0 0 10px rgba(165,132,166,0.5)",
+                    display: "inline-block",
+                    flexShrink: 0,
+                  }}
+                />
+                {copy.heroBadge}
+              </div>
               <Image
                 src="/brand/mascot.png"
                 alt={copy.auroraMascotAlt}
@@ -242,11 +239,7 @@ export function Hero({ copy }: HeroProps) {
             margin-left: auto !important;
             margin-right: auto !important;
           }
-          #top > div > div > div:first-child > div:first-child {
-            margin-left: auto !important;
-            margin-right: auto !important;
-          }
-          #top > div > div > div:first-child > div:nth-of-type(2) {
+          #top > div > div > div:first-child > div:nth-of-type(1) {
             justify-content: center !important;
           }
           #top > div > div > div:first-child > div:last-child {

@@ -69,6 +69,10 @@
 html {
   scroll-behavior: smooth;
   overflow-x: clip;
+  color-scheme: dark;
+}
+html[data-theme="light"] {
+  color-scheme: light;
 }
 
 body {
@@ -87,7 +91,17 @@ body {
   min-height: 100vh;
 }
 
+[data-theme="light"] body {
+  background:
+    radial-gradient(1300px 760px at 12% -8%, rgba(168, 95, 176, 0.12), transparent 58%),
+    radial-gradient(980px 560px at 96% 14%, rgba(240, 179, 75, 0.16), transparent 60%),
+    radial-gradient(900px 620px at 84% 92%, rgba(193, 95, 148, 0.08), transparent 58%),
+    linear-gradient(180deg, #fbf7f0 0%, #f1ebe2 48%, #e8e2d8 100%);
+  color: var(--cream);
+}
+
 ::selection { background: var(--amber); color: var(--ink); }
+html[data-theme="light"] ::selection { color: #1a1108; }
 
 /* ════════ Film grain overlay ════════ */
 body::after {
@@ -99,6 +113,10 @@ body::after {
   opacity: 0.032;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.8'/></svg>");
+}
+html[data-theme="light"] body::after {
+  opacity: 0.018;
+  mix-blend-mode: soft-light;
 }
 
 /* ════════ Page vignette ════════ */
@@ -121,6 +139,14 @@ body::after {
     radial-gradient(900px 560px at 96% 22%, rgba(245, 199, 107, 0.26), transparent 60%),
     radial-gradient(900px 520px at 88% 92%, rgba(185, 82, 140, 0.22), transparent 60%),
     linear-gradient(180deg, rgba(22, 14, 34, 0.98) 0%, rgba(13, 10, 20, 0.98) 48%, rgba(12, 10, 15, 0.98) 100%);
+}
+
+[data-theme="light"] .vibrant-page-bg {
+  background:
+    radial-gradient(1500px 760px at 10% -10%, rgba(165, 98, 180, 0.14), transparent 58%),
+    radial-gradient(900px 560px at 96% 22%, rgba(245, 199, 107, 0.22), transparent 60%),
+    radial-gradient(900px 520px at 88% 92%, rgba(185, 82, 140, 0.10), transparent 60%),
+    linear-gradient(180deg, #fdfaf5 0%, #f3ede4 45%, #ebe4d8 100%);
 }
 
 [data-theme="light"] .page-vignette {
@@ -197,6 +223,20 @@ body::after {
 }
 .live-dot { animation: livePulse 2s ease-in-out infinite; }
 .nav-link:hover { color: var(--cream) !important; }
+
+/* Sticky header: follows theme tokens (avoids hardcoded dark-only RGBA) */
+.site-header {
+  padding: 18px 0;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--ink) 90%, transparent) 0%,
+    color-mix(in srgb, var(--ink) 75%, transparent) 70%,
+    transparent 100%
+  );
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  border-bottom: 1px solid var(--hair);
+}
 .gold-accent-text { color: var(--gold); }
 .gold-accent-border { border-color: color-mix(in srgb, var(--gold) 42%, transparent); }
 .gold-accent-bg {
@@ -227,7 +267,7 @@ body::after {
 .plan-card-extras {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.28s ease-out;
+  transition: grid-template-rows 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .plan-card-extras-inner { overflow: hidden; min-height: 0; }
 
@@ -280,28 +320,203 @@ body::after {
   .appPreviewColFast, .appPreviewColMedium, .appPreviewColSlow { animation: none; }
 }
 
-/* ════════ Feature cards — mobile center reveal ════════ */
-.feature-card-desc {
-  max-height: 320px;
-  overflow: hidden;
-  transition: max-height 220ms ease, opacity 220ms ease;
+/* ════════ Features section — editorial lanes ════════ */
+@keyframes featuresLaneEnter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.features-section__header {
+  margin-bottom: clamp(40px, 8vw, 72px);
+}
+
+.features-section__intro {
+  max-width: 40rem;
+}
+
+.features-section__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--plum-2, #a584a6);
+  margin-bottom: 14px;
+}
+
+.features-section__eyebrow-mark {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--gold) 0%, var(--amber) 100%);
+  flex-shrink: 0;
+}
+
+.features-section__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--cream);
+  margin: 0 0 16px;
+}
+
+.features-section__lede {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--cream-3, #b5ab99);
+}
+
+.features-showcase {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.features-lane__plate {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-radius: 22px;
+  border: 1px solid var(--hair);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--lane-accent) 10%, transparent) 0%, transparent 42%),
+    var(--glass-bg);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--cream) 6%, transparent);
+  padding: 20px 20px 22px;
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease;
+  animation: featuresLaneEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.features-showcase .feature-card:nth-child(1) .features-lane__plate { animation-delay: 0.02s; }
+.features-showcase .feature-card:nth-child(2) .features-lane__plate { animation-delay: 0.07s; }
+.features-showcase .feature-card:nth-child(3) .features-lane__plate { animation-delay: 0.12s; }
+.features-showcase .feature-card:nth-child(4) .features-lane__plate { animation-delay: 0.17s; }
+.features-showcase .feature-card:nth-child(5) .features-lane__plate { animation-delay: 0.22s; }
+.features-showcase .feature-card:nth-child(6) .features-lane__plate { animation-delay: 0.27s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .features-lane__plate {
+    animation: none;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .feature-card:hover .features-lane__plate {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--lane-accent) 45%, var(--hair));
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--cream) 7%, transparent),
+      0 22px 56px -28px color-mix(in srgb, var(--lane-accent) 38%, transparent);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+  .feature-card:hover .features-lane__plate {
+    transform: none;
+  }
+}
+
+@media (min-width: 641px) {
+  .features-lane__plate {
+    padding: 24px 26px 26px 28px;
+  }
+}
+
+.features-lane__top {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 1rem;
+  row-gap: 0.35rem;
+  align-items: start;
+}
+
+.features-lane__index {
+  grid-column: 1;
+  grid-row: 1;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--cream-4, #6e6758);
+}
+
+.features-lane__iconRing {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  color: var(--lane-accent);
+  border: 1px solid color-mix(in srgb, var(--lane-accent) 42%, transparent);
+  background: color-mix(in srgb, var(--lane-accent) 12%, transparent);
+}
+
+.features-lane__title {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--cream);
+}
+
+.features-lane__desc {
+  margin-top: 0;
+  font-size: 14px;
+  line-height: 1.62;
 }
 
 @media (max-width: 640px) {
-  .feature-card .feature-card-desc {
-    max-height: 0;
-    opacity: 0;
-    margin-top: 0 !important;
+  .features-lane__plate {
+    padding: 18px 18px 20px;
   }
-  .feature-card[data-mobile-active="true"] .feature-card-desc {
-    max-height: 320px;
-    opacity: 1;
-    margin-top: 8px !important;
+}
+
+/* ════════ Feature cards — mobile center reveal (grid row, same as plan extras) ════════ */
+.feature-card-desc-wrap {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.feature-card-desc-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+@media (max-width: 640px) {
+  .feature-card .feature-card-desc-wrap {
+    grid-template-rows: 0fr;
+  }
+  .feature-card[data-mobile-active="true"] .feature-card-desc-wrap {
+    grid-template-rows: 1fr;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .feature-card-desc {
+  .feature-card-desc-wrap {
     transition: none;
   }
 }

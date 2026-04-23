@@ -52,7 +52,7 @@ export function SiteFooter({ copy }: SiteFooterProps) {
           {[
             { href: "#", label: copy.footerPrivacy },
             { href: "#", label: copy.footerTerms },
-            { href: "mailto:hello@calisto.co", label: "hello@calisto.co" },
+            { href: "mailto:info@calisto.com", label: "info@calisto.com" },
           ].map((link) => (
             <a
               key={link.label}

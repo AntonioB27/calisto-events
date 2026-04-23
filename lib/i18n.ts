@@ -8,6 +8,8 @@ type NavItem = {
 type Feature = {
   title: string;
   description: string;
+  /** Short line for the mascot speech bubble on the feature card */
+  mascotBubble: string;
 };
 
 type HowItWorksItem = {
@@ -154,10 +156,11 @@ const copy: Record<Locale, LandingCopy> = {
     themeDark: "Dark",
     navAriaLabel: "Page sections",
     nav: [
+      { href: "#preview", label: "Preview" },
       { href: "#features", label: "Features" },
+      { href: "#how", label: "How it works" },
       { href: "#plans", label: "Plans" },
-      { href: "#future", label: "Future" },
-      { href: "#waitlist", label: "Waitlist" },
+      { href: "#faq", label: "FAQ" },
     ],
     joinWaitlistShort: "Join waitlist",
     heroBadge: "Meet Aurora",
@@ -204,29 +207,35 @@ const copy: Record<Locale, LandingCopy> = {
         title: "Unique access code",
         description:
           "Each event has its own code (for example WEDDING2026). Guests use it to join—no complicated setup.",
+        mascotBubble: "Your event, your code—simple.",
       },
       {
         title: "Invite links & QR",
         description: "Share a link or show a QR code so guests can join the album quickly from their phones.",
+        mascotBubble: "Scan or tap—they're in!",
       },
       {
         title: "Shared gallery",
         description:
           "Everyone sees the same collection in real time as photos and videos arrive—built for weddings and celebrations.",
+        mascotBubble: "One gallery, all the magic.",
       },
       {
         title: "Roles that make sense",
         description:
           "Guests upload and browse; organizers create events, manage access, and (on paid plans) export the archive.",
+        mascotBubble: "Right people, right permissions.",
       },
       {
         title: "Photos & videos by plan",
         description:
           "Start with photos on Free; paid plans unlock video uploads with generous limits and longer retention.",
+        mascotBubble: "I'll match the plan to your story.",
       },
       {
         title: "ZIP export (paid plans)",
         description: "Organizers can download the full album as a ZIP after the event—timing depends on your plan.",
+        mascotBubble: "Zip the memories when you're ready.",
       },
     ],
     howTitle: "How it works",
@@ -371,11 +380,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         q: "Are photos uploaded at full quality?",
-        a: "Yes. Calisto never compresses your originals before you see them. HEIC and RAW files are fully supported on paid plans.",
-      },
-      {
-        q: "Who can see the album?",
-        a: "Only you, the organizer, until you decide to share. You can send guests a read-only link whenever you're ready.",
+        a: "Calisto compresses you photos, but they are still high quality and you barely notice the difference.",
       },
       {
         q: "What if a guest uploads something I don't want?",
@@ -424,10 +429,11 @@ const copy: Record<Locale, LandingCopy> = {
     themeDark: "Tamna",
     navAriaLabel: "Sekcije stranice",
     nav: [
+      { href: "#preview", label: "Pregled" },
       { href: "#features", label: "Mogućnosti" },
+      { href: "#how", label: "Kako radi" },
       { href: "#plans", label: "Paketi" },
-      { href: "#future", label: "Budućnost" },
-      { href: "#waitlist", label: "Lista čekanja" },
+      { href: "#faq", label: "Pitanja" },
     ],
     joinWaitlistShort: "Pridruži se listi",
     heroBadge: "Upoznaj Auroru",
@@ -472,26 +478,32 @@ const copy: Record<Locale, LandingCopy> = {
       {
         title: "Jedinstveni pristupni kod",
         description: "Svaki događaj ima svoj kod (npr. WEDDING2026). Gosti ulaze bez kompliciranog setupa.",
+        mascotBubble: "Tvoj događaj, tvoj kod—lako.",
       },
       {
         title: "Pozivni linkovi i QR",
         description: "Podijeli link ili QR i gosti se brzo pridružuju s mobitela.",
+        mascotBubble: "Skeniraj ili dodirni—ulaze odmah!",
       },
       {
         title: "Zajednička galerija",
         description: "Svi vide istu galeriju u stvarnom vremenu dok stižu fotografije i videa.",
+        mascotBubble: "Jedna galerija, svi u istom trenu.",
       },
       {
         title: "Uloge koje imaju smisla",
         description: "Gosti učitavaju i gledaju, a organizatori vode pristup i na plaćenim paketima izvoze arhivu.",
+        mascotBubble: "Uloge koje drže red.",
       },
       {
         title: "Fotografije i videa po paketu",
         description: "Free pokriva fotografije; plaćeni paketi dodaju videa, veće limite i duže čuvanje.",
+        mascotBubble: "Paket uskladim s pričom.",
       },
       {
         title: "ZIP izvoz (plaćeni paketi)",
         description: "Organizatori mogu preuzeti cijeli album kao ZIP, ovisno o paketu.",
+        mascotBubble: "Preuzmi album kad si spreman.",
       },
     ],
     howTitle: "Kako radi",
@@ -686,10 +698,11 @@ const copy: Record<Locale, LandingCopy> = {
     themeDark: "Dunkel",
     navAriaLabel: "Seitenabschnitte",
     nav: [
+      { href: "#preview", label: "Vorschau" },
       { href: "#features", label: "Funktionen" },
+      { href: "#how", label: "So funktioniert es" },
       { href: "#plans", label: "Tarife" },
-      { href: "#future", label: "Zukunft" },
-      { href: "#waitlist", label: "Warteliste" },
+      { href: "#faq", label: "Fragen" },
     ],
     joinWaitlistShort: "Zur Warteliste",
     heroBadge: "Lerne Aurora kennen",
@@ -735,26 +748,32 @@ const copy: Record<Locale, LandingCopy> = {
       {
         title: "Einzigartiger Zugangscode",
         description: "Jedes Event hat seinen eigenen Code (z. B. WEDDING2026). Gäste treten ohne kompliziertes Setup bei.",
+        mascotBubble: "Dein Event, dein Code—so einfach.",
       },
       {
         title: "Einladungslinks & QR",
         description: "Teile einen Link oder zeige einen QR-Code, damit Gäste dem Album schnell vom Handy beitreten.",
+        mascotBubble: "Scannen oder tippen—fertig!",
       },
       {
         title: "Gemeinsame Galerie",
         description: "Alle sehen dieselbe Sammlung in Echtzeit, sobald Fotos und Videos eintreffen – ideal für Feiern.",
+        mascotBubble: "Eine Galerie, alle im gleichen Takt.",
       },
       {
         title: "Sinnvolle Rollen",
         description: "Gäste laden hoch und schauen an; Organisatoren erstellen Events, verwalten Zugriffe und exportieren Archive.",
+        mascotBubble: "Die richtigen Rechte für alle.",
       },
       {
         title: "Fotos & Videos je Tarif",
         description: "Starte mit Fotos im Free-Tarif; kostenpflichtige Tarife schalten Videos und höhere Limits frei.",
+        mascotBubble: "Passend zu deinem Tarif.",
       },
       {
         title: "ZIP-Export (bezahlte Tarife)",
         description: "Organisatoren können das komplette Album als ZIP herunterladen – je nach Tarif und Zeitpunkt.",
+        mascotBubble: "ZIP packen, wenn ihr soweit seid.",
       },
     ],
     howTitle: "So funktioniert es",

@@ -47,7 +47,7 @@ export function WaitlistForm({ copy, locale }: WaitlistFormProps) {
   return (
     <section
       id="waitlist"
-      className="relative overflow-hidden"
+      className="relative scroll-mt-20 overflow-hidden"
       style={{
         borderTop: "1px solid var(--hair)",
         padding: "140px 0 120px",

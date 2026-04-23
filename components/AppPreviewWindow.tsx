@@ -59,7 +59,8 @@ export function AppPreviewWindow({ copy }: AppPreviewWindowProps) {
 
   return (
     <section
-      className="relative"
+      id="preview"
+      className="relative scroll-mt-20"
       aria-label={copy.appPreviewAriaSection}
       style={{ borderTop: "1px solid var(--hair)", padding: "120px 0", zIndex: 2 }}
     >
