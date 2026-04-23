@@ -440,7 +440,7 @@ const copy: Record<Locale, LandingCopy> = {
     heroIntro: "Bok, ja sam Aurora — predstavljam ti Calisto.",
     heroTitle: "Jedan zajednički album za tvoje vjenčanje ili događaj!",
     heroDescription:
-      "Gosti na jednom mjestu učitavaju i gledaju fotografije i videa. Nije potrebno preuzeti aplikaciju, a upload ide i bez računa. Pristup je kodom ili QR-om, uz jednokratno plaćanje po događaju.",
+      "Gosti na jednom mjestu učitavaju i gledaju fotografije i videa. Nije potrebno preuzeti aplikaciju, a upload ide i bez korisničkog računa. Pristup je kodom ili QR-om, uz jednokratno plaćanje po događaju.",
     heroPrimaryCta: "Pridruži se listi čekanja",
     heroSecondaryCta: "Usporedi pakete",
     heroSignals: [
