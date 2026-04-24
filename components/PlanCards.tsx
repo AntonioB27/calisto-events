@@ -147,7 +147,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
               </h2>
               <div className="ml-auto lg:ml-0 shrink-0">
                 <Image
-                  src="/brand/mascot/aurora_gallery.png"
+                  src="/brand/mascot/aurora_present.png"
                   alt={copy.plansMascotAlt}
                   width={200}
                   height={200}
