@@ -143,14 +143,14 @@ export function FAQ({ copy }: FAQProps) {
             >
               {copy.faqContactPrefix}{" "}
               <a
-                href="mailto:info@calisto.com"
+                href="mailto:info@calisto-events.com"
                 style={{
                   color: "var(--amber, #E6A760)",
                   borderBottom: "1px solid rgba(230,167,96,0.3)",
                   textDecoration: "none",
                 }}
               >
-                info@calisto.com
+                info@calisto-events.com
               </a>
               . {copy.faqContactSuffix}
             </p>

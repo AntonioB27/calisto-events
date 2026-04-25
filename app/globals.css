@@ -298,6 +298,10 @@ html[data-theme="light"] body::after {
 @media (hover: none), (pointer: coarse) {
   .plan-card[data-mobile-active="true"] .plan-card-extras { grid-template-rows: 1fr; }
 }
+@media (min-width: 641px) and (max-width: 1366px) {
+  .plan-card-extras { display: block; }
+  .plan-card-extras-inner { overflow: visible; }
+}
 @media (prefers-reduced-motion: reduce) {
   .plan-card-extras { transition: none; }
 }

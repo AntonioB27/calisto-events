@@ -714,9 +714,9 @@ const copy: Record<Locale, LandingCopy> = {
     joinWaitlistShort: "Zur Warteliste",
     heroBadge: "Lerne Aurora kennen",
     heroIntro: "Hi, ich bin Aurora, ich stelle dir Calisto vor.",
-    heroTitle: "Ein gemeinsames Album für deine Hochzeit oder dein Event!",
+    heroTitle: "Erstelle ein Album von deiner Hochzeit oder deinem Event!",
     heroDescription:
-      "Calisto hilft Gästen, Fotos und Videos an einem Ort hochzuladen und anzusehen. Kein App-Download nötig, und Uploads funktionieren ohne Konto. Der Zugriff läuft per Code oder QR – mit einmaliger Zahlung pro Event statt Abo.",
+      "Calisto hilft Gästen, Fotos und Videos an einem Ort hochzuladen und anzusehen. Kein App-Download nötig, und Uploads funktionieren ohne Konto. Der Zugriff läuft per Code oder QR – mit einmaliger Zahlung pro Event ohne Abo.",
     heroAuroraCardBlurb:
       "Lieber tanzt du auf der Feier, als dass du am Montag hundert Chatverläufe durchsuchst. Ich will, dass der Tag als eine lebendige Geschichte bleibt — Reden, Umarmungen, das schiefe Gruppenfoto — die man wiederfindet, ohne Schatzsuche.",
     heroPrimaryCta: "Zur Warteliste",
@@ -740,7 +740,7 @@ const copy: Record<Locale, LandingCopy> = {
     appPreviewEyebrow: "Sieh es in Aktion",
     appPreviewTitlePrefix: "Ein Album.",
     appPreviewTitleEmphasis: "Jeder",
-    appPreviewTitleSuffix: "Moment des Tages.",
+    appPreviewTitleSuffix: "Augenblick des Tages.",
     appPreviewMetaLabel: "calisto · organizer",
     appPreviewAriaSection: "App-Vorschau",
     appPreviewAriaThumbs: "Screenshot-Vorschau",
@@ -770,8 +770,8 @@ const copy: Record<Locale, LandingCopy> = {
         mascotBubble: "Eine Galerie, alle im gleichen Takt.",
       },
       {
-        title: "Sinnvolle Rollen",
-        description: "Gäste laden hoch und schauen an; Organisatoren erstellen Events, verwalten Zugriffe und exportieren Archive.",
+        title: "Deine Rolle",
+        description: "Gäste laden Fotos und Videos hoch und schauen sie zeitnah an. Organisatoren erstellen Events, verwalten Zugriffe und exportieren Archive.",
         mascotBubble: "Die richtigen Rechte für alle.",
       },
       {
@@ -925,7 +925,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         q: "Müssen Gäste ein Konto erstellen?",
-        a: "Kein Konto, keine E-Mail erforderlich. Gäste können optional ihren Vornamen angeben, damit du siehst, wer welche Fotos beigetragen hat.",
+        a: "Kein Konto, keine E-Mail erforderlich. Gäste können optional ihren Vornamen angeben, damit du siehst, wer welche Fotos zugefügt hat.",
       },
       {
         q: "Werden Fotos in voller Qualität hochgeladen?",
@@ -946,7 +946,7 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     waitlist: {
       title: "Zur Warteliste",
-      description: "Erfahre als Erste oder Erster, wenn Calisto breiter startet. Hinterlasse deine E-Mail für Launch-Updates.",
+      description: "Erfahre als Erste oder Erster alle Neuigkeiten von Calisto. Hinterlasse deine E-Mail für Launch-Updates.",
       discount: "Die ersten 10 Personen auf der Warteliste erhalten 20% Rabatt auf jeden bezahlten Tarif (Standard, Premium oder Max).",
       submitted: "Du bist auf der Liste – wir melden uns bald.",
       submitFailed: "Ein Eintrag in die Warteliste ist gerade nicht möglich. Bitte versuche es gleich noch einmal.",

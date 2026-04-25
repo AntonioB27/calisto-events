@@ -89,7 +89,7 @@ function welcomeHtml(email: string, locale: Locale): string {
       </tr>
       <tr>
         <td style="padding:18px 26px 24px;border-top:1px solid rgba(244,234,217,0.10);font-size:13px;line-height:1.7;color:#b5ab99;">
-          <div>${template.supportLabel} <a href="mailto:info@calisto.com" style="color:#ffd28e;text-decoration:none;">info@calisto.com</a></div>
+          <div>${template.supportLabel} <a href="mailto:info@calisto-events.com" style="color:#ffd28e;text-decoration:none;">info@calisto-events.com</a></div>
           <div style="margin-top:6px;">- ${template.signature}</div>
         </td>
       </tr>
@@ -109,7 +109,7 @@ function welcomeText(email: string, locale: Locale): string {
     "",
     `${template.ctaLabel}: ${siteUrl}`,
     "",
-    `${template.supportLabel} info@calisto.com`,
+    `${template.supportLabel} info@calisto-events.com`,
     `- ${template.signature}`,
   ].join("\n");
 }
