@@ -1,33 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import type { LandingCopy } from "@/lib/i18n";
-import {
-  AlbumGridScreen,
-  GuestWelcomeScreen,
-  PhotoPickerScreen,
-  UploadProgressScreen,
-  PhotoDetailScreen,
-  DashboardScreen,
-  GuestListScreen,
-  ModerationScreen,
-  ShareQRScreen,
-  DownloadScreen,
-} from "@/components/AppScreens";
+import eventScreen from "@/assets/screenshots/event.png";
+import galleryScreen from "@/assets/screenshots/gallery.png";
+import homeScreen from "@/assets/screenshots/home.png";
+import welcomeScreen from "@/assets/screenshots/wellcome.png";
 
-const SCREEN_COMPONENTS = [
-  AlbumGridScreen,
-  GuestWelcomeScreen,
-  PhotoPickerScreen,
-  UploadProgressScreen,
-  PhotoDetailScreen,
-  DashboardScreen,
-  GuestListScreen,
-  ModerationScreen,
-  ShareQRScreen,
-  DownloadScreen,
-] as const;
-const PREVIEW_SEQUENCE = [1, 0, 9, 6] as const; // Guest welcome, Gallery, Download, Guest list
+const PREVIEW_SCREENS = [welcomeScreen, homeScreen, galleryScreen, eventScreen] as const;
 
 type AppPreviewWindowProps = { copy: LandingCopy };
 
@@ -44,7 +25,7 @@ export function AppPreviewWindow({ copy }: AppPreviewWindowProps) {
       copy.appPreviewCaptions.map((label, i) => ({
         label,
         i,
-        screenIndex: PREVIEW_SEQUENCE[i] ?? 0,
+        screen: PREVIEW_SCREENS[i] ?? PREVIEW_SCREENS[0],
       })),
     [copy],
   );
@@ -229,8 +210,7 @@ export function AppPreviewWindow({ copy }: AppPreviewWindowProps) {
                       position: "relative",
                     }}
                   >
-                    {captions.map(({ i, screenIndex }) => {
-                      const Screen = SCREEN_COMPONENTS[screenIndex];
+                    {captions.map(({ i, screen }) => {
                       return (
                         <div
                           key={i}
@@ -241,7 +221,18 @@ export function AppPreviewWindow({ copy }: AppPreviewWindowProps) {
                             transition: "opacity 600ms ease",
                           }}
                         >
-                          <Screen copy={copy} />
+                          <Image
+                            src={screen}
+                            alt=""
+                            fill
+                            sizes="240px"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              display: "block",
+                            }}
+                          />
                         </div>
                       );
                     })}

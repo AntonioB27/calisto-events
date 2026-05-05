@@ -160,7 +160,7 @@ export async function sendWelcomeEmail(email: string, locale: Locale): Promise<S
   const template = getWelcomeTemplate(locale);
 
   try {
-    const { error } = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: fromAddress,
       to: email,
       subject: template.subject,
@@ -169,9 +169,39 @@ export async function sendWelcomeEmail(email: string, locale: Locale): Promise<S
     });
 
     if (error) {
+      // #region agent log
+      fetch("http://127.0.0.1:7770/ingest/2e686876-5e56-4de8-8cb2-224c3efe66a1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "caed9d" },
+        body: JSON.stringify({
+          sessionId: "caed9d",
+          runId: "provider-investigation",
+          hypothesisId: "H5",
+          location: "lib/welcome-email.ts:149",
+          message: "resend rejected email send",
+          data: { hasError: true, errorMessage: error.message, fromAddress, locale },
+          timestamp: Date.now(),
+        }),
+      }).catch(() => {});
+      // #endregion
       return { ok: false, error: error.message };
     }
 
+    // #region agent log
+    fetch("http://127.0.0.1:7770/ingest/2e686876-5e56-4de8-8cb2-224c3efe66a1", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "caed9d" },
+      body: JSON.stringify({
+        sessionId: "caed9d",
+        runId: "provider-investigation",
+        hypothesisId: "H5",
+        location: "lib/welcome-email.ts:165",
+        message: "resend accepted email send",
+        data: { hasError: false, resendId: data?.id ?? null, fromAddress, locale },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
     return { ok: true };
   } catch (error) {
     return {
