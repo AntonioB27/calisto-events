@@ -361,7 +361,7 @@ html[data-theme="light"] body::after {
 }
 
 .features-section__intro {
-  max-width: 40rem;
+  width: 100%;
 }
 
 .features-section__eyebrow {

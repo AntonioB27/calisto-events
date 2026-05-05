@@ -113,7 +113,7 @@ export function FAQ({ copy }: FAQProps) {
             >
               {copy.faqTitle}
             </h2>
-            <div className="shrink-0">
+            <div className="ml-auto shrink-0">
               <Image
                 src="/brand/mascot/aurora_key.png"
                 alt={copy.auroraMascotAlt}

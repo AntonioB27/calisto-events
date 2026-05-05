@@ -243,7 +243,7 @@ export function HowItWorks({ copy }: HowItWorksProps) {
           style={{ borderColor: "var(--hair)", paddingBottom: 28 }}
         >
           <div className="flex w-full flex-col justify-between gap-6 lg:flex-row lg:items-end">
-            <div className="min-w-0 max-w-2xl">
+            <div className="min-w-0 w-full">
               <p
                 className="m-0 mb-3.5"
                 style={{
@@ -272,7 +272,7 @@ export function HowItWorks({ copy }: HowItWorksProps) {
                 >
                   {copy.howTitle}
                 </h2>
-                <div className="shrink-0">
+                <div className="ml-auto shrink-0">
                   <Image
                     src="/brand/mascot/aurora_qr.png"
                     alt={copy.auroraMascotAlt}

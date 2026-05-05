@@ -44,7 +44,7 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
               <h2 className="features-section__title" style={{ flex: 1, minWidth: 0 }}>
                 {copy.featuresTitle}
               </h2>
-              <div className="shrink-0">
+              <div className="ml-auto shrink-0">
                 <Image
                   src="/brand/mascot/aurora_camera.png"
                   alt={copy.auroraMascotAlt}
