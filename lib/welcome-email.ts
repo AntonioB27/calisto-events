@@ -116,7 +116,37 @@ function welcomeText(email: string, locale: Locale): string {
 
 export async function sendWelcomeEmail(email: string, locale: Locale): Promise<SendWelcomeEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
+  // #region agent log
+  fetch("http://127.0.0.1:7770/ingest/2e686876-5e56-4de8-8cb2-224c3efe66a1", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "caed9d" },
+    body: JSON.stringify({
+      sessionId: "caed9d",
+      runId: "prod-investigation",
+      hypothesisId: "H4",
+      location: "lib/welcome-email.ts:123",
+      message: "sendWelcomeEmail entered",
+      data: { hasApiKey: Boolean(apiKey), locale },
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion
   if (!apiKey) {
+    // #region agent log
+    fetch("http://127.0.0.1:7770/ingest/2e686876-5e56-4de8-8cb2-224c3efe66a1", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "caed9d" },
+      body: JSON.stringify({
+        sessionId: "caed9d",
+        runId: "prod-investigation",
+        hypothesisId: "H4",
+        location: "lib/welcome-email.ts:138",
+        message: "RESEND_API_KEY missing; skipping email",
+        data: { hasApiKey: false },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
     return {
       ok: false,
       skipped: true,

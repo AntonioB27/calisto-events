@@ -43,13 +43,58 @@ export async function POST(request: Request) {
     if (error) {
       // Duplicate entry should still be treated as success for idempotent UX.
       if (error.code === "23505") {
+        // #region agent log
+        fetch("http://127.0.0.1:7770/ingest/2e686876-5e56-4de8-8cb2-224c3efe66a1", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "caed9d" },
+          body: JSON.stringify({
+            sessionId: "caed9d",
+            runId: "prod-investigation",
+            hypothesisId: "H1",
+            location: "app/api/waitlist/route.ts:48",
+            message: "duplicate waitlist entry; returning without email send",
+            data: { emailLength: email.length, locale },
+            timestamp: Date.now(),
+          }),
+        }).catch(() => {});
+        // #endregion
         return NextResponse.json({ ok: true, duplicate: true }, { status: 200 });
       }
       console.error("[waitlist] insert failed", error);
       return NextResponse.json({ error: "Failed to join waitlist." }, { status: 500 });
     }
 
+    // #region agent log
+    fetch("http://127.0.0.1:7770/ingest/2e686876-5e56-4de8-8cb2-224c3efe66a1", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "caed9d" },
+      body: JSON.stringify({
+        sessionId: "caed9d",
+        runId: "prod-investigation",
+        hypothesisId: "H2",
+        location: "app/api/waitlist/route.ts:66",
+        message: "waitlist insert succeeded; proceeding to email send",
+        data: { emailLength: email.length, locale },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
     const welcome = await sendWelcomeEmail(email, locale);
+    // #region agent log
+    fetch("http://127.0.0.1:7770/ingest/2e686876-5e56-4de8-8cb2-224c3efe66a1", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "caed9d" },
+      body: JSON.stringify({
+        sessionId: "caed9d",
+        runId: "prod-investigation",
+        hypothesisId: "H3",
+        location: "app/api/waitlist/route.ts:80",
+        message: "welcome email result",
+        data: { ok: welcome.ok, skipped: welcome.skipped ?? false, hasError: Boolean(welcome.error) },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
     if (!welcome.ok) {
       // Do not block waitlist signups on email delivery issues.
       console.warn("[waitlist] welcome email not sent", {
