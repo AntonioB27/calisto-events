@@ -1,0 +1,6 @@
+{"sessionId":"caed9d","runId":"prod-investigation","hypothesisId":"H1","location":"app/api/waitlist/route.ts:48","message":"duplicate waitlist entry; returning without email send","data":{"emailLength":24,"locale":"hr"},"timestamp":1777967139600}
+{"sessionId":"caed9d","runId":"prod-investigation","hypothesisId":"H4","location":"lib/welcome-email.ts:123","message":"sendWelcomeEmail entered","data":{"hasApiKey":true,"locale":"hr"},"timestamp":1777967139601}
+{"sessionId":"caed9d","runId":"post-fix","hypothesisId":"H1","location":"app/api/waitlist/route.ts:62","message":"duplicate entry welcome email result","data":{"ok":true,"skipped":false,"hasError":false},"timestamp":1777967140104}
+{"sessionId":"caed9d","runId":"prod-investigation","hypothesisId":"H2","location":"app/api/waitlist/route.ts:66","message":"waitlist insert succeeded; proceeding to email send","data":{"emailLength":24,"locale":"hr"},"timestamp":1777967160667}
+{"sessionId":"caed9d","runId":"prod-investigation","hypothesisId":"H4","location":"lib/welcome-email.ts:123","message":"sendWelcomeEmail entered","data":{"hasApiKey":true,"locale":"hr"},"timestamp":1777967160668}
+{"sessionId":"caed9d","runId":"prod-investigation","hypothesisId":"H3","location":"app/api/waitlist/route.ts:80","message":"welcome email result","data":{"ok":true,"skipped":false,"hasError":false},"timestamp":1777967161308}

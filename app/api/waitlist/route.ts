@@ -58,6 +58,29 @@ export async function POST(request: Request) {
           }),
         }).catch(() => {});
         // #endregion
+        const welcome = await sendWelcomeEmail(email, locale);
+        // #region agent log
+        fetch("http://127.0.0.1:7770/ingest/2e686876-5e56-4de8-8cb2-224c3efe66a1", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "caed9d" },
+          body: JSON.stringify({
+            sessionId: "caed9d",
+            runId: "post-fix",
+            hypothesisId: "H1",
+            location: "app/api/waitlist/route.ts:62",
+            message: "duplicate entry welcome email result",
+            data: { ok: welcome.ok, skipped: welcome.skipped ?? false, hasError: Boolean(welcome.error) },
+            timestamp: Date.now(),
+          }),
+        }).catch(() => {});
+        // #endregion
+        if (!welcome.ok) {
+          console.warn("[waitlist] welcome email not sent for duplicate", {
+            email,
+            skipped: welcome.skipped ?? false,
+            error: welcome.error,
+          });
+        }
         return NextResponse.json({ ok: true, duplicate: true }, { status: 200 });
       }
       console.error("[waitlist] insert failed", error);
