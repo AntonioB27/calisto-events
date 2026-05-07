@@ -9,7 +9,7 @@ type AppShellProps = {
   children: React.ReactNode;
 };
 
-function getActiveNav(pathname: string): string | null {
+export function getActiveNav(pathname: string): string | null {
   if (pathname === '/dashboard' || pathname === '/') return 'home';
   if (pathname.startsWith('/events/new')) return 'create';
   if (pathname.startsWith('/events')) return 'events';
@@ -74,7 +74,7 @@ export function AppShell({ userName, userInitial, children }: AppShellProps) {
           {NAV_LINKS.map(link => {
             const on = active === link.id;
             return (
-              <Link key={link.id} href={link.href} style={{
+              <Link key={link.id} href={link.href} aria-current={on ? 'page' : undefined} style={{
                 padding: '8px 16px',
                 borderRadius: 10,
                 background: on ? `color-mix(in srgb, var(--app-purple) 12%, transparent)` : 'transparent',
@@ -170,7 +170,7 @@ export function AppShell({ userName, userInitial, children }: AppShellProps) {
           {DOCK_ITEMS.map(item => {
             const on = active === item.id;
             return (
-              <Link key={item.id} href={item.href} style={{
+              <Link key={item.id} href={item.href} aria-label={item.label} style={{
                 width: 46, height: 46,
                 background: on ? 'linear-gradient(135deg, var(--app-gold), #D4A843)' : 'transparent',
                 borderRadius: 28,

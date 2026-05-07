@@ -1,13 +1,5 @@
 import { describe, it, expect } from 'vitest';
-
-function getActiveNav(pathname: string): string | null {
-  if (pathname === '/dashboard' || pathname === '/') return 'home';
-  if (pathname.startsWith('/events/new')) return 'create';
-  if (pathname.startsWith('/events')) return 'events';
-  if (pathname.startsWith('/join')) return 'join';
-  if (pathname.startsWith('/settings')) return 'settings';
-  return null;
-}
+import { getActiveNav } from './AppShell';
 
 describe('getActiveNav', () => {
   it('returns home for /dashboard', () => {
