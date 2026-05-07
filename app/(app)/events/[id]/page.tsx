@@ -67,17 +67,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
 
   return (
     <div style={{ padding: '40px 0 60px' }}>
-      <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, fontSize: 28, color: 'var(--app-text)' }}>
-        {event.title}
-      </h1>
-      <p style={{ marginTop: 8, fontSize: 14, color: 'var(--app-muted)' }}>
-        {new Date(event.event_date).toLocaleDateString()} •{" "}
-        <span style={{ fontFamily: 'monospace' }}>Code: {event.access_code}</span>
-      </p>
-
-      <div style={{ marginTop: 24 }}>
-        <EventAdminTabs eventId={id} selectedTab={selectedTab} />
-      </div>
+      <EventAdminTabs eventId={id} selectedTab={selectedTab} eventTitle={event.title} eventEmoji="📅" />
 
       <div style={{ marginTop: 24 }}>
         {selectedTab === "overview" && (
