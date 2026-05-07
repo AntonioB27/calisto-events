@@ -20,21 +20,24 @@ function LoginForm() {
     setPending(true);
     setError(null);
 
-    const formData = new FormData(event.currentTarget);
-    const email = String(formData.get("email") ?? "").trim();
-    const password = String(formData.get("password") ?? "");
+    try {
+      const formData = new FormData(event.currentTarget);
+      const email = String(formData.get("email") ?? "").trim();
+      const password = String(formData.get("password") ?? "");
 
-    const supabase = getSupabaseBrowserClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const supabase = getSupabaseBrowserClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (signInError) {
-      setError(signInError.message);
+      if (signInError) {
+        setError(signInError.message);
+        return;
+      }
+
+      router.push(returnTo ?? "/dashboard");
+      router.refresh();
+    } finally {
       setPending(false);
-      return;
     }
-
-    router.push(returnTo ?? "/dashboard");
-    router.refresh();
   }
 
   return (
@@ -84,10 +87,11 @@ function LoginForm() {
 
           <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--app-muted)', marginBottom: 8 }}>
+              <label htmlFor="login-email" style={{ display: 'block', fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--app-muted)', marginBottom: 8 }}>
                 Email
-              </div>
+              </label>
               <input
+                id="login-email"
                 name="email" type="email" placeholder="you@example.com"
                 autoComplete="email" required
                 style={{
@@ -102,10 +106,11 @@ function LoginForm() {
               />
             </div>
             <div>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--app-muted)', marginBottom: 8 }}>
+              <label htmlFor="login-password" style={{ display: 'block', fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--app-muted)', marginBottom: 8 }}>
                 Password
-              </div>
+              </label>
               <input
+                id="login-password"
                 name="password" type="password" placeholder="••••••••"
                 autoComplete="current-password" required
                 style={{
