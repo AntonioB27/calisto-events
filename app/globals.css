@@ -549,3 +549,33 @@ html[data-theme="light"] body::after {
     transition: none;
   }
 }
+
+/* ════════ App shell design tokens ════════ */
+:root {
+  --app-bg:     #0C0A0F;
+  --app-card:   rgba(255, 255, 255, 0.05);
+  --app-text:   #F4EAD9;
+  --app-muted:  #B5AB99;
+  --app-gold:   #F0B34B;
+  --app-purple: #8B6A8C;
+  --app-border: rgba(244, 234, 217, 0.08);
+  --app-card-solid: #1C1724;
+}
+
+[data-theme="light"] {
+  --app-bg:          #ECE4D9;
+  --app-card:        #FAF7F3;
+  --app-card-solid:  #FAF7F3;
+  --app-text:        #221509;
+  --app-muted:       #9A8570;
+  --app-gold:        #C5922A;
+  --app-purple:      #5B2D8E;
+  --app-border:      #DDD4C5;
+}
+
+.app-shell {
+  --font-display: 'Playfair Display', Georgia, serif;
+  background: var(--app-bg);
+  color: var(--app-text);
+  min-height: 100vh;
+}
