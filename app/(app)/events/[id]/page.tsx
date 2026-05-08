@@ -1,8 +1,7 @@
 import {
   EventAdminTabs,
-  type EventAdminTabId,
-  isEventAdminTabId,
 } from "./_tabs/EventAdminTabs";
+import { isEventAdminTabId, type EventAdminTabId } from "./_tabs/event-admin-tabs";
 import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 import { getPublicOrigin } from "@/lib/public-origin";
 import { GalleryTab } from "./_tabs/GalleryTab";

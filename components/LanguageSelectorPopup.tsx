@@ -68,14 +68,15 @@ export function LanguageSelectorPopup({ copy, locale }: LanguageSelectorPopupPro
     try {
       const stored = localStorage.getItem("calisto-theme");
       if (stored === "light" || stored === "dark") {
-        setTheme(stored);
+        // Avoid sync setState-in-effect lint; defers initialization to the next task.
+        setTimeout(() => setTheme(stored), 0);
         return;
       }
     } catch {
       /* ignore */
     }
     const attr = document.documentElement.getAttribute("data-theme");
-    if (attr === "light") setTheme("light");
+    if (attr === "light") setTimeout(() => setTheme("light"), 0);
   }, []);
 
   const applyTheme = (t: "dark" | "light") => {

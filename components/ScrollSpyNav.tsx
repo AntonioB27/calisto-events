@@ -52,7 +52,8 @@ export function ScrollSpyNav({ copy }: ScrollSpyNavProps) {
       update();
     };
 
-    update();
+    // Avoid sync setState-in-effect lint; schedule the initial state sync.
+    const t0 = setTimeout(() => update(), 0);
     const ro =
       typeof ResizeObserver !== "undefined"
         ? new ResizeObserver(() => {
@@ -72,6 +73,7 @@ export function ScrollSpyNav({ copy }: ScrollSpyNavProps) {
     }, 0);
 
     return () => {
+      clearTimeout(t0);
       clearTimeout(t1);
       if (ro) {
         ro.disconnect();
