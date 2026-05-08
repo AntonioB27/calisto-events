@@ -5,6 +5,9 @@ import { startTransition, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 import Link from "next/link";
 
+import { AppBtn } from "@/components/app-ui/AppBtn";
+import { AppCard } from "@/components/app-ui/AppCard";
+
 const SHARE_TEMPLATE_KEY = "share_invite_template_v1";
 
 type ShareTabProps = Readonly<{
@@ -109,104 +112,116 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
           {templateOptions.map(({ id, label }) => {
             const selected = template === id;
             return (
-              <button
+              <AppBtn
                 key={id}
                 type="button"
+                variant={selected ? "secondary" : "ghost"}
+                size="sm"
                 onClick={() => setTemplate(id)}
-                className="rounded-full border px-3 py-1.5 text-sm font-semibold transition"
+                className="!rounded-full"
                 style={{
-                  border: selected ? '1.5px solid var(--app-gold)' : '1.5px solid var(--app-border)',
-                  background: selected ? 'var(--app-card)' : 'var(--app-bg)',
-                  color: selected ? 'var(--app-gold)' : 'var(--app-muted)',
+                  borderColor: selected ? "var(--app-gold)" : undefined,
+                  color: selected ? "var(--app-gold)" : undefined,
                 }}
               >
                 {label}
-              </button>
+              </AppBtn>
             );
           })}
         </div>
 
-        <button
-          type="button"
-          onClick={() => void shareInvite()}
-          className="w-full rounded-xl px-4 py-3 text-center text-sm font-bold shadow-lg"
-          style={{ background: 'linear-gradient(135deg, var(--app-purple) 0%, #7B3FBE 100%)', color: '#fff' }}
-        >
+        <AppBtn variant="primary" size="lg" type="button" className="w-full !rounded-xl" onClick={() => void shareInvite()}>
           Share invite
-        </button>
+        </AppBtn>
         <p className="text-center text-xs italic" style={{ color: 'var(--app-muted)' }}>
           Uses your device share sheet when available; otherwise copies the full message.
         </p>
       </div>
 
-      {shareError ? <p className="text-sm text-red-400">{shareError}</p> : null}
+      {shareError ? (
+        <p className="text-sm" style={{ color: "var(--app-danger)" }}>
+          {shareError}
+        </p>
+      ) : null}
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-xl p-4" style={{ background: 'var(--app-card)', border: '1.5px solid var(--app-border)' }}>
-          <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--app-muted)' }}>Access code</p>
-          <p className="mt-2 break-all font-mono text-lg font-semibold" style={{ color: 'var(--app-text)' }}>{accessCode}</p>
-          <button
+        <AppCard pad="md" className="!rounded-xl">
+          <p className="text-xs uppercase tracking-widest" style={{ color: "var(--app-muted)" }}>
+            Access code
+          </p>
+          <p className="mt-2 break-all font-mono text-lg font-semibold" style={{ color: "var(--app-text)" }}>
+            {accessCode}
+          </p>
+          <AppBtn
+            variant="secondary"
+            size="sm"
             type="button"
+            className="mt-3 w-full"
             onClick={() => void copyToClipboard("code", accessCode)}
-            className="mt-3 w-full rounded-lg py-2 text-sm font-medium"
-            style={{ border: '1.5px solid var(--app-border)', background: 'var(--app-bg)', color: 'var(--app-text)' }}
           >
             {copied === "code" ? "Copied!" : "Copy code"}
-          </button>
-        </div>
+          </AppBtn>
+        </AppCard>
 
-        <div className="rounded-xl p-4" style={{ background: 'var(--app-card)', border: '1.5px solid var(--app-border)' }}>
-          <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--app-muted)' }}>Join link</p>
+        <AppCard pad="md" className="!rounded-xl">
+          <p className="text-xs uppercase tracking-widest" style={{ color: "var(--app-muted)" }}>
+            Join link
+          </p>
           <a
             className="mt-2 block break-all font-mono text-sm underline underline-offset-2"
-            style={{ color: 'var(--app-gold)' }}
+            style={{ color: "var(--app-gold)" }}
             href={joinUrl}
             target="_blank"
             rel="noreferrer"
           >
             {joinUrl}
           </a>
-          <button
+          <AppBtn
+            variant="secondary"
+            size="sm"
             type="button"
+            className="mt-3 w-full"
             onClick={() => void copyToClipboard("link", joinUrl)}
-            className="mt-3 w-full rounded-lg py-2 text-sm font-medium"
-            style={{ border: '1.5px solid var(--app-border)', background: 'var(--app-bg)', color: 'var(--app-text)' }}
           >
             {copied === "link" ? "Copied!" : "Copy link"}
-          </button>
-        </div>
+          </AppBtn>
+        </AppCard>
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-white p-6">
-        <p className="text-center text-sm font-semibold text-zinc-600">Scan to join</p>
-        <div className="mx-auto mt-4 flex max-w-[220px] justify-center rounded-lg border border-zinc-200 bg-white p-4">
+      <AppCard pad="lg" className="!rounded-xl" style={{ background: "var(--app-surface)" }}>
+        <p className="text-center text-sm font-semibold" style={{ color: "var(--app-muted)" }}>
+          Scan to join
+        </p>
+        <div
+          className="mx-auto mt-4 flex max-w-[220px] justify-center rounded-lg p-4"
+          style={{ border: "1.5px solid var(--app-border)", background: "var(--app-surface)" }}
+        >
           <QRCode value={joinUrl} size={180} />
         </div>
-        <p className="mt-3 text-center text-xs text-zinc-500">Opens the same join page as the link above.</p>
+        <p className="mt-3 text-center text-xs" style={{ color: "var(--app-subtle)" }}>
+          Opens the same join page as the link above.
+        </p>
         <div className="mt-4">
-          <Link
-            href={`/events/${eventId}/print`}
-            className="block w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-center text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
-          >
+          <AppBtn variant="outline" size="sm" href={`/events/${eventId}/print`} as={Link} className="block w-full text-center">
             Print QR poster
-          </Link>
+          </AppBtn>
         </div>
-      </div>
+      </AppCard>
 
-      <div className="rounded-xl p-4" style={{ background: 'var(--app-bg)', border: '1.5px solid var(--app-border)' }}>
-        <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--app-muted)' }}>Preview message</p>
-        <pre className="mt-3 whitespace-pre-wrap break-words font-sans text-sm leading-relaxed" style={{ color: 'var(--app-text)' }}>
+      <AppCard pad="md" className="!rounded-xl" style={{ background: "var(--app-bg)" }}>
+        <p className="text-xs uppercase tracking-widest" style={{ color: "var(--app-muted)" }}>
+          Preview message
+        </p>
+        <pre
+          className="mt-3 whitespace-pre-wrap break-words font-sans text-sm leading-relaxed"
+          style={{ color: "var(--app-text)" }}
+        >
           {inviteText}
         </pre>
-        <button
-          type="button"
-          onClick={() => void copyToClipboard("message", inviteText)}
-          className="mt-4 w-full rounded-lg py-2 text-sm font-medium"
-          style={{ border: '1.5px solid var(--app-border)', background: 'transparent', color: 'var(--app-muted)' }}
-        >
+        <AppBtn variant="ghost" size="sm" type="button" className="mt-4 w-full" onClick={() => void copyToClipboard("message", inviteText)}>
           {copied === "message" ? "Copied!" : "Copy full message"}
-        </button>
-      </div>
+        </AppBtn>
+      </AppCard>
     </section>
   );
 }

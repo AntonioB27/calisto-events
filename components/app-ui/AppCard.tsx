@@ -1,31 +1,45 @@
 "use client";
 
-import { useState } from "react";
+type Pad = "none" | "sm" | "md" | "lg";
 
 type AppCardProps = {
   children: React.ReactNode;
   style?: React.CSSProperties;
   onClick?: () => void;
   hover?: boolean;
+  pad?: Pad;
+  className?: string;
 };
 
-export function AppCard({ children, style = {}, onClick, hover }: AppCardProps) {
-  const [hov, setHov] = useState(false);
+const PAD_CLASS: Record<Exclude<Pad, "none">, string> = {
+  sm: "app-card--pad-sm",
+  md: "app-card--pad-md",
+  lg: "app-card--pad-lg",
+};
+
+export function AppCard({ children, style = {}, onClick, hover, pad = "md", className = "" }: AppCardProps) {
+  const padClass = pad === "none" ? "" : PAD_CLASS[pad];
+  const cls = ["app-card", hover ? "app-card--hover" : "", padClass, onClick ? "cursor-pointer" : "", className]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div
       onClick={onClick}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      style={{
-        background: 'var(--app-card)',
-        borderRadius: 18,
-        border: '1.5px solid var(--app-border)',
-        boxShadow: hov && hover ? '0 8px 32px rgba(0,0,0,0.08)' : '0 2px 8px rgba(0,0,0,0.04)',
-        transition: 'all 0.18s',
-        transform: hov && hover ? 'translateY(-2px)' : 'none',
-        cursor: onClick ? 'pointer' : 'default',
-        ...style,
-      }}
+      className={cls}
+      style={style}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
     >
       {children}
     </div>

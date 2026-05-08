@@ -32,6 +32,18 @@ export function resolveEventTab(value: string | undefined): EventAdminTabId {
   return "overview";
 }
 
+function splitLeadingEmoji(title: string): { emoji: string; title: string } {
+  const trimmed = title.trim();
+  const parts = Array.from(trimmed);
+  if (parts.length < 2) return { emoji: "📅", title: trimmed };
+  const first = parts[0] ?? "";
+  const afterFirst = trimmed.slice(first.length);
+  if (afterFirst.startsWith(" ")) {
+    return { emoji: first, title: afterFirst.trimStart() || "Event" };
+  }
+  return { emoji: "📅", title: trimmed };
+}
+
 export default async function EventPage({ params, searchParams }: EventPageProps) {
   const { id } = await params;
   const resolvedSearchParams = (await searchParams) ?? {};
@@ -64,15 +76,17 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     );
   }
 
+  const split = splitLeadingEmoji(String(event.title ?? "Event"));
+
   return (
     <div style={{ padding: '40px 0 60px' }}>
-      <EventAdminTabs eventId={id} selectedTab={selectedTab} eventTitle={event.title} eventEmoji="📅" />
+      <EventAdminTabs eventId={id} selectedTab={selectedTab} eventTitle={split.title} eventEmoji={split.emoji} />
 
       <div style={{ marginTop: 24 }}>
         {selectedTab === "overview" && (
           <OverviewTab
             eventId={id}
-            eventTitle={event.title}
+            eventTitle={split.title}
             eventDate={event.event_date}
             plan={event.plan}
             accessCode={event.access_code}
@@ -83,7 +97,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
         {selectedTab === "share" && (
           <ShareTab
             eventId={id}
-            eventTitle={event.title}
+            eventTitle={split.title}
             accessCode={event.access_code}
             publicOrigin={publicOrigin}
           />

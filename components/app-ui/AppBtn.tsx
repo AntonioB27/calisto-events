@@ -1,63 +1,141 @@
-type AppBtnVariant = 'primary' | 'gold' | 'ghost' | 'white';
+import Link from "next/link";
+import type { LinkProps } from "next/link";
 
-type AppBtnProps = {
-  children: React.ReactNode;
+export type AppBtnVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "gold"
+  | "danger"
+  | "dangerSolid"
+  /** @deprecated use secondary */
+  | "white";
+
+export type AppBtnSize = "sm" | "md" | "lg";
+
+export function appButtonClassNames(opts: {
   variant?: AppBtnVariant;
-  onClick?: () => void;
+  size?: AppBtnSize;
+  /** @deprecated use size="sm" */
   small?: boolean;
-  style?: React.CSSProperties;
-  icon?: React.ReactNode;
-  type?: 'button' | 'submit' | 'reset';
-  disabled?: boolean;
-};
+  className?: string;
+}): string {
+  const rawVariant = opts.variant ?? "primary";
+  const variant = rawVariant === "white" ? "secondary" : rawVariant;
+  const size: AppBtnSize = opts.small ? "sm" : opts.size ?? "md";
+  return ["app-btn", `app-btn--${variant}`, `app-btn--${size}`, opts.className].filter(Boolean).join(" ");
+}
 
-const VARIANTS: Record<AppBtnVariant, React.CSSProperties> = {
-  primary: {
-    background: 'linear-gradient(135deg, var(--app-purple) 0%, #7B3FBE 100%)',
-    color: '#fff',
-    boxShadow: '0 4px 16px color-mix(in srgb, var(--app-purple) 27%, transparent)',
-    border: 'none',
-  },
-  gold: {
-    background: 'transparent',
-    color: 'var(--app-gold)',
-    border: '1.5px solid var(--app-gold)',
-  },
-  ghost: {
-    background: 'transparent',
-    color: 'var(--app-muted)',
-    border: '1.5px solid var(--app-border)',
-  },
-  white: {
-    background: 'var(--app-card)',
-    color: 'var(--app-text)',
-    border: '1.5px solid var(--app-border)',
-  },
-};
+export type AppBtnProps = Readonly<
+  {
+    variant?: AppBtnVariant;
+    size?: AppBtnSize;
+    /** @deprecated use size="sm" */
+    small?: boolean;
+    loading?: boolean;
+    className?: string;
+    style?: React.CSSProperties;
+    /** When using `href` / `as={Link}`, maps to `aria-disabled` where appropriate. */
+    disabled?: boolean;
+    children: React.ReactNode;
+  } & (
+    | ({ href?: undefined; as?: "button" } & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "className">)
+    | ({ href: string; as?: "a" } & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "className">)
+    | ({ href: string; as: typeof Link } & Omit<LinkProps, "className" | "children">)
+  )
+>;
 
-export function AppBtn({ children, variant = 'primary', onClick, small, style = {}, icon, type = 'button', disabled }: AppBtnProps) {
+export function AppBtn(props: AppBtnProps) {
+  const {
+    variant = "primary",
+    size = "md",
+    small,
+    loading = false,
+    className,
+    style,
+    children,
+    disabled,
+    ...rest
+  } = props;
+
+  const classes = appButtonClassNames({ variant, size, small, className });
+  const busy = Boolean(loading);
+  const isDisabled = Boolean(disabled) || busy;
+
+  const inner = loading ? (
+    <>
+      <span
+        aria-hidden
+        style={{
+          width: 16,
+          height: 16,
+          border: "2px solid color-mix(in srgb, currentColor 35%, transparent)",
+          borderTopColor: "currentColor",
+          borderRadius: "50%",
+          display: "inline-block",
+          animation: "appBtnSpin 0.7s linear infinite",
+        }}
+      />
+      <span className="sr-only">{typeof children === "string" ? children : "Loading"}</span>
+    </>
+  ) : (
+    children
+  );
+
+  if ("href" in props && props.href && "as" in props && props.as === Link) {
+    const { href: _href, as: _as, prefetch, replace, scroll, shallow, passHref, locale, onClick, ...linkRest } = rest as Omit<
+      LinkProps,
+      "href" | "children" | "className"
+    > & { href: string; as?: unknown };
+    return (
+      <Link
+        href={props.href}
+        prefetch={prefetch}
+        replace={replace}
+        scroll={scroll}
+        shallow={shallow}
+        passHref={passHref}
+        locale={locale}
+        {...linkRest}
+        className={classes}
+        style={style}
+        aria-disabled={isDisabled || undefined}
+        aria-busy={busy || undefined}
+        onClick={isDisabled ? (e) => e.preventDefault() : onClick}
+      >
+        {inner}
+      </Link>
+    );
+  }
+
+  if ("href" in props && props.href) {
+    const anchorRest = rest as Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "children">;
+    return (
+      <a
+        href={props.href}
+        {...anchorRest}
+        className={classes}
+        style={style}
+        aria-disabled={isDisabled || undefined}
+        aria-busy={busy || undefined}
+      >
+        {inner}
+      </a>
+    );
+  }
+
+  const btnRest = rest as Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children">;
   return (
     <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 8,
-        borderRadius: small ? 10 : 14,
-        padding: small ? '9px 18px' : '15px 28px',
-        fontSize: small ? 13 : 15,
-        fontWeight: 600,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        transition: 'all 0.18s',
-        letterSpacing: '0.01em',
-        opacity: disabled ? 0.6 : 1,
-        ...VARIANTS[variant],
-        ...style,
-      }}
+      type={btnRest.type ?? "button"}
+      {...btnRest}
+      disabled={isDisabled}
+      className={classes}
+      style={style}
+      aria-busy={busy || undefined}
     >
-      {icon && icon}{children}
+      {inner}
     </button>
   );
 }

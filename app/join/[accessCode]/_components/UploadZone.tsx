@@ -78,9 +78,7 @@ export function UploadZone({ eventId, onUploaded, disabled }: Props) {
           const body = await res.json().catch(() => ({}));
           setQueue((prev) =>
             prev.map((item) =>
-              item.id === pending.id
-                ? { ...item, status: "error", errorMessage: mapUploadError(res.status, body) }
-                : item,
+              item.id === pending.id ? { ...item, status: "error", errorMessage: mapUploadError(res.status, body) } : item,
             ),
           );
         } else {
@@ -101,19 +99,22 @@ export function UploadZone({ eventId, onUploaded, disabled }: Props) {
       });
   }, [queue, eventId, disabled]);
 
-  const enqueue = useCallback((files: File[]) => {
-    if (disabled) return;
-    const valid = files.filter((f) => f.type.startsWith("image/") || f.type.startsWith("video/"));
-    if (valid.length === 0) return;
-    setQueue((prev) => [
-      ...prev,
-      ...valid.map((file) => ({
-        id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
-        file,
-        status: "pending" as const,
-      })),
-    ]);
-  }, [disabled]);
+  const enqueue = useCallback(
+    (files: File[]) => {
+      if (disabled) return;
+      const valid = files.filter((f) => f.type.startsWith("image/") || f.type.startsWith("video/"));
+      if (valid.length === 0) return;
+      setQueue((prev) => [
+        ...prev,
+        ...valid.map((file) => ({
+          id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+          file,
+          status: "pending" as const,
+        })),
+      ]);
+    },
+    [disabled],
+  );
 
   function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -127,8 +128,31 @@ export function UploadZone({ eventId, onUploaded, disabled }: Props) {
     handleFiles(e.dataTransfer.files);
   }
 
+  const dropSurface = (() => {
+    if (disabled) {
+      return {
+        cursor: "not-allowed" as const,
+        opacity: 0.5,
+        border: "2px dashed color-mix(in srgb, var(--app-border) 70%, transparent)",
+        background: "color-mix(in srgb, var(--app-surface-2) 40%, transparent)",
+      };
+    }
+    if (isDragging) {
+      return {
+        cursor: "pointer" as const,
+        border: "2px dashed color-mix(in srgb, var(--app-gold) 70%, transparent)",
+        background: "color-mix(in srgb, var(--app-gold) 10%, transparent)",
+      };
+    }
+    return {
+      cursor: "pointer" as const,
+      border: "2px dashed var(--app-border-strong)",
+      background: "var(--app-surface-2)",
+    };
+  })();
+
   return (
-    <div className="flex flex-col gap-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -139,15 +163,22 @@ export function UploadZone({ eventId, onUploaded, disabled }: Props) {
         onClick={() => {
           if (!disabled) inputRef.current?.click();
         }}
-        className={`flex flex-col items-center justify-center gap-3 rounded-[20px] border-2 border-dashed px-6 py-10 text-center transition ${
-          disabled
-            ? "cursor-not-allowed border-white/10 bg-white/[0.02] opacity-50"
-            : `cursor-pointer ${isDragging ? "border-amber-400 bg-amber-400/10" : "border-white/20 bg-white/5 hover:border-white/40"}`
-        }`}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 12,
+          borderRadius: 20,
+          padding: "40px 24px",
+          textAlign: "center",
+          transition: "border-color 0.2s, background 0.2s",
+          ...dropSurface,
+        }}
       >
-        <span className="text-3xl">📷</span>
-        <p className="text-sm font-semibold text-zinc-300">Drag &amp; drop photos or videos here</p>
-        <p className="text-xs text-zinc-500">or tap to browse</p>
+        <span style={{ fontSize: "1.875rem" }}>📷</span>
+        <p style={{ fontSize: 14, fontWeight: 600, color: "var(--app-text)" }}>Drag &amp; drop photos or videos here</p>
+        <p style={{ fontSize: 12, color: "var(--app-subtle)" }}>or tap to browse</p>
         <input
           ref={inputRef}
           type="file"
@@ -159,24 +190,39 @@ export function UploadZone({ eventId, onUploaded, disabled }: Props) {
         />
       </div>
 
-      {queue.length > 0 && (
-        <ul className="flex flex-col gap-2">
+      {queue.length > 0 ? (
+        <ul style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {queue.map((item) => {
             const isUploading = item.status === "pending" && item.id === uploadingId;
             return (
               <li
                 key={item.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  borderRadius: 12,
+                  border: "1.5px solid var(--app-border)",
+                  background: "var(--app-surface)",
+                  padding: "8px 16px",
+                  fontSize: 14,
+                }}
               >
-                <span className="min-w-0 truncate text-zinc-300">{item.file.name}</span>
+                <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--app-text)" }}>
+                  {item.file.name}
+                </span>
                 <span
-                  className={`shrink-0 font-semibold ${
-                    item.status === "done"
-                      ? "text-emerald-400"
-                      : item.status === "error"
-                        ? "text-red-400"
-                        : "text-zinc-400"
-                  }`}
+                  style={{
+                    flexShrink: 0,
+                    fontWeight: 600,
+                    color:
+                      item.status === "done"
+                        ? "var(--app-success)"
+                        : item.status === "error"
+                          ? "var(--app-danger)"
+                          : "var(--app-muted)",
+                  }}
                 >
                   {item.status === "done" && "✓"}
                   {item.status === "error" && (item.errorMessage ?? "Error")}
@@ -187,7 +233,7 @@ export function UploadZone({ eventId, onUploaded, disabled }: Props) {
             );
           })}
         </ul>
-      )}
+      ) : null}
     </div>
   );
 }

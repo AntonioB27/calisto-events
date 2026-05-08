@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+import { appButtonClassNames } from "@/components/app-ui/AppBtn";
+import { MascotSpot } from "@/components/MascotSpot";
+
 export default function WelcomePage() {
   return (
     <main className="app-shell" style={{
@@ -7,6 +10,14 @@ export default function WelcomePage() {
       minHeight: '100vh', padding: 24,
     }}>
       <div style={{ width: '100%', maxWidth: 400, textAlign: 'center' }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+          <MascotSpot
+            src="/brand/mascot/aurora_present.png"
+            size={168}
+            variant="stack"
+            className="welcome-mascot"
+          />
+        </div>
         <div style={{ width: 32, height: 3, background: 'var(--app-gold)', borderRadius: 2, margin: '0 auto 16px' }} />
         <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--app-muted)', marginBottom: 8 }}>
           Welcome to
@@ -19,26 +30,11 @@ export default function WelcomePage() {
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <Link href="/auth/register" style={{
-            display: 'block', padding: '15px 28px', borderRadius: 14, fontSize: 15, fontWeight: 600,
-            background: 'linear-gradient(135deg, var(--app-purple) 0%, #7B3FBE 100%)',
-            color: '#fff', textDecoration: 'none', textAlign: 'center',
-            boxShadow: '0 4px 16px color-mix(in srgb, var(--app-purple) 27%, transparent)',
-          }}>
-            Create organizer account
+          <Link href="/events/new" className={appButtonClassNames({ variant: "primary", size: "lg" })}>
+            Create an event
           </Link>
-          <Link href="/auth/login" style={{
-            display: 'block', padding: '15px 28px', borderRadius: 14, fontSize: 15, fontWeight: 600,
-            background: 'transparent', color: 'var(--app-muted)',
-            border: '1.5px solid var(--app-border)', textDecoration: 'none', textAlign: 'center',
-          }}>
-            I already have an account
-          </Link>
-          <Link href="/join" style={{
-            display: 'block', padding: '12px', fontSize: 14,
-            color: 'var(--app-muted)', textDecoration: 'none', textAlign: 'center',
-          }}>
-            I have an event code →
+          <Link href="/join" className={appButtonClassNames({ variant: "outline", size: "lg" })}>
+            Join an event
           </Link>
         </div>
 

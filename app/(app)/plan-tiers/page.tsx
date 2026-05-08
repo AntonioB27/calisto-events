@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { AppBadge } from "@/components/app-ui/AppBadge";
+import { appButtonClassNames } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
 import { getPlanLimits } from "@/lib/plan-limits";
 
@@ -21,7 +23,7 @@ export default function PlanTiersPage() {
               A quick summary of guest and upload limits.
             </p>
           </div>
-          <Link href="/dashboard" style={{ fontSize: 13, color: 'var(--app-gold)', textDecoration: 'underline', flexShrink: 0 }}>
+          <Link href="/dashboard" className={appButtonClassNames({ variant: "ghost", size: "sm", className: "flex-shrink-0" })}>
             Back
           </Link>
         </div>
@@ -30,25 +32,23 @@ export default function PlanTiersPage() {
           {PLANS.map((planId) => {
             const limits = getPlanLimits(planId);
             return (
-              <AppCard key={planId} hover style={{ padding: 24 }}>
+              <AppCard key={planId} hover pad="lg">
                 <div className="flex items-start justify-between gap-3">
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, fontSize: 20, color: 'var(--app-text)', textTransform: 'capitalize' }}>
+                  <h2
+                    style={{
+                      fontFamily: "var(--font-display)",
+                      fontStyle: "italic",
+                      fontWeight: 700,
+                      fontSize: 20,
+                      color: "var(--app-text)",
+                      textTransform: "capitalize",
+                    }}
+                  >
                     {planId}
                   </h2>
-                  <span style={{
-                    flexShrink: 0,
-                    padding: '4px 12px',
-                    borderRadius: 20,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    background: 'color-mix(in srgb, var(--app-gold) 12%, transparent)',
-                    border: '1.5px solid color-mix(in srgb, var(--app-gold) 30%, transparent)',
-                    color: 'var(--app-gold)',
-                  }}>
+                  <AppBadge tone="accent" className="flex-shrink-0">
                     {limits.uploadDaysAfterEvent} days uploads
-                  </span>
+                  </AppBadge>
                 </div>
 
                 <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">

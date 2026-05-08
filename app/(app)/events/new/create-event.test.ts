@@ -43,6 +43,7 @@ describe("parseCreateEventQuery", () => {
     ).toEqual({
       step: "1",
       name: "Launch Party",
+      emoji: "",
       date: "2026-01-01",
       planId: "free",
     });
@@ -59,6 +60,7 @@ describe("parseCreateEventQuery", () => {
     ).toEqual({
       step: "2",
       name: "Launch Party",
+      emoji: "",
       date: "2026-08-20",
       planId: "free",
     });

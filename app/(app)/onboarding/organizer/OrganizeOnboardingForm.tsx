@@ -2,9 +2,11 @@
 
 import type { EventKind } from "@/lib/event-kind";
 import { EVENT_KINDS } from "@/lib/event-kind";
-import { GoldBar } from "@/components/app-ui/GoldBar";
-import { AppInput } from "@/components/app-ui/AppInput";
 import { AppBtn } from "@/components/app-ui/AppBtn";
+import { AppCard } from "@/components/app-ui/AppCard";
+import { AppFormRow } from "@/components/app-ui/AppFormRow";
+import { AppInput } from "@/components/app-ui/AppInput";
+import { GoldBar } from "@/components/app-ui/GoldBar";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -69,14 +71,8 @@ export function OrganizeOnboardingForm() {
   }
 
   return (
-    <div style={{
-      background: 'var(--app-card)',
-      borderRadius: 18,
-      border: '1.5px solid var(--app-border)',
-      padding: 32,
-      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-    }}>
-      <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+    <AppCard pad="lg" style={{ borderRadius: 18, boxShadow: "var(--app-shadow-sm)" }}>
+      <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: 28 }}>
         <header>
           <GoldBar />
           <p style={{ marginTop: 12, fontSize: 11, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--app-muted)' }}>
@@ -96,64 +92,54 @@ export function OrganizeOnboardingForm() {
           </p>
           <div className="grid grid-cols-2 gap-2">
             {EVENT_KINDS.map((k) => (
-              <button
+              <AppBtn
                 key={k}
                 type="button"
+                variant={kind === k ? "gold" : "outline"}
+                className="w-full !justify-start !text-left"
                 onClick={() => {
                   setKind(k);
                   if (error) setError(null);
                 }}
-                style={{
-                  padding: '14px 16px',
-                  borderRadius: 14,
-                  textAlign: 'left',
-                  fontSize: 14,
-                  fontWeight: 600,
-                  transition: 'all 0.18s',
-                  cursor: 'pointer',
-                  border: kind === k
-                    ? '1.5px solid var(--app-gold)'
-                    : '1.5px solid var(--app-border)',
-                  background: kind === k
-                    ? 'color-mix(in srgb, var(--app-gold) 12%, transparent)'
-                    : 'var(--app-card)',
-                  color: kind === k ? 'var(--app-text)' : 'var(--app-muted)',
-                }}
               >
                 {KIND_LABEL[k]}
-              </button>
+              </AppBtn>
             ))}
           </div>
         </section>
 
         <section>
-          <label
-            htmlFor="displayName"
-            style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--app-muted)', marginBottom: 8 }}
-          >
-            What should we call you?{" "}
-            <span style={{ fontWeight: 400 }}>(optional)</span>
-          </label>
-          <AppInput
-            id="displayName"
-            name="displayName"
-            value={displayName}
-            onChange={setDisplayName}
-            placeholder="e.g. Alex"
-            autoComplete="name"
-          />
+          <AppFormRow label="What should we call you? (optional)" labelFor="displayName">
+            <AppInput
+              id="displayName"
+              name="displayName"
+              value={displayName}
+              onChange={setDisplayName}
+              placeholder="e.g. Alex"
+              autoComplete="name"
+            />
+          </AppFormRow>
         </section>
 
         {error ? (
-          <p style={{ fontSize: 13, color: '#e05252', background: 'rgba(224,82,82,0.08)', padding: '10px 14px', borderRadius: 10 }}>
+          <p
+            style={{
+              fontSize: 13,
+              color: "var(--app-danger)",
+              background: "color-mix(in srgb, var(--app-danger) 10%, transparent)",
+              border: "1.5px solid color-mix(in srgb, var(--app-danger) 35%, transparent)",
+              padding: "10px 14px",
+              borderRadius: 10,
+            }}
+          >
             {error}
           </p>
         ) : null}
 
-        <AppBtn type="submit" disabled={busy || !kind} style={{ width: '100%', justifyContent: 'center' }}>
-          {busy ? "Saving…" : "Continue to dashboard"}
+        <AppBtn type="submit" variant="primary" className="w-full" disabled={busy || !kind} loading={busy}>
+          Continue to dashboard
         </AppBtn>
       </form>
-    </div>
+    </AppCard>
   );
 }

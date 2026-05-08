@@ -34,6 +34,53 @@ function InfoCard({ eventDate, plan }: { eventDate: string; plan: string }) {
     catch { return eventDate; }
   })();
 
+  const calendarIcon = (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M8 3V6M16 3V6M4.5 9.5H19.5M6.5 5.5H17.5C18.6046 5.5 19.5 6.39543 19.5 7.5V18.5C19.5 19.6046 18.6046 20.5 17.5 20.5H6.5C5.39543 20.5 4.5 19.6046 4.5 18.5V7.5C4.5 6.39543 5.39543 5.5 6.5 5.5Z"
+        stroke="var(--app-muted)"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+
+  const hourglassIcon = (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M6 2H18M6 22H18M8 2V7.2C8 8.12 8.38 9 9.05 9.63L12 12L14.95 9.63C15.62 9 16 8.12 16 7.2V2M8 22V16.8C8 15.88 8.38 15 9.05 14.37L12 12L14.95 14.37C15.62 15 16 15.88 16 16.8V22"
+        stroke="var(--app-warn)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
+  const trashIcon = (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 7H20" stroke="var(--app-muted)" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M10 11V17M14 11V17"
+        stroke="var(--app-muted)"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M6 7L7 20H17L18 7"
+        stroke="var(--app-muted)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 7V4.8C9 4.06 9.6 3.5 10.3 3.5H13.7C14.4 3.5 15 4.06 15 4.8V7"
+        stroke="var(--app-muted)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
   return (
     <AppCard pad="lg" style={{ borderRadius: 18 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
@@ -47,14 +94,17 @@ function InfoCard({ eventDate, plan }: { eventDate: string; plan: string }) {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'var(--app-text)' }}>
-          <span>📅</span><span>{formatted}</span>
+          <span style={{ display: "inline-flex" }}>{calendarIcon}</span>
+          <span>{formatted}</span>
         </div>
         <div style={{ height: 1, background: 'var(--app-border)' }} />
         <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--app-warn)", fontWeight: 600 }}>
-          <span>⏳</span><span>Uploads close in 30 days</span>
+          <span style={{ display: "inline-flex" }}>{hourglassIcon}</span>
+          <span>Uploads close in 30 days</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'var(--app-muted)' }}>
-          <span>🗑️</span><span>Event deletes in 180 days</span>
+          <span style={{ display: "inline-flex" }}>{trashIcon}</span>
+          <span>Event deletes in 180 days</span>
         </div>
       </div>
     </AppCard>

@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { appButtonClassNames } from "@/components/app-ui/AppBtn";
+import { AppCard } from "@/components/app-ui/AppCard";
 import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 
 import { SettingsClient } from "./SettingsClient";
@@ -17,14 +19,14 @@ export default async function SettingsPage() {
           <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, fontSize: 28, color: 'var(--app-text)' }}>
             Settings
           </h1>
-          <Link href="/dashboard" style={{ fontSize: 13, color: 'var(--app-gold)', textDecoration: 'underline' }}>
+          <Link href="/dashboard" className={appButtonClassNames({ variant: "ghost", size: "sm" })}>
             Events
           </Link>
         </div>
 
-        <div style={{ background: 'var(--app-card)', borderRadius: 18, border: '1.5px solid var(--app-border)', padding: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+        <AppCard pad="lg" style={{ borderRadius: 18, boxShadow: "var(--app-shadow-sm)" }}>
           <SettingsClient email={user?.email ?? ""} />
-        </div>
+        </AppCard>
       </div>
     </main>
   );

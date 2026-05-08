@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
   if (!url?.trim() || !anonKey?.trim()) {
     if (process.env.NODE_ENV === "development") {
       console.warn(
-        "[calisto-landing] Supabase middleware skipped: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local (Dashboard → Settings → API).",
+        "[calisto-landing] Supabase proxy skipped: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local (Dashboard → Settings → API).",
       );
     }
     return supabaseResponse;

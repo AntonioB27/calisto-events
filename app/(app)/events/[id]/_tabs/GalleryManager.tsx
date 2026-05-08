@@ -3,6 +3,8 @@
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { AppBtn } from "@/components/app-ui/AppBtn";
+
 type MediaRow = {
   id: string;
   storage_path: string;
@@ -138,8 +140,11 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
               {(['all', 'photos', 'videos'] as const).map(f => (
                 <button key={f} type="button" onClick={() => setMediaFilter(f)} style={{
                   padding: '9px 18px', border: 'none',
-                  background: mediaFilter === f ? 'linear-gradient(135deg, var(--app-purple) 0%, #7B3FBE 100%)' : 'transparent',
-                  color: mediaFilter === f ? '#fff' : 'var(--app-muted)',
+                  background:
+                    mediaFilter === f
+                      ? "linear-gradient(135deg, var(--app-purple) 0%, var(--app-purple-2) 100%)"
+                      : "transparent",
+                  color: mediaFilter === f ? "var(--app-inverse)" : "var(--app-muted)",
                   fontWeight: mediaFilter === f ? 600 : 400,
                   fontSize: 13, cursor: 'pointer', transition: 'all 0.15s',
                   textTransform: 'capitalize',
@@ -148,21 +153,16 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
                 </button>
               ))}
             </div>
-            <button
-              type="button"
-              onClick={() => void fetchPage(0, true)}
-              style={{
-                padding: '9px 18px', borderRadius: 10, border: '1.5px solid var(--app-border)',
-                background: 'transparent', color: 'var(--app-muted)', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              }}
-            >
+            <AppBtn variant="ghost" size="sm" type="button" onClick={() => void fetchPage(0, true)}>
               Refresh
-            </button>
+            </AppBtn>
           </div>
         </div>
       </div>
 
-      {error && <p style={{ marginBottom: 16, fontSize: 13, color: '#e05252' }}>{error}</p>}
+      {error ? (
+        <p style={{ marginBottom: 16, fontSize: 13, color: "var(--app-danger)" }}>{error}</p>
+      ) : null}
       {loading && <p style={{ color: 'var(--app-muted)', fontSize: 14 }}>Loading gallery…</p>}
       {!loading && filtered.length === 0 && (
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
@@ -231,19 +231,11 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
         </div>
       )}
 
-      {hasMore && (
-        <button
-          type="button"
-          onClick={loadMore}
-          style={{
-            marginTop: 16, width: '100%', padding: '12px', borderRadius: 14,
-            border: '1.5px solid var(--app-border)',
-            background: 'transparent', color: 'var(--app-muted)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-          }}
-        >
+      {hasMore ? (
+        <AppBtn variant="outline" type="button" className="mt-4 w-full" onClick={loadMore}>
           Load more
-        </button>
-      )}
+        </AppBtn>
+      ) : null}
 
       {/* Lightbox */}
       {lightbox && (

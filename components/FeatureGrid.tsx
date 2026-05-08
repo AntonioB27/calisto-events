@@ -62,7 +62,6 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
           {copy.features.map((f, i) => {
             const accent = ACCENTS[i % ACCENTS.length]!;
             const Icon = ICONS[i] ?? ICONS[0];
-            const idx = String(i + 1);
             return (
               <li key={f.title} className="feature-card">
                 <div

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId } from "react";
 
 type AppInputProps = {
   value?: string;
@@ -13,54 +13,72 @@ type AppInputProps = {
   id?: string;
   required?: boolean;
   autoComplete?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
+  error?: boolean;
+  className?: string;
+  maxLength?: number;
+  autoFocus?: boolean;
 };
 
 export function AppInput({
-  value, defaultValue, onChange, placeholder,
-  type = 'text', multiline, name, id, required, autoComplete,
+  value,
+  defaultValue,
+  onChange,
+  placeholder,
+  type = "text",
+  multiline,
+  name,
+  id,
+  required,
+  autoComplete,
+  disabled,
+  readOnly,
+  error,
+  className = "",
+  maxLength,
+  autoFocus,
 }: AppInputProps) {
-  const [focus, setFocus] = useState(false);
-
-  const shared: React.CSSProperties = {
-    width: '100%',
-    padding: '13px 16px',
-    background: 'var(--app-bg)',
-    border: `1.5px solid ${focus ? 'var(--app-gold)' : 'var(--app-border)'}`,
-    borderRadius: 12,
-    fontSize: 15,
-    color: 'var(--app-text)',
-    outline: 'none',
-    fontFamily: 'inherit',
-    transition: 'border-color 0.2s',
-  };
-
-  const handlers = {
-    onFocus: () => setFocus(true),
-    onBlur: () => setFocus(false),
-  };
+  const autoId = useId();
+  const inputId = id ?? autoId;
+  const baseClass = ["app-input", error ? "app-input--error" : "", className].filter(Boolean).join(" ");
 
   if (multiline) {
     return (
       <textarea
-        name={name} id={id} required={required}
-        value={value} defaultValue={defaultValue}
-        onChange={e => onChange?.(e.target.value)}
+        name={name}
+        id={inputId}
+        required={required}
+        value={value}
+        defaultValue={defaultValue}
+        onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
-        style={{ ...shared, resize: 'vertical', minHeight: 80 }}
-        {...handlers}
+        disabled={disabled}
+        readOnly={readOnly}
+        className={baseClass}
+        style={{ resize: "vertical", minHeight: 80 }}
+        maxLength={maxLength}
+        autoFocus={autoFocus}
       />
     );
   }
 
   return (
     <input
-      type={type} name={name} id={id} required={required}
-      value={value} defaultValue={defaultValue}
-      onChange={e => onChange?.(e.target.value)}
+      type={type}
+      name={name}
+      id={inputId}
+      required={required}
+      value={value}
+      defaultValue={defaultValue}
+      onChange={(e) => onChange?.(e.target.value)}
       placeholder={placeholder}
       autoComplete={autoComplete}
-      style={shared}
-      {...handlers}
+      disabled={disabled}
+      readOnly={readOnly}
+      className={baseClass}
+      maxLength={maxLength}
+      autoFocus={autoFocus}
     />
   );
 }

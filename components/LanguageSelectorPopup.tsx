@@ -55,7 +55,7 @@ function ThemeSwatch({ variant }: { variant: "light" | "dark" }) {
 
 export function LanguageSelectorPopup({ copy, locale }: LanguageSelectorPopupProps) {
   const [open, setOpen] = useState(true);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">("light");
   const titleId = useId();
   const subtitleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);

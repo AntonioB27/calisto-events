@@ -1,12 +1,13 @@
 "use client";
 
 import { startTransition, useEffect, useState } from "react";
+
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { canGuestUpload, type PlanId } from "@/lib/plan-limits";
 
-import { WelcomeModal } from "./WelcomeModal";
 import { MediaGrid } from "./MediaGrid";
 import { UploadZone } from "./UploadZone";
+import { WelcomeModal } from "./WelcomeModal";
 
 type GuestEventPageProps = Readonly<{
   accessCode: string;
@@ -23,7 +24,7 @@ export function GuestEventPage({ accessCode, eventId, eventTitle, planId, eventD
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    void supabase.auth.getSession().then(({ data: { session } }) => {
       setHasSession(session !== null);
     });
   }, []);
@@ -64,57 +65,81 @@ export function GuestEventPage({ accessCode, eventId, eventTitle, planId, eventD
 
   if (hasSession === null) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-2xl items-center justify-center px-6 py-12">
-        <p className="text-sm text-zinc-500">Loading…</p>
+      <main className="join-shell mx-auto flex min-h-screen max-w-2xl items-center justify-center px-6 py-12">
+        <p style={{ fontSize: 14, color: "var(--app-muted)" }}>Loading…</p>
       </main>
     );
   }
 
   if (hasSession && !membershipReady) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-2xl items-center justify-center px-6 py-12">
-        <p className="text-sm text-zinc-500">Joining event…</p>
+      <main className="join-shell mx-auto flex min-h-screen max-w-2xl items-center justify-center px-6 py-12">
+        <p style={{ fontSize: 14, color: "var(--app-muted)" }}>Joining event…</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#1a0a2e] px-4 pb-16 pt-10 sm:px-6">
+    <main className="join-shell min-h-screen px-4 pb-16 pt-10 sm:px-6">
       {!hasSession && (
-        <WelcomeModal
-          eventTitle={eventTitle}
-          accessCode={accessCode}
-          onSessionReady={() => setHasSession(true)}
-        />
+        <WelcomeModal eventTitle={eventTitle} accessCode={accessCode} onSessionReady={() => setHasSession(true)} />
       )}
 
       <div className="mx-auto max-w-3xl">
-        <h1 className="mb-1 text-2xl font-extrabold text-white">{eventTitle}</h1>
-        <p className="mb-8 text-sm text-zinc-400">Share your memories from this event.</p>
+        <h1 style={{ marginBottom: 4, fontSize: "1.5rem", fontWeight: 800, color: "var(--app-text)" }}>{eventTitle}</h1>
+        <p style={{ marginBottom: 32, fontSize: 14, color: "var(--app-muted)" }}>Share your memories from this event.</p>
 
-        {!uploadsOpen && hasSession && (
-          <div className="mb-8 rounded-2xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+        {!uploadsOpen && hasSession ? (
+          <div
+            style={{
+              marginBottom: 32,
+              borderRadius: 16,
+              border: "1.5px solid color-mix(in srgb, var(--app-warn) 45%, transparent)",
+              background: "color-mix(in srgb, var(--app-warn) 12%, transparent)",
+              padding: "12px 16px",
+              fontSize: 14,
+              color: "var(--app-warn)",
+            }}
+          >
             Uploads are closed for this event (upload window ended). You can still browse the gallery.
           </div>
-        )}
+        ) : null}
 
-        {hasSession && (
+        {hasSession ? (
           <>
-            <section className="mb-10">
-              <h2 className="mb-4 text-sm font-bold uppercase tracking-widest text-zinc-400">Upload</h2>
-              <UploadZone
-                eventId={eventId}
-                disabled={!uploadsOpen}
-                onUploaded={() => setRefreshKey((k) => k + 1)}
-              />
+            <section style={{ marginBottom: 40 }}>
+              <h2
+                style={{
+                  marginBottom: 16,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.2em",
+                  color: "var(--app-muted)",
+                }}
+              >
+                Upload
+              </h2>
+              <UploadZone eventId={eventId} disabled={!uploadsOpen} onUploaded={() => setRefreshKey((k) => k + 1)} />
             </section>
 
             <section>
-              <h2 className="mb-4 text-sm font-bold uppercase tracking-widest text-zinc-400">Gallery</h2>
+              <h2
+                style={{
+                  marginBottom: 16,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.2em",
+                  color: "var(--app-muted)",
+                }}
+              >
+                Gallery
+              </h2>
               <MediaGrid eventId={eventId} refreshKey={refreshKey} />
             </section>
           </>
-        )}
+        ) : null}
       </div>
     </main>
   );

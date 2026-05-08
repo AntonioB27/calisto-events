@@ -2,7 +2,7 @@ import Image from "next/image";
 
 type MascotSpotProps = {
   src: string;
-  caption: string;
+  caption?: string;
   size?: number;
   variant?: "inline" | "stack";
   className?: string;
@@ -12,6 +12,7 @@ type MascotSpotProps = {
  * Consistent fixed-frame mascot with optional bubble text (decorative image + visible caption).
  */
 export function MascotSpot({ src, caption, size = 88, variant = "inline", className = "" }: MascotSpotProps) {
+  const showCaption = Boolean(caption && caption.trim().length > 0);
   const frame = (
     <div
       className="mascot-spot__frame"
@@ -40,19 +41,21 @@ export function MascotSpot({ src, caption, size = 88, variant = "inline", classN
         style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center" }}
       >
         {frame}
-        <p
-          className="mascot-spot__caption"
-          style={{
-            margin: 0,
-            fontFamily: "var(--font-sans)",
-            fontSize: 12.5,
-            lineHeight: 1.45,
-            color: "var(--cream-3, #B5AB99)",
-            maxWidth: 18,
-          }}
-        >
-          {caption}
-        </p>
+        {showCaption ? (
+          <p
+            className="mascot-spot__caption"
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-sans)",
+              fontSize: 12.5,
+              lineHeight: 1.45,
+              color: "var(--cream-3, #B5AB99)",
+              maxWidth: 18,
+            }}
+          >
+            {caption}
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -63,19 +66,21 @@ export function MascotSpot({ src, caption, size = 88, variant = "inline", classN
       style={{ display: "flex", alignItems: "center", gap: 14 }}
     >
       {frame}
-      <p
-        className="mascot-spot__caption"
-        style={{
-          margin: 0,
-          fontFamily: "var(--font-sans)",
-          fontSize: 12.5,
-          lineHeight: 1.45,
-          color: "var(--cream-3, #B5AB99)",
-          textAlign: "left",
-        }}
-      >
-        {caption}
-      </p>
+      {showCaption ? (
+        <p
+          className="mascot-spot__caption"
+          style={{
+            margin: 0,
+            fontFamily: "var(--font-sans)",
+            fontSize: 12.5,
+            lineHeight: 1.45,
+            color: "var(--cream-3, #B5AB99)",
+            textAlign: "left",
+          }}
+        >
+          {caption}
+        </p>
+      ) : null}
     </div>
   );
 }

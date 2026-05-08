@@ -8,20 +8,68 @@ import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
 import { AppFormRow } from "@/components/app-ui/AppFormRow";
 
+type JoinPreview = {
+  title: string;
+  eventDate: string | null;
+  planId: string | null;
+};
+
 export function JoinCodeForm() {
   const router = useRouter();
+  const [stage, setStage] = useState<"enter" | "choice">("enter");
   const [code, setCode] = useState("");
+  const [resolvedCode, setResolvedCode] = useState("");
+  const [preview, setPreview] = useState<JoinPreview | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const normalized = normalizeAccessCode(code);
     if (normalized.length < 4) {
       setError("Enter the code from your invite (at least 4 characters).");
       return;
     }
+
+    setLoadingPreview(true);
     setError(null);
-    router.push(`/join/${encodeURIComponent(normalized)}`);
+    try {
+      const response = await fetch(`/api/join/preview?code=${encodeURIComponent(normalized)}`);
+      if (response.status === 404) {
+        setError("We could not find an event for that code. Please check and try again.");
+        setStage("enter");
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(`Preview failed with status ${response.status}`);
+      }
+
+      const data = (await response.json()) as JoinPreview;
+      setResolvedCode(normalized);
+      setPreview(data);
+      setStage("choice");
+    } catch {
+      setError("Something went wrong while checking your code. Please try again.");
+      setStage("enter");
+    } finally {
+      setLoadingPreview(false);
+    }
+  }
+
+  function onChangeCode() {
+    setStage("enter");
+    setPreview(null);
+    setResolvedCode("");
+    setError(null);
+  }
+
+  function onLogin() {
+    const returnTo = `/join/${encodeURIComponent(resolvedCode)}`;
+    router.push(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
+  }
+
+  function onContinueAsGuest() {
+    router.push(`/join/${encodeURIComponent(resolvedCode)}`);
   }
 
   return (
@@ -39,7 +87,7 @@ export function JoinCodeForm() {
       <div style={{ width: 32, height: 3, background: "var(--app-gold)", borderRadius: 2, marginBottom: 24 }} />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="https://www.calisto-events.com/_next/image?url=%2Fbrand%2Fmascot%2Faurora_key.png&w=384&q=75"
+        src="/brand/mascot/aurora_key.png"
         alt="Aurora"
         style={{ width: 100, height: 100, objectFit: "contain", marginBottom: 4, filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.1))" }}
       />
@@ -70,47 +118,80 @@ export function JoinCodeForm() {
       </p>
 
       <AppCard pad="lg" style={{ width: "100%", borderRadius: 18 }}>
-        <form onSubmit={onSubmit}>
-          <AppFormRow label="Access Code" labelFor="access-code" errorText={error}>
-            <input
-              id="access-code"
-              value={code}
-              onChange={(e) => {
-                setCode(e.target.value.toUpperCase());
-                if (error) setError(null);
-              }}
-              placeholder="CALISTO-XXXXXX"
-              className="app-input"
+        {stage === "enter" ? (
+          <form onSubmit={onSubmit}>
+            <AppFormRow label="Access Code" labelFor="access-code" errorText={error}>
+              <input
+                id="access-code"
+                value={code}
+                onChange={(e) => {
+                  setCode(e.target.value.toUpperCase());
+                  if (error) setError(null);
+                }}
+                placeholder="CALISTO-XXXXXX"
+                className="app-input"
+                style={{
+                  padding: "18px 20px",
+                  fontSize: 22,
+                  fontWeight: 700,
+                  textAlign: "center",
+                  letterSpacing: "0.12em",
+                  borderWidth: 2,
+                  borderColor: code.length > 5 ? "var(--app-gold)" : "var(--app-border)",
+                  transition: "border-color 0.2s",
+                }}
+              />
+              <p
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontStyle: "italic",
+                  fontSize: 13,
+                  color: "var(--app-muted)",
+                  marginTop: 10,
+                  lineHeight: 1.5,
+                  textAlign: "center",
+                }}
+              >
+                Hint: codes look like <strong style={{ fontStyle: "normal" }}>CALISTO-S2UAQ4</strong>
+              </p>
+            </AppFormRow>
+
+            <AppBtn type="submit" variant="primary" className="mt-6 w-full" loading={loadingPreview}>
+              Join Event →
+            </AppBtn>
+          </form>
+        ) : (
+          <div style={{ display: "grid", gap: 16 }}>
+            <div
               style={{
-                padding: "18px 20px",
-                fontSize: 22,
-                fontWeight: 700,
-                textAlign: "center",
-                letterSpacing: "0.12em",
-                borderWidth: 2,
-                borderColor: code.length > 5 ? "var(--app-gold)" : "var(--app-border)",
-                transition: "border-color 0.2s",
-              }}
-            />
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontStyle: "italic",
-                fontSize: 13,
-                color: "var(--app-muted)",
-                marginTop: 10,
-                lineHeight: 1.5,
-                textAlign: "center",
+                border: "1px solid var(--app-border)",
+                borderRadius: 12,
+                padding: "14px 16px",
+                textAlign: "left",
+                background: "var(--app-surface-2)",
               }}
             >
-              Hint: codes look like <strong style={{ fontStyle: "normal" }}>CALISTO-S2UAQ4</strong>
-            </p>
-          </AppFormRow>
+              <p style={{ margin: 0, fontSize: 12, color: "var(--app-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                Event Preview
+              </p>
+              <p style={{ margin: "8px 0 0", fontSize: 18, fontWeight: 700, color: "var(--app-text)" }}>{preview?.title ?? "Event"}</p>
+              <p style={{ margin: "8px 0 0", fontSize: 14, color: "var(--app-muted)" }}>
+                Code: <strong style={{ color: "var(--app-text)" }}>{resolvedCode}</strong>
+              </p>
+              {preview?.eventDate ? <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--app-muted)" }}>Date: {preview.eventDate}</p> : null}
+            </div>
 
-          <AppBtn type="submit" variant="primary" className="mt-6 w-full">
-            Join Event →
-          </AppBtn>
-        </form>
+            <AppBtn type="button" variant="primary" className="w-full" onClick={onLogin}>
+              I have an account
+            </AppBtn>
+            <AppBtn type="button" variant="secondary" className="w-full" onClick={onContinueAsGuest}>
+              Continue as guest
+            </AppBtn>
+            <AppBtn type="button" variant="ghost" className="w-full" onClick={onChangeCode}>
+              Change code
+            </AppBtn>
+          </div>
+        )}
       </AppCard>
     </div>
   );

@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+
+import { AppBtn } from "@/components/app-ui/AppBtn";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type MediaItem = {
@@ -88,55 +90,56 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
     setLoading(true);
     setPage(0);
     setItems([]);
-    fetchPage(0, true);
+    void fetchPage(0, true);
   }, [fetchPage, refreshKey]);
 
   function loadMore() {
     const nextPage = page + 1;
     setPage(nextPage);
-    fetchPage(nextPage, false);
+    void fetchPage(nextPage, false);
   }
 
   return (
     <div>
-      {loading && <p className="text-zinc-500">Loading gallery…</p>}
-      {error && <p className="text-red-400">{error}</p>}
-      {!loading && items.length === 0 && <p className="text-zinc-400">No media yet — be the first to upload!</p>}
+      {loading ? <p style={{ color: "var(--app-muted)" }}>Loading gallery…</p> : null}
+      {error ? <p style={{ color: "var(--app-danger)" }}>{error}</p> : null}
+      {!loading && items.length === 0 ? (
+        <p style={{ color: "var(--app-muted)" }}>No media yet — be the first to upload!</p>
+      ) : null}
 
-      {items.length > 0 && (
+      {items.length > 0 ? (
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
           {items.map((item) => (
-            <li key={item.id} className="relative aspect-square overflow-hidden rounded-xl bg-white/10">
+            <li
+              key={item.id}
+              style={{
+                position: "relative",
+                aspectRatio: "1",
+                overflow: "hidden",
+                borderRadius: 12,
+                background: "var(--app-surface-2)",
+              }}
+            >
               {item.signedUrl ? (
                 isVideoMime(item.mime_type) ? (
-                  <video
-                    src={item.signedUrl}
-                    className="h-full w-full object-cover"
-                    controls
-                    playsInline
-                    muted
-                  />
+                  <video src={item.signedUrl} className="h-full w-full object-cover" controls playsInline muted />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={item.signedUrl} alt="" className="h-full w-full object-cover" />
                 )
               ) : (
-                <div className="h-full w-full bg-zinc-800" />
+                <div style={{ height: "100%", width: "100%", background: "var(--app-border)" }} />
               )}
             </li>
           ))}
         </ul>
-      )}
+      ) : null}
 
-      {hasMore && (
-        <button
-          onClick={loadMore}
-          className="mt-6 w-full rounded-full border border-white/20 bg-white/5 py-2.5 text-sm font-semibold text-zinc-300 transition hover:bg-white/10"
-          type="button"
-        >
+      {hasMore ? (
+        <AppBtn variant="outline" type="button" className="mt-6 w-full" onClick={loadMore}>
           Load more
-        </button>
-      )}
+        </AppBtn>
+      ) : null}
     </div>
   );
 }

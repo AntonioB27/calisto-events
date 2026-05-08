@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { AppBtn } from "@/components/app-ui/AppBtn";
+import { AppCard } from "@/components/app-ui/AppCard";
+import { AppFormRow } from "@/components/app-ui/AppFormRow";
+import { AppInput } from "@/components/app-ui/AppInput";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type Props = {
@@ -53,73 +58,83 @@ export function WelcomeModal({ eventTitle, accessCode, onSessionReady }: Props) 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-md">
-        <p className="text-xs font-semibold uppercase tracking-widest text-amber-300">You&apos;re invited</p>
-        <h1 className="mt-1 text-2xl font-semibold text-white">{eventTitle}</h1>
-        <p className="mt-2 text-sm text-zinc-300">Join to upload photos &amp; videos and browse the gallery.</p>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 50,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16,
+        background: "color-mix(in srgb, var(--app-text) 55%, transparent)",
+        backdropFilter: "blur(6px)",
+      }}
+    >
+      <AppCard pad="lg" style={{ width: "100%", maxWidth: 384, borderRadius: 16, boxShadow: "var(--app-shadow-lg)" }}>
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.16em",
+            color: "var(--app-gold)",
+          }}
+        >
+          You&apos;re invited
+        </p>
+        <h1 style={{ marginTop: 4, fontSize: "1.5rem", fontWeight: 600, color: "var(--app-text)" }}>{eventTitle}</h1>
+        <p style={{ marginTop: 8, fontSize: 14, color: "var(--app-muted)" }}>
+          Join to upload photos &amp; videos and browse the gallery.
+        </p>
 
         {!showNicknameInput ? (
-          <div className="mt-6 flex flex-col gap-3">
-            <button
-              onClick={() => router.push(`/auth/register?returnTo=${encodeURIComponent(returnTo)}`)}
-              className="w-full rounded-full bg-amber-300 px-6 py-3 font-semibold text-zinc-900 transition hover:bg-amber-200"
+          <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12 }}>
+            <AppBtn
               type="button"
+              variant="gold"
+              className="w-full"
+              onClick={() => router.push(`/auth/register?returnTo=${encodeURIComponent(returnTo)}`)}
             >
               Create account
-            </button>
-            <button
-              onClick={() => router.push(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`)}
-              className="w-full rounded-full border border-white/20 bg-white/10 px-6 py-3 font-semibold text-white transition hover:bg-white/15"
+            </AppBtn>
+            <AppBtn
               type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => router.push(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`)}
             >
               Log in
-            </button>
-            <button
-              onClick={() => setShowNicknameInput(true)}
-              className="w-full rounded-full border border-white/10 px-6 py-3 text-sm font-semibold text-zinc-300 transition hover:text-white"
-              type="button"
-            >
+            </AppBtn>
+            <AppBtn type="button" variant="ghost" className="w-full" onClick={() => setShowNicknameInput(true)}>
               Continue as guest
-            </button>
+            </AppBtn>
           </div>
         ) : (
-          <form onSubmit={handleGuestSubmit} className="mt-6 flex flex-col gap-3">
-            <label className="text-sm font-medium text-zinc-200" htmlFor="nickname">
-              Your nickname
-            </label>
-            <input
-              id="nickname"
-              type="text"
-              value={nickname}
-              onChange={(e) => {
-                setNickname(e.target.value);
-                if (nicknameError) setNicknameError(null);
-              }}
-              placeholder="e.g. Maria"
-              maxLength={30}
-              className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-300"
-              autoFocus
-            />
-            {nicknameError ? <p className="text-sm text-red-300">{nicknameError}</p> : null}
-            <button
-              type="submit"
-              disabled={busy}
-              className="w-full rounded-full bg-amber-300 px-6 py-3 font-semibold text-zinc-900 transition hover:bg-amber-200 disabled:opacity-60"
-            >
-              {busy ? "Joining…" : "Enter as guest"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowNicknameInput(false)}
-              className="text-sm text-zinc-400 hover:text-zinc-200"
-            >
+          <form onSubmit={handleGuestSubmit} style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12 }}>
+            <AppFormRow label="Your nickname" labelFor="nickname" errorText={nicknameError}>
+              <AppInput
+                id="nickname"
+                type="text"
+                value={nickname}
+                onChange={(v) => {
+                  setNickname(v);
+                  if (nicknameError) setNicknameError(null);
+                }}
+                placeholder="e.g. Maria"
+                maxLength={30}
+                autoFocus
+              />
+            </AppFormRow>
+            <AppBtn type="submit" variant="gold" className="w-full" disabled={busy} loading={busy}>
+              Enter as guest
+            </AppBtn>
+            <AppBtn type="button" variant="ghost" size="sm" onClick={() => setShowNicknameInput(false)}>
               ← Back
-            </button>
+            </AppBtn>
           </form>
         )}
-      </div>
+      </AppCard>
     </div>
   );
 }
-

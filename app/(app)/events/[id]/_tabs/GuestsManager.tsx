@@ -14,6 +14,11 @@ type MemberRow = {
   display_name_at_event: string | null;
 };
 
+type ProfileRow = {
+  id: string;
+  display_name: string | null;
+};
+
 type MediaRow = {
   uploaded_by: string;
   mime_type: string | null;
@@ -34,6 +39,7 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
   const [error, setError] = useState<string | null>(null);
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
   const [members, setMembers] = useState<MemberRow[]>([]);
+  const [profileNameById, setProfileNameById] = useState<Map<string, string>>(() => new Map());
   const [organizerId, setOrganizerId] = useState<string | null>(null);
   const [myUserId, setMyUserId] = useState<string | null>(null);
   const [mediaByUser, setMediaByUser] = useState<Map<string, { photos: number; videos: number }>>(() => new Map());
@@ -65,6 +71,22 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
 
       setOrganizerId((ev as { organizer_id: string } | null)?.organizer_id ?? null);
       setMembers((mems ?? []) as MemberRow[]);
+
+      const userIds = Array.from(new Set(((mems ?? []) as MemberRow[]).map((m) => m.user_id)));
+      if (userIds.length) {
+        const { data: profiles, error: profilesErr } = await supabase
+          .from("profiles")
+          .select("id, display_name")
+          .in("id", userIds);
+        if (!profilesErr) {
+          const map = new Map<string, string>();
+          for (const p of (profiles ?? []) as ProfileRow[]) {
+            const name = p.display_name?.trim();
+            if (name) map.set(p.id, name);
+          }
+          setProfileNameById(map);
+        }
+      }
 
       const map = new Map<string, { photos: number; videos: number }>();
       for (const row of (media ?? []) as MediaRow[]) {
@@ -157,7 +179,17 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
       </div>
 
       {error ? (
-        <p style={{ fontSize: 13, color: '#e05252', background: 'rgba(224,82,82,0.08)', padding: '10px 14px', borderRadius: 10, marginBottom: 16 }}>
+        <p
+          style={{
+            fontSize: 13,
+            color: "var(--app-danger)",
+            background: "color-mix(in srgb, var(--app-danger) 10%, transparent)",
+            padding: "10px 14px",
+            borderRadius: 10,
+            marginBottom: 16,
+            border: "1.5px solid color-mix(in srgb, var(--app-danger) 35%, transparent)",
+          }}
+        >
           {error}
         </p>
       ) : null}
@@ -179,7 +211,10 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
             const canRemove = isPrimaryOrganizer && !isPrimary;
             const canPromoteDemote = isPrimaryOrganizer && !isPrimary;
             const busy = busyUserId === m.user_id;
-            const display = m.display_name_at_event?.trim() || (isPrimary ? "Organizer" : "Guest");
+            const display =
+              m.display_name_at_event?.trim() ||
+              profileNameById.get(m.user_id) ||
+              (isPrimary ? "Organizer" : "Guest");
             const isOrgRole = m.role === "organizer" || m.role === "co_organizer";
             return (
               <li
@@ -244,27 +279,16 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
                       </AppBtn>
                     ) : null}
                     {canRemove ? (
-                      <button
+                      <AppBtn
+                        variant="danger"
+                        size="sm"
                         type="button"
                         disabled={busyUserId !== null}
+                        loading={busy}
                         onClick={() => void removeMember(m.user_id)}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          borderRadius: 10,
-                          padding: '9px 18px',
-                          fontSize: 13,
-                          fontWeight: 600,
-                          background: 'rgba(224,82,82,0.10)',
-                          border: '1.5px solid rgba(224,82,82,0.4)',
-                          color: '#fca5a5',
-                          cursor: busyUserId !== null ? 'not-allowed' : 'pointer',
-                          opacity: busyUserId !== null ? 0.6 : 1,
-                          transition: 'all 0.18s',
-                        }}
                       >
-                        {busy ? "Removing…" : "Remove"}
-                      </button>
+                        Remove
+                      </AppBtn>
                     ) : null}
                   </div>
                 ) : null}
