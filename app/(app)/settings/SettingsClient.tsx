@@ -55,7 +55,7 @@ export function SettingsClient({ email }: SettingsClientProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
       <section>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <GoldBar vertical />
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--app-muted)' }}>
             Account

@@ -22,7 +22,7 @@ export default async function SettingsPage() {
           </Link>
         </div>
 
-        <div style={{ background: 'var(--app-card)', borderRadius: 18, border: '1.5px solid var(--app-border)', padding: 24 }}>
+        <div style={{ background: 'var(--app-card)', borderRadius: 18, border: '1.5px solid var(--app-border)', padding: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
           <SettingsClient email={user?.email ?? ""} />
         </div>
       </div>
