@@ -1,6 +1,6 @@
 "use client";
 
-import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { startTransition, useCallback, useEffect, useMemo, useState } from "react";
 import { GoldBar } from "@/components/app-ui/GoldBar";
 import { AppBtn } from "@/components/app-ui/AppBtn";
@@ -34,7 +34,7 @@ function shortId(id: string) {
 }
 
 export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
@@ -43,6 +43,28 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
   const [organizerId, setOrganizerId] = useState<string | null>(null);
   const [myUserId, setMyUserId] = useState<string | null>(null);
   const [mediaByUser, setMediaByUser] = useState<Map<string, { photos: number; videos: number }>>(() => new Map());
+
+  if (!supabase) {
+    return (
+      <div style={{ padding: "24px 0" }}>
+        <div
+          style={{
+            borderRadius: "var(--app-radius-lg)",
+            border: "1.5px solid color-mix(in srgb, var(--app-danger) 35%, var(--app-border))",
+            background: "color-mix(in srgb, var(--app-danger) 8%, var(--app-surface))",
+            padding: 16,
+          }}
+        >
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--app-danger)" }}>
+            Supabase not configured
+          </div>
+          <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--app-muted)", lineHeight: 1.55 }}>
+            Set <strong>NEXT_PUBLIC_SUPABASE_URL</strong> and <strong>NEXT_PUBLIC_SUPABASE_ANON_KEY</strong> in <code>.env.local</code> to use event admin features.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const isPrimaryOrganizer = Boolean(myUserId && organizerId && myUserId === organizerId);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AppBtn } from "@/components/app-ui/AppBtn";
@@ -36,7 +36,28 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
   const [lightbox, setLightbox] = useState<MediaItem | null>(null);
   const [mediaFilter, setMediaFilter] = useState<'all' | 'photos' | 'videos'>('all');
 
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
+
+  if (!supabase) {
+    return (
+      <div
+        style={{
+          marginTop: 12,
+          borderRadius: "var(--app-radius-lg)",
+          border: "1.5px solid color-mix(in srgb, var(--app-danger) 35%, var(--app-border))",
+          background: "color-mix(in srgb, var(--app-danger) 8%, var(--app-surface))",
+          padding: 16,
+        }}
+      >
+        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--app-danger)" }}>
+          Supabase not configured
+        </div>
+        <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--app-muted)", lineHeight: 1.55 }}>
+          Set <strong>NEXT_PUBLIC_SUPABASE_URL</strong> and <strong>NEXT_PUBLIC_SUPABASE_ANON_KEY</strong> in <code>.env.local</code> to load the gallery.
+        </p>
+      </div>
+    );
+  }
 
   const fetchPage = useCallback(
     async (pageIndex: number, replace: boolean) => {

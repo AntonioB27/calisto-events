@@ -7,7 +7,7 @@ import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
 import { AppFormRow } from "@/components/app-ui/AppFormRow";
 import { AppInput } from "@/components/app-ui/AppInput";
-import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type Props = {
   eventTitle: string;
@@ -35,7 +35,11 @@ export function WelcomeModal({ eventTitle, accessCode, onSessionReady }: Props) 
     setBusy(true);
 
     try {
-      const supabase = createSupabaseBrowserClient();
+      const supabase = maybeCreateSupabaseBrowserClient();
+      if (!supabase) {
+        setNicknameError("Supabase is not configured. Please try again later.");
+        return;
+      }
       const { error: anonError } = await supabase.auth.signInAnonymously();
       if (anonError) throw anonError;
 

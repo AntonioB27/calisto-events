@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { AppBtn } from "@/components/app-ui/AppBtn";
-import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type MediaItem = {
   id: string;
@@ -44,7 +44,13 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
   const fetchPage = useCallback(
     async (pageIndex: number, replace: boolean) => {
       try {
-        const supabase = createSupabaseBrowserClient();
+        const supabase = maybeCreateSupabaseBrowserClient();
+        if (!supabase) {
+          setError("Supabase is not configured.");
+          setLoading(false);
+          setHasMore(false);
+          return;
+        }
         const from = pageIndex * PAGE_SIZE;
         const to = from + PAGE_SIZE - 1;
 

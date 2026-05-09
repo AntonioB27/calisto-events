@@ -22,6 +22,15 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 
 Without these, middleware skips session refresh and login/admin flows will not work.
 
+### Production builds (important)
+
+Next.js embeds `NEXT_PUBLIC_*` into the JS bundle **at build time**. If CI / Vercel / Docker runs `npm run build` **without** these variables available, guests and organizers hit `@supabase/ssr: URL and API key are required`.
+
+- In your host’s dashboard, set **`NEXT_PUBLIC_SUPABASE_URL`** and **`NEXT_PUBLIC_SUPABASE_ANON_KEY`** for Production (same values as Dashboard → Settings → API: **Project URL** and **anon public**).
+- Deploy again after saving (every change needs a **new build**).
+
+If you currently only define server-style **`SUPABASE_URL`** and **`SUPABASE_ANON_KEY`**, either add the `NEXT_PUBLIC_*` copies or rely on **`next.config.ts`**, which maps `SUPABASE_*` / `EXPO_PUBLIC_*` into the browser bundle automatically.
+
 Optional but recommended for **correct guest join links** in emails and on the Share tab (especially behind proxies):
 
 ```bash

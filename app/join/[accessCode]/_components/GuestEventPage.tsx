@@ -2,7 +2,7 @@
 
 import { startTransition, useEffect, useState } from "react";
 
-import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { canGuestUpload, type PlanId } from "@/lib/plan-limits";
 
 import { MediaGrid } from "./MediaGrid";
@@ -23,8 +23,13 @@ export function GuestEventPage({ accessCode, eventId, eventTitle, planId, eventD
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
-    void supabase.auth.getSession().then(({ data: { session } }) => {
+    const supabase = maybeCreateSupabaseBrowserClient();
+    if (!supabase) {
+      setHasSession(false);
+      return;
+    }
+    void supabase.auth.getSession().then((res: unknown) => {
+      const session = (res as { data?: { session?: unknown } } | null)?.data?.session ?? null;
       setHasSession(session !== null);
     });
   }, []);
@@ -37,7 +42,11 @@ export function GuestEventPage({ accessCode, eventId, eventTitle, planId, eventD
     startTransition(() => setMembershipReady(false));
 
     async function ensureMembership() {
-      const supabase = createSupabaseBrowserClient();
+      const supabase = maybeCreateSupabaseBrowserClient();
+      if (!supabase) {
+        setMembershipReady(true);
+        return;
+      }
       const { error } = await supabase.rpc("join_event_with_code", {
         p_code: accessCode.toUpperCase(),
       });

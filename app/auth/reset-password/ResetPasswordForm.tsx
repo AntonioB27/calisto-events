@@ -33,7 +33,7 @@ function ResetPasswordInner() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event: unknown, session: unknown) => {
       if (!mountedRef.current) return;
       if (session) {
         setHasRecoverySession(true);

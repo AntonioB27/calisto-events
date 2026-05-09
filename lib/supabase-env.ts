@@ -7,7 +7,10 @@ export function getSupabaseUrl(errorMessage: string): string {
 }
 
 export function getSupabaseAnonKey(errorMessage: string): string {
-  const value = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.SUPABASE_ANON_KEY;
+  const value =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    process.env.SUPABASE_ANON_KEY ??
+    process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
   if (!value) {
     throw new Error(errorMessage);
   }
