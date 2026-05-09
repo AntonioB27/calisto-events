@@ -1,35 +1,68 @@
-import Image from "next/image";
+/** Same column width for `/welcome`, `/auth/login`, and similar heroes. */
+export const WELCOME_HERO_COLUMN_MAX_WIDTH_PX = 400;
+
+/** Default hero mascot width (square assets use this height too). */
+export const WELCOME_HERO_MASCOT_PX = 168;
+
+/**
+ * `aurora_key.png` is 1024×1536 portrait. In a square frame it letterboxes sideways and looks tiny;
+ * match welcome’s perceived size by using a 2:3 frame with the same 168px width.
+ */
+export const WELCOME_HERO_KEY_MASCOT_FRAME_HEIGHT_PX = Math.round((WELCOME_HERO_MASCOT_PX * 1536) / 1024);
 
 type MascotSpotProps = {
   src: string;
   caption?: string;
   size?: number;
+  /** Portrait / landscape art: frame height (px). Default: square `size × size`. */
+  frameHeight?: number;
   variant?: "inline" | "stack";
   className?: string;
 };
 
 /**
  * Consistent fixed-frame mascot with optional bubble text (decorative image + visible caption).
+ * Uses `<img>` so hero sizing is stable with Tailwind preflight + mixed aspect ratios.
  */
-export function MascotSpot({ src, caption, size = 88, variant = "inline", className = "" }: MascotSpotProps) {
+export function MascotSpot({
+  src,
+  caption,
+  size = 88,
+  frameHeight: frameHeightProp,
+  variant = "inline",
+  className = "",
+}: MascotSpotProps) {
   const showCaption = Boolean(caption && caption.trim().length > 0);
+  const frameH = frameHeightProp ?? size;
   const frame = (
     <div
       className="mascot-spot__frame"
       style={{
         position: "relative",
+        boxSizing: "border-box",
         width: size,
-        height: size,
+        height: frameH,
+        minWidth: size,
+        minHeight: frameH,
         flexShrink: 0,
       }}
     >
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element -- fixed public assets; predictable px frame */}
+      <img
         src={src}
         alt=""
         width={size}
-        height={size}
+        height={frameH}
         className="mascot-spot__img"
-        style={{ objectFit: "contain", objectPosition: "center", width: "100%", height: "100%" }}
+        decoding="async"
+        style={{
+          display: "block",
+          width: size,
+          height: frameH,
+          maxWidth: "none",
+          objectFit: "contain",
+          objectPosition: "center",
+        }}
       />
     </div>
   );

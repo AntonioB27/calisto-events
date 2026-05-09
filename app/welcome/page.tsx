@@ -1,7 +1,11 @@
 import Link from "next/link";
 
 import { appButtonClassNames } from "@/components/app-ui/AppBtn";
-import { MascotSpot } from "@/components/MascotSpot";
+import {
+  MascotSpot,
+  WELCOME_HERO_COLUMN_MAX_WIDTH_PX,
+  WELCOME_HERO_MASCOT_PX,
+} from "@/components/MascotSpot";
 
 export default function WelcomePage() {
   return (
@@ -9,11 +13,11 @@ export default function WelcomePage() {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       minHeight: '100vh', padding: 24,
     }}>
-      <div style={{ width: '100%', maxWidth: 400, textAlign: 'center' }}>
+      <div style={{ width: "100%", maxWidth: WELCOME_HERO_COLUMN_MAX_WIDTH_PX, textAlign: "center" }}>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
           <MascotSpot
             src="/brand/mascot/aurora_present.png"
-            size={168}
+            size={WELCOME_HERO_MASCOT_PX}
             variant="stack"
             className="welcome-mascot"
           />
@@ -35,6 +39,12 @@ export default function WelcomePage() {
           </Link>
           <Link href="/join" className={appButtonClassNames({ variant: "outline", size: "lg" })}>
             Join an event
+          </Link>
+          <Link
+            href={`/auth/login?returnTo=${encodeURIComponent("/dashboard")}`}
+            className={appButtonClassNames({ variant: "ghost", size: "lg" })}
+          >
+            I already have an account
           </Link>
         </div>
 

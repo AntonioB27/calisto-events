@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { GoldBar } from "@/components/app-ui/GoldBar";
+import { applyCalistoTheme, readCalistoTheme, type CalistoTheme } from "@/lib/calisto-theme";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type SettingsClientProps = Readonly<{
@@ -14,31 +15,16 @@ type SettingsClientProps = Readonly<{
 
 export function SettingsClient({ email }: SettingsClientProps) {
   const router = useRouter();
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<CalistoTheme>("dark");
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("calisto-theme");
-      if (stored === "light" || stored === "dark") {
-        queueMicrotask(() => setTheme(stored));
-        return;
-      }
-    } catch {
-      /* ignore */
-    }
-    const attr = document.documentElement.getAttribute("data-theme");
-    if (attr === "light") queueMicrotask(() => setTheme("light"));
+    queueMicrotask(() => setTheme(readCalistoTheme()));
   }, []);
 
-  const applyTheme = useCallback((t: "light" | "dark") => {
+  const applyTheme = useCallback((t: CalistoTheme) => {
     setTheme(t);
-    document.documentElement.setAttribute("data-theme", t);
-    try {
-      localStorage.setItem("calisto-theme", t);
-    } catch {
-      /* ignore */
-    }
+    applyCalistoTheme(t);
   }, []);
 
   async function onSignOut() {
@@ -55,11 +41,11 @@ export function SettingsClient({ email }: SettingsClientProps) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-      <section>
+      <section id="profile" style={{ scrollMarginTop: 88 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <GoldBar vertical />
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--app-muted)' }}>
-            Account
+            Profile
           </span>
         </div>
         <p style={{ fontSize: 14, color: 'var(--app-muted)' }}>

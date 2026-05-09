@@ -2,11 +2,13 @@ import {
   EventAdminTabs,
 } from "./_tabs/EventAdminTabs";
 import { isEventAdminTabId, type EventAdminTabId } from "./_tabs/event-admin-tabs";
+import { displayNavEmoji, splitEventTitleStored } from "@/lib/event-title";
 import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 import { getPublicOrigin } from "@/lib/public-origin";
 import { GalleryTab } from "./_tabs/GalleryTab";
 import { GuestsTab } from "./_tabs/GuestsTab";
 import { OverviewTab } from "./_tabs/OverviewTab";
+import { SettingsTab } from "./_tabs/SettingsTab";
 import { ShareTab } from "./_tabs/ShareTab";
 
 type EventPageProps = Readonly<{
@@ -32,22 +34,9 @@ export function resolveEventTab(value: string | undefined): EventAdminTabId {
   return "overview";
 }
 
-function splitLeadingEmoji(title: string): { emoji: string; title: string } {
-  const trimmed = title.trim();
-  const parts = Array.from(trimmed);
-  if (parts.length < 2) return { emoji: "📅", title: trimmed };
-  const first = parts[0] ?? "";
-  const afterFirst = trimmed.slice(first.length);
-  if (afterFirst.startsWith(" ")) {
-    return { emoji: first, title: afterFirst.trimStart() || "Event" };
-  }
-  return { emoji: "📅", title: trimmed };
-}
-
 export default async function EventPage({ params, searchParams }: EventPageProps) {
   const { id } = await params;
   const resolvedSearchParams = (await searchParams) ?? {};
-  const selectedTab = resolveEventTab(pickQueryValue(resolvedSearchParams.tab));
   const publicOrigin = await getPublicOrigin();
 
   const supabase = await createSupabaseAuthServerClient();
@@ -61,7 +50,15 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     .eq("id", id)
     .maybeSingle();
 
-  const isOrganizer = Boolean(event && user && event.organizer_id === user.id);
+  const isPrimaryOrganizer = Boolean(event && user && event.organizer_id === user.id);
+
+  /** Today only the primary organizer may open this admin page — keep explicit for organizer-only tabs. */
+  const isOrganizer = isPrimaryOrganizer;
+
+  let selectedTab = resolveEventTab(pickQueryValue(resolvedSearchParams.tab));
+  if (selectedTab === "settings" && !isPrimaryOrganizer) {
+    selectedTab = "overview";
+  }
 
   if (!event || !isOrganizer) {
     return (
@@ -76,17 +73,24 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     );
   }
 
-  const split = splitLeadingEmoji(String(event.title ?? "Event"));
+  const { emoji: storedEmoji, name: eventName } = splitEventTitleStored(String(event.title ?? "Event"));
+  const navEmoji = displayNavEmoji(storedEmoji);
 
   return (
     <div style={{ padding: '40px 0 60px' }}>
-      <EventAdminTabs eventId={id} selectedTab={selectedTab} eventTitle={split.title} eventEmoji={split.emoji} />
+      <EventAdminTabs
+        eventId={id}
+        selectedTab={selectedTab}
+        eventTitle={eventName}
+        eventEmoji={navEmoji}
+        showOrganizerOnlyTabs={isPrimaryOrganizer}
+      />
 
       <div style={{ marginTop: 24 }}>
         {selectedTab === "overview" && (
           <OverviewTab
             eventId={id}
-            eventTitle={split.title}
+            eventTitle={eventName}
             eventDate={event.event_date}
             plan={event.plan}
             accessCode={event.access_code}
@@ -97,9 +101,19 @@ export default async function EventPage({ params, searchParams }: EventPageProps
         {selectedTab === "share" && (
           <ShareTab
             eventId={id}
-            eventTitle={split.title}
+            eventTitle={eventName}
             accessCode={event.access_code}
             publicOrigin={publicOrigin}
+          />
+        )}
+        {selectedTab === "settings" && isPrimaryOrganizer && (
+          <SettingsTab
+            eventId={id}
+            storedEmoji={storedEmoji}
+            storedName={eventName}
+            eventDate={event.event_date}
+            plan={event.plan}
+            accessCode={event.access_code}
           />
         )}
       </div>

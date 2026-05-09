@@ -98,7 +98,7 @@ export function WelcomeModal({ eventTitle, accessCode, onSessionReady }: Props) 
               type="button"
               variant="gold"
               className="w-full"
-              onClick={() => router.push(`/auth/register?returnTo=${encodeURIComponent(returnTo)}`)}
+              onClick={() => router.push(`/auth/login?mode=register&returnTo=${encodeURIComponent(returnTo)}`)}
             >
               Create account
             </AppBtn>

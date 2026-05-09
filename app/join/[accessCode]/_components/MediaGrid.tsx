@@ -114,27 +114,27 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
       ) : null}
 
       {items.length > 0 ? (
-        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+        <ul className="m-0 list-none columns-2 [column-gap:8px] p-0 sm:columns-3 lg:columns-4">
           {items.map((item) => (
             <li
               key={item.id}
-              style={{
-                position: "relative",
-                aspectRatio: "1",
-                overflow: "hidden",
-                borderRadius: 12,
-                background: "var(--app-surface-2)",
-              }}
+              className="mb-2 break-inside-avoid overflow-hidden rounded-xl bg-[var(--app-surface-2)]"
             >
               {item.signedUrl ? (
                 isVideoMime(item.mime_type) ? (
-                  <video src={item.signedUrl} className="h-full w-full object-cover" controls playsInline muted />
+                  <video
+                    src={item.signedUrl}
+                    className="block h-auto w-full max-w-full"
+                    controls
+                    playsInline
+                    muted
+                  />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.signedUrl} alt="" className="h-full w-full object-cover" />
+                  <img src={item.signedUrl} alt="" className="block h-auto w-full max-w-full" />
                 )
               ) : (
-                <div style={{ height: "100%", width: "100%", background: "var(--app-border)" }} />
+                <div className="min-h-32 w-full bg-[var(--app-border)]" />
               )}
             </li>
           ))}

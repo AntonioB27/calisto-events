@@ -45,9 +45,9 @@ vi.mock("@/lib/supabase-auth-server", async (importOriginal) => {
 });
 
 describe("EventAdminTabs", () => {
-  it("renders all expected tabs with hrefs and a single selected marker", () => {
+  it("renders all expected tabs with hrefs and a single selected marker when organizer tabs are visible", () => {
     const html = renderToStaticMarkup(
-      <EventAdminTabs eventId="evt_123" selectedTab="guests" />,
+      <EventAdminTabs eventId="evt_123" selectedTab="guests" showOrganizerOnlyTabs />,
     );
 
     for (const tab of EVENT_ADMIN_TABS) {
@@ -57,6 +57,17 @@ describe("EventAdminTabs", () => {
 
     const selectedMatchCount = html.match(/aria-current="page"/g)?.length ?? 0;
     expect(selectedMatchCount).toBe(1);
+  });
+
+  it("hides organizer-only tabs when showOrganizerOnlyTabs is false", () => {
+    const html = renderToStaticMarkup(
+      <EventAdminTabs eventId="evt_123" selectedTab="overview" showOrganizerOnlyTabs={false} />,
+    );
+
+    expect(html).not.toContain(">Settings<");
+    expect(html).not.toContain("tab=settings");
+    expect(html).toContain(">Overview<");
+    expect(html).toContain("/events/evt_123?tab=gallery");
   });
 });
 
@@ -68,5 +79,6 @@ describe("Event page tabs", () => {
   it("accepts known tab ids", () => {
     expect(resolveEventTab("gallery")).toBe("gallery");
     expect(resolveEventTab("guests")).toBe("guests");
+    expect(resolveEventTab("settings")).toBe("settings");
   });
 });

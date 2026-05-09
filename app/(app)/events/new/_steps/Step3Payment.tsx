@@ -38,7 +38,7 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
 
   const returnTo = "/events/new?resume=1";
   const loginHref = `/auth/login?returnTo=${encodeURIComponent(returnTo)}`;
-  const registerHref = `/auth/register?returnTo=${encodeURIComponent(returnTo)}`;
+  const registerHref = `/auth/login?mode=register&returnTo=${encodeURIComponent(returnTo)}`;
 
   const writeStep3Draft = () => {
     writeCreateEventDraftToStorage({

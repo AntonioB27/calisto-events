@@ -10,20 +10,31 @@ type EventAdminTabsProps = Readonly<{
   selectedTab: EventAdminTabId;
   eventTitle: string;
   eventEmoji?: string;
+  /** When false, hides tabs marked `visibleTo: "organizer"` (e.g. Settings). */
+  showOrganizerOnlyTabs?: boolean;
 }>;
 
-function TabsInner({ eventId, selectedTab, eventTitle, eventEmoji = "📅" }: EventAdminTabsProps) {
+function TabsInner({
+  eventId,
+  selectedTab,
+  eventTitle,
+  eventEmoji = "📅",
+  showOrganizerOnlyTabs = false,
+}: EventAdminTabsProps) {
+  const tabs = EVENT_ADMIN_TABS.filter((t) => t.visibleTo === "all" || showOrganizerOnlyTabs);
+
   return (
     <div className="event-navbar">
       <div className="event-navbar__inner">
         <div className="event-navbar__rule" />
         <h1 className="event-navbar__title">
-          {eventEmoji} {eventTitle}
+          <span className="calisto-emoji-upright">{eventEmoji}</span>{" "}
+          {eventTitle}
         </h1>
         <p className="event-navbar__sub">Share with guests to let them join.</p>
 
         <div className="event-navbar__tabs" role="tablist" aria-label="Event sections">
-          {EVENT_ADMIN_TABS.map((tab) => {
+          {tabs.map((tab) => {
             const on = tab.id === selectedTab;
             return (
               <Link

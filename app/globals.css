@@ -629,6 +629,27 @@ html[data-theme="dark"] .app-shell {
     linear-gradient(180deg, #140d1f 0%, #0d0a14 48%, #0c0a0f 100%);
 }
 
+/* Top bar: stay above page layers; solid fill on small screens (backdrop-filter can break taps on some mobile browsers). */
+.app-shell-header {
+  position: relative;
+  z-index: 400;
+  isolation: isolate;
+  overflow: visible;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  background: color-mix(in srgb, var(--app-surface) 82%, transparent);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+}
+
+@media (max-width: 767px) {
+  .app-shell-header {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--app-surface);
+  }
+}
+
 /* Join flow uses app tokens without .app-shell wrapper */
 .join-shell {
   background:
@@ -644,6 +665,313 @@ html[data-theme="dark"] .join-shell {
     radial-gradient(1100px 700px at 10% -6%,  rgba(168, 95,  176, 0.30), transparent 58%),
     radial-gradient(900px  560px at 95% 16%,  rgba(240, 179, 75,  0.24), transparent 60%),
     linear-gradient(180deg, #140d1f 0%, #0d0a14 48%, #0c0a0f 100%);
+}
+
+/* Preflight applies img { max-width: 100%; height: auto } — hero mascots use a fixed px frame via next/image */
+.mascot-spot__frame img {
+  max-width: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+/* Auth card — subtle depth behind login / register */
+.app-card.auth-card {
+  position: relative;
+  border: 1.5px solid color-mix(in srgb, var(--app-border) 88%, transparent);
+  background:
+    radial-gradient(
+      120% 95% at 50% -8%,
+      color-mix(in srgb, var(--app-purple) 14%, transparent) 0%,
+      transparent 52%
+    ),
+    var(--app-surface);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--app-inverse) 5%, transparent),
+    var(--app-shadow-md);
+}
+
+html[data-theme="dark"] .app-card.auth-card {
+  background:
+    radial-gradient(
+      120% 95% at 50% -8%,
+      color-mix(in srgb, var(--app-purple) 18%, transparent) 0%,
+      transparent 52%
+    ),
+    var(--app-surface);
+}
+
+.app-card.auth-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Sign in / Register — sliding pill + layered labels */
+.auth-mode-rail {
+  position: relative;
+  margin-bottom: 26px;
+  padding: 6px;
+  border-radius: 14px;
+  border: 1.5px solid color-mix(in srgb, var(--app-border) 75%, transparent);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-surface-2) 92%, transparent) 0%,
+      color-mix(in srgb, var(--app-bg) 72%, transparent) 100%
+    );
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--app-inverse) 4%, transparent);
+}
+
+.auth-mode-rail__thumb {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  width: calc((100% - 18px) / 2); /* pad + gutter */
+  z-index: 0;
+  border-radius: 10px;
+  background: linear-gradient(
+    148deg,
+    color-mix(in srgb, var(--app-purple) 26%, var(--app-surface)) 0%,
+    color-mix(in srgb, var(--app-gold) 15%, var(--app-surface)) 110%
+  );
+  border: 1px solid color-mix(in srgb, var(--app-purple) 32%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--app-inverse) 14%, transparent),
+    0 10px 32px color-mix(in srgb, var(--app-purple) 26%, transparent);
+  pointer-events: none;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.auth-mode-rail[data-active-panel="register"] .auth-mode-rail__thumb {
+  transform: translateX(calc(100% + 6px));
+}
+
+.auth-mode-rail__track {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.auth-mode-rail__tab {
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 10px 12px;
+  text-align: center;
+  font: inherit;
+  background: transparent;
+  color: var(--app-muted);
+  transition:
+    color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-mode-rail__tab:hover:not([data-active="true"]) {
+  color: color-mix(in srgb, var(--app-text) 78%, var(--app-muted));
+  transform: translateY(-1px);
+}
+
+.auth-mode-rail__tab:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+.auth-mode-rail__tab[data-active="true"] {
+  color: var(--app-inverse);
+  cursor: default;
+}
+
+.auth-mode-rail__tab[data-active="true"]:hover {
+  transform: none;
+}
+
+.auth-mode-rail__kicker {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: inherit;
+  opacity: 0.74;
+  margin-bottom: 4px;
+  font-family: var(--font-sans);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-mode-rail__tab[data-active="true"] .auth-mode-rail__kicker {
+  opacity: 0.88;
+}
+
+.auth-mode-rail__label {
+  display: block;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-mode-rail__tab[data-active="true"] .auth-mode-rail__label {
+  transform: translateY(0);
+}
+
+.auth-mode-rail__tab:not([data-active="true"]) .auth-mode-rail__label {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-mode-rail__thumb {
+    transition: none;
+  }
+
+  .auth-mode-rail__tab,
+  .auth-mode-rail__label,
+  .auth-mode-rail__kicker {
+    transition: none;
+  }
+
+  .auth-mode-rail__tab:hover:not([data-active="true"]) {
+    transform: none;
+  }
+}
+
+.auth-oauth-google-btn {
+  flex-shrink: 0;
+}
+
+.auth-oauth-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 20px 0 18px;
+  width: 100%;
+}
+
+.auth-oauth-divider__rule {
+  flex: 1;
+  height: 1px;
+  min-width: 12px;
+  border-radius: 999px;
+}
+
+.auth-oauth-divider__rule--left {
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in srgb, var(--app-border) 55%, transparent) 28%,
+    color-mix(in srgb, var(--app-purple) 22%, var(--app-border)) 72%,
+    color-mix(in srgb, var(--app-border) 45%, transparent)
+  );
+}
+
+.auth-oauth-divider__rule--right {
+  background: linear-gradient(
+    to left,
+    transparent,
+    color-mix(in srgb, var(--app-border) 55%, transparent) 28%,
+    color-mix(in srgb, var(--app-purple) 22%, var(--app-border)) 72%,
+    color-mix(in srgb, var(--app-border) 45%, transparent)
+  );
+}
+
+.auth-oauth-divider__text {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  text-align: center;
+  max-width: min(260px, 86vw);
+}
+
+.auth-oauth-divider__eyebrow {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--app-muted) 88%, transparent);
+}
+
+.auth-oauth-divider__body {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  color: color-mix(in srgb, var(--app-muted) 95%, var(--app-text));
+  line-height: 1.2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-oauth-divider__rule--left,
+  .auth-oauth-divider__rule--right {
+    background: color-mix(in srgb, var(--app-border) 78%, transparent);
+  }
+}
+
+/* Combined login / register: both panels share one grid cell so row height = max(login, register) — card size stays constant */
+.auth-form-stack {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(min-content, auto);
+}
+
+.auth-form-panel {
+  grid-column: 1;
+  grid-row: 1;
+  width: 100%;
+  align-self: start;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(10px);
+  filter: blur(2px);
+  z-index: 0;
+  transition:
+    opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0s linear 0.45s;
+}
+
+.auth-form-panel.auth-form-panel--visible {
+  z-index: 2;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+  filter: blur(0);
+  transition:
+    opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0s linear 0s;
+}
+
+/* Hidden panel sits off to the side so the visible one reads as sliding in/out */
+.auth-form-stack--login .auth-form-panel--register:not(.auth-form-panel--visible) {
+  transform: translateX(22px) translateY(10px);
+}
+
+.auth-form-stack--register .auth-form-panel--login:not(.auth-form-panel--visible) {
+  transform: translateX(-22px) translateY(10px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-form-panel,
+  .auth-form-panel--visible {
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+    transform: none !important;
+    filter: none !important;
+  }
 }
 
 /* ════════ App UI primitives (shared class hooks) ════════ */
@@ -1082,6 +1410,17 @@ html[data-theme="dark"] .event-navbar::before {
   margin: 0;
 }
 
+/* Upright emoji — avoids Playfair italic skewing glyphs in event headers and forms */
+.calisto-emoji-upright {
+  font-style: normal;
+  font-family:
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji",
+    sans-serif;
+}
+
 .event-navbar__sub {
   margin-top: 6px;
   font-size: 14px;
@@ -1136,6 +1475,170 @@ html[data-theme="dark"] .event-navbar::before {
 .event-navbar__tab[aria-current="page"]::after {
   background: linear-gradient(90deg, var(--app-gold-2), var(--app-gold));
   box-shadow: 0 8px 24px color-mix(in srgb, var(--app-gold) 35%, transparent);
+}
+
+/* App shell: account avatar popover */
+.app-account-menu__trigger {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--app-purple), var(--app-purple-2));
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 2px var(--app-surface),
+    0 0 0 3.5px color-mix(in srgb, var(--app-purple) 35%, transparent);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    filter 0.15s ease;
+}
+
+.app-account-menu__trigger:hover {
+  filter: brightness(1.06);
+}
+
+.app-account-menu__trigger:focus-visible {
+  outline: 2px solid var(--app-gold);
+  outline-offset: 3px;
+}
+
+.app-account-menu__trigger[aria-expanded="true"] {
+  box-shadow:
+    0 0 0 2px var(--app-surface),
+    0 0 0 3px color-mix(in srgb, var(--app-gold) 55%, transparent),
+    0 8px 28px color-mix(in srgb, var(--app-purple) 28%, transparent);
+}
+
+.app-account-menu__panel {
+  min-width: 232px;
+  padding: 4px 0;
+  border-radius: 14px;
+  border: 1.5px solid color-mix(in srgb, var(--app-border) 78%, transparent);
+  background:
+    radial-gradient(
+      120% 140% at 100% -20%,
+      color-mix(in srgb, var(--app-purple) 12%, transparent) 0%,
+      transparent 55%
+    ),
+    var(--app-surface);
+  box-shadow:
+    var(--app-shadow-lg),
+    0 0 0 1px color-mix(in srgb, var(--app-inverse) 4%, transparent);
+}
+
+.app-account-menu__separator {
+  height: 1px;
+  margin: 4px 10px;
+  background: color-mix(in srgb, var(--app-border) 85%, transparent);
+  border-radius: 1px;
+}
+
+.app-account-menu__item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.app-account-menu__item:hover,
+.app-account-menu__item:focus-visible {
+  background: color-mix(in srgb, var(--app-purple) 10%, transparent);
+  outline: none;
+}
+
+a.app-account-menu__item:visited {
+  color: var(--app-text);
+}
+
+.app-account-menu__item--danger {
+  color: var(--app-danger);
+}
+
+.app-account-menu__item--danger:hover:not(:disabled),
+.app-account-menu__item--danger:focus-visible:not(:disabled) {
+  background: color-mix(in srgb, var(--app-danger) 10%, transparent);
+  color: var(--app-danger);
+}
+
+.app-account-menu__item--danger:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.app-account-menu__theme {
+  padding: 8px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.app-account-menu__theme-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+
+.app-account-menu__theme-toggle {
+  display: flex;
+  gap: 6px;
+}
+
+.app-account-menu__theme-btn {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1.5px solid color-mix(in srgb, var(--app-border) 70%, transparent);
+  background: color-mix(in srgb, var(--app-surface-2) 40%, transparent);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--app-muted);
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease,
+    color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+.app-account-menu__theme-btn:hover {
+  color: var(--app-text);
+  border-color: color-mix(in srgb, var(--app-purple) 28%, var(--app-border));
+}
+
+.app-account-menu__theme-btn:focus-visible {
+  outline: 2px solid var(--app-gold);
+  outline-offset: 2px;
+}
+
+.app-account-menu__theme-btn--active {
+  border-color: color-mix(in srgb, var(--app-gold) 45%, var(--app-border));
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--app-gold) 18%, var(--app-surface)),
+    color-mix(in srgb, var(--app-purple) 12%, var(--app-surface))
+  );
+  color: var(--app-text);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--app-inverse) 6%, transparent);
 }
 
 @keyframes appBtnSpin {
