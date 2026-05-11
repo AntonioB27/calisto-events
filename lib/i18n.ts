@@ -145,7 +145,7 @@ export type LandingCopy = {
 };
 
 export const LOCALES: Locale[] = ["en", "hr", "de"];
-export const DEFAULT_LOCALE: Locale = "hr";
+export const DEFAULT_LOCALE: Locale = "en";
 
 export function isLocale(value: string): value is Locale {
   return LOCALES.includes(value as Locale);

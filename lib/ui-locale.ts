@@ -19,7 +19,7 @@ function preferenceFromAcceptLanguage(raw: string | null): Locale | null {
 }
 
 /**
- * Resolved UI locale: cookie wins, then Accept-Language, then `DEFAULT_LOCALE` (`hr` in product config).
+ * Resolved UI locale: cookie wins, then Accept-Language, then `DEFAULT_LOCALE` (`en`).
  */
 export async function getUiLocale(): Promise<Locale> {
   const jar = await cookies();
