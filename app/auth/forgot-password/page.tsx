@@ -7,11 +7,13 @@ import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
 import { AppFormRow } from "@/components/app-ui/AppFormRow";
 import { AppInput } from "@/components/app-ui/AppInput";
+import { getBrowserPublicOrigin } from "@/lib/browser-public-origin";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 function buildRedirectTo() {
   if (typeof window === "undefined") return "";
-  return `${window.location.origin}/auth/reset-password`;
+  const origin = getBrowserPublicOrigin() || window.location.origin;
+  return `${origin}/auth/reset-password`;
 }
 
 export default function ForgotPasswordPage() {

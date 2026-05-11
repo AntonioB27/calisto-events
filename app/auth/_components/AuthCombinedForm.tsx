@@ -16,6 +16,7 @@ import {
   WELCOME_HERO_KEY_MASCOT_FRAME_HEIGHT_PX,
   WELCOME_HERO_MASCOT_PX,
 } from "@/components/MascotSpot";
+import { getBrowserPublicOrigin } from "@/lib/browser-public-origin";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { getPostAuthRedirectPath } from "@/lib/safe-return-path";
 
@@ -94,7 +95,8 @@ export function AuthCombinedForm() {
     try {
       const supabase = getSupabaseBrowserClient();
       const nextPath = afterAuthPath;
-      const redirectTo = new URL(`${window.location.origin}/auth/callback`);
+      const origin = getBrowserPublicOrigin() || window.location.origin;
+      const redirectTo = new URL(`${origin}/auth/callback`);
       redirectTo.searchParams.set("next", nextPath);
 
       const { data, error: oauthErr } = await supabase.auth.signInWithOAuth({

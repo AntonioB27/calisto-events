@@ -39,7 +39,7 @@ NEXT_PUBLIC_SITE_URL=https://calisto-events.com
 
 **Password reset emails** use `resetPasswordForEmail` with `redirectTo` set to `{origin}/auth/reset-password`. In the Supabase dashboard ([Authentication → URL configuration](https://supabase.com/dashboard/project/_/auth/url-configuration)), add that path to **Redirect URLs**, e.g. `http://localhost:3000/auth/reset-password` and your production URL with the same path.
 
-**Google sign-in** uses Supabase OAuth and returns through `/auth/callback`. Add `{origin}/auth/callback` (dev and prod) to **Redirect URLs**, and enable **Google** under Authentication → Providers (client ID and secret from [Google Cloud Console](https://console.cloud.google.com/)).
+**Google sign-in** uses Supabase OAuth and returns through `/auth/callback`. In [Authentication → URL configuration](https://supabase.com/dashboard/project/_/auth/url-configuration), set **Site URL** to your real production origin (for example `https://calisto-events.com`), not `http://localhost:3000`. If Site URL stays on localhost, failed or disallowed redirects can send users back to localhost in production. Add both dev and prod callback URLs to **Redirect URLs**, for example `http://localhost:3000/auth/callback` and `https://calisto-events.com/auth/callback`. Enable **Google** under Authentication → Providers (client ID and secret from [Google Cloud Console](https://console.cloud.google.com/)).
 
 **Guest “continue without account”** uses Supabase **`signInAnonymously()`**. Enable **anonymous sign-ins** under Authentication → Providers so the guest join flow works.
 
