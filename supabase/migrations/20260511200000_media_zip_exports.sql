@@ -20,7 +20,7 @@ CREATE INDEX media_zip_exports_event_created_idx
 CREATE INDEX media_zip_exports_status_created_idx
   ON public.media_zip_exports (status, created_at);
 
-CREATE OR REPLACE FUNCTION public.set_updated_at()
+CREATE OR REPLACE FUNCTION public.media_zip_exports_set_updated_at()
 RETURNS trigger
 LANGUAGE plpgsql
 SET search_path TO 'public'
@@ -34,7 +34,7 @@ $$;
 CREATE TRIGGER media_zip_exports_set_updated_at
   BEFORE UPDATE ON public.media_zip_exports
   FOR EACH ROW
-  EXECUTE FUNCTION public.set_updated_at();
+  EXECUTE FUNCTION public.media_zip_exports_set_updated_at();
 
 ALTER TABLE public.media_zip_exports ENABLE ROW LEVEL SECURITY;
 
