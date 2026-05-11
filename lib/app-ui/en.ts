@@ -237,12 +237,21 @@ export const APP_UI_EN = {
 
   overview: {
     yourRole: "Your role",
-    uploadWindowLead: "Guests can upload during your plan window: from the event date through",
-    uploadWindowBoldOne: "{n} day",
-    uploadWindowBoldMany: "{n} days",
-    uploadWindowTail: "after — see Share for whether uploads are open today.",
-    planCapsNote:
-      "Photo, video, and guest counts are capped by your plan tier. Retention and billing are managed in your Calisto account or with support — there’s no fixed “automatic delete on day X” shown here.",
+    uploadCloseLabel: "Time until uploads close",
+    uploadCloseShareHint: "See Share for whether guests can upload today.",
+    autoDeletionLabel: "Time until automatic event deletion",
+    autoDeletionOverdue: "Removal time passed — the next purge job will delete this event.",
+    autoDeletionFooterHint:
+      "Based on your plan tier from the event date. Changing date or plan updates this. You can still delete manually in Settings.",
+    countdownJoin: ", ",
+    countdownDayOne: "{n} day",
+    countdownDayMany: "{n} days",
+    countdownHourOne: "{n} hour",
+    countdownHourMany: "{n} hours",
+    countdownMinuteOne: "{n} minute",
+    countdownMinuteMany: "{n} minutes",
+    countdownSubMinute: "Less than a minute",
+    uploadWindowEnded: "Upload window ended — uploads are closed.",
     statsTitle: "Statistics",
     statsPhotos: "Photos",
     statsVideos: "Videos",
@@ -299,6 +308,25 @@ export const APP_UI_EN = {
     downloadPhotoFail: "Could not download this photo.",
     downloadFailedWithStatus: "Download failed ({status}).",
     deleteBusy: "…",
+    zipExportCardEyebrow: "Primary organizer",
+    zipExportTitle: "Bulk ZIP export",
+    zipExportBlurb:
+      "Download gallery media in one ZIP. We prepare it in the background and email you when it is ready. Download links expire after 24 hours.",
+    zipExportPrepare: "Prepare ZIP",
+    zipExportModalTitle: "Prepare gallery ZIP",
+    zipExportModalBody:
+      "Photos are included by default. Turn on the option below to include videos (larger file, longer build).",
+    zipExportIncludeVideos: "Include videos",
+    zipExportStart: "Start export",
+    zipExportQueued: "Queued — we will notify you when it is ready.",
+    zipExportRunning: "Building your ZIP…",
+    zipExportReady: "Ready to download",
+    zipExportFailed: "Export failed",
+    zipExportExpired: "Download expired",
+    zipExportDownload: "Download ZIP",
+    zipExportErrorGeneric: "Could not start export.",
+    zipExportErrorPending: "Another export is already in progress.",
+    zipExportErrorTooMany: "Too many items for one ZIP. Remove some uploads or export without videos.",
   },
 
   guests: {

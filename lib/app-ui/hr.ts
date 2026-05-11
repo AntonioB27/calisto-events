@@ -240,12 +240,21 @@ export const APP_UI_HR: AppUiDict = {
 
   overview: {
     yourRole: "Vaša uloga",
-    uploadWindowLead: "Gosti mogu slati tijekom prozora vašeg plana: od datuma događaja kroz još",
-    uploadWindowBoldOne: "{n} dan",
-    uploadWindowBoldMany: "{n} dana",
-    uploadWindowTail: "– u Dijeli provjerite jesu li uploadi danas omogućeni.",
-    planCapsNote:
-      "Broj fotografija, videozapisa i gosti ovisi o vašoj razini paketa. Zadržavanje i naplata uređuju se u vašem Calisto računu ili uz podršku – nema fiksnog „automatskog brisanja dan X”.",
+    uploadCloseLabel: "Preostalo vrijeme do zatvaranja uploada",
+    uploadCloseShareHint: "U Dijeli provjerite mogu li gosti danas slati sadržaj.",
+    autoDeletionLabel: "Vrijeme do automatskog brisanja događaja",
+    autoDeletionOverdue: "Vrijeme brisanja je prošlo — sljedeći posao uklonit će ovaj događaj.",
+    autoDeletionFooterHint:
+      "Prema razini paketa od datuma događaja. Promjena datuma ili paketa ažurira ovo. Ručno brisanje i dalje u Postavkama.",
+    countdownJoin: ", ",
+    countdownDayOne: "{n} dan",
+    countdownDayMany: "{n} dana",
+    countdownHourOne: "{n} sat",
+    countdownHourMany: "{n} sati",
+    countdownMinuteOne: "{n} minuta",
+    countdownMinuteMany: "{n} minuta",
+    countdownSubMinute: "Manje od minute",
+    uploadWindowEnded: "Prozor za upload je završen — uploadi su zatvoreni.",
     statsTitle: "Statistika",
     statsPhotos: "Fotografije",
     statsVideos: "Videozapisi",
@@ -305,6 +314,25 @@ export const APP_UI_HR: AppUiDict = {
     downloadPhotoFail: "Nismo mogli preuzeti fotografiju.",
     downloadFailedWithStatus: "Preuzimanje nije uspjelo ({status}).",
     deleteBusy: "…",
+    zipExportCardEyebrow: "Primarni organizator",
+    zipExportTitle: "ZIP skupni izvoz",
+    zipExportBlurb:
+      "Preuzmi medije galerije u jednom ZIP‑u. Pripremamo u pozadini i šaljemo e‑mail kad bude spremno. Poveznice istječu nakon 24 sata.",
+    zipExportPrepare: "Pripremi ZIP",
+    zipExportModalTitle: "Pripremi ZIP galerije",
+    zipExportModalBody:
+      "Fotografije su uključene po zadanom. Uključi opciju ispod za videozapise (veća datoteka, duže trajanje).",
+    zipExportIncludeVideos: "Uključi videozapise",
+    zipExportStart: "Pokreni izvoz",
+    zipExportQueued: "U redu čekanja — javljamo kad bude spremno.",
+    zipExportRunning: "Gradimo ZIP…",
+    zipExportReady: "Spremno za preuzimanje",
+    zipExportFailed: "Izvoz nije uspio",
+    zipExportExpired: "Preuzimanje je isteklo",
+    zipExportDownload: "Preuzmi ZIP",
+    zipExportErrorGeneric: "Nismo mogli pokrenuti izvoz.",
+    zipExportErrorPending: "Drugi izvoz je već u tijeku.",
+    zipExportErrorTooMany: "Previše stavki za jedan ZIP. Ukloni neke uploadove ili izvezi bez videozapisa.",
   },
 
   guests: {
