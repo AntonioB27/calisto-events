@@ -546,6 +546,7 @@ export const APP_UI_EN = {
     templateSectionLabel: "Layout",
     templateTableMinimal: "Minimal",
     templateTableBold: "Bold",
+    posterLanguageLabel: "Poster language",
   },
 
   languagePicker: {

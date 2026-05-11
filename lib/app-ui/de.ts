@@ -573,6 +573,7 @@ export const APP_UI_DE: AppUiDict = {
     templateSectionLabel: "Layout",
     templateTableMinimal: "Reduziert",
     templateTableBold: "Kräftig",
+    posterLanguageLabel: "Sprache auf dem Plakat",
   },
 
   languagePicker: {

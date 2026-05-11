@@ -1,3 +1,9 @@
+import type { Locale } from "@/lib/i18n";
+import { isLocale } from "@/lib/i18n";
+
+/** Query key for poster on-paper language (`?posterLang=de`). */
+export const POSTER_LANG_QUERY = "posterLang";
+
 export const POSTER_TEMPLATES = ["table-minimal", "table-bold"] as const;
 export type PosterTemplateId = (typeof POSTER_TEMPLATES)[number];
 export const DEFAULT_POSTER_TEMPLATE: PosterTemplateId = "table-minimal";
@@ -18,4 +24,12 @@ export function parsePrintPaper(raw: string | undefined): PrintPaperId {
     return raw as PrintPaperId;
   }
   return DEFAULT_PRINT_PAPER;
+}
+
+/** Language for strings printed on the poster; invalid or missing → `fallback` (typically UI locale). */
+export function parsePosterContentLocale(raw: string | undefined, fallback: Locale): Locale {
+  if (raw && isLocale(raw)) {
+    return raw;
+  }
+  return fallback;
 }

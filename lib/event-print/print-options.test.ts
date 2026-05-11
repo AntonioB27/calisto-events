@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_POSTER_TEMPLATE,
   DEFAULT_PRINT_PAPER,
+  parsePosterContentLocale,
   parsePosterTemplate,
   parsePrintPaper,
 } from "./print-options";
@@ -32,5 +33,19 @@ describe("parsePrintPaper", () => {
   });
   it("rejects unknown", () => {
     expect(parsePrintPaper("tabloid")).toBe(DEFAULT_PRINT_PAPER);
+  });
+});
+
+describe("parsePosterContentLocale", () => {
+  it("uses fallback when undefined", () => {
+    expect(parsePosterContentLocale(undefined, "en")).toBe("en");
+    expect(parsePosterContentLocale(undefined, "hr")).toBe("hr");
+  });
+  it("accepts en hr de", () => {
+    expect(parsePosterContentLocale("de", "en")).toBe("de");
+    expect(parsePosterContentLocale("hr", "en")).toBe("hr");
+  });
+  it("rejects unknown", () => {
+    expect(parsePosterContentLocale("fr", "de")).toBe("de");
   });
 });
