@@ -371,6 +371,15 @@ export const APP_UI_DE: AppUiDict = {
     appliesNote: "Wirkt auf Seiten mit hellem oder dunklem Design.",
     signOut: "Abmelden",
     backEvents: "← Zurück zu Veranstaltungen",
+    uploadNameEyebrow: "Uploads & Galerie",
+    uploadNameLabel: "Name bei deinen Uploads",
+    uploadNameHint:
+      "Wird neben deinen Fotos und Videos in Veranstaltungs‑Galerien angezeigt. Nutzt dein Profil; Galerie nach dem Speichern aktualisieren.",
+    uploadNamePlaceholder: "z. B. Alex",
+    saveUploadName: "Namen speichern",
+    uploadNameSaved: "Gespeichert.",
+    uploadNameSaveFail: "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    uploadNameNotSignedIn: "Nicht angemeldet.",
   },
 
   settingsTab: {
@@ -555,6 +564,15 @@ export const APP_UI_DE: AppUiDict = {
     heroEyebrow: "QR scannen zum Hochladen von Fotos und Videos",
     footerGoToLead: "Oder öffne ",
     footerGoToTrail: " und gib ein:",
+    sheetHelper:
+      "Zwei identische Tischkarten pro Blatt. Entlang der gestrichelten Linie schneiden und je eine Karte auf einen Tisch legen.",
+    cutHere: "Hier schneiden",
+    paperSectionLabel: "Papierformat",
+    paperA4: "A4",
+    paperLetter: "US Letter",
+    templateSectionLabel: "Layout",
+    templateTableMinimal: "Reduziert",
+    templateTableBold: "Kräftig",
   },
 
   languagePicker: {

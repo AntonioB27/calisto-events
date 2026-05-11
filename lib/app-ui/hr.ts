@@ -361,6 +361,15 @@ export const APP_UI_HR: AppUiDict = {
     appliesNote: "Primjenjuje se na stranice koje podržavaju svijetli i tamni način.",
     signOut: "Odjavi se",
     backEvents: "← Natrag na događaje",
+    uploadNameEyebrow: "Prijenosi i galerija",
+    uploadNameLabel: "Ime uz vaše prijenose",
+    uploadNameHint:
+      "Prikazuje se uz fotografije i video koje dodate u galeriji događaja. Koristi profil; nakon spremanja osvježite galeriju.",
+    uploadNamePlaceholder: "npr. Ana",
+    saveUploadName: "Spremi ime",
+    uploadNameSaved: "Spremljeno.",
+    uploadNameSaveFail: "Spremanje nije uspjelo. Pokušajte ponovno.",
+    uploadNameNotSignedIn: "Niste prijavljeni.",
   },
 
   settingsTab: {
@@ -540,6 +549,15 @@ export const APP_UI_HR: AppUiDict = {
     heroEyebrow: "Skeniraj za upload fotografija i videozapisa",
     footerGoToLead: "Ili otvori ",
     footerGoToTrail: " i unesi kod:",
+    sheetHelper:
+      "Dva ista kartica za stol po listu. Zareži duž isprekidane linije i stavi jednu karticu na svaki stol.",
+    cutHere: "Zareži ovdje",
+    paperSectionLabel: "Veličina papira",
+    paperA4: "A4",
+    paperLetter: "US Letter",
+    templateSectionLabel: "Izgled",
+    templateTableMinimal: "Jednostavno",
+    templateTableBold: "Naglašeno",
   },
 
   languagePicker: {

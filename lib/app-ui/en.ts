@@ -355,6 +355,15 @@ export const APP_UI_EN = {
     appliesNote: "Applies to pages that support light and dark.",
     signOut: "Sign out",
     backEvents: "← Back to events",
+    uploadNameEyebrow: "Uploads & gallery",
+    uploadNameLabel: "Name on your uploads",
+    uploadNameHint:
+      "Shown next to photos and videos you add in event galleries. Uses your profile; refresh the gallery after saving.",
+    uploadNamePlaceholder: "e.g. Alex",
+    saveUploadName: "Save name",
+    uploadNameSaved: "Saved.",
+    uploadNameSaveFail: "Could not save. Try again.",
+    uploadNameNotSignedIn: "Not signed in.",
   },
 
   settingsTab: {
@@ -528,6 +537,15 @@ export const APP_UI_EN = {
     heroEyebrow: "Scan to upload photos & videos",
     footerGoToLead: "Or go to ",
     footerGoToTrail: " and enter code:",
+    sheetHelper:
+      "Two identical table cards per sheet. Cut along the dashed line to place one card on each table.",
+    cutHere: "Cut here",
+    paperSectionLabel: "Paper size",
+    paperA4: "A4",
+    paperLetter: "US Letter",
+    templateSectionLabel: "Layout",
+    templateTableMinimal: "Minimal",
+    templateTableBold: "Bold",
   },
 
   languagePicker: {
