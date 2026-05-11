@@ -2,7 +2,7 @@ export type CalistoTheme = "light" | "dark";
 
 export const CALISTO_THEME_STORAGE_KEY = "calisto-theme";
 
-/** Read persisted theme preference, falling back to `document` state or dark. */
+/** Read persisted theme preference, then `data-theme`, then system `prefers-color-scheme`. */
 export function readCalistoTheme(): CalistoTheme {
   if (typeof document === "undefined") return "dark";
   try {
@@ -12,7 +12,11 @@ export function readCalistoTheme(): CalistoTheme {
     /* ignore */
   }
   const attr = document.documentElement.getAttribute("data-theme");
-  return attr === "light" ? "light" : "dark";
+  if (attr === "light" || attr === "dark") return attr;
+  if (typeof window !== "undefined" && window.matchMedia) {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  return "light";
 }
 
 export function applyCalistoTheme(t: CalistoTheme) {
