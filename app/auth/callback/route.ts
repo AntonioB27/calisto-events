@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { getSafeReturnPath } from "@/lib/safe-return-path";
+import { getPostAuthRedirectPath } from "@/lib/safe-return-path";
 import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase-env";
 
 function buildLoginRecoverUrl(origin: string, nextPath: string): string {
@@ -17,7 +17,7 @@ function buildLoginRecoverUrl(origin: string, nextPath: string): string {
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const nextPath = getSafeReturnPath(searchParams.get("next")) ?? "/dashboard";
+  const nextPath = getPostAuthRedirectPath(searchParams.get("next"));
 
   let supabaseUrl: string;
   let anonKey: string;

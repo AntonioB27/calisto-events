@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getSafeReturnPath } from "./safe-return-path";
+import { getPostAuthRedirectPath, getSafeReturnPath } from "./safe-return-path";
 
 describe("getSafeReturnPath", () => {
   it("accepts same-origin relative paths", () => {
@@ -15,5 +15,19 @@ describe("getSafeReturnPath", () => {
     expect(getSafeReturnPath("")).toBeNull();
     expect(getSafeReturnPath(null)).toBeNull();
     expect(getSafeReturnPath("https://x.com")).toBeNull();
+  });
+});
+
+describe("getPostAuthRedirectPath", () => {
+  it("defaults to dashboard when missing, invalid, or root", () => {
+    expect(getPostAuthRedirectPath(null)).toBe("/dashboard");
+    expect(getPostAuthRedirectPath("")).toBe("/dashboard");
+    expect(getPostAuthRedirectPath("//evil")).toBe("/dashboard");
+    expect(getPostAuthRedirectPath("/")).toBe("/dashboard");
+  });
+
+  it("preserves safe deep paths", () => {
+    expect(getPostAuthRedirectPath("/join/ABC")).toBe("/join/ABC");
+    expect(getPostAuthRedirectPath("/events/new?resume=1")).toBe("/events/new?resume=1");
   });
 });

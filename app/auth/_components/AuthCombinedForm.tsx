@@ -17,7 +17,7 @@ import {
   WELCOME_HERO_MASCOT_PX,
 } from "@/components/MascotSpot";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { getSafeReturnPath } from "@/lib/safe-return-path";
+import { getPostAuthRedirectPath } from "@/lib/safe-return-path";
 
 export type AuthCombinedMode = "login" | "register";
 
@@ -52,8 +52,8 @@ export function AuthCombinedForm() {
   const ui = useAppUi();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const returnTo = useMemo(
-    () => getSafeReturnPath(searchParams.get("returnTo")),
+  const afterAuthPath = useMemo(
+    () => getPostAuthRedirectPath(searchParams.get("returnTo")),
     [searchParams],
   );
   const initialMode = useMemo(
@@ -93,7 +93,7 @@ export function AuthCombinedForm() {
     let willRedirect = false;
     try {
       const supabase = getSupabaseBrowserClient();
-      const nextPath = returnTo ?? "/dashboard";
+      const nextPath = afterAuthPath;
       const redirectTo = new URL(`${window.location.origin}/auth/callback`);
       redirectTo.searchParams.set("next", nextPath);
 
@@ -140,7 +140,7 @@ export function AuthCombinedForm() {
         return;
       }
 
-      router.push(returnTo ?? "/dashboard");
+      router.push(afterAuthPath);
       router.refresh();
     } finally {
       setPending(false);
@@ -172,7 +172,7 @@ export function AuthCombinedForm() {
       }
 
       if (data.session) {
-        router.push(returnTo ?? "/dashboard");
+        router.push(afterAuthPath);
         router.refresh();
         return;
       }
