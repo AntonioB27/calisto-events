@@ -1,0 +1,568 @@
+import type { AppUiDict } from "./en";
+
+export const APP_UI_DE: AppUiDict = {
+  defaults: {
+    eventTitle: "Veranstaltung",
+    organizer: "Organisator",
+    guest: "Gast",
+  },
+
+  theme: {
+    light: "hell",
+    dark: "dunkel",
+  },
+
+  common: {
+    cancel: "Abbrechen",
+    delete: "Löschen",
+    remove: "Entfernen",
+    refresh: "Aktualisieren",
+    copied: "Kopiert!",
+    loading: "Laden …",
+    working: "Wird ausgeführt …",
+    back: "← Zurück",
+    stay: "Bleiben",
+    pending: "Ausstehend",
+    errorFallback: "Fehler",
+    configuringSupabase: "Konfiguriere Supabase für die Vorschau der Uploads.",
+    loadCountsHint: "Konfiguriere Supabase, um aktuelle Zahlen zu laden.",
+  },
+
+  quotas: {
+    unlimitedPlan: "Unbegrenzter Tarif",
+    ofCount: "von {n}",
+    notOnPlan: "In diesem Tarif nicht verfügbar",
+  },
+
+  plans: {
+    free: "Kostenlos",
+    standard: "Standard",
+    plus: "Plus",
+    premium: "Premium",
+    max: "Max",
+  },
+
+  invites: {
+    code: "Zugangscode",
+    link: "Einladungslink",
+    introShort: "Komm zur Veranstaltung:",
+    introFriendly: "Du bist eingeladen zu",
+    introFormal: "Du bist herzlich eingeladen zu",
+    ctaShort: "Bis bald!",
+    ctaFriendly: "Wir können es kaum erwarten!",
+    ctaFormal: "Wir würden uns über deine Teilnahme sehr freuen.",
+    templateShort: "Kurz",
+    templateFriendly: "Locker",
+    templateFormal: "Formal",
+  },
+
+  shell: {
+    brand: "Calisto",
+    navHome: "Start",
+    navSettings: "Einstellungen",
+    joinCta: "Mitmachen",
+    newEventAria: "Neue Veranstaltung",
+    newEventShort: "+",
+    newEventLabel: "+ Neue Veranstaltung",
+    eventBreadcrumb: "← Start",
+    eventContext: "Veranstaltung",
+  },
+
+  accountMenu: {
+    triggerSr: "Kontomenü",
+    panelAria: "Konto",
+    signedInLabel: "Angemeldet",
+    profile: "Profil",
+    settings: "Einstellungen",
+    help: "Hilfe",
+    themeLabel: "Design",
+    signingOut: "Abmelden …",
+    signOut: "Abmelden",
+  },
+
+  dashboard: {
+    eyebrow: "Übersicht",
+    helloTemplate: "Hallo, {name}",
+    fallbackName: "Freund",
+    subtitle: "Veranstaltungen, die du organisierst, sowie solche als Co‑Organisator.",
+    joinWithCode: "Mit Code mitmachen",
+    createEvent: "+ Veranstaltung erstellen",
+    yourEvents: "Deine Veranstaltungen",
+    memberOne: "Mitglied",
+    membersMany: "Mitglieder",
+    roleOrganizer: "Organisator",
+    roleCoOrganizer: "Co‑Organisator",
+    emptyHint: "Erstelle eine neue Veranstaltung oder tritt mit einem Code eines Organizers bei.",
+    moreHint:
+      "Erstelle noch eine Veranstaltung oder trete mit einem Code eines Organizers bei.",
+  },
+
+  joinEntryFooter: {
+    howItWorks: "So funktioniert Calisto",
+    home: "Start",
+  },
+
+  joinForm: {
+    title: "Veranstaltung beitreten",
+    subtitle: "Gib den Zugangscode ein, den dein Organisator teilt.",
+    accessCodeLabel: "Zugangscode",
+    hintFormats: "Hinweis: Codes sehen etwa so aus ",
+    joinCta: "Mitmachen →",
+    codeTooShort: "Bitte den Code aus der Einladung eingeben (mindestens 4 Zeichen).",
+    notFound:
+      "Für diesen Code konnten wir keine Veranstaltung finden. Bitte prüfen und erneut versuchen.",
+    genericError:
+      "Beim Prüfen des Codes ist ein Fehler aufgetreten. Bitte erneut versuchen.",
+    previewEyebrow: "Vorschau der Veranstaltung",
+    codePrefix: "Code:",
+    datePrefix: "Datum:",
+    haveAccount: "Ich habe bereits ein Konto",
+    guestContinue: "Als Gast fortfahren",
+    changeCode: "Code ändern",
+  },
+
+  globals: {
+    errorTitle: "Etwas ist schiefgegangen",
+    errorBody:
+      "Es ist ein unerwarteter Fehler aufgetreten. Versuche es erneut oder kehre zur Startseite zurück.",
+    tryAgain: "Erneut versuchen",
+    home: "Start",
+    notFoundCode: "404",
+    notFoundTitle: "Seite nicht gefunden",
+    notFoundBody: "Der Link ist möglicherweise defekt oder die Seite wurde verschoben.",
+    calistoHome: "Calisto Start",
+    welcomeLink: "Willkommen",
+  },
+
+  guestJoin: {
+    loading: "Laden …",
+    joining: "Beitritt zur Veranstaltung …",
+    tagline: "Teile deine Erinnerungen an diese Veranstaltung.",
+    uploadClosedBanner:
+      "Uploads sind für diese Veranstaltung geschlossen (Zeitfenster beendet). Die Galerie bleibt sichtbar.",
+    sectionUpload: "Upload",
+    sectionGallery: "Galerie",
+    joinInvalidOrNotFound:
+      "Der Zugangscode ist für einen Beitritt gerade nicht gültig.",
+    joinAlreadyMember: "Du gehörst bereits zu dieser Veranstaltung.",
+    joinGeneric:
+      "Beim Beitritt ist etwas schiefgelaufen. Bitte aktualisiere die Seite.",
+  },
+
+  welcomeModal: {
+    eyebrow: "Du bist eingeladen",
+    body: "Tritt bei, um Fotos und Videos hochzuladen und die Galerie zu sehen.",
+    createAccount: "Konto erstellen",
+    logIn: "Anmelden",
+    continueGuest: "Als Gast fortfahren",
+    nicknameLabel: "Dein Anzeigename",
+    nicknameError: "Anzeigenamen zwischen 2 und 30 Zeichen.",
+    supabaseMissing: "Supabase ist nicht konfiguriert. Versuche es später noch einmal.",
+    enterGuest: "Als Gast eintreten",
+    genericError: "Etwas ist schiefgegangen. Bitte erneut versuchen.",
+  },
+
+  upload: {
+    closedEvent: "Uploads sind für diese Veranstaltung geschlossen.",
+    quotaReached: "Das Foto-/Video‑Limit dieser Veranstaltung wurde erreicht.",
+    needSignIn: "Melde dich an, um hochzuladen.",
+    wrongType: "Nur Bilder und Videodateien werden unterstützt.",
+    failedGeneric: "Upload fehlgeschlagen.",
+    dropPrompt: "Fotos oder Videos hier ablegen",
+    tapBrowse: "oder tippen zur Auswahl",
+    uploading: "Wird hochgeladen …",
+  },
+
+  leaveRpc: {
+    primaryOrganizer:
+      "Primäre Organizer können hier nicht austreten – löschen Sie die Veranstaltung in den Einstellungen.",
+    notMember: "Du gehörst nicht mehr zu dieser Veranstaltung.",
+    notAuth: "Bitte melde dich erneut an, um fortzufahren.",
+    fallback: "Austritt von der Veranstaltung nicht möglich.",
+  },
+
+  leave: {
+    title: "Veranstaltung verlassen?",
+    organizerMessage:
+      "Du verlierst Zugang zu Upload und Freigaben. Bereits hochgeladene Medien bleiben in der Galerie für andere sichtbar.",
+    guestMessage:
+      "Du verlierst Zugriff auf dieses Album und Uploads. Bereits Hochgeladenes bleibt für andere Gäste.",
+    confirm: "Verlassen",
+    genericError: "Verlassen der Veranstaltung nicht möglich.",
+    ctaOrganizerTab: "Veranstaltung verlassen",
+    guestCtaSame: "Veranstaltung verlassen",
+    cancelStay: "Bleiben",
+  },
+
+  auth: {
+    oauthFail:
+      "Google‑Anmeldung wurde nicht abgeschlossen. Bitte erneut versuchen oder E‑Mail und Passwort nutzen.",
+    googleStartFail: "Google‑Anmeldung konnte nicht gestartet werden. Versuche es in Kürze erneut.",
+    checkEmailVerify: "Öffne deine E‑Mails zur Kontobestätigung",
+    welcomeEyebrow: "Willkommen bei",
+    brandRest: ".",
+    continueGoogle: "Mit Google fortfahren",
+    dividerOr: "Oder",
+    dividerBody: "mit E‑Mail fortfahren",
+    email: "E‑Mail",
+    password: "Passwort",
+    signInSubmit: "Anmelden",
+    forgotPw: "Passwort vergessen?",
+    fullName: "Vollständiger Name",
+    createAccountSubmit: "Konto anlegen",
+    emailPlaceholderRegister: "du@beispiel.de",
+    emailPlaceholderAlt: "du@beispiel.de",
+    passwordDots: "••••••••",
+    namePlaceholder: "Antonio Kovač",
+    legalPrefix: "Mit Fortfahren stimmst du den Calisto",
+    terms: "AGB",
+    privacy: "Datenschutzrichtlinien",
+    and: "und",
+  },
+
+  authRail: {
+    aria: "Anmeldung oder Registrierung auswählen",
+    loginKicker: "Willkommen zurück",
+    loginLabel: "Anmelden",
+    registerKicker: "Neu bei Calisto?",
+    registerLabel: "Registrieren",
+  },
+
+  forbidden: {
+    title: "Veranstaltung nicht gefunden",
+    deny: "Du hast keinen Zugang zu dieser Veranstaltung.",
+    dashboardLink: "← Übersicht",
+  },
+
+  eventNav: {
+    tabOverview: "Übersicht",
+    tabGuests: "Gäste",
+    tabGallery: "Galerie",
+    tabShare: "Teilen",
+    tabSettings: "Einstellungen",
+    subtitle: "Teilen mit Gästen, damit diese beitreten können.",
+    tabsAria: "Bereiche der Veranstaltung",
+  },
+
+  overview: {
+    yourRole: "Deine Rolle",
+    uploadWindowLead:
+      "Gäste können während des Tarif‑Zeitraums hochladen: vom Veranstaltungsdatum noch",
+    uploadWindowBoldOne: "{n} Tag",
+    uploadWindowBoldMany: "{n} Tage",
+    uploadWindowTail: "darüber hinaus – unter Teilen prüfen, ob heute noch Upload möglich ist.",
+    planCapsNote:
+      "Foto-, Video‑ und Gastzahlen hängen von deinem Tarif ab. Aufbewahrung und Abrechnung steuern dein Calisto‑Konto bzw. der Support.",
+    statsTitle: "Statistik",
+    statsPhotos: "Fotos",
+    statsVideos: "Videos",
+    statsGuests: "Gäste",
+    accessCodeTitle: "Zugangscode",
+    copyCode: "Code kopieren",
+    showQr: "QR‑Einladung anzeigen",
+    hideQr: "QR ausblenden",
+    scanHint: "Scan zum Beitreten · gleicher Link wie unter Teilen",
+    openShareLink: "Zu Teilen für Link und Nachricht →",
+    recentPhotos: "Neue Fotos",
+    noPhotosHint:
+      "Noch keine Uploads. Öffne die Galerie, sobald neue Medien eintreffen.",
+    openGalleryBtn: "Zur Galerie",
+    viewGalleryFull: "Vollständige Galerie →",
+  },
+
+  share: {
+    heading: "Teilen",
+    subtitle:
+      "Sende Gastlink oder Zugangscode. Wähle den Nachrichtenstil, dann teilen oder kopieren.",
+    messageStyleEyebrow: "Nachrichtsstil",
+    shareInvite: "Einladung teilen",
+    shareFootnote:
+      "Nutzt das System‑Teilen, falls möglich, sonst wird die Nachricht kopiert.",
+    shareInviteDialogTitle: "Du bist eingeladen",
+    copyFailManual: "Kopieren fehlgeschlagen – Text bitte manuell auswählen.",
+    shareUnavailable:
+      "Teilen ist hier nicht möglich. Kopiere die Nachricht unten stattdessen.",
+    scanQr: "QR scannen zum Beitreten",
+    joinsSameHint: "Öffnet dieselbe Mitmach‑Seite wie der Link oben.",
+    printPoster: "QR‑Plakat drucken",
+    previewMessage: "Nachricht-Vorschau",
+    copyFullMessage: "Nachricht kopieren",
+    copyJoinLinkBtn: "Link kopieren",
+  },
+
+  gallery: {
+    loadFailed: "Galerie konnte nicht geladen werden.",
+    loading: "Galerie wird geladen …",
+    deleteMediaFail: "Medien konnten nicht gelöscht werden.",
+    deleteTitle: "Upload löschen?",
+    deleteBody:
+      "Entfernt den Eintrag und löscht die Datei. Das kann nicht rückgängig gemacht werden.",
+    title: "Galerie",
+    subtitle: "Hochgeladene Fotos & Videos durchsuchen",
+    filterAria: "Nach Medientyp filtern",
+    filterAll: "Alle",
+    filterPhotos: "Fotos",
+    filterVideos: "Videos",
+    empty: "Noch keine Uploads.",
+    loadMore: "Mehr laden …",
+    lightboxAria: "Foto‑Lightbox",
+    closeLightboxAria: "Lightbox schließen",
+    downloadPhotoAria: "Dieses Foto herunterladen",
+    downloadBtn: "Herunterladen",
+    downloadWorking: "Wird heruntergeladen …",
+    downloadPhotoFail: "Download nicht möglich.",
+    downloadFailedWithStatus: "Download fehlgeschlagen ({status}).",
+    deleteBusy: "…",
+  },
+
+  guests: {
+    title: "Gäste",
+    loadFailed: "Gäste konnten nicht geladen werden.",
+    configureSupabase:
+      "NEXT_PUBLIC_SUPABASE_URL und NEXT_PUBLIC_SUPABASE_ANON_KEY in `.env.local` setzen, um Organizer‑Features zu nutzen.",
+    cannotRemoveOrganizer:
+      "Der primäre Organisator kann nicht entfernt werden.",
+    rolesOnlyPrimary:
+      "Nur der primäre Organisator kann Rollen ändern.",
+    notAllowed: "Nicht erlaubt.",
+    memberNotFound: "Mitglied nicht gefunden.",
+    actionFailed: "Aktion fehlgeschlagen.",
+    removeMemberFail: "Mitglied konnte nicht entfernt werden.",
+    updateRoleFail: "Rolle konnte nicht geändert werden.",
+    removeDialogTitle: "Dieses Mitglied entfernen?",
+    removeDialogBody:
+      "Verliert Zugang zu Veranstaltung und Galerie. Hochgeladene Medien bleiben bis zum Löschen in der Galerie.",
+    loadingGuests: "Gäste werden geladen …",
+    empty: "Noch keine Gäste.",
+    youBadge: "(du)",
+    uploadsLine: "Uploads: {photos} Fotos • {videos} Videos",
+    promoteCo: "Zum Co‑Organisator machen",
+    demoteGuest: "Zum Gast machen",
+    guestLabelFallback: "Gast",
+    organizerLabelFallback: "Organisator",
+    membersOne: "1 Mitglied",
+    membersMany: "{n} Mitglieder",
+  },
+
+  supabase: {
+    missingTitle: "Supabase nicht konfiguriert",
+    settingsBody:
+      "NEXT_PUBLIC_SUPABASE_URL und NEXT_PUBLIC_SUPABASE_ANON_KEY in `.env.local` setzen, um Einstellungen zu bearbeiten.",
+    galleryBody:
+      "NEXT_PUBLIC_SUPABASE_URL und NEXT_PUBLIC_SUPABASE_ANON_KEY in `.env.local` setzen, um die Galerie zu laden.",
+  },
+
+  settingsPage: {
+    title: "Einstellungen",
+    eventsLink: "Veranstaltungen",
+  },
+
+  settingsClient: {
+    profileEyebrow: "Profil",
+    signedInAs: "Angemeldet als ",
+    anon: "—",
+    appearanceEyebrow: "Aussehen",
+    languageEyebrow: "Sprache",
+    langEnglish: "Englisch",
+    langHrvatski: "Kroatisch",
+    langDeutsch: "Deutsch",
+    themeDarkLabel: "Dunkel",
+    themeLightLabel: "Hell",
+    appliesNote: "Wirkt auf Seiten mit hellem oder dunklem Design.",
+    signOut: "Abmelden",
+    backEvents: "← Zurück zu Veranstaltungen",
+  },
+
+  settingsTab: {
+    heading: "Einstellungen",
+    subtitle:
+      "Nur du (primärer Organisator) siehst diesen Bereich und wie die Veranstaltung wirkt.",
+    sectionNameIcon: "Name & Symbol",
+    eventNameLabel: "Name der Veranstaltung",
+    namePlaceholder: "z. B. Anna & Luca",
+    iconEyebrow: "Symbolemoji",
+    chooseEmoji: "Emoji wählen",
+    closePicker: "Schließen",
+    noIcon: "Kein Symbol",
+    emojiAria: "Ausgewähltes Emoji",
+    emojiPickerAria: "Emoji‑Auswahl",
+    iconHint:
+      "Zeigt sich neben dem Titel im Header. Ohne Emoji wird nur in der Navigation ein Standard angezeigt.",
+    saveChanges: "Speichern",
+    reset: "Zurücksetzen",
+    sectionSchedule: "Veranstaltungsdetails",
+    scheduleNoteLead: "Gespeichert als ",
+    scheduleNoteTrail:
+      "(Kalenderdatum). Datum oder Tarif wirken sich auf Gast‑Zeitfenster und Medien‑Limits aus.",
+    eventDateUtc: "Datum (Kalendertag, UTC)",
+    planTier: "Tarif",
+    saveSchedule: "Datum & Tarif speichern",
+    joinCodeEyebrow: "Einladungs‑Code für Gäste",
+    dashboardBack: "Zur Übersicht",
+    dangerEyebrow: "Gefahrenbereich",
+    deletePhraseWord: "DELETE",
+    confirmMismatch:
+      "Die Bestätigung passt nicht. Bitte gespeicherten Titel genau angeben oder DELETE schreiben.",
+    deleteStorageIncomplete:
+      "Veranstaltung entfernt, aber einzelne Speicher‑Dateien fehlen möglicherweise noch. Kontaktiere den Support.",
+    deleteFail: "Löschen nicht möglich.",
+    genericSaveFail: "Speichern nicht möglich.",
+    validDateNeeded: "Bitte ein gültiges Datum wählen.",
+    scheduleSaveFail: "Datum oder Tarif konnte nicht aktualisiert werden.",
+    deleteTitleForever: "Veranstaltung dauerhaft löschen?",
+    deleteDialogBody:
+      "Allen entfällt sofort der Zugang. Gäste, Galerie, Uploads und Codes verschwinden.",
+    deleteConfirmLabel: "Ja, endgültig löschen",
+    deleteDangerNote: "Das kann nicht rückgängig gemacht werden.",
+    deleteInstructionLead: "Tippe zur Bestätigung entweder den gespeicherten Titel ",
+    deleteInstructionTrail: " oder das Wort ",
+    deleteConfirmPhraseLabel: "Bestätigung",
+    deletePlaceholderTitleOrWord: "Titel oder DELETE",
+    deleteButton: "Veranstaltung komplett löschen",
+    exactParen: "(exakt)",
+  },
+
+  validateCreate: {
+    nameRequired:
+      "Ein Veranstaltungsname wird benötigt. Bitte zurück und einen Namen eintragen.",
+  },
+
+  createStep1: {
+    eyebrow: "Neue Veranstaltung",
+    title: "Veranstaltung erstellen",
+    description: "Du wirst automatisch Organisator.",
+    eventTitleLabel: "Veranstaltungstitel",
+    namePlaceholder: "z. B. Anna & Luca",
+    eventIconEyebrow: "Symbol",
+    eventDateLabel: "Datum der Veranstaltung",
+    continuePlan: "Weiter zum Tarif →",
+    searchEmojiHint: "Alle Emojis durchsuchen. Es erscheint im Veranstaltungs‑Header.",
+    noEmojiBtn: "Ohne Emoji",
+    defaultEmojiAria: "Ausgewähltes Emoji",
+  },
+
+  createStep2: {
+    eyebrow: "Schritt 2 von 3",
+    heading: "Tarif wählen",
+    description: "Wähle einen Tarif, der zur Veranstaltung passt.",
+    priceEyebrow: "Preis",
+    sale: "Aktion",
+    popularBadge: "Beliebt",
+    unlimited: "Unbegrenzt",
+    guestsPhotosVideos: "{guests} Gäste • {photos} Fotos • {videos} Videos",
+    uploadsOpenAfterDays:
+      "{n} Tage Upload nach dem Veranstaltungsdatum",
+    moreDetailsAria: "Mehr Infos zum Tarif {plan}",
+    detailRegionAria: "Details zum Tarif {plan}",
+    rowGuests: "Gäste",
+    rowPhotos: "Fotos",
+    rowVideos: "Videos",
+    rowUploadWindow: "Upload‑Fenster",
+    uploadWindowDays: "{n} Tage",
+    tipChangePlanLater:
+      "Hinweis: Du kannst den Tarif später in den Veranstaltungs‑Einstellungen ändern.",
+    continuePayment: "Weiter zur Zahlung →",
+    payWord: "Zahlung",
+    planWord: "Tarif",
+    dayWord: "Tag",
+    daysWord: "Tage",
+  },
+
+  createStep3: {
+    validationBack: "Zurück zu den Details",
+    checkingSession: "Sitzung wird geprüft …",
+    needAuthHeading: "Melde dich an, um fertigzustellen",
+    needAuthBody:
+      "Du brauchst ein Konto, um die Erstellung zu beenden. Dein Entwurf bleibt erhalten.",
+    logInBtn: "Anmelden",
+    createAcctBtn: "Konto anlegen",
+    checkoutFailGeneric: "Checkout konnte nicht gestartet werden.",
+    createFail: "Veranstaltung konnte nicht erstellt werden.",
+    stepEyebrow: "Schritt 3 · Prüfen & erstellen",
+    confirmHeading: "Veranstaltung bestätigen",
+    confirmBodyLeadBeforeName: "Du erstellst jetzt ",
+    confirmBodyBetweenNameDate: " am ",
+    confirmBodyTierWord: " mit dem ",
+    confirmBodyPlanSuffix: "‑Tarif",
+    confirmBodyPaidTail:
+      " Die Zahlung läuft sicher über Stripe, danach ist die Veranstaltung mit den Tarifs‑Limits aktiv.",
+    confirmBodyFreeTier:
+      "Die kostenlose Stufe wird hier ohne Checkout bestätigt – lade gleich Gäste ein.",
+    selectedPlanEyebrow: "Gewählter Tarif",
+    saleBadge: "Angebot",
+    priceNotePaid:
+      "Inkl. Mehrwertsteuer wenn anwendbar — einmalig bei Bestätigung in Stripe.",
+    priceNoteFree: "Kostenlos bleibt kostenlos.",
+    footnotePaid: "Du gehst zu Stripe; nach erfolgreicher Zahlung ist alles aktiv.",
+    footnoteFree:
+      "Keine Gebühr — Album und Gästeinladung sind sofort online.",
+    btnOpeningCheckout: "Checkout wird geöffnet …",
+    btnCreating: "Wird erstellt …",
+    btnStripe: "Weiter zu Stripe",
+    btnConfirmFree: "Bestätigen und erstellen",
+  },
+
+  stripeComplete: {
+    missingSession: "Checkout‑Session fehlt.",
+    fulfillFailGeneric: "Checkout konnte nicht abgeschlossen werden.",
+    fulfillRetryHint:
+      "Wenn die Zahlung gerade durchgelaufen ist, kurz warten und „Erneut versuchen“ nutzen.",
+    noEventId: "Zahlung abgeschlossen, aber keine Veranstaltungs‑ID zurückgegeben.",
+    tryAgain: "Erneut versuchen",
+    goDashboard: "Zur Übersicht",
+    finalizing:
+      "Zahlung wird abgeschlossen und Veranstaltung angelegt …",
+  },
+
+  onboardingForm: {
+    welcomeEyebrow: "Willkommen",
+    title: "Erzähl uns von deinem Event",
+    subtitle:
+      "So personalisiert sich dein Platz. Als Nächstes kannst du in der Übersicht dein erstes Event erstellen.",
+    kindEyebrow: "Was planst du?",
+    displayNameLabel: "Wie sollen wir dich nennen? (optional)",
+    namePlaceholderShort: "z. B. Alex",
+    choosePlanning: "Bitte wähle eine Art Veranstaltung.",
+    saveFail: "Speichern fehlgeschlagen. Versuche es erneut.",
+    notSignedIn: "Nicht angemeldet.",
+    continueDashboard: "Weiter zur Übersicht",
+  },
+
+  onboardingKinds: {
+    wedding: "Hochzeit",
+    birthday: "Geburtstag",
+    corporate: "Firmlich",
+    other: "Etwas anderes",
+  },
+
+  planTiersPage: {
+    eyebrow: "Tarife",
+    title: "Tarifstufen",
+    subtitle: "Kurzüberblick über Gäste- und Upload‑Limits.",
+    back: "Zurück",
+    uploadBadge: "{n} Tage Upload",
+    colGuests: "Gäste",
+    colPhotos: "Fotos",
+    colVideos: "Videos",
+  },
+
+  print: {
+    deniedTitle: "Veranstaltung nicht gefunden",
+    deniedDeny: "Du hast keinen Zugang zu dieser Veranstaltung.",
+    backDashboard: "← Übersicht",
+    backShare: "← Zurück zu Teilen",
+    print: "Drucken",
+    heroEyebrow: "QR scannen zum Hochladen von Fotos und Videos",
+    footerGoToLead: "Oder öffne ",
+    footerGoToTrail: " und gib ein:",
+  },
+
+  languagePicker: {
+    label: "Sprache",
+    locales: {
+      en: "Englisch",
+      hr: "Kroatisch",
+      de: "Deutsch",
+    },
+  },
+};

@@ -43,7 +43,7 @@ export default async function LocalePage({ params }: LocalePageProps) {
         <FAQ copy={copy} />
         <WaitlistForm copy={copy.waitlist} mascotAlt={copy.auroraMascotAlt} locale={locale as Locale} />
       </main>
-      <SiteFooter copy={copy} />
+      <SiteFooter copy={copy} locale={locale as Locale} />
     </div>
   );
 }

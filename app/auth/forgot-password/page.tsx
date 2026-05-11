@@ -157,7 +157,14 @@ export default function ForgotPasswordPage() {
 
         <p style={{ textAlign: "center", marginTop: 20, fontSize: 12, color: "var(--app-muted)" }}>
           By continuing you agree to Calisto&apos;s{" "}
-          <span style={{ textDecoration: "underline" }}>Terms &amp; Privacy Policy</span>.
+          <Link href="/terms" style={{ textDecoration: "underline", color: "inherit" }}>
+            Terms
+          </Link>
+          {" "}and{" "}
+          <Link href="/privacy" style={{ textDecoration: "underline", color: "inherit" }}>
+            Privacy Policy
+          </Link>
+          .
         </p>
       </div>
     </main>

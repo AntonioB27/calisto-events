@@ -1,5 +1,6 @@
 "use client";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
 import { AppFormRow } from "@/components/app-ui/AppFormRow";
@@ -17,6 +18,7 @@ type Step1DetailsProps = {
 };
 
 export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1DetailsProps) {
+  const ui = useAppUi();
   const getPlanIdForDraft = (): PlanId => readCreateEventDraftFromStorage()?.planId ?? "free";
 
   const initialEmoji = useMemo(
@@ -66,9 +68,9 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
   return (
     <div style={{ padding: "40px 0 60px" }}>
       <AppPageHeader
-        eyebrow="New event"
-        title="Create event"
-        description="You'll automatically become the organizer."
+        eyebrow={ui.createStep1.eyebrow}
+        title={ui.createStep1.title}
+        description={ui.createStep1.description}
       />
 
       <form
@@ -87,13 +89,13 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
         <div style={{ display: "grid", gridTemplateColumns: "1fr 260px", gap: 16 }}>
           <AppCard pad="md" style={{ marginBottom: 0 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            <AppFormRow label="Event title">
+            <AppFormRow label={ui.createStep1.eventTitleLabel}>
               <AppInput
                 id="name"
                 name="name"
                 type="text"
                 defaultValue={defaultName}
-                placeholder="e.g. Kyle & Laura"
+                placeholder={ui.createStep1.namePlaceholder}
                 onChange={(value) => {
                   const dateEl = document.getElementById("date");
                   const currentDate = dateEl instanceof HTMLInputElement ? dateEl.value : defaultDate;
@@ -101,7 +103,7 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
                 }}
               />
             </AppFormRow>
-            <AppFormRow label="Event date">
+            <AppFormRow label={ui.createStep1.eventDateLabel}>
               <AppInput
                 id="date"
                 name="date"
@@ -129,11 +131,11 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
                   color: "var(--app-muted)",
                 }}
               >
-                Event icon
+                {ui.createStep1.eventIconEyebrow}
               </p>
               <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
                 <div
-                  aria-label="Selected emoji"
+                  aria-label={ui.createStep1.defaultEmojiAria}
                   style={{
                     width: 56,
                     height: 56,
@@ -156,7 +158,7 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
                     onClick={() => setPickerOpen((v) => !v)}
                     className="w-full"
                   >
-                    {pickerOpen ? "Close picker" : "Choose emoji"}
+                    {pickerOpen ? ui.settingsTab.closePicker : ui.settingsTab.chooseEmoji}
                   </AppBtn>
                   <AppBtn
                     type="button"
@@ -178,20 +180,20 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
                     }}
                     className="w-full"
                   >
-                    No emoji
+                    {ui.createStep1.noEmojiBtn}
                   </AppBtn>
                 </div>
               </div>
 
               <p style={{ margin: "12px 0 0", fontSize: 12, color: "var(--app-subtle)", lineHeight: 1.45 }}>
-                Search or browse all emojis. Your choice appears in the event header.
+                {ui.createStep1.searchEmojiHint}
               </p>
             </AppCard>
 
             {pickerOpen ? (
               <div
                 role="dialog"
-                aria-label="Emoji picker"
+                aria-label={ui.settingsTab.emojiPickerAria}
                 style={{
                   position: "absolute",
                   right: 0,
@@ -233,7 +235,7 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
         </div>
 
         <AppBtn type="submit" variant="primary" style={{ width: "100%", marginTop: 24 }}>
-          Continue to plan →
+          {ui.createStep1.continuePlan}
         </AppBtn>
       </form>
     </div>

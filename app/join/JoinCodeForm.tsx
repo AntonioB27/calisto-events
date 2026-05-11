@@ -4,6 +4,7 @@ import { normalizeAccessCode } from "@/lib/access-code";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
 import { AppFormRow } from "@/components/app-ui/AppFormRow";
@@ -15,6 +16,7 @@ type JoinPreview = {
 };
 
 export function JoinCodeForm() {
+  const ui = useAppUi();
   const router = useRouter();
   const [stage, setStage] = useState<"enter" | "choice">("enter");
   const [code, setCode] = useState("");
@@ -27,7 +29,7 @@ export function JoinCodeForm() {
     e.preventDefault();
     const normalized = normalizeAccessCode(code);
     if (normalized.length < 4) {
-      setError("Enter the code from your invite (at least 4 characters).");
+      setError(ui.joinForm.codeTooShort);
       return;
     }
 
@@ -36,7 +38,7 @@ export function JoinCodeForm() {
     try {
       const response = await fetch(`/api/join/preview?code=${encodeURIComponent(normalized)}`);
       if (response.status === 404) {
-        setError("We could not find an event for that code. Please check and try again.");
+        setError(ui.joinForm.notFound);
         setStage("enter");
         return;
       }
@@ -49,7 +51,7 @@ export function JoinCodeForm() {
       setPreview(data);
       setStage("choice");
     } catch {
-      setError("Something went wrong while checking your code. Please try again.");
+      setError(ui.joinForm.genericError);
       setStage("enter");
     } finally {
       setLoadingPreview(false);
@@ -101,7 +103,7 @@ export function JoinCodeForm() {
           marginBottom: 6,
         }}
       >
-        Join Event
+        {ui.joinForm.title}
       </h1>
       <p
         style={{
@@ -114,13 +116,13 @@ export function JoinCodeForm() {
           maxWidth: 320,
         }}
       >
-        Enter the access code shared by your event organizer.
+        {ui.joinForm.subtitle}
       </p>
 
       <AppCard pad="lg" style={{ width: "100%", borderRadius: 18 }}>
         {stage === "enter" ? (
           <form onSubmit={onSubmit}>
-            <AppFormRow label="Access Code" labelFor="access-code" errorText={error}>
+            <AppFormRow label={ui.joinForm.accessCodeLabel} labelFor="access-code" errorText={error}>
               <input
                 id="access-code"
                 value={code}
@@ -152,12 +154,13 @@ export function JoinCodeForm() {
                   textAlign: "center",
                 }}
               >
-                Hint: codes look like <strong style={{ fontStyle: "normal" }}>CALISTO-S2UAQ4</strong>
+                {ui.joinForm.hintFormats}
+                <strong style={{ fontStyle: "normal" }}>CALISTO-S2UAQ4</strong>
               </p>
             </AppFormRow>
 
             <AppBtn type="submit" variant="primary" className="mt-6 w-full" loading={loadingPreview}>
-              Join Event →
+              {ui.joinForm.joinCta}
             </AppBtn>
           </form>
         ) : (
@@ -172,23 +175,29 @@ export function JoinCodeForm() {
               }}
             >
               <p style={{ margin: 0, fontSize: 12, color: "var(--app-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                Event Preview
+                {ui.joinForm.previewEyebrow}
               </p>
-              <p style={{ margin: "8px 0 0", fontSize: 18, fontWeight: 700, color: "var(--app-text)" }}>{preview?.title ?? "Event"}</p>
+              <p style={{ margin: "8px 0 0", fontSize: 18, fontWeight: 700, color: "var(--app-text)" }}>
+                {preview?.title ?? ui.defaults.eventTitle}
+              </p>
               <p style={{ margin: "8px 0 0", fontSize: 14, color: "var(--app-muted)" }}>
-                Code: <strong style={{ color: "var(--app-text)" }}>{resolvedCode}</strong>
+                {ui.joinForm.codePrefix} <strong style={{ color: "var(--app-text)" }}>{resolvedCode}</strong>
               </p>
-              {preview?.eventDate ? <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--app-muted)" }}>Date: {preview.eventDate}</p> : null}
+              {preview?.eventDate ? (
+                <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--app-muted)" }}>
+                  {ui.joinForm.datePrefix} {preview.eventDate}
+                </p>
+              ) : null}
             </div>
 
             <AppBtn type="button" variant="primary" className="w-full" onClick={onLogin}>
-              I have an account
+              {ui.joinForm.haveAccount}
             </AppBtn>
             <AppBtn type="button" variant="secondary" className="w-full" onClick={onContinueAsGuest}>
-              Continue as guest
+              {ui.joinForm.guestContinue}
             </AppBtn>
             <AppBtn type="button" variant="ghost" className="w-full" onClick={onChangeCode}>
-              Change code
+              {ui.joinForm.changeCode}
             </AppBtn>
           </div>
         )}

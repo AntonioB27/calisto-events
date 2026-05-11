@@ -1,5 +1,6 @@
 "use client";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { buildEventInviteShareText, getWebJoinUrl, type InviteTemplate } from "@/lib/join-link";
 import { startTransition, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
@@ -18,6 +19,7 @@ type ShareTabProps = Readonly<{
 }>;
 
 export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: ShareTabProps) {
+  const ui = useAppUi();
   const [template, setTemplate] = useState<InviteTemplate>("friendly");
   const [copied, setCopied] = useState<string | null>(null);
   const [shareError, setShareError] = useState<string | null>(null);
@@ -59,8 +61,19 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
         accessCode,
         joinLink: joinUrl,
         template,
+        defaultEventTitle: ui.defaults.eventTitle,
+        labels: {
+          code: ui.invites.code,
+          link: ui.invites.link,
+          introShort: ui.invites.introShort,
+          introFriendly: ui.invites.introFriendly,
+          introFormal: ui.invites.introFormal,
+          ctaShort: ui.invites.ctaShort,
+          ctaFriendly: ui.invites.ctaFriendly,
+          ctaFormal: ui.invites.ctaFormal,
+        },
       }),
-    [eventTitle, accessCode, joinUrl, template],
+    [eventTitle, accessCode, joinUrl, template, ui],
   );
 
   async function copyToClipboard(label: string, text: string) {
@@ -69,7 +82,7 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
       setCopied(label);
       setShareError(null);
     } catch {
-      setShareError("Could not copy — try selecting the text manually.");
+      setShareError(ui.share.copyFailManual);
     }
   }
 
@@ -78,7 +91,7 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
     try {
       if (typeof navigator !== "undefined" && navigator.share) {
         await navigator.share({
-          title: "You're invited",
+          title: ui.share.shareInviteDialogTitle,
           text: inviteText,
           url: joinUrl,
         });
@@ -87,27 +100,27 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
       await copyToClipboard("message", inviteText);
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") return;
-      setShareError("Sharing isn't available in this browser. Copy the message below instead.");
+      setShareError(ui.share.shareUnavailable);
     }
   }
 
   const templateOptions: { id: InviteTemplate; label: string }[] = [
-    { id: "short", label: "Short" },
-    { id: "friendly", label: "Friendly" },
-    { id: "formal", label: "Formal" },
+    { id: "short", label: ui.invites.templateShort },
+    { id: "friendly", label: ui.invites.templateFriendly },
+    { id: "formal", label: ui.invites.templateFormal },
   ];
 
   return (
     <section className="space-y-8">
       <div>
-        <h2 className="text-lg font-semibold" style={{ color: 'var(--app-text)' }}>Share</h2>
+        <h2 className="text-lg font-semibold" style={{ color: 'var(--app-text)' }}>{ui.share.heading}</h2>
         <p className="mt-2 text-sm" style={{ color: 'var(--app-muted)' }}>
-          Send a guest link or access code. Pick a message style, then share or copy.
+          {ui.share.subtitle}
         </p>
       </div>
 
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--app-muted)' }}>Message style</p>
+        <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--app-muted)' }}>{ui.share.messageStyleEyebrow}</p>
         <div className="flex flex-wrap gap-2">
           {templateOptions.map(({ id, label }) => {
             const selected = template === id;
@@ -131,10 +144,10 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
         </div>
 
         <AppBtn variant="primary" size="lg" type="button" className="w-full !rounded-xl" onClick={() => void shareInvite()}>
-          Share invite
+          {ui.share.shareInvite}
         </AppBtn>
         <p className="text-center text-xs italic" style={{ color: 'var(--app-muted)' }}>
-          Uses your device share sheet when available; otherwise copies the full message.
+          {ui.share.shareFootnote}
         </p>
       </div>
 
@@ -147,7 +160,7 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
       <div className="grid gap-6 md:grid-cols-2">
         <AppCard pad="md" className="!rounded-xl">
           <p className="text-xs uppercase tracking-widest" style={{ color: "var(--app-muted)" }}>
-            Access code
+            {ui.invites.code}
           </p>
           <p className="mt-2 break-all font-mono text-lg font-semibold" style={{ color: "var(--app-text)" }}>
             {accessCode}
@@ -159,13 +172,13 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
             className="mt-3 w-full"
             onClick={() => void copyToClipboard("code", accessCode)}
           >
-            {copied === "code" ? "Copied!" : "Copy code"}
+            {copied === "code" ? ui.common.copied : ui.overview.copyCode}
           </AppBtn>
         </AppCard>
 
         <AppCard pad="md" className="!rounded-xl">
           <p className="text-xs uppercase tracking-widest" style={{ color: "var(--app-muted)" }}>
-            Join link
+            {ui.invites.link}
           </p>
           <a
             className="mt-2 block break-all font-mono text-sm underline underline-offset-2"
@@ -183,14 +196,14 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
             className="mt-3 w-full"
             onClick={() => void copyToClipboard("link", joinUrl)}
           >
-            {copied === "link" ? "Copied!" : "Copy link"}
+            {copied === "link" ? ui.common.copied : ui.share.copyJoinLinkBtn}
           </AppBtn>
         </AppCard>
       </div>
 
       <AppCard pad="lg" className="!rounded-xl" style={{ background: "var(--app-surface)" }}>
         <p className="text-center text-sm font-semibold" style={{ color: "var(--app-muted)" }}>
-          Scan to join
+          {ui.share.scanQr}
         </p>
         <div
           className="mx-auto mt-4 flex max-w-[220px] justify-center rounded-lg p-4"
@@ -199,18 +212,18 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
           <QRCode value={joinUrl} size={180} />
         </div>
         <p className="mt-3 text-center text-xs" style={{ color: "var(--app-subtle)" }}>
-          Opens the same join page as the link above.
+          {ui.share.joinsSameHint}
         </p>
         <div className="mt-4">
           <AppBtn variant="outline" size="sm" href={`/events/${eventId}/print`} as={Link} className="block w-full text-center">
-            Print QR poster
+            {ui.share.printPoster}
           </AppBtn>
         </div>
       </AppCard>
 
       <AppCard pad="md" className="!rounded-xl" style={{ background: "var(--app-bg)" }}>
         <p className="text-xs uppercase tracking-widest" style={{ color: "var(--app-muted)" }}>
-          Preview message
+          {ui.share.previewMessage}
         </p>
         <pre
           className="mt-3 whitespace-pre-wrap break-words font-sans text-sm leading-relaxed"
@@ -219,7 +232,7 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
           {inviteText}
         </pre>
         <AppBtn variant="ghost" size="sm" type="button" className="mt-4 w-full" onClick={() => void copyToClipboard("message", inviteText)}>
-          {copied === "message" ? "Copied!" : "Copy full message"}
+          {copied === "message" ? ui.common.copied : ui.share.copyFullMessage}
         </AppBtn>
       </AppCard>
     </section>

@@ -19,15 +19,20 @@ const defaultLabels = {
   ctaFormal: "We would be honored by your presence.",
 } as const;
 
+export type InviteShareLabels = Record<keyof typeof defaultLabels, string>;
+
 export function buildEventInviteShareText(input: {
   eventTitle: string;
   accessCode: string;
   joinLink: string;
   template: InviteTemplate;
-  labels?: Partial<typeof defaultLabels>;
+  labels?: Partial<InviteShareLabels>;
+  /** Fallback when title is blank (localized). Defaults to `"Event"` if omitted. */
+  defaultEventTitle?: string;
 }): string {
-  const labels = { ...defaultLabels, ...input.labels };
-  const title = input.eventTitle.trim() || "Event";
+  const labels: InviteShareLabels = { ...defaultLabels, ...input.labels };
+  const fallbackTitle = typeof input.defaultEventTitle === "string" && input.defaultEventTitle.trim() ? input.defaultEventTitle.trim() : "Event";
+  const title = input.eventTitle.trim() || fallbackTitle;
   const code = normalizeAccessCode(input.accessCode);
   const link = input.joinLink.trim();
   const intro =

@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 
 import { isAccessCodeValid, normalizeAccessCode } from "@/lib/access-code";
 import type { PlanId } from "@/lib/plan-limits";
+import { clientIpFromRequest, consumeRateLimitToken } from "@/lib/simple-ip-rate-limit";
 import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
+
+const JOIN_PREVIEW_RATE_LIMIT = { max: 120, windowMs: 60_000 } as const;
 
 function isPlanId(value: string): value is PlanId {
   return (
@@ -19,6 +22,17 @@ function notFound(): NextResponse {
 }
 
 export async function GET(request: Request): Promise<NextResponse> {
+  const rl = consumeRateLimitToken(`join-preview:${clientIpFromRequest(request)}`, JOIN_PREVIEW_RATE_LIMIT);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rl.retryAfterSec) },
+      },
+    );
+  }
+
   const url = new URL(request.url);
   const raw = url.searchParams.get("code") ?? "";
   const code = normalizeAccessCode(raw);

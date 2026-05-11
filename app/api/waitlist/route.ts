@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
+
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n";
+import { clientIpFromRequest, consumeRateLimitToken } from "@/lib/simple-ip-rate-limit";
 import { sendWelcomeEmail } from "@/lib/welcome-email";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_EMAIL_LENGTH = 320;
+
+const WAITLIST_RATE_LIMIT = { max: 24, windowMs: 60_000 } as const;
 
 function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
@@ -36,6 +40,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid email." }, { status: 400 });
   }
 
+  const rl = consumeRateLimitToken(`waitlist:${clientIpFromRequest(request)}`, WAITLIST_RATE_LIMIT);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rl.retryAfterSec) },
+      },
+    );
+  }
+
   try {
     const supabase = getSupabaseServerClient();
     const { error } = await supabase.from("waitlist").insert({ email });
@@ -43,37 +58,7 @@ export async function POST(request: Request) {
     if (error) {
       // Duplicate entry should still be treated as success for idempotent UX.
       if (error.code === "23505") {
-        // #region agent log
-        fetch("http://127.0.0.1:7770/ingest/2e686876-5e56-4de8-8cb2-224c3efe66a1", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "caed9d" },
-          body: JSON.stringify({
-            sessionId: "caed9d",
-            runId: "prod-investigation",
-            hypothesisId: "H1",
-            location: "app/api/waitlist/route.ts:48",
-            message: "duplicate waitlist entry; returning without email send",
-            data: { emailLength: email.length, locale },
-            timestamp: Date.now(),
-          }),
-        }).catch(() => {});
-        // #endregion
         const welcome = await sendWelcomeEmail(email, locale);
-        // #region agent log
-        fetch("http://127.0.0.1:7770/ingest/2e686876-5e56-4de8-8cb2-224c3efe66a1", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "caed9d" },
-          body: JSON.stringify({
-            sessionId: "caed9d",
-            runId: "post-fix",
-            hypothesisId: "H1",
-            location: "app/api/waitlist/route.ts:62",
-            message: "duplicate entry welcome email result",
-            data: { ok: welcome.ok, skipped: welcome.skipped ?? false, hasError: Boolean(welcome.error) },
-            timestamp: Date.now(),
-          }),
-        }).catch(() => {});
-        // #endregion
         if (!welcome.ok) {
           console.warn("[waitlist] welcome email not sent for duplicate", {
             email,
@@ -87,37 +72,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to join waitlist." }, { status: 500 });
     }
 
-    // #region agent log
-    fetch("http://127.0.0.1:7770/ingest/2e686876-5e56-4de8-8cb2-224c3efe66a1", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "caed9d" },
-      body: JSON.stringify({
-        sessionId: "caed9d",
-        runId: "prod-investigation",
-        hypothesisId: "H2",
-        location: "app/api/waitlist/route.ts:66",
-        message: "waitlist insert succeeded; proceeding to email send",
-        data: { emailLength: email.length, locale },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
     const welcome = await sendWelcomeEmail(email, locale);
-    // #region agent log
-    fetch("http://127.0.0.1:7770/ingest/2e686876-5e56-4de8-8cb2-224c3efe66a1", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "caed9d" },
-      body: JSON.stringify({
-        sessionId: "caed9d",
-        runId: "prod-investigation",
-        hypothesisId: "H3",
-        location: "app/api/waitlist/route.ts:80",
-        message: "welcome email result",
-        data: { ok: welcome.ok, skipped: welcome.skipped ?? false, hasError: Boolean(welcome.error) },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
     if (!welcome.ok) {
       // Do not block waitlist signups on email delivery issues.
       console.warn("[waitlist] welcome email not sent", {

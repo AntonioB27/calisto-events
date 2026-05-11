@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { AppShellAccountMenu } from "@/components/AppShellAccountMenu";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 
@@ -21,12 +22,12 @@ export function getActiveNav(pathname: string): string | null {
   return null;
 }
 
-const NAV_LINKS = [
-  { id: "home", href: "/dashboard", label: "Home" },
-  { id: "settings", href: "/settings", label: "Settings" },
-];
-
 export function AppShell({ userName, userInitial, children }: AppShellProps) {
+  const ui = useAppUi();
+  const NAV_LINKS = [
+    { id: "home", href: "/dashboard", label: ui.shell.navHome },
+    { id: "settings", href: "/settings", label: ui.shell.navSettings },
+  ];
   const pathname = usePathname();
   const active = getActiveNav(pathname);
 
@@ -85,8 +86,8 @@ export function AppShell({ userName, userInitial, children }: AppShellProps) {
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-2.5">
-          <AppBtn as={Link} href="/join" variant="outline" size="sm" className="hidden md:inline-flex">
-            Join
+          <AppBtn as={Link} href="/join" variant="outline" size="sm" className="inline-flex shrink-0">
+            {ui.shell.joinCta}
           </AppBtn>
           <AppBtn
             as={Link}
@@ -94,10 +95,10 @@ export function AppShell({ userName, userInitial, children }: AppShellProps) {
             variant="gold"
             size="sm"
             className="shrink-0"
-            aria-label="New event"
+            aria-label={ui.shell.newEventAria}
           >
-            <span className="md:hidden">+</span>
-            <span className="hidden md:inline">+ New Event</span>
+            <span className="md:hidden">{ui.shell.newEventShort}</span>
+            <span className="hidden md:inline">{ui.shell.newEventLabel}</span>
           </AppBtn>
           <AppShellAccountMenu userName={userName} userInitial={userInitial} />
         </div>
@@ -122,7 +123,7 @@ export function AppShell({ userName, userInitial, children }: AppShellProps) {
               gap: 4,
             }}
           >
-            ← Home
+            {ui.shell.eventBreadcrumb}
           </Link>
           <span style={{ color: "var(--app-border-strong)", margin: "0 10px" }}>/</span>
           <span
@@ -133,7 +134,7 @@ export function AppShell({ userName, userInitial, children }: AppShellProps) {
               color: "var(--app-text)",
             }}
           >
-            Event
+            {ui.shell.eventContext}
           </span>
         </div>
       )}

@@ -3,7 +3,24 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { useAppUi } from "@/components/AppUiProvider";
+
 import { EVENT_ADMIN_TABS, type EventAdminTabId } from "./event-admin-tabs";
+
+function labelForAdminTab(tab: EventAdminTabId, t: ReturnType<typeof useAppUi>): string {
+  switch (tab) {
+    case "overview":
+      return t.eventNav.tabOverview;
+    case "guests":
+      return t.eventNav.tabGuests;
+    case "gallery":
+      return t.eventNav.tabGallery;
+    case "share":
+      return t.eventNav.tabShare;
+    case "settings":
+      return t.eventNav.tabSettings;
+  }
+}
 
 type EventAdminTabsProps = Readonly<{
   eventId: string;
@@ -21,6 +38,7 @@ function TabsInner({
   eventEmoji = "📅",
   showOrganizerOnlyTabs = false,
 }: EventAdminTabsProps) {
+  const ui = useAppUi();
   const tabs = EVENT_ADMIN_TABS.filter((t) => t.visibleTo === "all" || showOrganizerOnlyTabs);
 
   return (
@@ -31,9 +49,9 @@ function TabsInner({
           <span className="calisto-emoji-upright">{eventEmoji}</span>{" "}
           {eventTitle}
         </h1>
-        <p className="event-navbar__sub">Share with guests to let them join.</p>
+        <p className="event-navbar__sub">{ui.eventNav.subtitle}</p>
 
-        <div className="event-navbar__tabs" role="tablist" aria-label="Event sections">
+        <div className="event-navbar__tabs" role="tablist" aria-label={ui.eventNav.tabsAria}>
           {tabs.map((tab) => {
             const on = tab.id === selectedTab;
             return (
@@ -43,7 +61,7 @@ function TabsInner({
                 aria-current={on ? "page" : undefined}
                 className="event-navbar__tab"
               >
-                {tab.label}
+                {labelForAdminTab(tab.id, ui)}
               </Link>
             );
           })}

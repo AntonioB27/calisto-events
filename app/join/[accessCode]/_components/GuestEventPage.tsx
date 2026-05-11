@@ -5,6 +5,7 @@ import { startTransition, useEffect, useState } from "react";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { canGuestUpload, type PlanId } from "@/lib/plan-limits";
 
+import { GuestLeaveEvent } from "./GuestLeaveEvent";
 import { MediaGrid } from "./MediaGrid";
 import { UploadZone } from "./UploadZone";
 import { WelcomeModal } from "./WelcomeModal";
@@ -13,19 +14,36 @@ type GuestEventPageProps = Readonly<{
   accessCode: string;
   eventId: string;
   eventTitle: string;
+  organizerUserId: string;
   planId: PlanId;
   eventDate: string;
 }>;
 
-export function GuestEventPage({ accessCode, eventId, eventTitle, planId, eventDate }: GuestEventPageProps) {
+function guestJoinErrorMessage(raw: string) {
+  const m = raw.toLowerCase();
+  if (m.includes("invalid") || m.includes("not found")) return "That access code isn’t valid for joining right now.";
+  if (m.includes("already")) return "You’re already part of this event.";
+  return raw.trim() || "Something went wrong while joining. Try refreshing the page.";
+}
+
+export function GuestEventPage({
+  accessCode,
+  eventId,
+  eventTitle,
+  organizerUserId,
+  planId,
+  eventDate,
+}: GuestEventPageProps) {
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [membershipReady, setMembershipReady] = useState(false);
+  const [membershipRpcError, setMembershipRpcError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = maybeCreateSupabaseBrowserClient();
     if (!supabase) {
-      setHasSession(false);
+      queueMicrotask(() => setHasSession(false));
       return;
     }
     void supabase.auth.getSession().then((res: unknown) => {
@@ -39,7 +57,10 @@ export function GuestEventPage({ accessCode, eventId, eventTitle, planId, eventD
 
     let cancelled = false;
 
-    startTransition(() => setMembershipReady(false));
+    startTransition(() => {
+      setMembershipReady(false);
+      setMembershipRpcError(null);
+    });
 
     async function ensureMembership() {
       const supabase = maybeCreateSupabaseBrowserClient();
@@ -52,7 +73,9 @@ export function GuestEventPage({ accessCode, eventId, eventTitle, planId, eventD
       });
       if (!cancelled) {
         if (error) {
-          console.error("[guest] join_event_with_code", error.message);
+          setMembershipRpcError(guestJoinErrorMessage(error.message ?? ""));
+        } else {
+          setMembershipRpcError(null);
         }
         setMembershipReady(true);
       }
@@ -63,6 +86,21 @@ export function GuestEventPage({ accessCode, eventId, eventTitle, planId, eventD
       cancelled = true;
     };
   }, [hasSession, accessCode]);
+
+  useEffect(() => {
+    if (!hasSession || !membershipReady) {
+      queueMicrotask(() => setUserId(null));
+      return;
+    }
+    const supabase = maybeCreateSupabaseBrowserClient();
+    if (!supabase) return;
+    void supabase.auth.getUser().then((res: { data: { user: { id: string } | null } | null }) => {
+      setUserId(res.data?.user?.id ?? null);
+    });
+  }, [hasSession, membershipReady]);
+
+  const canLeaveAsGuest =
+    Boolean(membershipReady && hasSession && userId && organizerUserId && userId !== organizerUserId);
 
   const uploadsOpen =
     hasSession &&
@@ -97,6 +135,25 @@ export function GuestEventPage({ accessCode, eventId, eventTitle, planId, eventD
       <div className="mx-auto max-w-3xl">
         <h1 style={{ marginBottom: 4, fontSize: "1.5rem", fontWeight: 800, color: "var(--app-text)" }}>{eventTitle}</h1>
         <p style={{ marginBottom: 32, fontSize: 14, color: "var(--app-muted)" }}>Share your memories from this event.</p>
+
+        {hasSession ? <GuestLeaveEvent eventId={eventId} canShow={canLeaveAsGuest} /> : null}
+
+        {membershipRpcError ? (
+          <div
+            role="alert"
+            style={{
+              marginBottom: 24,
+              borderRadius: 16,
+              border: "1.5px solid color-mix(in srgb, var(--app-danger) 45%, transparent)",
+              background: "color-mix(in srgb, var(--app-danger) 12%, transparent)",
+              padding: "12px 16px",
+              fontSize: 14,
+              color: "var(--app-danger)",
+            }}
+          >
+            {membershipRpcError}
+          </div>
+        ) : null}
 
         {!uploadsOpen && hasSession ? (
           <div

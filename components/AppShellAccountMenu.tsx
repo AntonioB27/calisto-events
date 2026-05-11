@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { applyCalistoTheme, type CalistoTheme, readCalistoTheme } from "@/lib/calisto-theme";
 
@@ -15,6 +16,7 @@ type AppShellAccountMenuProps = Readonly<{
 }>;
 
 export function AppShellAccountMenu({ userName, userInitial }: AppShellAccountMenuProps) {
+  const ui = useAppUi();
   const router = useRouter();
   const pathname = usePathname();
   const menuId = useId();
@@ -87,7 +89,7 @@ export function AppShellAccountMenu({ userName, userInitial }: AppShellAccountMe
         title={userName}
         onClick={() => setOpen((o) => !o)}
       >
-        <span className="sr-only">Account menu</span>
+        <span className="sr-only">{ui.accountMenu.triggerSr}</span>
         <span aria-hidden style={{ pointerEvents: "none" }}>
           {userInitial}
         </span>
@@ -97,7 +99,7 @@ export function AppShellAccountMenu({ userName, userInitial }: AppShellAccountMe
         <div
           id={menuId}
           role="menu"
-          aria-label="Account"
+          aria-label={ui.accountMenu.panelAria}
           className="app-account-menu__panel"
           style={{ position: "absolute", top: "calc(100% + 10px)", right: 0, zIndex: 250 }}
         >
@@ -112,7 +114,7 @@ export function AppShellAccountMenu({ userName, userInitial }: AppShellAccountMe
                 color: "var(--app-muted)",
               }}
             >
-              Signed in
+              {ui.accountMenu.signedInLabel}
             </p>
             <p
               style={{
@@ -139,19 +141,19 @@ export function AppShellAccountMenu({ userName, userInitial }: AppShellAccountMe
             className="app-account-menu__item"
             onClick={() => setOpen(false)}
           >
-            Profile
+            {ui.accountMenu.profile}
           </Link>
           <Link role="menuitem" href="/settings" className="app-account-menu__item" onClick={() => setOpen(false)}>
-            Settings
+            {ui.accountMenu.settings}
           </Link>
           <a role="menuitem" href={HELP_MAIL} className="app-account-menu__item" onClick={() => setOpen(false)}>
-            Help
+            {ui.accountMenu.help}
           </a>
 
           <div className="app-account-menu__separator" role="separator" />
 
-          <div className="app-account-menu__theme" role="group" aria-label="Theme">
-            <span className="app-account-menu__theme-label">Theme</span>
+          <div className="app-account-menu__theme" role="group" aria-label={ui.accountMenu.themeLabel}>
+            <span className="app-account-menu__theme-label">{ui.accountMenu.themeLabel}</span>
             <div className="app-account-menu__theme-toggle">
               {(["light", "dark"] as const).map((t) => (
                 <button
@@ -161,7 +163,7 @@ export function AppShellAccountMenu({ userName, userInitial }: AppShellAccountMe
                   aria-pressed={theme === t}
                   onClick={() => onTheme(t)}
                 >
-                  {t}
+                  {t === "light" ? ui.theme.light : ui.theme.dark}
                 </button>
               ))}
             </div>
@@ -176,7 +178,7 @@ export function AppShellAccountMenu({ userName, userInitial }: AppShellAccountMe
             disabled={signingOut}
             onClick={() => void onSignOut()}
           >
-            {signingOut ? "Signing out…" : "Sign out"}
+            {signingOut ? ui.accountMenu.signingOut : ui.accountMenu.signOut}
           </button>
         </div>
       ) : null}

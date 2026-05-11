@@ -41,7 +41,31 @@ NEXT_PUBLIC_SITE_URL=https://calisto-events.com
 
 **Google sign-in** uses Supabase OAuth and returns through `/auth/callback`. Add `{origin}/auth/callback` (dev and prod) to **Redirect URLs**, and enable **Google** under Authentication → Providers (client ID and secret from [Google Cloud Console](https://console.cloud.google.com/)).
 
+**Guest “continue without account”** uses Supabase **`signInAnonymously()`**. Enable **anonymous sign-ins** under Authentication → Providers so the guest join flow works.
+
 **First-run onboarding:** Public entry points are `/welcome` (organizer vs guest) and `/join` (paste an access code). After sign-in, organizers complete a short screen at `/onboarding/organizer` until `profiles.onboarding_completed_at` is set (requires the `onboarding_completed_at` column on `profiles` from the mobile app migrations).
+
+### API rate limiting (built-in)
+
+`POST /api/waitlist` and `GET /api/join/preview` apply light **per-IP**, **per-server-instance** limits in process memory. Scale-out or rotating instances reset windows independently. For stricter protection, configure your host’s **edge firewall**, **WAF**, or a shared rate-limit store (e.g. Redis) in addition to these defaults.
+
+### Privacy and terms
+
+Public copies live at **`/privacy`** and **`/terms`** (redirect to the default locale path) and at **`/[locale]/privacy`** and **`/[locale]/terms`**. Replace the boilerplate legal text with counsel-reviewed wording before relying on it.
+
+## Paid events (Stripe)
+
+Checkout and webhooks use the server-side Stripe key and a signing secret:
+
+```bash
+STRIPE_SECRET_KEY=sk_live_...   # or sk_test_... in sandbox
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+- **Webhook URL:** `POST {your-origin}/api/stripe/webhook` — listen for **`checkout.session.completed`**.
+- **`NEXT_PUBLIC_APP_URL`:** Canonical site URL with protocol (e.g. `https://calisto-events.com`). Used when building Checkout success/cancel URLs so redirects match your custom domain. If unset on Vercel, the app falls back to `https://${VERCEL_URL}`.
+
+After changing environment variables related to Stripe or Supabase **`NEXT_PUBLIC_*` keys**, redeploy so a fresh build picks them up.
 
 ## Waitlist backend (Supabase)
 

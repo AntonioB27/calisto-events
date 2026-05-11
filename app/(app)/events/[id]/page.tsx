@@ -1,10 +1,14 @@
+import { EventLeaveBanner } from "./_components/EventLeaveBanner";
 import {
   EventAdminTabs,
 } from "./_tabs/EventAdminTabs";
 import { isEventAdminTabId, type EventAdminTabId } from "./_tabs/event-admin-tabs";
 import { displayNavEmoji, splitEventTitleStored } from "@/lib/event-title";
+import { getAppStrings } from "@/lib/app-ui";
+import { getEventAdminAccess } from "@/lib/event-admin-access";
 import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 import { getPublicOrigin } from "@/lib/public-origin";
+import { getUiLocale } from "@/lib/ui-locale";
 import { GalleryTab } from "./_tabs/GalleryTab";
 import { GuestsTab } from "./_tabs/GuestsTab";
 import { OverviewTab } from "./_tabs/OverviewTab";
@@ -38,6 +42,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   const { id } = await params;
   const resolvedSearchParams = (await searchParams) ?? {};
   const publicOrigin = await getPublicOrigin();
+  const uiCopy = getAppStrings(await getUiLocale());
 
   const supabase = await createSupabaseAuthServerClient();
   const {
@@ -50,30 +55,37 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     .eq("id", id)
     .maybeSingle();
 
-  const isPrimaryOrganizer = Boolean(event && user && event.organizer_id === user.id);
+  const access = event
+    ? await getEventAdminAccess(supabase, {
+        eventId: id,
+        userId: user?.id,
+        organizerId: String(event.organizer_id),
+      })
+    : { canAccess: false, isPrimaryOrganizer: false };
 
-  /** Today only the primary organizer may open this admin page — keep explicit for organizer-only tabs. */
-  const isOrganizer = isPrimaryOrganizer;
+  const isPrimaryOrganizer = access.isPrimaryOrganizer;
 
   let selectedTab = resolveEventTab(pickQueryValue(resolvedSearchParams.tab));
   if (selectedTab === "settings" && !isPrimaryOrganizer) {
     selectedTab = "overview";
   }
 
-  if (!event || !isOrganizer) {
+  if (!event || !access.canAccess) {
     return (
       <div style={{ padding: '40px 0' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, fontSize: 28, color: 'var(--app-text)' }}>
-          Event not found
+          {uiCopy.forbidden.title}
         </h1>
         <p style={{ marginTop: 8, fontSize: 14, color: 'var(--app-muted)' }}>
-          You don&apos;t have access to this event.
+          {uiCopy.forbidden.deny}
         </p>
       </div>
     );
   }
 
-  const { emoji: storedEmoji, name: eventName } = splitEventTitleStored(String(event.title ?? "Event"));
+  const { emoji: storedEmoji, name: eventName } = splitEventTitleStored(
+    String(event.title ?? uiCopy.defaults.eventTitle),
+  );
   const navEmoji = displayNavEmoji(storedEmoji);
 
   return (
@@ -86,14 +98,23 @@ export default async function EventPage({ params, searchParams }: EventPageProps
         showOrganizerOnlyTabs={isPrimaryOrganizer}
       />
 
+      {!isPrimaryOrganizer ? (
+        <div style={{ marginTop: 18 }}>
+          <EventLeaveBanner eventId={id} />
+        </div>
+      ) : null}
+
       <div style={{ marginTop: 24 }}>
         {selectedTab === "overview" && (
           <OverviewTab
             eventId={id}
-            eventTitle={eventName}
             eventDate={event.event_date}
             plan={event.plan}
             accessCode={event.access_code}
+            publicOrigin={publicOrigin}
+            adminRoleLabel={
+              isPrimaryOrganizer ? uiCopy.dashboard.roleOrganizer : uiCopy.dashboard.roleCoOrganizer
+            }
           />
         )}
         {selectedTab === "guests" && <GuestsTab eventId={id} />}
@@ -111,6 +132,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             eventId={id}
             storedEmoji={storedEmoji}
             storedName={eventName}
+            fullStoredTitle={String(event.title ?? "")}
             eventDate={event.event_date}
             plan={event.plan}
             accessCode={event.access_code}

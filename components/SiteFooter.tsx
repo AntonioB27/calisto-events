@@ -1,8 +1,8 @@
-import type { LandingCopy } from "@/lib/i18n";
+import type { LandingCopy, Locale } from "@/lib/i18n";
 
-type SiteFooterProps = { copy: LandingCopy };
+type SiteFooterProps = Readonly<{ copy: LandingCopy; locale: Locale }>;
 
-export function SiteFooter({ copy }: SiteFooterProps) {
+export function SiteFooter({ copy, locale }: SiteFooterProps) {
   return (
     <footer
       style={{
@@ -50,8 +50,8 @@ export function SiteFooter({ copy }: SiteFooterProps) {
         {/* Nav links */}
         <div style={{ display: "flex", gap: 24 }}>
           {[
-            { href: "#", label: copy.footerPrivacy },
-            { href: "#", label: copy.footerTerms },
+            { href: `/${locale}/privacy`, label: copy.footerPrivacy },
+            { href: `/${locale}/terms`, label: copy.footerTerms },
             { href: "mailto:info@calisto-events.com", label: "info@calisto-events.com" },
           ].map((link) => (
             <a

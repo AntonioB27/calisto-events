@@ -9,7 +9,9 @@ import {
   clearCreateEventDraftFromStorage,
   writeCreateEventDraftToStorage,
 } from "@/lib/create-event-draft";
+import { isPaidPlanForCheckout } from "@/lib/event-stripe-checkout";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
 
@@ -21,15 +23,16 @@ type Step3PaymentProps = {
   validationError: "NAME_REQUIRED" | null;
 };
 
-const PLAN_PRICE: Record<PlanId, { now: string; was?: string; label: string }> = {
-  free: { now: "0€", label: "Free" },
-  standard: { now: "15€", label: "Standard" },
-  plus: { now: "35€", label: "Plus" },
-  premium: { now: "65€", was: "70€", label: "Premium" },
-  max: { now: "90€", was: "100€", label: "Max" },
+const PLAN_PRICE: Record<PlanId, { now: string; was?: string }> = {
+  free: { now: "0€" },
+  standard: { now: "15€" },
+  plus: { now: "35€" },
+  premium: { now: "65€", was: "70€" },
+  max: { now: "90€", was: "100€" },
 };
 
 export function Step3Payment({ name, emoji, date, planId, validationError }: Step3PaymentProps) {
+  const ui = useAppUi();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,9 +86,9 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
   if (validationError) {
     return (
       <AppCard pad="md" className="mt-8">
-        <p style={{ margin: 0, fontSize: 14, color: "var(--app-danger)" }}>{validationError}</p>
+        <p style={{ margin: 0, fontSize: 14, color: "var(--app-danger)" }}>{ui.validateCreate.nameRequired}</p>
         <AppBtn as={Link} href="/events/new?step=1" variant="outline" size="sm" style={{ marginTop: 16 }}>
-          Go back to details
+          {ui.createStep3.validationBack}
         </AppBtn>
       </AppCard>
     );
@@ -94,7 +97,7 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
   if (!isSessionReady) {
     return (
       <AppCard pad="md" className="mt-8">
-        <p style={{ margin: 0, fontSize: 14, color: "var(--app-muted)" }}>Checking your session…</p>
+        <p style={{ margin: 0, fontSize: 14, color: "var(--app-muted)" }}>{ui.createStep3.checkingSession}</p>
       </AppCard>
     );
   }
@@ -102,16 +105,18 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
   if (requiresAuth) {
     return (
       <AppCard pad="lg" className="mt-8">
-        <h2 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "var(--app-text)" }}>Sign in to create your event</h2>
+        <h2 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "var(--app-text)" }}>
+          {ui.createStep3.needAuthHeading}
+        </h2>
         <p style={{ margin: "0 0 16px", fontSize: 14, color: "var(--app-muted)", lineHeight: 1.55 }}>
-          You need an account to finish creating this event. We&apos;ll keep your draft so you can continue on return.
+          {ui.createStep3.needAuthBody}
         </p>
         <div style={{ display: "flex", gap: 12 }}>
           <AppBtn type="button" variant="primary" onClick={() => goToAuth(loginHref)}>
-            Log in
+            {ui.createStep3.logInBtn}
           </AppBtn>
           <AppBtn type="button" variant="secondary" onClick={() => goToAuth(registerHref)}>
-            Create account
+            {ui.createStep3.createAcctBtn}
           </AppBtn>
         </div>
       </AppCard>
@@ -132,6 +137,25 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
         return;
       }
 
+      if (isPaidPlanForCheckout(planId)) {
+        const response = await fetch("/api/stripe/checkout-create-event", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, emoji, date, planId }),
+          credentials: "same-origin",
+        });
+        const payload = (await response.json().catch(() => null)) as { url?: unknown; error?: unknown } | null;
+        const url = typeof payload?.url === "string" ? payload.url : null;
+
+        if (!response.ok || !url) {
+          const msg = typeof payload?.error === "string" ? payload.error : ui.createStep3.checkoutFailGeneric;
+          throw new Error(msg);
+        }
+
+        window.location.href = url;
+        return;
+      }
+
       const accessCode = crypto.randomUUID().slice(0, 8).toUpperCase();
       const title = emoji?.trim() ? `${emoji.trim()} ${name.trim()}` : name.trim();
       const { data, error: insertError } = await supabase
@@ -147,14 +171,14 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
         .single();
 
       if (insertError || !data?.id) {
-        throw new Error(insertError?.message ?? "Could not create event.");
+        throw new Error(insertError?.message ?? ui.createStep3.createFail);
       }
 
       clearCreateEventDraftFromStorage();
       router.push(`/events/${data.id}?tab=share`);
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not create event.");
+      setError(e instanceof Error ? e.message : ui.createStep3.createFail);
       setBusy(false);
     }
   }
@@ -203,7 +227,7 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
                 color: "var(--app-subtle)",
               }}
             >
-              Step 3 · Payment
+              {ui.createStep3.stepEyebrow}
             </p>
             <h2
               style={{
@@ -216,11 +240,17 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
                 lineHeight: 1.2,
               }}
             >
-              Confirm your event
+              {ui.createStep3.confirmHeading}
             </h2>
             <p style={{ margin: "8px 0 0", fontSize: 13.5, color: "var(--app-muted)", lineHeight: 1.55, maxWidth: 520 }}>
-              You’re about to create <strong style={{ color: "var(--app-text)" }}>{name}</strong> for{" "}
-              <strong style={{ color: "var(--app-text)" }}>{date}</strong>.
+              {ui.createStep3.confirmBodyLeadBeforeName}
+              <strong style={{ color: "var(--app-text)" }}>{name}</strong>
+              {ui.createStep3.confirmBodyBetweenNameDate}
+              <strong style={{ color: "var(--app-text)" }}>{date}</strong>
+              {ui.createStep3.confirmBodyTierWord}
+              <strong style={{ color: "var(--app-text)" }}>{ui.plans[planId]}</strong>
+              {ui.createStep3.confirmBodyPlanSuffix}
+              {isPaidPlanForCheckout(planId) ? ui.createStep3.confirmBodyPaidTail : ` ${ui.createStep3.confirmBodyFreeTier}`}
             </p>
           </div>
 
@@ -235,7 +265,7 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
             }}
           >
             <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--app-subtle)" }}>
-              Selected plan
+              {ui.createStep3.selectedPlanEyebrow}
             </div>
             <div style={{ marginTop: 8, display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
               <div style={{ display: "flex", alignItems: "baseline", gap: 10, minWidth: 0 }}>
@@ -244,11 +274,10 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
                     fontSize: 16,
                     fontWeight: 800,
                     color: "var(--app-text)",
-                    textTransform: "capitalize",
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {PLAN_PRICE[planId].label}
+                  {ui.plans[planId]}
                 </div>
                 {PLAN_PRICE[planId].was ? (
                   <span
@@ -260,7 +289,7 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
                       color: "var(--app-gold)",
                     }}
                   >
-                    Sale
+                    {ui.createStep3.saleBadge}
                   </span>
                 ) : null}
               </div>
@@ -285,7 +314,7 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
               </div>
             </div>
             <div style={{ marginTop: 10, fontSize: 12, color: "var(--app-muted)", lineHeight: 1.5 }}>
-              One-time payment per event.
+              {isPaidPlanForCheckout(planId) ? ui.createStep3.priceNotePaid : ui.createStep3.priceNoteFree}
             </div>
           </div>
         </div>
@@ -309,10 +338,16 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
 
         <div style={{ marginTop: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
           <p style={{ margin: 0, fontSize: 12, color: "var(--app-subtle)" }}>
-            By continuing, you’ll create the event and get your share code instantly.
+            {isPaidPlanForCheckout(planId) ? ui.createStep3.footnotePaid : ui.createStep3.footnoteFree}
           </p>
           <AppBtn type="button" variant="primary" disabled={busy} loading={busy} onClick={() => void onConfirm()}>
-            {busy ? "Creating…" : "Confirm and create event"}
+            {busy
+              ? isPaidPlanForCheckout(planId)
+                ? ui.createStep3.btnOpeningCheckout
+                : ui.createStep3.btnCreating
+              : isPaidPlanForCheckout(planId)
+                ? ui.createStep3.btnStripe
+                : ui.createStep3.btnConfirmFree}
           </AppBtn>
         </div>
       </div>

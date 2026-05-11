@@ -1,9 +1,14 @@
 "use client";
 
+import { UploadZone } from "@/app/join/[accessCode]/_components/UploadZone";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { interpolate } from "@/lib/app-ui";
+import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
+import { ConfirmDialog } from "@/components/app-ui/ConfirmDialog";
+import { canGuestUpload, normalizePlanId, type PlanId } from "@/lib/plan-limits";
 
 type MediaRow = {
   id: string;
@@ -42,9 +47,13 @@ function downloadFilename(item: Pick<MediaRow, "id" | "storage_path" | "mime_typ
   return name.startsWith(".") ? `photo-${item.id}${name}` : name;
 }
 
-async function downloadFromSignedUrl(signedUrl: string, filename: string) {
+async function downloadFromSignedUrl(
+  signedUrl: string,
+  filename: string,
+  badStatusMessage: (status: number) => string,
+) {
   const res = await fetch(signedUrl);
-  if (!res.ok) throw new Error(`Download failed (${res.status}).`);
+  if (!res.ok) throw new Error(badStatusMessage(res.status));
   const blob = await res.blob();
   const objectUrl = URL.createObjectURL(blob);
   try {
@@ -60,13 +69,7 @@ async function downloadFromSignedUrl(signedUrl: string, filename: string) {
   }
 }
 
-const MEDIA_FILTER_OPTS = [
-  { id: "all" as const, label: "All" },
-  { id: "photos" as const, label: "Photos" },
-  { id: "videos" as const, label: "Videos" },
-];
-
-type MediaFilterId = (typeof MEDIA_FILTER_OPTS)[number]["id"];
+type MediaFilterId = "all" | "photos" | "videos";
 
 function mediaFilterSlideIndex(f: MediaFilterId) {
   if (f === "all") return 0;
@@ -91,6 +94,7 @@ function buildUploaderLabelMap(
   organizerId: string | null,
   memberships: MembershipLabellingRow[] | null | undefined,
   profiles: ProfileLabellingRow[] | null | undefined,
+  defaults: Readonly<{ organizer: string; guest: string }>,
 ): Map<string, string> {
   const atEvent = new Map<string, string | null>();
   for (const m of memberships ?? []) {
@@ -106,13 +110,15 @@ function buildUploaderLabelMap(
     const label =
       atEvent.get(id)?.trim() ||
       profById.get(id)?.trim() ||
-      (organizerId !== null && id === organizerId ? "Organizer" : "Guest");
+      (organizerId !== null && id === organizerId ? defaults.organizer : defaults.guest);
     out.set(id, label);
   }
   return out;
 }
 
 export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
+  const ui = useAppUi();
+  const [eventUpload, setEventUpload] = useState<{ planId: PlanId; eventDate: string } | null>(null);
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -121,43 +127,50 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
   const [hasMore, setHasMore] = useState(false);
   const [lightbox, setLightbox] = useState<MediaItem | null>(null);
   const [lightboxDownloading, setLightboxDownloading] = useState(false);
+  const [lightboxDownloadError, setLightboxDownloadError] = useState<string | null>(null);
   const [mediaFilter, setMediaFilter] = useState<MediaFilterId>("all");
+  const [pendingDelete, setPendingDelete] = useState<MediaItem | null>(null);
 
   const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
 
-  useEffect(() => {
-    if (!lightbox) setLightboxDownloading(false);
-  }, [lightbox]);
+  const uploadsOpen = useMemo(
+    () =>
+      eventUpload
+        ? canGuestUpload({
+            planId: eventUpload.planId,
+            eventDate: eventUpload.eventDate,
+            now: new Date().toISOString(),
+          })
+        : false,
+    [eventUpload],
+  );
 
-  if (!supabase) {
-    return (
-      <div
-        style={{
-          marginTop: 12,
-          borderRadius: "var(--app-radius-lg)",
-          border: "1.5px solid color-mix(in srgb, var(--app-danger) 35%, var(--app-border))",
-          background: "color-mix(in srgb, var(--app-danger) 8%, var(--app-surface))",
-          padding: 16,
-        }}
-      >
-        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--app-danger)" }}>
-          Supabase not configured
-        </div>
-        <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--app-muted)", lineHeight: 1.55 }}>
-          Set <strong>NEXT_PUBLIC_SUPABASE_URL</strong> and <strong>NEXT_PUBLIC_SUPABASE_ANON_KEY</strong> in <code>.env.local</code> to load the gallery.
-        </p>
-      </div>
-    );
-  }
+  const mediaFilterOpts = useMemo(
+    () =>
+      [
+        { id: "all" as const, label: ui.gallery.filterAll },
+        { id: "photos" as const, label: ui.gallery.filterPhotos },
+        { id: "videos" as const, label: ui.gallery.filterVideos },
+      ] as const,
+    [ui.gallery.filterAll, ui.gallery.filterPhotos, ui.gallery.filterVideos],
+  );
+
+  useEffect(() => {
+    if (!lightbox) {
+      setLightboxDownloading(false);
+      setLightboxDownloadError(null);
+    }
+  }, [lightbox]);
 
   const fetchPage = useCallback(
     async (pageIndex: number, replace: boolean) => {
+      if (!supabase) return;
       setError(null);
       const from = pageIndex * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
 
       const [{ data: evRow }, { data: rows, error: fetchErr }] = await Promise.all([
-        supabase.from("events").select("organizer_id").eq("id", eventId).maybeSingle(),
+        supabase.from("events").select("organizer_id, plan, event_date").eq("id", eventId).maybeSingle(),
         supabase
           .from("media_items")
           .select("id, storage_path, mime_type, created_at, uploaded_by")
@@ -167,16 +180,18 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
       ]);
 
       if (fetchErr) {
-        setError("Failed to load gallery.");
+        setError(ui.gallery.loadFailed);
         setLoading(false);
         return;
       }
 
-      const organizerId =
-        evRow &&
-        typeof (evRow as { organizer_id?: unknown }).organizer_id === "string"
-          ? (evRow as { organizer_id: string }).organizer_id
-          : null;
+      const ev = evRow as { organizer_id?: unknown; plan?: unknown; event_date?: unknown } | null;
+      const organizerId = ev && typeof ev.organizer_id === "string" ? ev.organizer_id : null;
+      if (ev && typeof ev.plan === "string" && typeof ev.event_date === "string" && ev.event_date) {
+        setEventUpload({ planId: normalizePlanId(ev.plan), eventDate: ev.event_date });
+      } else {
+        setEventUpload(null);
+      }
 
       const typed = (rows ?? []) as MediaRow[];
       const uploaderIds = Array.from(new Set(typed.map((r) => r.uploaded_by).filter(Boolean)));
@@ -197,6 +212,7 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
           organizerId,
           memErr ? null : (mems as MembershipLabellingRow[] | null),
           profErr ? null : (profs as ProfileLabellingRow[] | null),
+          { organizer: ui.guests.organizerLabelFallback, guest: ui.guests.guestLabelFallback },
         );
       }
 
@@ -209,27 +225,32 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
       const mapped: MediaItem[] = typed.map((r) => ({
         ...r,
         signedUrl: urlMap[r.storage_path],
-        uploaderLabel: labelMap.get(r.uploaded_by) ?? (organizerId !== null && r.uploaded_by === organizerId ? "Organizer" : "Guest"),
+        uploaderLabel:
+          labelMap.get(r.uploaded_by) ??
+          (organizerId !== null && r.uploaded_by === organizerId
+            ? ui.guests.organizerLabelFallback
+            : ui.guests.guestLabelFallback),
       }));
 
       setItems((prev) => (replace ? mapped : [...prev, ...mapped]));
       setHasMore(typed.length === PAGE_SIZE);
       setLoading(false);
     },
-    [eventId, supabase],
+    [eventId, supabase, ui.gallery.loadFailed, ui.guests.guestLabelFallback, ui.guests.organizerLabelFallback],
   );
 
   useEffect(() => {
+    if (!supabase) return;
     setLoading(true);
     setPage(0);
     setItems([]);
     void fetchPage(0, true);
-  }, [fetchPage]);
+  }, [fetchPage, supabase]);
 
-  async function deleteItem(item: MediaItem) {
-    if (busyId) return;
-    const ok = window.confirm("Delete this upload? This cannot be undone.");
-    if (!ok) return;
+  async function confirmDeletePending() {
+    if (!supabase) return;
+    const item = pendingDelete;
+    if (!item || busyId) return;
 
     setBusyId(item.id);
     setError(null);
@@ -246,8 +267,10 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
       if (storageError) throw storageError;
 
       setItems((prev) => prev.filter((x) => x.id !== item.id));
+      if (lightbox?.id === item.id) setLightbox(null);
+      setPendingDelete(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not delete media.");
+      setError(e instanceof Error ? e.message : ui.gallery.deleteMediaFail);
     } finally {
       setBusyId(null);
     }
@@ -265,24 +288,59 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
     return !isVideoMime(item.mime_type);
   });
 
+  if (!supabase) {
+    return (
+      <div
+        style={{
+          marginTop: 12,
+          borderRadius: "var(--app-radius-lg)",
+          border: "1.5px solid color-mix(in srgb, var(--app-danger) 35%, var(--app-border))",
+          background: "color-mix(in srgb, var(--app-danger) 8%, var(--app-surface))",
+          padding: 16,
+        }}
+      >
+        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--app-danger)" }}>
+          {ui.supabase.missingTitle}
+        </div>
+        <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--app-muted)", lineHeight: 1.55 }}>
+          {ui.supabase.galleryBody}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <section>
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title={ui.gallery.deleteTitle}
+        message={ui.gallery.deleteBody}
+        confirmLabel={ui.common.delete}
+        cancelLabel={ui.common.cancel}
+        variant="danger"
+        busy={Boolean(pendingDelete && busyId === pendingDelete.id)}
+        onConfirm={() => void confirmDeletePending()}
+        onCancel={() => {
+          if (busyId) return;
+          setPendingDelete(null);
+        }}
+      />
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <div style={{ width: 32, height: 3, background: 'var(--app-gold)', borderRadius: 2, marginBottom: 10 }} />
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, fontSize: 42, color: 'var(--app-text)' }}>
-              Gallery
+              {ui.gallery.title}
             </h2>
-            <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 15, color: 'var(--app-muted)', marginTop: 4 }}>
-              Browse uploaded photos &amp; videos
+            <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 15, color: "var(--app-muted)", marginTop: 4 }}>
+              {ui.gallery.subtitle}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
             <div
               role="tablist"
-              aria-label="Filter by media type"
+              aria-label={ui.gallery.filterAria}
               className="flex shrink-0 rounded-[14px] p-[3px] shadow-[0_10px_28px_-14px_rgba(0,0,0,0.18)]"
               style={{
                 background:
@@ -309,7 +367,7 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
                       "0 1px 0 color-mix(in srgb, #fff 55%, transparent) inset, 0 2px 14px color-mix(in srgb, var(--app-gold) 34%, transparent)",
                   }}
                 />
-                {MEDIA_FILTER_OPTS.map((opt) => {
+                {mediaFilterOpts.map((opt) => {
                   const on = mediaFilter === opt.id;
                   return (
                     <button
@@ -337,21 +395,62 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
               </div>
             </div>
             <AppBtn variant="ghost" size="sm" type="button" onClick={() => void fetchPage(0, true)}>
-              Refresh
+              {ui.common.refresh}
             </AppBtn>
           </div>
         </div>
       </div>
 
+      <div style={{ marginBottom: 28 }}>
+        <p
+          style={{
+            margin: "0 0 12px",
+            fontSize: 12,
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.2em",
+            color: "var(--app-muted)",
+          }}
+        >
+          {ui.guestJoin.sectionUpload}
+        </p>
+        {!uploadsOpen ? (
+          <p
+            style={{
+              margin: "0 0 14px",
+              padding: "12px 14px",
+              borderRadius: 12,
+              fontSize: 13,
+              color: "var(--app-warn)",
+              background: "color-mix(in srgb, var(--app-warn) 12%, transparent)",
+              border: "1.5px solid color-mix(in srgb, var(--app-warn) 45%, transparent)",
+              lineHeight: 1.5,
+            }}
+          >
+            {ui.guestJoin.uploadClosedBanner}
+          </p>
+        ) : null}
+        <UploadZone
+          eventId={eventId}
+          disabled={!uploadsOpen}
+          onUploaded={() => {
+            setPage(0);
+            void fetchPage(0, true);
+          }}
+        />
+      </div>
+
       {error ? (
         <p style={{ marginBottom: 16, fontSize: 13, color: "var(--app-danger)" }}>{error}</p>
       ) : null}
-      {loading && <p style={{ color: 'var(--app-muted)', fontSize: 14 }}>Loading gallery…</p>}
+      {loading && (
+        <p style={{ color: "var(--app-muted)", fontSize: 14 }}>{ui.gallery.loading}</p>
+      )}
       {!loading && filtered.length === 0 && (
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <span style={{ fontSize: 48, opacity: 0.4 }}>📷</span>
           <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 15, color: 'var(--app-muted)', marginTop: 12 }}>
-            No uploads yet.
+            {ui.gallery.empty}
           </p>
         </div>
       )}
@@ -405,14 +504,17 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
                   <button
                     type="button"
                     disabled={busyId !== null}
-                    onClick={e => { e.stopPropagation(); void deleteItem(item); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPendingDelete(item);
+                    }}
                     className="shrink-0 rounded-full border-0 bg-black/50 px-2 py-1 text-[10px] font-semibold text-white md:px-2.5 md:text-[11px]"
                     style={{
                       cursor: busy ? 'not-allowed' : 'pointer',
                       opacity: busy ? 0.5 : 1,
                     }}
                   >
-                    {busy ? '…' : 'Delete'}
+                    {busy ? ui.gallery.deleteBusy : ui.common.delete}
                   </button>
                 </div>
               </div>
@@ -423,7 +525,7 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
 
       {hasMore ? (
         <AppBtn variant="outline" type="button" className="mt-4 w-full" onClick={loadMore}>
-          Load more
+          {ui.gallery.loadMore}
         </AppBtn>
       ) : null}
 
@@ -433,7 +535,7 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
           onClick={() => setLightbox(null)}
           role="dialog"
           aria-modal="true"
-          aria-label="Photo lightbox"
+          aria-label={ui.gallery.lightboxAria}
           style={{
             position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -452,18 +554,32 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
                 left: 16,
                 right: 16,
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-                flexWrap: 'wrap',
+                flexDirection: 'column',
+                gap: 10,
               }}
             >
+              {lightboxDownloadError ? (
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: '#fde8e8',
+                    background: 'rgba(180,30,40,0.75)',
+                    padding: '8px 12px',
+                    borderRadius: 12,
+                  }}
+                  role="alert"
+                >
+                  {lightboxDownloadError}
+                </div>
+              ) : null}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
               <div style={{ color: '#fff', fontSize: 14, fontWeight: 600, background: 'rgba(0,0,0,0.5)', padding: '6px 14px', borderRadius: 20, minWidth: 0 }}>
                 📷 {lightbox.uploaderLabel}
               </div>
               <button
                 type="button"
-                aria-label="Download this photo"
+                aria-label={ui.gallery.downloadPhotoAria}
                 disabled={lightboxDownloading || !lightbox.signedUrl}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -471,10 +587,13 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
                   if (!url || lightboxDownloading) return;
                   void (async () => {
                     setLightboxDownloading(true);
+                    setLightboxDownloadError(null);
                     try {
-                      await downloadFromSignedUrl(url, downloadFilename(lightbox));
+                      await downloadFromSignedUrl(url, downloadFilename(lightbox), (status) =>
+                        interpolate(ui.gallery.downloadFailedWithStatus, { status }),
+                      );
                     } catch (err) {
-                      window.alert(err instanceof Error ? err.message : "Could not download this photo.");
+                      setLightboxDownloadError(err instanceof Error ? err.message : ui.gallery.downloadPhotoFail);
                     } finally {
                       setLightboxDownloading(false);
                     }
@@ -498,12 +617,13 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
                     '0 1px 0 color-mix(in srgb, #fff 55%, transparent) inset, 0 2px 14px color-mix(in srgb, var(--app-gold) 38%, transparent)',
                 }}
               >
-                {lightboxDownloading ? "Downloading…" : "Download"}
+                {lightboxDownloading ? ui.gallery.downloadWorking : ui.gallery.downloadBtn}
               </button>
+              </div>
             </div>
             <button
               type="button"
-              aria-label="Close lightbox"
+              aria-label={ui.gallery.closeLightboxAria}
               onClick={() => setLightbox(null)}
               style={{
                 position: 'absolute', top: -14, right: -14,

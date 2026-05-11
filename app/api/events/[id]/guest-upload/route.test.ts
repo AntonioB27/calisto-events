@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { maxGuestUploadBytesForMime } from "@/lib/guest-upload-limits";
+
 import { __test, POST } from "./route";
 
 vi.mock("@/lib/supabase-auth-server", () => ({
@@ -36,35 +38,45 @@ const insertMediaItemMock = vi.fn<
   }) => Promise<{ id: string; storage_path: string }>
 >();
 
+const maxBytesMock = vi.fn<(mime: string) => number>();
+
 beforeEach(() => {
   getEventUploadContextMock.mockReset();
   countMediaForQuotaMock.mockReset();
   insertMediaItemMock.mockReset();
+  maxBytesMock.mockReset();
+  maxBytesMock.mockImplementation((mime: string) => maxGuestUploadBytesForMime(mime));
   __test.getEventUploadContext = getEventUploadContextMock;
   __test.countMediaForQuota = countMediaForQuotaMock;
   __test.insertMediaItem = insertMediaItemMock;
+  __test.maxGuestUploadBytesForMime = maxBytesMock;
 });
 
 describe("guest-upload route", () => {
   it("returns 403 with QUOTA_REACHED when quota exceeded", async () => {
-    getEventUploadContextMock.mockResolvedValue({
-      planId: "free",
-      eventDate: "2026-05-06T00:00:00.000Z",
-    });
-    countMediaForQuotaMock.mockResolvedValue(20);
+    vi.useFakeTimers({ now: new Date("2026-05-07T12:00:00.000Z") });
+    try {
+      getEventUploadContextMock.mockResolvedValue({
+        planId: "free",
+        eventDate: "2026-05-06T00:00:00.000Z",
+      });
+      countMediaForQuotaMock.mockResolvedValue(20);
 
-    const form = new FormData();
-    form.append("file", new File(["hello"], "photo.jpg", { type: "image/jpeg" }));
-    const request = new Request("http://localhost/api/events/evt_1/guest-upload", {
-      method: "POST",
-      body: form,
-    });
+      const form = new FormData();
+      form.append("file", new File(["hello"], "photo.jpg", { type: "image/jpeg" }));
+      const request = new Request("http://localhost/api/events/evt_1/guest-upload", {
+        method: "POST",
+        body: form,
+      });
 
-    const response = await POST(request, { params: Promise.resolve({ id: "evt_1" }) });
+      const response = await POST(request, { params: Promise.resolve({ id: "evt_1" }) });
 
-    expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toEqual({ error: "QUOTA_REACHED" });
-    expect(insertMediaItemMock).not.toHaveBeenCalled();
+      expect(response.status).toBe(403);
+      await expect(response.json()).resolves.toEqual({ error: "QUOTA_REACHED" });
+      expect(insertMediaItemMock).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("returns 200 when within quota and upload window", async () => {
@@ -87,6 +99,28 @@ describe("guest-upload route", () => {
     expect(response.status).toBe(201);
     await expect(response.json()).resolves.toEqual({ id: "m1", file_path: "events/evt_2/x.jpg" });
     expect(insertMediaItemMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns 413 FILE_TOO_LARGE when file exceeds cap", async () => {
+    maxBytesMock.mockReturnValueOnce(4);
+    getEventUploadContextMock.mockResolvedValue({
+      planId: "standard",
+      eventDate: "2026-05-06T00:00:00.000Z",
+    });
+    countMediaForQuotaMock.mockResolvedValue(0);
+
+    const form = new FormData();
+    form.append("file", new File(["hello"], "big.jpg", { type: "image/jpeg" }));
+    const request = new Request("http://localhost/api/events/evt_3/guest-upload", {
+      method: "POST",
+      body: form,
+    });
+
+    const response = await POST(request, { params: Promise.resolve({ id: "evt_3" }) });
+
+    expect(response.status).toBe(413);
+    await expect(response.json()).resolves.toEqual({ error: "FILE_TOO_LARGE" });
+    expect(insertMediaItemMock).not.toHaveBeenCalled();
   });
 });
 

@@ -3,37 +3,41 @@
 import Link from "next/link";
 import { startTransition, useEffect, useMemo, useState } from "react";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { AppBadge } from "@/components/app-ui/AppBadge";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
 import { AppPageHeader } from "@/components/app-ui/AppPageHeader";
+import { displayNavEmoji, splitEventTitleStored } from "@/lib/event-title";
+import type { DashboardEventRow } from "@/lib/dashboard-events";
+import { formatUiDateShort } from "@/lib/format-ui-datetime";
+import { interpolate } from "@/lib/app-ui";
 import { loadSavedOrder, mergeWithSavedOrder } from "@/lib/my-events-order";
 import { loadHiddenEventIds } from "@/lib/my-events-visibility";
-
-type EventRow = {
-  id: string;
-  title: string;
-  event_date: string;
-  plan: string;
-  access_code: string;
-};
 
 type Props = Readonly<{
   organizerId: string;
   userName: string;
-  events: EventRow[];
+  events: DashboardEventRow[];
 }>;
 
-function formatDate(iso: string) {
-  try {
-    return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-  } catch {
-    return iso;
-  }
-}
-
-function EventCard({ event, onOpen }: { event: EventRow; onOpen: (e: EventRow) => void }) {
-  const emoji = event.plan === "premium" || event.plan === "max" ? "💍" : "📅";
+function EventCard({
+  event,
+  onOpen,
+  locale,
+  defaultEventTitle,
+  roleOrganizer,
+  roleCo,
+}: Readonly<{
+  event: DashboardEventRow;
+  onOpen: (e: DashboardEventRow) => void;
+  locale: ReturnType<typeof useAppUi>["locale"];
+  defaultEventTitle: string;
+  roleOrganizer: string;
+  roleCo: string;
+}>) {
+  const { emoji: storedEmoji, name: displayTitle } = splitEventTitleStored(String(event.title ?? defaultEventTitle));
+  const navEmoji = displayNavEmoji(storedEmoji);
 
   return (
     <AppCard hover pad="md" onClick={() => onOpen(event)}>
@@ -52,7 +56,7 @@ function EventCard({ event, onOpen }: { event: EventRow; onOpen: (e: EventRow) =
             fontSize: 24,
           }}
         >
-          {emoji}
+          {navEmoji}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
@@ -67,10 +71,11 @@ function EventCard({ event, onOpen }: { event: EventRow; onOpen: (e: EventRow) =
               textOverflow: "ellipsis",
             }}
           >
-            {event.title}
+            {displayTitle}
           </div>
           <div style={{ fontSize: 12, color: "var(--app-muted)", marginTop: 3 }}>
-            {formatDate(event.event_date)} · Organizer
+            {formatUiDateShort(event.event_date, locale)} ·{" "}
+            {event.membershipRole === "organizer" ? roleOrganizer : roleCo}
           </div>
         </div>
         <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 8 }}>
@@ -85,6 +90,7 @@ function EventCard({ event, onOpen }: { event: EventRow; onOpen: (e: EventRow) =
 }
 
 export function DashboardClient({ organizerId, userName, events }: Props) {
+  const ui = useAppUi();
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [orderIds, setOrderIds] = useState<string[]>([]);
 
@@ -96,23 +102,23 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
   const orderedEvents = useMemo(() => mergeWithSavedOrder(events, orderIds), [events, orderIds]);
   const visibleEvents = useMemo(() => orderedEvents.filter((e) => !hiddenIds.has(e.id)), [orderedEvents, hiddenIds]);
 
-  function handleOpen(event: EventRow) {
+  function handleOpen(event: DashboardEventRow) {
     window.location.href = `/events/${event.id}`;
   }
 
   return (
     <div style={{ padding: "40px 0 60px" }}>
       <AppPageHeader
-        eyebrow="Dashboard"
-        title={`Hello, ${userName}`}
-        description="Your shared albums, all in one place."
+        eyebrow={ui.dashboard.eyebrow}
+        title={interpolate(ui.dashboard.helloTemplate, { name: userName })}
+        description={ui.dashboard.subtitle}
         actions={
           <>
             <AppBtn as={Link} href="/join" variant="outline" size="sm">
-              Join with code
+              {ui.dashboard.joinWithCode}
             </AppBtn>
             <AppBtn as={Link} href="/events/new" variant="primary" size="sm">
-              + Create event
+              {ui.dashboard.createEvent}
             </AppBtn>
           </>
         }
@@ -131,12 +137,20 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
                 color: "var(--app-muted)",
               }}
             >
-              My Events
+              {ui.dashboard.yourEvents}
             </span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {visibleEvents.map((e) => (
-              <EventCard key={e.id} event={e} onOpen={handleOpen} />
+              <EventCard
+                key={e.id}
+                event={e}
+                onOpen={handleOpen}
+                locale={ui.locale}
+                defaultEventTitle={ui.defaults.eventTitle}
+                roleOrganizer={ui.dashboard.roleOrganizer}
+                roleCo={ui.dashboard.roleCoOrganizer}
+              />
             ))}
           </div>
         </div>
@@ -161,9 +175,7 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
               margin: 0,
             }}
           >
-            {visibleEvents.length === 0
-              ? "Create a new event or join an existing one with a code from your organizer."
-              : "Create another event or join one with a code from your organizer."}
+            {visibleEvents.length === 0 ? ui.dashboard.emptyHint : ui.dashboard.moreHint}
           </p>
         </div>
       </AppCard>

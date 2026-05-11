@@ -4,9 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { GoldBar } from "@/components/app-ui/GoldBar";
 import { applyCalistoTheme, readCalistoTheme, type CalistoTheme } from "@/lib/calisto-theme";
+import type { Locale } from "@/lib/i18n";
+import { setUiLocaleCookieClient } from "@/lib/set-ui-locale-cookie-client";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type SettingsClientProps = Readonly<{
@@ -14,6 +17,7 @@ type SettingsClientProps = Readonly<{
 }>;
 
 export function SettingsClient({ email }: SettingsClientProps) {
+  const ui = useAppUi();
   const router = useRouter();
   const [theme, setTheme] = useState<CalistoTheme>("dark");
   const [signingOut, setSigningOut] = useState(false);
@@ -45,49 +49,95 @@ export function SettingsClient({ email }: SettingsClientProps) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <GoldBar vertical />
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--app-muted)' }}>
-            Profile
+            {ui.settingsClient.profileEyebrow}
           </span>
         </div>
-        <p style={{ fontSize: 14, color: 'var(--app-muted)' }}>
-          Signed in as <span style={{ fontWeight: 600, color: 'var(--app-text)' }}>{email || "—"}</span>
+        <p style={{ fontSize: 14, color: "var(--app-muted)" }}>
+          {ui.settingsClient.signedInAs}
+          <span style={{ fontWeight: 600, color: "var(--app-text)" }}>{email || ui.settingsClient.anon}</span>
         </p>
       </section>
 
       <section>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
           <GoldBar vertical />
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--app-muted)' }}>
-            Appearance
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: "var(--app-muted)",
+            }}
+          >
+            {ui.settingsClient.languageEyebrow}
           </span>
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {(["dark", "light"] as const).map((t) => (
+          {(
+            [
+              ["en", ui.settingsClient.langEnglish],
+              ["hr", ui.settingsClient.langHrvatski],
+              ["de", ui.settingsClient.langDeutsch],
+            ] as const
+          ).map(([localeKey, label]) => (
             <AppBtn
-              key={t}
+              key={localeKey}
               type="button"
-              variant={theme === t ? "gold" : "outline"}
+              variant={ui.locale === localeKey ? "gold" : "outline"}
               size="sm"
-              onClick={() => applyTheme(t)}
-              style={{ textTransform: "capitalize" }}
+              onClick={() => {
+                setUiLocaleCookieClient(localeKey as Locale);
+                router.refresh();
+              }}
             >
-              {t}
+              {label}
             </AppBtn>
           ))}
         </div>
-        <p style={{ marginTop: 8, fontSize: 11, color: 'var(--app-muted)' }}>
-          Applies to pages that support light and dark.
+      </section>
+
+      <section>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+          <GoldBar vertical />
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: "var(--app-muted)",
+            }}
+          >
+            {ui.settingsClient.appearanceEyebrow}
+          </span>
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {(
+            [
+              ["dark", ui.settingsClient.themeDarkLabel],
+              ["light", ui.settingsClient.themeLightLabel],
+            ] as const
+          ).map(([t, label]) => (
+            <AppBtn key={t} type="button" variant={theme === t ? "gold" : "outline"} size="sm" onClick={() => applyTheme(t)}>
+              {label}
+            </AppBtn>
+          ))}
+        </div>
+        <p style={{ marginTop: 8, fontSize: 11, color: "var(--app-muted)" }}>
+          {ui.settingsClient.appliesNote}
         </p>
       </section>
 
       <section>
         <AppBtn variant="danger" type="button" disabled={signingOut} loading={signingOut} onClick={() => void onSignOut()}>
-          Sign out
+          {ui.settingsClient.signOut}
         </AppBtn>
       </section>
 
       <p style={{ fontSize: 13, color: "var(--app-muted)" }}>
         <AppBtn variant="ghost" size="sm" href="/dashboard" as={Link}>
-          ← Back to events
+          {ui.settingsClient.backEvents}
         </AppBtn>
       </p>
     </div>

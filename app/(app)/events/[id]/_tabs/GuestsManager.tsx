@@ -2,8 +2,11 @@
 
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { startTransition, useCallback, useEffect, useMemo, useState } from "react";
+import { interpolate } from "@/lib/app-ui";
+import { useAppUi } from "@/components/AppUiProvider";
 import { GoldBar } from "@/components/app-ui/GoldBar";
 import { AppBtn } from "@/components/app-ui/AppBtn";
+import { ConfirmDialog } from "@/components/app-ui/ConfirmDialog";
 
 type MembershipRole = "organizer" | "guest" | "co_organizer" | string;
 
@@ -34,6 +37,7 @@ function shortId(id: string) {
 }
 
 export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
+  const ui = useAppUi();
   const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,32 +47,10 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
   const [organizerId, setOrganizerId] = useState<string | null>(null);
   const [myUserId, setMyUserId] = useState<string | null>(null);
   const [mediaByUser, setMediaByUser] = useState<Map<string, { photos: number; videos: number }>>(() => new Map());
-
-  if (!supabase) {
-    return (
-      <div style={{ padding: "24px 0" }}>
-        <div
-          style={{
-            borderRadius: "var(--app-radius-lg)",
-            border: "1.5px solid color-mix(in srgb, var(--app-danger) 35%, var(--app-border))",
-            background: "color-mix(in srgb, var(--app-danger) 8%, var(--app-surface))",
-            padding: 16,
-          }}
-        >
-          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--app-danger)" }}>
-            Supabase not configured
-          </div>
-          <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--app-muted)", lineHeight: 1.55 }}>
-            Set <strong>NEXT_PUBLIC_SUPABASE_URL</strong> and <strong>NEXT_PUBLIC_SUPABASE_ANON_KEY</strong> in <code>.env.local</code> to use event admin features.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const isPrimaryOrganizer = Boolean(myUserId && organizerId && myUserId === organizerId);
+  const [pendingRemoveUserId, setPendingRemoveUserId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    if (!supabase) return;
     setLoading(true);
     setError(null);
     try {
@@ -120,28 +102,52 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
       }
       setMediaByUser(map);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load guests.");
+      setError(e instanceof Error ? e.message : ui.guests.loadFailed);
     } finally {
       setLoading(false);
     }
-  }, [eventId, supabase]);
+  }, [eventId, supabase, ui.guests.loadFailed]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  function mapRpcErrorMessage(raw: string) {
-    if (raw.includes("CANNOT_REMOVE_PRIMARY_ORGANIZER")) return "You can't remove the primary organizer.";
-    if (raw.includes("ONLY_PRIMARY_ORGANIZER")) return "Only the primary organizer can change roles.";
-    if (raw.includes("NOT_ALLOWED")) return "Not allowed.";
-    if (raw.includes("MEMBER_NOT_FOUND")) return "Member not found.";
-    return raw || "Action failed.";
+  const isPrimaryOrganizer = Boolean(myUserId && organizerId && myUserId === organizerId);
+
+  if (!supabase) {
+    return (
+      <div style={{ padding: "24px 0" }}>
+        <div
+          style={{
+            borderRadius: "var(--app-radius-lg)",
+            border: "1.5px solid color-mix(in srgb, var(--app-danger) 35%, var(--app-border))",
+            background: "color-mix(in srgb, var(--app-danger) 8%, var(--app-surface))",
+            padding: 16,
+          }}
+        >
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--app-danger)" }}>
+            {ui.supabase.missingTitle}
+          </div>
+          <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--app-muted)", lineHeight: 1.55 }}>
+            {ui.guests.configureSupabase}
+          </p>
+        </div>
+      </div>
+    );
   }
 
-  async function removeMember(targetUserId: string) {
-    if (busyUserId) return;
-    const ok = window.confirm("Remove this member from the event?");
-    if (!ok) return;
+  function mapRpcErrorMessage(raw: string) {
+    if (raw.includes("CANNOT_REMOVE_PRIMARY_ORGANIZER")) return ui.guests.cannotRemoveOrganizer;
+    if (raw.includes("ONLY_PRIMARY_ORGANIZER")) return ui.guests.rolesOnlyPrimary;
+    if (raw.includes("NOT_ALLOWED")) return ui.guests.notAllowed;
+    if (raw.includes("MEMBER_NOT_FOUND")) return ui.guests.memberNotFound;
+    return raw || ui.guests.actionFailed;
+  }
+
+  async function confirmRemovePending() {
+    if (!supabase) return;
+    const targetUserId = pendingRemoveUserId;
+    if (!targetUserId || busyUserId) return;
 
     setBusyUserId(targetUserId);
     setError(null);
@@ -152,8 +158,9 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
       });
       if (rpcErr) throw new Error(mapRpcErrorMessage(rpcErr.message));
       startTransition(() => setMembers((prev) => prev.filter((m) => m.user_id !== targetUserId)));
+      setPendingRemoveUserId(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not remove member.");
+      setError(e instanceof Error ? e.message : ui.guests.removeMemberFail);
     } finally {
       setBusyUserId(null);
     }
@@ -177,7 +184,7 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
         ),
       );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not update role.");
+      setError(e instanceof Error ? e.message : ui.guests.updateRoleFail);
     } finally {
       setBusyUserId(null);
     }
@@ -185,19 +192,35 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
 
   return (
     <section>
+      <ConfirmDialog
+        open={pendingRemoveUserId !== null}
+        title={ui.guests.removeDialogTitle}
+        message={ui.guests.removeDialogBody}
+        confirmLabel={ui.common.remove}
+        cancelLabel={ui.common.cancel}
+        variant="danger"
+        busy={Boolean(pendingRemoveUserId && busyUserId === pendingRemoveUserId)}
+        onConfirm={() => void confirmRemovePending()}
+        onCancel={() => {
+          if (busyUserId) return;
+          setPendingRemoveUserId(null);
+        }}
+      />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
             <GoldBar vertical />
             <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, fontSize: 20, color: 'var(--app-text)' }}>
-              Guests
+              {ui.guests.title}
             </span>
           </div>
-          <p style={{ fontSize: 13, color: 'var(--app-muted)' }}>
-            {members.length} member{members.length === 1 ? "" : "s"}
+          <p style={{ fontSize: 13, color: "var(--app-muted)" }}>
+            {members.length === 1 ? ui.guests.membersOne : interpolate(ui.guests.membersMany, { n: members.length })}
           </p>
         </div>
-        <AppBtn variant="ghost" small onClick={() => void load()}>Refresh</AppBtn>
+        <AppBtn variant="ghost" small onClick={() => void load()}>
+          {ui.common.refresh}
+        </AppBtn>
       </div>
 
       {error ? (
@@ -217,11 +240,11 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
       ) : null}
 
       {loading ? (
-        <p style={{ fontSize: 13, color: 'var(--app-muted)', marginTop: 24 }}>Loading guests…</p>
+        <p style={{ fontSize: 13, color: "var(--app-muted)", marginTop: 24 }}>{ui.guests.loadingGuests}</p>
       ) : null}
 
       {!loading && members.length === 0 ? (
-        <p style={{ fontSize: 13, color: 'var(--app-muted)', marginTop: 24 }}>No guests have joined yet.</p>
+        <p style={{ fontSize: 13, color: "var(--app-muted)", marginTop: 24 }}>{ui.guests.empty}</p>
       ) : null}
 
       {members.length > 0 ? (
@@ -236,7 +259,13 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
             const display =
               m.display_name_at_event?.trim() ||
               profileNameById.get(m.user_id) ||
-              (isPrimary ? "Organizer" : "Guest");
+              (isPrimary ? ui.guests.organizerLabelFallback : ui.guests.guestLabelFallback);
+            const roleLabel =
+              m.role === "organizer"
+                ? ui.dashboard.roleOrganizer
+                : m.role === "co_organizer"
+                  ? ui.dashboard.roleCoOrganizer
+                  : ui.guests.guestLabelFallback;
             const isOrgRole = m.role === "organizer" || m.role === "co_organizer";
             return (
               <li
@@ -254,14 +283,14 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
                     <p style={{ fontWeight: 700, color: 'var(--app-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {display}
                       {isMe ? (
-                        <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 600, color: 'var(--app-gold)' }}>(you)</span>
+                        <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 600, color: "var(--app-gold)" }}>{ui.guests.youBadge}</span>
                       ) : null}
                     </p>
                     <p style={{ marginTop: 4, fontFamily: 'monospace', fontSize: 11, color: 'var(--app-muted)' }} title={m.user_id}>
                       {shortId(m.user_id)}
                     </p>
-                    <p style={{ marginTop: 6, fontSize: 11, color: 'var(--app-muted)' }}>
-                      Uploads: {uploads.photos} photos • {uploads.videos} videos
+                    <p style={{ marginTop: 6, fontSize: 11, color: "var(--app-muted)" }}>
+                      {interpolate(ui.guests.uploadsLine, { photos: uploads.photos, videos: uploads.videos })}
                     </p>
                   </div>
                   <span style={{
@@ -280,7 +309,7 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
                       : '1.5px solid var(--app-border)',
                     color: isOrgRole ? 'var(--app-gold)' : 'var(--app-muted)',
                   }}>
-                    {m.role}
+                    {roleLabel}
                   </span>
                 </div>
 
@@ -293,11 +322,7 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
                         disabled={busyUserId !== null}
                         onClick={() => void setCoOrganizer(m.user_id, m.role === "guest")}
                       >
-                        {busy
-                          ? "Working…"
-                          : m.role === "guest"
-                            ? "Promote to co‑organizer"
-                            : "Demote to guest"}
+                        {busy ? ui.common.working : m.role === "guest" ? ui.guests.promoteCo : ui.guests.demoteGuest}
                       </AppBtn>
                     ) : null}
                     {canRemove ? (
@@ -307,9 +332,9 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
                         type="button"
                         disabled={busyUserId !== null}
                         loading={busy}
-                        onClick={() => void removeMember(m.user_id)}
+                        onClick={() => setPendingRemoveUserId(m.user_id)}
                       >
-                        Remove
+                        {ui.common.remove}
                       </AppBtn>
                     ) : null}
                   </div>

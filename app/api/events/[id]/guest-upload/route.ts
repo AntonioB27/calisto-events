@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { maxGuestUploadBytesForMime } from "@/lib/guest-upload-limits";
 import { canGuestUpload } from "@/lib/plan-limits";
 import { getPlanLimits, type PlanId } from "@/lib/plan-limits";
 import { getSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
@@ -111,6 +112,7 @@ export const __test = {
   getEventUploadContext,
   countMediaForQuota,
   insertMediaItem,
+  maxGuestUploadBytesForMime,
 };
 
 export async function POST(request: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -136,6 +138,11 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
   const file = formData.get("file");
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "No file provided." }, { status: 400 });
+  }
+
+  const maxBytes = __test.maxGuestUploadBytesForMime(file.type);
+  if (file.size > maxBytes) {
+    return NextResponse.json({ error: "FILE_TOO_LARGE" }, { status: 413 });
   }
 
   const isPhoto = file.type.startsWith("image/");

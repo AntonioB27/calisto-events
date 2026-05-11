@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { __resetRateLimitsForTests } from "@/lib/simple-ip-rate-limit";
+
 const createSupabaseAuthServerClient = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/supabase-auth-server", () => ({
@@ -20,6 +22,7 @@ function mockQueryChain(result: { data: unknown; error: unknown }) {
 }
 
 beforeEach(() => {
+  __resetRateLimitsForTests();
   createSupabaseAuthServerClient.mockReset();
 });
 

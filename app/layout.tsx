@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
+import { AppUiProvider } from "@/components/AppUiProvider";
 import { CalistoThemeInit } from "@/components/CalistoThemeInit";
+import { getAppStrings } from "@/lib/app-ui";
+import { bcp47FromUiLocale } from "@/lib/locale-bcp47";
+import { getUiLocale } from "@/lib/ui-locale";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,13 +16,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getUiLocale();
+  const dict = getAppStrings(locale);
+  const lang = bcp47FromUiLocale(locale);
+
   return (
-    <html lang="en" translate="no" className="notranslate h-full scroll-smooth antialiased" suppressHydrationWarning>
+    <html lang={lang} translate="no" className="notranslate h-full scroll-smooth antialiased" suppressHydrationWarning>
       <head>
         <meta name="google" content="notranslate" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -31,7 +39,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <CalistoThemeInit />
-        {children}
+        <AppUiProvider value={{ locale, ...dict }}>{children}</AppUiProvider>
         <Analytics />
       </body>
     </html>

@@ -1,18 +1,23 @@
 "use client";
 
+import type { AppUiDict } from "@/lib/app-ui/en";
+
 export type AuthMode = "login" | "register";
 
-type AuthModeRailProps = {
+export type AuthModeRailCopy = Pick<AppUiDict["authRail"], "aria" | "loginKicker" | "loginLabel" | "registerKicker" | "registerLabel">;
+
+type AuthModeRailProps = Readonly<{
   active: AuthMode;
   /** Called when the user taps “Sign in” (no-op when already on login). */
   onLogin: () => void;
   /** Called when the user taps “Register” (no-op when already on register). */
   onRegister: () => void;
-};
+  copy: AuthModeRailCopy;
+}>;
 
-export function AuthModeRail({ active, onLogin, onRegister }: AuthModeRailProps) {
+export function AuthModeRail({ active, onLogin, onRegister, copy }: AuthModeRailProps) {
   return (
-    <div className="auth-mode-rail" data-active-panel={active} role="tablist" aria-label="Choose sign in or register">
+    <div className="auth-mode-rail" data-active-panel={active} role="tablist" aria-label={copy.aria}>
       <span className="auth-mode-rail__thumb" aria-hidden />
       <div className="auth-mode-rail__track">
         <button
@@ -24,8 +29,8 @@ export function AuthModeRail({ active, onLogin, onRegister }: AuthModeRailProps)
           data-active={active === "login" ? "true" : undefined}
           onClick={onLogin}
         >
-          <span className="auth-mode-rail__kicker">Welcome back</span>
-          <span className="auth-mode-rail__label">Sign in</span>
+          <span className="auth-mode-rail__kicker">{copy.loginKicker}</span>
+          <span className="auth-mode-rail__label">{copy.loginLabel}</span>
         </button>
         <button
           type="button"
@@ -36,8 +41,8 @@ export function AuthModeRail({ active, onLogin, onRegister }: AuthModeRailProps)
           data-active={active === "register" ? "true" : undefined}
           onClick={onRegister}
         >
-          <span className="auth-mode-rail__kicker">New to Calisto</span>
-          <span className="auth-mode-rail__label">Register</span>
+          <span className="auth-mode-rail__kicker">{copy.registerKicker}</span>
+          <span className="auth-mode-rail__label">{copy.registerLabel}</span>
         </button>
       </div>
     </div>

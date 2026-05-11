@@ -2,8 +2,9 @@
 
 import type { PlanId } from "@/lib/plan-limits";
 import { getPlanLimits, PLAN_DB_INT_MAX } from "@/lib/plan-limits";
+import { interpolate } from "@/lib/app-ui";
+import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
-import { AppCard } from "@/components/app-ui/AppCard";
 import { AppPageHeader } from "@/components/app-ui/AppPageHeader";
 import { writeCreateEventDraftToStorage } from "@/lib/create-event-draft";
 import { useMemo, useState } from "react";
@@ -39,13 +40,14 @@ const PLAN_STYLE: Record<PlanId, { accent: string; tint: string }> = {
   max: { accent: "color-mix(in srgb, var(--app-purple) 55%, var(--app-gold))", tint: "color-mix(in srgb, var(--app-purple) 10%, transparent)" },
 };
 
-function formatCap(n: number): string {
-  return n >= PLAN_DB_INT_MAX ? "Unlimited" : String(n);
-}
-
 export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, validationError }: Step2PlanProps) {
+  const ui = useAppUi();
   const [selected, setSelected] = useState<PlanId>(selectedPlanId);
   const [expanded, setExpanded] = useState<PlanId | null>(null);
+
+  function formatCap(n: number): string {
+    return n >= PLAN_DB_INT_MAX ? ui.createStep2.unlimited : String(n);
+  }
 
   const writeStep2Draft = (planId: PlanId) => {
     writeCreateEventDraftToStorage({
@@ -73,16 +75,12 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
           style: PLAN_STYLE[planId],
         };
       }),
-    [planOptions],
+    [planOptions, ui.createStep2.unlimited],
   );
 
   return (
     <div style={{ padding: "40px 0 60px" }}>
-      <AppPageHeader
-        eyebrow="Step 2 of 3"
-        title="Choose a plan"
-        description="Select the plan that fits your event size."
-      />
+      <AppPageHeader eyebrow={ui.createStep2.eyebrow} title={ui.createStep2.heading} description={ui.createStep2.description} />
 
       <form action="/events/new" method="get">
         <input type="hidden" name="name" value={name} />
@@ -103,7 +101,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
               border: "1px solid color-mix(in srgb, var(--app-danger) 35%, transparent)",
             }}
           >
-            Event name is required. Please go back and enter a name.
+            {ui.validateCreate.nameRequired}
           </p>
         ) : null}
 
@@ -155,32 +153,35 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
                           fontSize: 18,
                           fontWeight: 800,
                           color: "var(--app-text)",
-                          textTransform: "capitalize",
                           letterSpacing: "-0.01em",
                         }}
                       >
-                        {planId}
+                        {ui.plans[planId]}
                       </h3>
                       {planId === "premium" ? (
                         <span
                           className="app-badge app-badge--accent"
                           style={{ borderColor: style.accent, color: style.accent }}
                         >
-                          Popular
+                          {ui.createStep2.popularBadge}
                         </span>
                       ) : null}
                     </div>
                     <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--app-muted)", lineHeight: 1.45 }}>
-                      {formatCap(limits.guests)} guests • {formatCap(limits.photos)} photos • {formatCap(limits.videos)} videos
+                      {interpolate(ui.createStep2.guestsPhotosVideos, {
+                        guests: formatCap(limits.guests),
+                        photos: formatCap(limits.photos),
+                        videos: formatCap(limits.videos),
+                      })}
                     </p>
                     <p style={{ margin: "8px 0 0", fontSize: 12, color: "var(--app-subtle)" }}>
-                      Uploads open for {limits.uploadDaysAfterEvent} days after the event
+                      {interpolate(ui.createStep2.uploadsOpenAfterDays, { n: limits.uploadDaysAfterEvent })}
                     </p>
                   </div>
 
                   <div style={{ textAlign: "right", flexShrink: 0 }}>
                     <div style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--app-subtle)" }}>
-                      Price
+                      {ui.createStep2.priceEyebrow}
                     </div>
                     <div style={{ marginTop: 6, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10 }}>
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.05 }}>
@@ -204,7 +205,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
                       </div>
                       <button
                         type="button"
-                        aria-label={`More details about the ${planId} plan`}
+                        aria-label={interpolate(ui.createStep2.moreDetailsAria, { plan: ui.plans[planId] })}
                         aria-expanded={isExpanded}
                         aria-controls={detailsId}
                         onClick={(e) => {
@@ -246,7 +247,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
                 <div
                   id={detailsId}
                   role="region"
-                  aria-label={`${planId} plan details`}
+                  aria-label={interpolate(ui.createStep2.detailRegionAria, { plan: ui.plans[planId] })}
                   style={{
                     marginTop: 14,
                     borderTop: "1px solid color-mix(in srgb, var(--app-border) 80%, transparent)",
@@ -262,10 +263,13 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
                     {(
                       [
-                        { label: "Guests", value: formatCap(limits.guests) },
-                        { label: "Photos", value: formatCap(limits.photos) },
-                        { label: "Videos", value: formatCap(limits.videos) },
-                        { label: "Upload window", value: `${limits.uploadDaysAfterEvent} days` },
+                        { label: ui.createStep2.rowGuests, value: formatCap(limits.guests) },
+                        { label: ui.createStep2.rowPhotos, value: formatCap(limits.photos) },
+                        { label: ui.createStep2.rowVideos, value: formatCap(limits.videos) },
+                        {
+                          label: ui.createStep2.rowUploadWindow,
+                          value: interpolate(ui.createStep2.uploadWindowDays, { n: limits.uploadDaysAfterEvent }),
+                        },
                       ] as const
                     ).map((row) => (
                       <div
@@ -288,7 +292,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
                   </div>
 
                   <p style={{ margin: 0, fontSize: 12, color: "var(--app-muted)", lineHeight: 1.5 }}>
-                    Tip: You can change plans later from your event settings.
+                    {ui.createStep2.tipChangePlanLater}
                   </p>
                 </div>
               </button>
@@ -298,7 +302,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
 
         <div style={{ display: "flex", gap: 12 }}>
           <AppBtn type="submit" variant="ghost" formAction="/events/new" formMethod="get" name="step" value="1">
-            ← Back
+            {ui.common.back}
           </AppBtn>
           <AppBtn
             type="submit"
@@ -314,7 +318,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
               writeStep2Draft(current);
             }}
           >
-            Continue to payment →
+            {ui.createStep2.continuePayment}
           </AppBtn>
         </div>
       </form>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import QRCode from "react-qr-code";
 
 import { EventPrintToolbar } from "./EventPrintToolbar";
+import { getEventAdminAccess } from "@/lib/event-admin-access";
 import { getWebJoinUrl } from "@/lib/join-link";
 import { getPublicOrigin } from "@/lib/public-origin";
 import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
@@ -23,8 +24,15 @@ export default async function EventPrintPage({ params }: Props) {
     .eq("id", id)
     .maybeSingle();
 
-  const isOrganizer = Boolean(event && user && event.organizer_id === user.id);
-  if (!event || !isOrganizer) {
+  const access = event
+    ? await getEventAdminAccess(supabase, {
+        eventId: id,
+        userId: user?.id,
+        organizerId: String(event.organizer_id),
+      })
+    : { canAccess: false, isPrimaryOrganizer: false };
+
+  if (!event || !access.canAccess) {
     return (
       <main className="join-shell min-h-screen px-4 py-10">
         <div style={{ maxWidth: 768, margin: "0 auto" }}>

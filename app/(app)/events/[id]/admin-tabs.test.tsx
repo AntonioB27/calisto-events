@@ -1,6 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
+import { AppUiProvider } from "@/components/AppUiProvider";
+import { getAppStrings } from "@/lib/app-ui";
+
 import { resolveEventTab } from "./page";
 import { EventAdminTabs } from "./_tabs/EventAdminTabs";
 import { EVENT_ADMIN_TABS } from "./_tabs/event-admin-tabs";
@@ -45,13 +48,25 @@ vi.mock("@/lib/supabase-auth-server", async (importOriginal) => {
 });
 
 describe("EventAdminTabs", () => {
+  const en = getAppStrings("en");
+  const provider = en;
+
   it("renders all expected tabs with hrefs and a single selected marker when organizer tabs are visible", () => {
     const html = renderToStaticMarkup(
-      <EventAdminTabs eventId="evt_123" selectedTab="guests" showOrganizerOnlyTabs />,
+      <AppUiProvider value={{ locale: "en", ...provider }}>
+        <EventAdminTabs eventId="evt_123" selectedTab="guests" showOrganizerOnlyTabs />
+      </AppUiProvider>,
     );
 
+    const labelByTab: Record<(typeof EVENT_ADMIN_TABS)[number]["id"], string> = {
+      overview: en.eventNav.tabOverview,
+      guests: en.eventNav.tabGuests,
+      gallery: en.eventNav.tabGallery,
+      share: en.eventNav.tabShare,
+      settings: en.eventNav.tabSettings,
+    };
     for (const tab of EVENT_ADMIN_TABS) {
-      expect(html).toContain(tab.label);
+      expect(html).toContain(labelByTab[tab.id]);
       expect(html).toContain(`/events/evt_123?tab=${tab.id}`);
     }
 
@@ -61,10 +76,12 @@ describe("EventAdminTabs", () => {
 
   it("hides organizer-only tabs when showOrganizerOnlyTabs is false", () => {
     const html = renderToStaticMarkup(
-      <EventAdminTabs eventId="evt_123" selectedTab="overview" showOrganizerOnlyTabs={false} />,
+      <AppUiProvider value={{ locale: "en", ...provider }}>
+        <EventAdminTabs eventId="evt_123" selectedTab="overview" showOrganizerOnlyTabs={false} />
+      </AppUiProvider>,
     );
 
-    expect(html).not.toContain(">Settings<");
+    expect(html).not.toContain(`>${en.eventNav.tabSettings}<`);
     expect(html).not.toContain("tab=settings");
     expect(html).toContain(">Overview<");
     expect(html).toContain("/events/evt_123?tab=gallery");

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AuthModeRail } from "@/components/app-ui/AuthModeRail";
 import { AppCard } from "@/components/app-ui/AppCard";
@@ -48,6 +49,7 @@ function GoogleMark() {
 }
 
 export function AuthCombinedForm() {
+  const ui = useAppUi();
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = useMemo(
@@ -71,12 +73,12 @@ export function AuthCombinedForm() {
     if (oauthErrorHandledRef.current) return;
     if (searchParams.get("oauth_error") !== "1") return;
     oauthErrorHandledRef.current = true;
-    setError("Google sign-in didn’t finish. Try again or use email and password.");
+    setError(ui.auth.oauthFail);
     const qs = new URLSearchParams(searchParams.toString());
     qs.delete("oauth_error");
     const tail = qs.toString();
     router.replace(tail ? `/auth/login?${tail}` : "/auth/login", { scroll: false });
-  }, [router, searchParams]);
+  }, [router, searchParams, ui.auth.oauthFail]);
 
   function selectMode(next: AuthCombinedMode) {
     setMode(next);
@@ -112,7 +114,7 @@ export function AuthCombinedForm() {
         return;
       }
 
-      setError("Could not start Google sign-in. Try again shortly.");
+      setError(ui.auth.googleStartFail);
     } finally {
       if (!willRedirect) {
         setOauthPending(false);
@@ -175,7 +177,7 @@ export function AuthCombinedForm() {
         return;
       }
 
-      setSuccessMessage("Check your email to confirm your account");
+      setSuccessMessage(ui.auth.checkEmailVerify);
     } finally {
       setPending(false);
     }
@@ -213,7 +215,7 @@ export function AuthCombinedForm() {
               color: "var(--app-muted)",
             }}
           >
-            Welcome to
+            {ui.auth.welcomeEyebrow}
           </p>
           <h1
             style={{
@@ -225,12 +227,17 @@ export function AuthCombinedForm() {
               lineHeight: 1,
             }}
           >
-            Calisto.
+            Calisto{ui.auth.brandRest}
           </h1>
         </div>
 
         <AppCard pad="lg" className="auth-card" style={{ borderRadius: 18 }}>
-          <AuthModeRail active={mode} onLogin={() => selectMode("login")} onRegister={() => selectMode("register")} />
+          <AuthModeRail
+            active={mode}
+            onLogin={() => selectMode("login")}
+            onRegister={() => selectMode("register")}
+            copy={ui.authRail}
+          />
 
           <AppBtn
             type="button"
@@ -241,14 +248,14 @@ export function AuthCombinedForm() {
             onClick={onGoogleOAuth}
           >
             <GoogleMark />
-            Continue with Google
+            {ui.auth.continueGoogle}
           </AppBtn>
 
           <div className="auth-oauth-divider" role="presentation">
             <span className="auth-oauth-divider__rule auth-oauth-divider__rule--left" aria-hidden />
             <span className="auth-oauth-divider__text">
-              <span className="auth-oauth-divider__eyebrow">Or</span>
-              <span className="auth-oauth-divider__body">continue with email</span>
+              <span className="auth-oauth-divider__eyebrow">{ui.auth.dividerOr}</span>
+              <span className="auth-oauth-divider__body">{ui.auth.dividerBody}</span>
             </span>
             <span className="auth-oauth-divider__rule auth-oauth-divider__rule--right" aria-hidden />
           </div>
@@ -265,22 +272,22 @@ export function AuthCombinedForm() {
               onSubmit={onLoginSubmit}
               style={{ display: "flex", flexDirection: "column", gap: 16 }}
             >
-              <AppFormRow label="Email" labelFor="login-email">
+              <AppFormRow label={ui.auth.email} labelFor="login-email">
                 <AppInput
                   id="login-email"
                   name="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={ui.auth.emailPlaceholderRegister}
                   autoComplete="email"
                   required
                 />
               </AppFormRow>
-              <AppFormRow label="Password" labelFor="login-password">
+              <AppFormRow label={ui.auth.password} labelFor="login-password">
                 <AppInput
                   id="login-password"
                   name="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder={ui.auth.passwordDots}
                   autoComplete="current-password"
                   required
                 />
@@ -303,13 +310,13 @@ export function AuthCombinedForm() {
               ) : null}
 
               <AppBtn type="submit" variant="primary" className="w-full" disabled={pending} loading={pending && mode === "login"}>
-                Sign In
+                {ui.auth.signInSubmit}
               </AppBtn>
             </form>
 
             <div style={{ textAlign: "center", marginTop: 20 }}>
               <AppBtn variant="ghost" size="sm" href="/auth/forgot-password" as={Link}>
-                Forgot password?
+                {ui.auth.forgotPw}
               </AppBtn>
             </div>
           </div>
@@ -325,25 +332,31 @@ export function AuthCombinedForm() {
               onSubmit={onRegisterSubmit}
               style={{ display: "flex", flexDirection: "column", gap: 16 }}
             >
-              <AppFormRow label="Full name" labelFor="register-name">
-                <AppInput id="register-name" name="name" type="text" placeholder="Antonio Kovač" autoComplete="name" />
+              <AppFormRow label={ui.auth.fullName} labelFor="register-name">
+                <AppInput
+                  id="register-name"
+                  name="name"
+                  type="text"
+                  placeholder={ui.auth.namePlaceholder}
+                  autoComplete="name"
+                />
               </AppFormRow>
-              <AppFormRow label="Email" labelFor="register-email">
+              <AppFormRow label={ui.auth.email} labelFor="register-email">
                 <AppInput
                   id="register-email"
                   name="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={ui.auth.emailPlaceholderAlt}
                   autoComplete="email"
                   required
                 />
               </AppFormRow>
-              <AppFormRow label="Password" labelFor="register-password">
+              <AppFormRow label={ui.auth.password} labelFor="register-password">
                 <AppInput
                   id="register-password"
                   name="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder={ui.auth.passwordDots}
                   autoComplete="new-password"
                   required
                 />
@@ -381,7 +394,7 @@ export function AuthCombinedForm() {
               ) : null}
 
               <AppBtn type="submit" variant="primary" className="w-full" disabled={pending} loading={pending && mode === "register"}>
-                Create Account
+                {ui.auth.createAccountSubmit}
               </AppBtn>
             </form>
           </div>
@@ -389,8 +402,16 @@ export function AuthCombinedForm() {
         </AppCard>
 
         <p style={{ textAlign: "center", marginTop: 20, fontSize: 12, color: "var(--app-muted)" }}>
-          By continuing you agree to Calisto&apos;s{" "}
-          <span style={{ textDecoration: "underline" }}>Terms &amp; Privacy Policy</span>.
+          {ui.auth.legalPrefix}{" "}
+          <Link href="/terms" style={{ textDecoration: "underline", color: "inherit" }}>
+            {ui.auth.terms}
+          </Link>
+          {" "}
+          {ui.auth.and}{" "}
+          <Link href="/privacy" style={{ textDecoration: "underline", color: "inherit" }}>
+            {ui.auth.privacy}
+          </Link>
+          .
         </p>
       </div>
     </main>
