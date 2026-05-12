@@ -4,7 +4,6 @@ import { FAQ } from "@/components/FAQ";
 import { FeatureGrid } from "@/components/FeatureGrid";
 import { Hero } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
-import { LanguageSelectorPopup } from "@/components/LanguageSelectorPopup";
 import { AppPreviewWindow } from "@/components/AppPreviewWindow";
 import { PlanCards } from "@/components/PlanCards";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -33,7 +32,6 @@ export default async function LocalePage({ params }: LocalePageProps) {
     <div className="vibrant-page-bg flex min-h-0 flex-1 flex-col overflow-x-clip">
       <WebMcpTools />
       <div className="page-vignette" aria-hidden />
-      <LanguageSelectorPopup copy={copy} locale={locale as Locale} />
       <SiteHeader copy={copy} locale={locale as Locale} />
       <main className="flex-1">
         <Hero copy={copy} />

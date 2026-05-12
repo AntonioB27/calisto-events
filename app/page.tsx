@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
-import { DEFAULT_LOCALE } from "@/lib/i18n";
+import { getUiLocale } from "@/lib/ui-locale";
 
-export default function Home() {
-  redirect(`/${DEFAULT_LOCALE}`);
+export default async function Home() {
+  const locale = await getUiLocale();
+  redirect(`/${locale}`);
 }
