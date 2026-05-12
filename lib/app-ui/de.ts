@@ -119,6 +119,17 @@ export const APP_UI_DE: AppUiDict = {
     haveAccount: "Ich habe bereits ein Konto",
     guestContinue: "Als Gast fortfahren",
     changeCode: "Code ändern",
+    scanQrInstead: "QR-Code scannen",
+    scanInvalidQr: "Dieser QR-Code enthält keinen gültigen Beitrittslink oder Zugangscode.",
+    scanQrTitle: "Einladungs-QR scannen",
+    scanQrHint: "Nutze die Kamera, um den QR-Code von der Einladung oder dem Event-Poster zu scannen.",
+    scanQrStartCamera: "Kamera starten",
+    scanQrStopCamera: "Kamera stoppen",
+    scanQrCamUnsupported: "Die Kamera konnte auf diesem Gerät nicht gestartet werden. Gib den Code manuell ein.",
+    scanQrPermissionDenied:
+      "Kamerazugriff wurde verweigert. Erlaube den Zugriff in den Browsereinstellungen oder gib den Code manuell ein.",
+    scanQrNoCamera: "Keine nutzbare Kamera gefunden. Gib den Code stattdessen manuell ein.",
+    scanEnterInstead: "Code eingeben",
   },
 
   globals: {
@@ -137,6 +148,9 @@ export const APP_UI_DE: AppUiDict = {
   guestJoin: {
     loading: "Laden …",
     joining: "Beitritt zur Veranstaltung …",
+    signedInNavAria: "Kontonavigation",
+    myEvents: "Meine Veranstaltungen",
+    manageEvent: "Veranstaltung verwalten",
     tagline: "Teile deine Erinnerungen an diese Veranstaltung.",
     uploadClosedBanner:
       "Uploads sind für diese Veranstaltung geschlossen (Zeitfenster beendet). Die Galerie bleibt sichtbar.",

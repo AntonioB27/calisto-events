@@ -116,6 +116,17 @@ export const APP_UI_HR: AppUiDict = {
     haveAccount: "Imam račun",
     guestContinue: "Nastavi kao gost",
     changeCode: "Promijeni kod",
+    scanQrInstead: "Skeniraj QR kod",
+    scanInvalidQr: "Taj QR kod ne sadrži valjanu poveznicu za pridruživanje niti pristupni kod.",
+    scanQrTitle: "Skeniraj QR s pozivnice",
+    scanQrHint: "Kamerom skeniraj QR kod s pozivnice ili postera događaja.",
+    scanQrStartCamera: "Pokreni kameru",
+    scanQrStopCamera: "Zaustavi kameru",
+    scanQrCamUnsupported: "Kameru nismo mogli pokrenuti na ovom uređaju. Unesi kod ručno.",
+    scanQrPermissionDenied:
+      "Pristup kameri je odbijen. Dozvoli pristup u postavkama preglednika ili unesi kod ručno.",
+    scanQrNoCamera: "Nije pronađena upotrebljiva kamera. Umjesto toga unesi kod ručno.",
+    scanEnterInstead: "Unesi kod",
   },
 
   globals: {
@@ -134,6 +145,9 @@ export const APP_UI_HR: AppUiDict = {
   guestJoin: {
     loading: "Učitavanje…",
     joining: "Pridruživanje događaju…",
+    signedInNavAria: "Navigacija računa",
+    myEvents: "Moji događaji",
+    manageEvent: "Upravljaj događajem",
     tagline: "Podijelite uspomene s ovog događaja.",
     uploadClosedBanner:
       "Upload je zatvoren za ovaj događaj (period uploada je završio). I dalje možete pregledavati galeriju.",

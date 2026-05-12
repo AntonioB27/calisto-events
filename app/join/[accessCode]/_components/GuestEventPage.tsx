@@ -1,7 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
+import { AppBtn } from "@/components/app-ui/AppBtn";
+import { useAppUi } from "@/components/AppUiProvider";
+import type { AppUiDict } from "@/lib/app-ui";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { canGuestUpload, type PlanId } from "@/lib/plan-limits";
 
@@ -19,11 +23,14 @@ type GuestEventPageProps = Readonly<{
   eventDate: string;
 }>;
 
-function guestJoinErrorMessage(raw: string) {
+function guestJoinErrorMessage(
+  raw: string,
+  copy: Pick<AppUiDict["guestJoin"], "joinInvalidOrNotFound" | "joinAlreadyMember" | "joinGeneric">,
+) {
   const m = raw.toLowerCase();
-  if (m.includes("invalid") || m.includes("not found")) return "That access code isn’t valid for joining right now.";
-  if (m.includes("already")) return "You’re already part of this event.";
-  return raw.trim() || "Something went wrong while joining. Try refreshing the page.";
+  if (m.includes("invalid") || m.includes("not found")) return copy.joinInvalidOrNotFound;
+  if (m.includes("already")) return copy.joinAlreadyMember;
+  return raw.trim() || copy.joinGeneric;
 }
 
 export function GuestEventPage({
@@ -34,11 +41,13 @@ export function GuestEventPage({
   planId,
   eventDate,
 }: GuestEventPageProps) {
+  const ui = useAppUi();
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [membershipReady, setMembershipReady] = useState(false);
   const [membershipRpcError, setMembershipRpcError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
+  const [canManageEvent, setCanManageEvent] = useState(false);
 
   useEffect(() => {
     const supabase = maybeCreateSupabaseBrowserClient();
@@ -73,7 +82,7 @@ export function GuestEventPage({
       });
       if (!cancelled) {
         if (error) {
-          setMembershipRpcError(guestJoinErrorMessage(error.message ?? ""));
+          setMembershipRpcError(guestJoinErrorMessage(error.message ?? "", ui.guestJoin));
         } else {
           setMembershipRpcError(null);
         }
@@ -88,7 +97,7 @@ export function GuestEventPage({
   }, [hasSession, accessCode]);
 
   useEffect(() => {
-    if (!hasSession || !membershipReady) {
+    if (!hasSession) {
       queueMicrotask(() => setUserId(null));
       return;
     }
@@ -97,7 +106,42 @@ export function GuestEventPage({
     void supabase.auth.getUser().then((res: { data: { user: { id: string } | null } | null }) => {
       setUserId(res.data?.user?.id ?? null);
     });
-  }, [hasSession, membershipReady]);
+  }, [hasSession]);
+
+  useEffect(() => {
+    if (!userId || !organizerUserId) {
+      queueMicrotask(() => setCanManageEvent(false));
+      return;
+    }
+    if (userId === organizerUserId) {
+      queueMicrotask(() => setCanManageEvent(true));
+      return;
+    }
+
+    let cancelled = false;
+    const supabase = maybeCreateSupabaseBrowserClient();
+    if (!supabase) {
+      queueMicrotask(() => setCanManageEvent(false));
+      return;
+    }
+
+    void supabase
+      .from("event_memberships")
+      .select("role")
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .maybeSingle()
+      .then((res: { data: unknown }) => {
+        if (cancelled) return;
+        const data = res.data as { role?: string } | null;
+        const role = typeof data?.role === "string" ? data.role : "";
+        setCanManageEvent(role === "co_organizer");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, organizerUserId, eventId]);
 
   const canLeaveAsGuest =
     Boolean(membershipReady && hasSession && userId && organizerUserId && userId !== organizerUserId);
@@ -113,7 +157,7 @@ export function GuestEventPage({
   if (hasSession === null) {
     return (
       <main className="join-shell mx-auto flex min-h-screen max-w-2xl items-center justify-center px-6 py-12">
-        <p style={{ fontSize: 14, color: "var(--app-muted)" }}>Loading…</p>
+        <p style={{ fontSize: 14, color: "var(--app-muted)" }}>{ui.guestJoin.loading}</p>
       </main>
     );
   }
@@ -121,7 +165,7 @@ export function GuestEventPage({
   if (hasSession && !membershipReady) {
     return (
       <main className="join-shell mx-auto flex min-h-screen max-w-2xl items-center justify-center px-6 py-12">
-        <p style={{ fontSize: 14, color: "var(--app-muted)" }}>Joining event…</p>
+        <p style={{ fontSize: 14, color: "var(--app-muted)" }}>{ui.guestJoin.joining}</p>
       </main>
     );
   }
@@ -133,8 +177,30 @@ export function GuestEventPage({
       )}
 
       <div className="mx-auto max-w-3xl">
+        {hasSession ? (
+          <nav
+            aria-label={ui.guestJoin.signedInNavAria}
+            style={{
+              marginBottom: 20,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 10,
+              alignItems: "center",
+            }}
+          >
+            <AppBtn variant="ghost" size="sm" href="/dashboard" as={Link}>
+              {ui.guestJoin.myEvents}
+            </AppBtn>
+            {canManageEvent ? (
+              <AppBtn variant="outline" size="sm" href={`/events/${eventId}`} as={Link}>
+                {ui.guestJoin.manageEvent}
+              </AppBtn>
+            ) : null}
+          </nav>
+        ) : null}
+
         <h1 style={{ marginBottom: 4, fontSize: "1.5rem", fontWeight: 800, color: "var(--app-text)" }}>{eventTitle}</h1>
-        <p style={{ marginBottom: 32, fontSize: 14, color: "var(--app-muted)" }}>Share your memories from this event.</p>
+        <p style={{ marginBottom: 32, fontSize: 14, color: "var(--app-muted)" }}>{ui.guestJoin.tagline}</p>
 
         {hasSession ? <GuestLeaveEvent eventId={eventId} canShow={canLeaveAsGuest} /> : null}
 
@@ -167,7 +233,7 @@ export function GuestEventPage({
               color: "var(--app-warn)",
             }}
           >
-            Uploads are closed for this event (upload window ended). You can still browse the gallery.
+            {ui.guestJoin.uploadClosedBanner}
           </div>
         ) : null}
 
@@ -184,7 +250,7 @@ export function GuestEventPage({
                   color: "var(--app-muted)",
                 }}
               >
-                Upload
+                {ui.guestJoin.sectionUpload}
               </h2>
               <UploadZone eventId={eventId} disabled={!uploadsOpen} onUploaded={() => setRefreshKey((k) => k + 1)} />
             </section>
@@ -200,7 +266,7 @@ export function GuestEventPage({
                   color: "var(--app-muted)",
                 }}
               >
-                Gallery
+                {ui.guestJoin.sectionGallery}
               </h2>
               <MediaGrid eventId={eventId} refreshKey={refreshKey} />
             </section>

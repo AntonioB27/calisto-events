@@ -115,6 +115,17 @@ export const APP_UI_EN = {
     haveAccount: "I have an account",
     guestContinue: "Continue as guest",
     changeCode: "Change code",
+    scanQrInstead: "Scan QR code",
+    scanInvalidQr: "That QR code doesn’t contain a valid join link or access code.",
+    scanQrTitle: "Scan invite QR",
+    scanQrHint: "Use your camera to scan the QR from your invite or event poster.",
+    scanQrStartCamera: "Start camera",
+    scanQrStopCamera: "Stop camera",
+    scanQrCamUnsupported: "We couldn’t start the camera on this device. Try entering the code manually.",
+    scanQrPermissionDenied:
+      "Camera permission was denied. Allow camera access in your browser settings, or enter the code manually.",
+    scanQrNoCamera: "No usable camera was found. Enter the code manually instead.",
+    scanEnterInstead: "Enter code instead",
   },
 
   globals: {
@@ -132,6 +143,9 @@ export const APP_UI_EN = {
   guestJoin: {
     loading: "Loading…",
     joining: "Joining event…",
+    signedInNavAria: "Account navigation",
+    myEvents: "My events",
+    manageEvent: "Manage event",
     tagline: "Share your memories from this event.",
     uploadClosedBanner:
       "Uploads are closed for this event (upload window ended). You can still browse the gallery.",
