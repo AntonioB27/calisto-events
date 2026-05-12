@@ -1,6 +1,7 @@
 "use client";
 
 import { normalizeAccessCode } from "@/lib/access-code";
+import { decodeJoinCodeFromScan } from "@/lib/join-code-from-scan";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
@@ -8,6 +9,8 @@ import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
 import { AppFormRow } from "@/components/app-ui/AppFormRow";
+
+import { JoinQrScanner } from "./JoinQrScanner";
 
 type JoinPreview = {
   title: string;
@@ -18,29 +21,22 @@ type JoinPreview = {
 export function JoinCodeForm() {
   const ui = useAppUi();
   const router = useRouter();
-  const [stage, setStage] = useState<"enter" | "choice">("enter");
+  const [stage, setStage] = useState<"enter" | "scan" | "choice">("enter");
   const [code, setCode] = useState("");
   const [resolvedCode, setResolvedCode] = useState("");
   const [preview, setPreview] = useState<JoinPreview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const normalized = normalizeAccessCode(code);
-    if (normalized.length < 4) {
-      setError(ui.joinForm.codeTooShort);
-      return;
-    }
-
+  async function fetchJoinPreview(normalized: string, source: "form" | "scan"): Promise<boolean> {
     setLoadingPreview(true);
     setError(null);
     try {
       const response = await fetch(`/api/join/preview?code=${encodeURIComponent(normalized)}`);
       if (response.status === 404) {
         setError(ui.joinForm.notFound);
-        setStage("enter");
-        return;
+        if (source === "form") setStage("enter");
+        return false;
       }
       if (!response.ok) {
         throw new Error(`Preview failed with status ${response.status}`);
@@ -50,12 +46,25 @@ export function JoinCodeForm() {
       setResolvedCode(normalized);
       setPreview(data);
       setStage("choice");
+      return true;
     } catch {
       setError(ui.joinForm.genericError);
-      setStage("enter");
+      if (source === "form") setStage("enter");
+      return false;
     } finally {
       setLoadingPreview(false);
     }
+  }
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const normalized = normalizeAccessCode(code);
+    if (normalized.length < 4) {
+      setError(ui.joinForm.codeTooShort);
+      return;
+    }
+
+    await fetchJoinPreview(normalized, "form");
   }
 
   function onChangeCode() {
@@ -162,7 +171,74 @@ export function JoinCodeForm() {
             <AppBtn type="submit" variant="primary" className="mt-6 w-full" loading={loadingPreview}>
               {ui.joinForm.joinCta}
             </AppBtn>
+            <AppBtn
+              type="button"
+              variant="ghost"
+              className="mt-3 w-full"
+              disabled={loadingPreview}
+              onClick={() => {
+                setError(null);
+                setStage("scan");
+              }}
+            >
+              {ui.joinForm.scanQrInstead}
+            </AppBtn>
           </form>
+        ) : stage === "scan" ? (
+          <div style={{ textAlign: "left" }}>
+            {error ? (
+              <p
+                style={{
+                  margin: "0 0 14px",
+                  fontSize: 14,
+                  color: "var(--app-danger)",
+                  lineHeight: 1.45,
+                }}
+                role="alert"
+              >
+                {error}
+              </p>
+            ) : null}
+            {loadingPreview ? (
+              <p
+                style={{
+                  margin: "0 0 14px",
+                  fontFamily: "var(--font-display)",
+                  fontStyle: "italic",
+                  fontSize: 14,
+                  color: "var(--app-muted)",
+                }}
+              >
+                {ui.common.loading}
+              </p>
+            ) : null}
+            <JoinQrScanner
+              disabled={loadingPreview}
+              strings={{
+                title: ui.joinForm.scanQrTitle,
+                hint: ui.joinForm.scanQrHint,
+                startCamera: ui.joinForm.scanQrStartCamera,
+                stopCamera: ui.joinForm.scanQrStopCamera,
+                back: ui.joinForm.scanEnterInstead,
+                unsupported: ui.joinForm.scanQrCamUnsupported,
+                permissionDenied: ui.joinForm.scanQrPermissionDenied,
+                noCamera: ui.joinForm.scanQrNoCamera,
+              }}
+              onRawScan={async (raw) => {
+                const extracted = decodeJoinCodeFromScan(raw);
+                if (!extracted) {
+                  setError(ui.joinForm.scanInvalidQr);
+                  return false;
+                }
+                setCode(extracted);
+                return fetchJoinPreview(extracted, "scan");
+              }}
+              onBack={() => {
+                setStage("enter");
+                setError(null);
+              }}
+            />
+          </div>
         ) : (
           <div style={{ display: "grid", gap: 16 }}>
             <div
