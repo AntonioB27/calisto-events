@@ -11,10 +11,8 @@ function supabaseIssuer(): string | null {
 }
 
 /**
- * RFC 9728 — metadata at `/.well-known/oauth-protected-resource` (no path after the suffix)
- * MUST use a `resource` value equal to the resource identifier formed by removing that suffix
- * from the metadata URL — i.e. the HTTPS origin with no path (see RFC 9728 §3.1 and §3.3).
- * API routes under `/api/` use bearer tokens from the listed authorization servers.
+ * RFC 9728 metadata for resource identifier `{origin}/api` — retrieved from
+ * `GET /.well-known/oauth-protected-resource/api` (suffix inserted between host and path).
  */
 export async function GET(): Promise<NextResponse> {
   const origin = await getPublicOrigin();
@@ -26,8 +24,9 @@ export async function GET(): Promise<NextResponse> {
     );
   }
 
+  const resource = `${origin}/api`;
   const body = {
-    resource: origin,
+    resource,
     authorization_servers: [issuer],
     scopes_supported: ["openid", "email", "profile"],
     bearer_methods_supported: ["header"],
