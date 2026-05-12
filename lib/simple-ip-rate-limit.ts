@@ -34,10 +34,13 @@ export function consumeRateLimitToken(
 }
 
 export function clientIpFromRequest(request: Request): string {
+  // On Vercel, the platform appends the real client IP as the last entry in
+  // x-forwarded-for so it cannot be spoofed by a client-supplied header.
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first;
+    const parts = forwarded.split(",");
+    const last = parts[parts.length - 1]?.trim();
+    if (last) return last;
   }
   const realIp = request.headers.get("x-real-ip")?.trim();
   if (realIp) return realIp;

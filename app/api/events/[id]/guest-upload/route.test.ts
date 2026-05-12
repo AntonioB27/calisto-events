@@ -25,8 +25,9 @@ vi.mock("@/lib/supabase-server", () => ({
 }));
 
 const getEventUploadContextMock = vi.fn<
-  (eventId: string) => Promise<{ planId: "free" | "standard" | "plus" | "premium" | "max"; eventDate: string } | null>
+  (eventId: string) => Promise<{ planId: "free" | "standard" | "plus" | "premium" | "max"; eventDate: string; organizerId: string } | null>
 >();
+const checkUserIsMemberMock = vi.fn<(eventId: string, userId: string) => Promise<boolean>>();
 const countMediaForQuotaMock = vi.fn<(eventId: string, mediaType: "photo" | "video") => Promise<number>>();
 const insertMediaItemMock = vi.fn<
   (params: {
@@ -42,11 +43,15 @@ const maxBytesMock = vi.fn<(mime: string) => number>();
 
 beforeEach(() => {
   getEventUploadContextMock.mockReset();
+  checkUserIsMemberMock.mockReset();
   countMediaForQuotaMock.mockReset();
   insertMediaItemMock.mockReset();
   maxBytesMock.mockReset();
   maxBytesMock.mockImplementation((mime: string) => maxGuestUploadBytesForMime(mime));
+  // Default: user is a member so existing tests are unaffected.
+  checkUserIsMemberMock.mockResolvedValue(true);
   __test.getEventUploadContext = getEventUploadContextMock;
+  __test.checkUserIsMember = checkUserIsMemberMock;
   __test.countMediaForQuota = countMediaForQuotaMock;
   __test.insertMediaItem = insertMediaItemMock;
   __test.maxGuestUploadBytesForMime = maxBytesMock;
@@ -59,6 +64,7 @@ describe("guest-upload route", () => {
       getEventUploadContextMock.mockResolvedValue({
         planId: "free",
         eventDate: "2026-05-06T00:00:00.000Z",
+        organizerId: "other_user",
       });
       countMediaForQuotaMock.mockResolvedValue(20);
 
@@ -83,6 +89,7 @@ describe("guest-upload route", () => {
     getEventUploadContextMock.mockResolvedValue({
       planId: "standard",
       eventDate: "2026-05-06T00:00:00.000Z",
+      organizerId: "other_user",
     });
     countMediaForQuotaMock.mockResolvedValue(10);
     insertMediaItemMock.mockResolvedValue({ id: "m1", storage_path: "events/evt_2/x.jpg" });
@@ -106,6 +113,7 @@ describe("guest-upload route", () => {
     getEventUploadContextMock.mockResolvedValue({
       planId: "standard",
       eventDate: "2026-05-06T00:00:00.000Z",
+      organizerId: "other_user",
     });
     countMediaForQuotaMock.mockResolvedValue(0);
 

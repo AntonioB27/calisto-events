@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 
 import { ZIP_EXPORT_BATCH_LIMIT } from "@/lib/zip-export-constants";
@@ -13,8 +14,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "CRON_SECRET is not configured." }, { status: 503 });
   }
 
-  const auth = request.headers.get("authorization") ?? "";
-  if (auth !== `Bearer ${secret}`) {
+  const expected = `Bearer ${secret}`;
+  const provided = request.headers.get("authorization") ?? "";
+  const match =
+    provided.length === expected.length &&
+    timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
+  if (!match) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 

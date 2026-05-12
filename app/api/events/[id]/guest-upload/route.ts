@@ -11,13 +11,14 @@ type MediaType = "photo" | "video";
 type EventUploadContext = {
   planId: PlanId;
   eventDate: string;
+  organizerId: string;
 };
 
 async function getEventUploadContext(eventId: string): Promise<EventUploadContext | null> {
   const db = getSupabaseServerClient();
   const { data, error } = await db
     .from("events")
-    .select("id, plan, event_date")
+    .select("id, plan, event_date, organizer_id")
     .eq("id", eventId)
     .maybeSingle();
 
@@ -36,7 +37,22 @@ async function getEventUploadContext(eventId: string): Promise<EventUploadContex
     return null;
   }
 
-  return { planId, eventDate: data.event_date };
+  const organizerId = typeof (data as { organizer_id?: unknown }).organizer_id === "string"
+    ? (data as { organizer_id: string }).organizer_id
+    : "";
+
+  return { planId, eventDate: data.event_date, organizerId };
+}
+
+async function checkUserIsMember(eventId: string, userId: string): Promise<boolean> {
+  const db = getSupabaseServerClient();
+  const { data } = await db
+    .from("event_memberships")
+    .select("user_id")
+    .eq("event_id", eventId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  return data !== null;
 }
 
 const MIME_TO_EXT: Record<string, string> = {
@@ -110,6 +126,7 @@ async function insertMediaItem(params: {
 // Test seam: override these in route tests to avoid Supabase env requirements.
 export const __test = {
   getEventUploadContext,
+  checkUserIsMember,
   countMediaForQuota,
   insertMediaItem,
   maxGuestUploadBytesForMime,
@@ -156,6 +173,15 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
   const eventContext = await __test.getEventUploadContext(eventId);
   if (!eventContext) {
     return NextResponse.json({ error: "Event not found." }, { status: 404 });
+  }
+
+  // 3a) Membership check — user must be organizer or a joined member
+  const isOrganizer = eventContext.organizerId && eventContext.organizerId === user.id;
+  if (!isOrganizer) {
+    const isMember = await __test.checkUserIsMember(eventId, user.id);
+    if (!isMember) {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+    }
   }
 
   const now = new Date().toISOString();

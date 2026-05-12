@@ -33,6 +33,14 @@ const AGENT_DISCOVERY_LINK =
   '</docs/api>; rel="service-doc", ' +
   '</.well-known/agent-skills/index.json>; rel="describedby"';
 
+const SECURITY_HEADERS = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  { key: "X-XSS-Protection", value: "1; mode=block" },
+];
+
 const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_SUPABASE_URL,
@@ -40,6 +48,7 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      { source: "/(.*)", headers: SECURITY_HEADERS },
       { source: "/", headers: [{ key: "Link", value: AGENT_DISCOVERY_LINK }] },
       { source: "/en", headers: [{ key: "Link", value: AGENT_DISCOVERY_LINK }] },
       { source: "/hr", headers: [{ key: "Link", value: AGENT_DISCOVERY_LINK }] },
