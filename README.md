@@ -108,6 +108,8 @@ RESEND_FROM="Calisto <notifications@yourdomain.com>"
 NEXT_PUBLIC_SITE_URL=https://your-production-host
 ```
 
+Until you **verify a domain** in Resend, the API may only deliver to your Resend account email (trial/testing). ZIP export still completes: organizers use **Gallery → Download ZIP**. After domain verification, set `RESEND_FROM` to a sender on that domain so `to` can be any address.
+
 ### Required table
 
 Create this table in Supabase:

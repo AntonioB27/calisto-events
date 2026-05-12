@@ -32,6 +32,15 @@ function galleryUrlForEvent(eventId: string): string {
   return `${siteOrigin()}/events/${eventId}?tab=gallery`;
 }
 
+function logZipExportEmailSkipped(kind: "ready" | "failed", error: string) {
+  const isResendRecipientOrDomain =
+    /testing emails to your own|verify a domain at resend\.com/i.test(error);
+  const hint = isResendRecipientOrDomain
+    ? " (ZIP is still ready in the gallery — verify a sending domain at https://resend.com/domains and set RESEND_FROM to an address on that domain to email any recipient.)"
+    : "";
+  console.warn(`[zip-export] ${kind} email skipped:`, error + hint);
+}
+
 function safeZipEntryName(storagePath: string, id: string): string {
   const tail = storagePath.split("/").pop()?.trim() || "file";
   const cleaned = tail.replace(/[/\\]/g, "_");
@@ -172,7 +181,7 @@ export async function processNextZipExportJob(
         galleryUrl: galleryUrlForEvent(eventId),
         jobId,
       });
-      if (!r.ok) console.warn("[zip-export] ready email skipped:", r.error);
+      if (!r.ok) logZipExportEmailSkipped("ready", r.error);
     } else {
       console.warn("[zip-export] no organizer email for notify");
     }
@@ -207,13 +216,14 @@ export async function processNextZipExportJob(
           : "Event";
       const to = organizerId ? await organizerEmail(db, organizerId) : null;
       if (to) {
-        await sendZipExportEmail({
+        const sent = await sendZipExportEmail({
           kind: "failed",
           to,
           eventTitle,
           galleryUrl: galleryUrlForEvent(eventId),
           jobId,
         });
+        if (!sent.ok) logZipExportEmailSkipped("failed", sent.error);
       }
     } catch {
       console.error("[zip-export] failed notify branch", msg);
