@@ -246,13 +246,21 @@ export const APP_UI_DE: AppUiDict = {
 
   overview: {
     yourRole: "Deine Rolle",
-    uploadWindowLead:
-      "Gäste können während des Tarif‑Zeitraums hochladen: vom Veranstaltungsdatum noch",
-    uploadWindowBoldOne: "{n} Tag",
-    uploadWindowBoldMany: "{n} Tage",
-    uploadWindowTail: "darüber hinaus – unter Teilen prüfen, ob heute noch Upload möglich ist.",
-    planCapsNote:
-      "Foto-, Video‑ und Gastzahlen hängen von deinem Tarif ab. Aufbewahrung und Abrechnung steuern dein Calisto‑Konto bzw. der Support.",
+    uploadCloseLabel: "Verbleibende Zeit bis Ende der Uploads",
+    uploadCloseShareHint: "Unter Teilen prüfen, ob Gäste heute noch hochladen können.",
+    autoDeletionLabel: "Zeit bis zur automatischen Löschung des Events",
+    autoDeletionOverdue: "Löschzeitpunkt überschritten — der nächste Purge‑Job entfernt dieses Event.",
+    autoDeletionFooterHint:
+      "Richtet sich nach deinem Tarif ab Veranstaltungsdatum. Änderungen an Datum oder Tarif aktualisieren das. Manuelles Löschen weiterhin unter Einstellungen.",
+    countdownJoin: ", ",
+    countdownDayOne: "{n} Tag",
+    countdownDayMany: "{n} Tage",
+    countdownHourOne: "{n} Stunde",
+    countdownHourMany: "{n} Stunden",
+    countdownMinuteOne: "{n} Minute",
+    countdownMinuteMany: "{n} Minuten",
+    countdownSubMinute: "Weniger als eine Minute",
+    uploadWindowEnded: "Upload‑Fenster beendet — Uploads sind geschlossen.",
     statsTitle: "Statistik",
     statsPhotos: "Fotos",
     statsVideos: "Videos",
@@ -313,6 +321,27 @@ export const APP_UI_DE: AppUiDict = {
     downloadPhotoFail: "Download nicht möglich.",
     downloadFailedWithStatus: "Download fehlgeschlagen ({status}).",
     deleteBusy: "…",
+    zipExportCardEyebrow: "Primär‑Organisation",
+    zipExportTitle: "ZIP‑Sammelexport",
+    zipExportBlurb:
+      "Medien der Galerie als ZIP laden. Wir bereiten das im Hintergrund vor und senden eine E‑Mail, sobald es fertig ist. Download‑Links laufen nach 24 Stunden ab.",
+    zipExportPrepare: "ZIP vorbereiten",
+    zipExportModalTitle: "Galerie‑ZIP vorbereiten",
+    zipExportModalBody:
+      "Fotos sind standardmäßig enthalten. Option aktivieren, um Videos einzubeziehen (größere Datei, längere Erstellung).",
+    zipExportIncludeVideos: "Videos einbeziehen",
+    zipExportStart: "Export starten",
+    zipExportQueued: "In Warteschlange — wir melden uns, sobald es fertig ist.",
+    zipExportRunning: "ZIP wird erstellt …",
+    zipExportReady: "Bereit zum Download",
+    zipExportFailed: "Export fehlgeschlagen",
+    zipExportExpired: "Download abgelaufen",
+    zipExportDownload: "ZIP herunterladen",
+    zipExportErrorGeneric: "Export konnte nicht gestartet werden.",
+    zipExportErrorPending: "Ein anderer Export läuft bereits.",
+    zipExportErrorQueue:
+      "Die Export‑Warteschlange konnte nicht gelesen werden. Bei eigenem Supabase‑Projekt die neuesten Migrationen anwenden (inkl. `media_zip_exports`). Sonst kurz warten und erneut versuchen.",
+    zipExportErrorTooMany: "Zu viele Elemente für ein ZIP. Uploads reduzieren oder ohne Videos exportieren.",
   },
 
   guests: {

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { PLAN_DB_INT_MAX, canGuestUpload, getPlanLimits, type PlanId } from "./plan-limits";
+import {
+  PLAN_DB_INT_MAX,
+  canGuestUpload,
+  getPlanLimits,
+  getRetentionDeletionEndMs,
+  type PlanId,
+} from "./plan-limits";
 
 describe("getPlanLimits", () => {
   const cases: Array<{ planId: PlanId; expected: ReturnType<typeof getPlanLimits> }> = [
@@ -11,6 +17,7 @@ describe("getPlanLimits", () => {
         photos: 20,
         videos: 0,
         uploadDaysAfterEvent: 3,
+        retentionDaysAfterEvent: 7,
       },
     },
     {
@@ -20,6 +27,7 @@ describe("getPlanLimits", () => {
         photos: 150,
         videos: 10,
         uploadDaysAfterEvent: 7,
+        retentionDaysAfterEvent: 30,
       },
     },
     {
@@ -29,6 +37,7 @@ describe("getPlanLimits", () => {
         photos: 500,
         videos: 50,
         uploadDaysAfterEvent: 14,
+        retentionDaysAfterEvent: 90,
       },
     },
     {
@@ -38,6 +47,7 @@ describe("getPlanLimits", () => {
         photos: 2000,
         videos: 200,
         uploadDaysAfterEvent: 30,
+        retentionDaysAfterEvent: 180,
       },
     },
     {
@@ -47,6 +57,7 @@ describe("getPlanLimits", () => {
         photos: PLAN_DB_INT_MAX,
         videos: PLAN_DB_INT_MAX,
         uploadDaysAfterEvent: 60,
+        retentionDaysAfterEvent: 365,
       },
     },
   ];
@@ -62,13 +73,27 @@ describe("getPlanLimits", () => {
     freePlanLimits.photos = 999;
     freePlanLimits.videos = 999;
     freePlanLimits.uploadDaysAfterEvent = 999;
+    freePlanLimits.retentionDaysAfterEvent = 999;
 
     expect(getPlanLimits("free")).toEqual({
       guests: 5,
       photos: 20,
       videos: 0,
       uploadDaysAfterEvent: 3,
+      retentionDaysAfterEvent: 7,
     });
+  });
+});
+
+describe("getRetentionDeletionEndMs", () => {
+  it("adds plan retention days to event instant", () => {
+    const ms = getRetentionDeletionEndMs({ planId: "free", eventDate: "2026-01-01T00:00:00.000Z" });
+    expect(ms).toBe(new Date("2026-01-08T00:00:00.000Z").getTime());
+  });
+
+  it("uses 365 days for max", () => {
+    const ms = getRetentionDeletionEndMs({ planId: "max", eventDate: "2026-06-01T12:00:00.000Z" });
+    expect(ms).toBe(new Date("2027-06-01T12:00:00.000Z").getTime());
   });
 });
 

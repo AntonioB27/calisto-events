@@ -51,7 +51,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
 
   const { data: event } = await supabase
     .from("events")
-    .select("id, title, event_date, plan, access_code, organizer_id")
+    .select("id, title, event_date, plan, access_code, organizer_id, scheduled_deletion_at")
     .eq("id", id)
     .maybeSingle();
 
@@ -110,6 +110,11 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             eventId={id}
             eventDate={event.event_date}
             plan={event.plan}
+            scheduledDeletionAt={
+              typeof (event as { scheduled_deletion_at?: unknown }).scheduled_deletion_at === "string"
+                ? (event as { scheduled_deletion_at: string }).scheduled_deletion_at
+                : null
+            }
             accessCode={event.access_code}
             publicOrigin={publicOrigin}
             adminRoleLabel={
@@ -118,7 +123,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
           />
         )}
         {selectedTab === "guests" && <GuestsTab eventId={id} />}
-        {selectedTab === "gallery" && <GalleryTab eventId={id} />}
+        {selectedTab === "gallery" && <GalleryTab eventId={id} isPrimaryOrganizer={isPrimaryOrganizer} />}
         {selectedTab === "share" && (
           <ShareTab
             eventId={id}

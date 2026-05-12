@@ -31,11 +31,6 @@ function isVideoMime(mime: string | null | undefined) {
   return Boolean(mime && mime.startsWith("video/"));
 }
 
-function shortId(id: string) {
-  if (id.length <= 12) return id;
-  return `${id.slice(0, 6)}…${id.slice(-4)}`;
-}
-
 export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
   const ui = useAppUi();
   const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
@@ -249,7 +244,7 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
 
       {members.length > 0 ? (
         <ul style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {members.map((m) => {
+          {members.map((m, idx) => {
             const isMe = myUserId === m.user_id;
             const isPrimary = organizerId === m.user_id;
             const uploads = mediaByUser.get(m.user_id) ?? { photos: 0, videos: 0 };
@@ -267,54 +262,89 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
                   ? ui.dashboard.roleCoOrganizer
                   : ui.guests.guestLabelFallback;
             const isOrgRole = m.role === "organizer" || m.role === "co_organizer";
+            const avatarLetter = display.trim()[0]?.toUpperCase() ?? "?";
+            const avatarColor = isPrimary
+              ? "var(--app-gold)"
+              : m.role === "co_organizer"
+                ? "var(--app-purple)"
+                : "var(--app-muted)";
+            const avatarBg = isPrimary
+              ? "linear-gradient(135deg, color-mix(in srgb, var(--app-gold) 22%, transparent), color-mix(in srgb, var(--app-gold) 10%, transparent))"
+              : m.role === "co_organizer"
+                ? "linear-gradient(135deg, color-mix(in srgb, var(--app-purple) 22%, transparent), color-mix(in srgb, var(--app-purple) 10%, transparent))"
+                : "color-mix(in srgb, var(--app-muted) 10%, transparent)";
             return (
               <li
                 key={`${m.user_id}-${m.joined_at}`}
+                className="welcome-reveal guest-member-row"
                 style={{
+                  animationDelay: `${0.05 + idx * 0.04}s`,
                   background: 'var(--app-card)',
-                  borderRadius: 18,
+                  borderRadius: 16,
                   border: '1.5px solid var(--app-border)',
                   padding: '14px 18px',
                   fontSize: 14,
+                  transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{ fontWeight: 700, color: 'var(--app-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {display}
-                      {isMe ? (
-                        <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 600, color: "var(--app-gold)" }}>{ui.guests.youBadge}</span>
-                      ) : null}
-                    </p>
-                    <p style={{ marginTop: 4, fontFamily: 'monospace', fontSize: 11, color: 'var(--app-muted)' }} title={m.user_id}>
-                      {shortId(m.user_id)}
-                    </p>
-                    <p style={{ marginTop: 6, fontSize: 11, color: "var(--app-muted)" }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      background: avatarBg,
+                      border: `1.5px solid color-mix(in srgb, ${avatarColor} 30%, var(--app-border))`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: "var(--font-display)",
+                      fontStyle: "italic",
+                      fontWeight: 700,
+                      fontSize: 16,
+                      color: avatarColor,
+                    }}
+                  >
+                    {avatarLetter}
+                  </div>
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                      <p style={{ fontWeight: 700, color: 'var(--app-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
+                        {display}
+                        {isMe ? (
+                          <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 600, color: "var(--app-gold)" }}>{ui.guests.youBadge}</span>
+                        ) : null}
+                      </p>
+                      <span style={{
+                        flexShrink: 0,
+                        padding: '3px 10px',
+                        borderRadius: 20,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.08em',
+                        background: isOrgRole
+                          ? 'color-mix(in srgb, var(--app-gold) 12%, transparent)'
+                          : 'color-mix(in srgb, var(--app-muted) 12%, transparent)',
+                        border: isOrgRole
+                          ? '1.5px solid color-mix(in srgb, var(--app-gold) 30%, transparent)'
+                          : '1.5px solid var(--app-border)',
+                        color: isOrgRole ? 'var(--app-gold)' : 'var(--app-muted)',
+                      }}>
+                        {roleLabel}
+                      </span>
+                    </div>
+                    <p style={{ marginTop: 4, fontSize: 11, color: "var(--app-muted)", margin: "4px 0 0" }}>
                       {interpolate(ui.guests.uploadsLine, { photos: uploads.photos, videos: uploads.videos })}
                     </p>
                   </div>
-                  <span style={{
-                    flexShrink: 0,
-                    padding: '4px 12px',
-                    borderRadius: 20,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    background: isOrgRole
-                      ? 'color-mix(in srgb, var(--app-gold) 12%, transparent)'
-                      : 'color-mix(in srgb, var(--app-muted) 12%, transparent)',
-                    border: isOrgRole
-                      ? '1.5px solid color-mix(in srgb, var(--app-gold) 30%, transparent)'
-                      : '1.5px solid var(--app-border)',
-                    color: isOrgRole ? 'var(--app-gold)' : 'var(--app-muted)',
-                  }}>
-                    {roleLabel}
-                  </span>
                 </div>
 
                 {isPrimaryOrganizer ? (
-                  <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--app-border)", display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                     {canPromoteDemote && (m.role === "guest" || m.role === "co_organizer") ? (
                       <AppBtn
                         variant="ghost"

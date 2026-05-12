@@ -193,7 +193,11 @@ export function AuthCombinedForm() {
         alignItems: "center",
         justifyContent: "center",
         minHeight: "100vh",
-        padding: 24,
+        paddingTop: 24,
+        paddingLeft: 24,
+        paddingRight: 24,
+        paddingBottom: "max(24px, env(safe-area-inset-bottom, 24px))",
+        overflowY: "auto",
       }}
     >
       <div style={{ width: "100%", maxWidth: WELCOME_HERO_COLUMN_MAX_WIDTH_PX }}>
@@ -224,7 +228,7 @@ export function AuthCombinedForm() {
               fontFamily: "var(--font-display)",
               fontStyle: "italic",
               fontWeight: 700,
-              fontSize: 56,
+              fontSize: "clamp(36px, 13vw, 56px)",
               color: "var(--app-text)",
               lineHeight: 1,
             }}
@@ -248,6 +252,7 @@ export function AuthCombinedForm() {
             disabled={pending || oauthPending}
             loading={oauthPending}
             onClick={onGoogleOAuth}
+            size="lg"
           >
             <GoogleMark />
             {ui.auth.continueGoogle}
@@ -311,13 +316,17 @@ export function AuthCombinedForm() {
                 </p>
               ) : null}
 
-              <AppBtn type="submit" variant="primary" className="w-full" disabled={pending} loading={pending && mode === "login"}>
+              <AppBtn type="submit" variant="primary" size="lg" className="w-full auth-submit-btn" disabled={pending} loading={pending && mode === "login"}>
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <rect x="3" y="7.5" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+                  <path d="M5 7.5V5a3 3 0 0 1 6 0v2.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                </svg>
                 {ui.auth.signInSubmit}
               </AppBtn>
             </form>
 
             <div style={{ textAlign: "center", marginTop: 20 }}>
-              <AppBtn variant="ghost" size="sm" href="/auth/forgot-password" as={Link}>
+              <AppBtn variant="ghost" size="sm" href="/auth/forgot-password" as={Link} className="auth-forgot-link">
                 {ui.auth.forgotPw}
               </AppBtn>
             </div>
@@ -395,7 +404,10 @@ export function AuthCombinedForm() {
                 </p>
               ) : null}
 
-              <AppBtn type="submit" variant="primary" className="w-full" disabled={pending} loading={pending && mode === "register"}>
+              <AppBtn type="submit" variant="primary" size="lg" className="w-full auth-submit-btn" disabled={pending} loading={pending && mode === "register"}>
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path d="M8 1.5 L9.18 6.82 L14.5 8 L9.18 9.18 L8 14.5 L6.82 9.18 L1.5 8 L6.82 6.82 Z" />
+                </svg>
                 {ui.auth.createAccountSubmit}
               </AppBtn>
             </form>

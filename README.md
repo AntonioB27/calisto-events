@@ -80,6 +80,36 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
 Important: `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never be exposed in client code.
 
+### Automatic event deletion (retention)
+
+Events get `scheduled_deletion_at` in Postgres (`event_date` plus plan retention: Free 7d, Standard 30d, Plus 90d, Premium 180d, Max 365d). Apply migrations under `supabase/migrations/`.
+
+Production purges run from **`GET /api/cron/purge-expired-events`** (hourly via [`vercel.json`](./vercel.json)). Set a strong random value for:
+
+```bash
+CRON_SECRET=your-long-random-secret
+```
+
+Vercel sends `Authorization: Bearer <CRON_SECRET>` to cron routes when this variable is set. Without `CRON_SECRET`, the route returns 503 and nothing is deleted.
+
+### Gallery ZIP exports (primary organizer)
+
+Apply migrations that add `media_zip_exports` and `claim_next_zip_export_job()`. Cron routes (see [`vercel.json`](./vercel.json)):
+
+- **`GET /api/cron/process-zip-exports`** — service role claims queued jobs, builds ZIPs, uploads to the `event-media` bucket under `exports/{eventId}/{jobId}.zip`, marks jobs ready, sends email when `RESEND_API_KEY` is set.
+- **`GET /api/cron/expire-zip-exports`** — removes expired ready ZIP objects and marks rows `expired`.
+
+Email uses the same Resend setup as the waitlist/welcome flows. Set at least:
+
+```bash
+RESEND_API_KEY=re_...
+# optional — defaults to onboarding sender in code
+RESEND_FROM="Calisto <notifications@yourdomain.com>"
+NEXT_PUBLIC_SITE_URL=https://your-production-host
+```
+
+Until you **verify a domain** in Resend, the API may only deliver to your Resend account email (trial/testing). ZIP export still completes: organizers use **Gallery → Download ZIP**. After domain verification, set `RESEND_FROM` to a sender on that domain so `to` can be any address.
+
 ### Required table
 
 Create this table in Supabase:

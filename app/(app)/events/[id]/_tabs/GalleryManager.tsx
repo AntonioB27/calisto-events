@@ -25,6 +25,15 @@ type SignedUrlEntry = {
   signedUrl: string;
 };
 
+type ZipExportRow = {
+  id: string;
+  status: string;
+  include_videos: boolean;
+  error_message: string | null;
+  expires_at: string | null;
+  created_at: string;
+};
+
 const PAGE_SIZE = 60;
 
 function isVideoMime(mime: string | null | undefined) {
@@ -116,7 +125,10 @@ function buildUploaderLabelMap(
   return out;
 }
 
-export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
+export function GalleryManager({
+  eventId,
+  isPrimaryOrganizer,
+}: Readonly<{ eventId: string; isPrimaryOrganizer: boolean }>) {
   const ui = useAppUi();
   const [eventUpload, setEventUpload] = useState<{ planId: PlanId; eventDate: string } | null>(null);
   const [items, setItems] = useState<MediaItem[]>([]);
@@ -130,6 +142,11 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
   const [lightboxDownloadError, setLightboxDownloadError] = useState<string | null>(null);
   const [mediaFilter, setMediaFilter] = useState<MediaFilterId>("all");
   const [pendingDelete, setPendingDelete] = useState<MediaItem | null>(null);
+  const [zipExports, setZipExports] = useState<ZipExportRow[]>([]);
+  const [zipModalOpen, setZipModalOpen] = useState(false);
+  const [zipIncludeVideos, setZipIncludeVideos] = useState(false);
+  const [zipBusy, setZipBusy] = useState(false);
+  const [zipPanelError, setZipPanelError] = useState<string | null>(null);
 
   const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
 
@@ -161,6 +178,87 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
       setLightboxDownloadError(null);
     }
   }, [lightbox]);
+
+  useEffect(() => {
+    if (!supabase || !isPrimaryOrganizer) return;
+    let cancelled = false;
+    const tick = async () => {
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
+      const { data, error } = await supabase
+        .from("media_zip_exports")
+        .select("id, status, include_videos, error_message, expires_at, created_at")
+        .eq("event_id", eventId)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (!cancelled && !error) {
+        setZipExports((data ?? []) as ZipExportRow[]);
+      }
+    };
+    void tick();
+    const id = window.setInterval(() => void tick(), 4000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [supabase, isPrimaryOrganizer, eventId]);
+
+  const downloadZipExport = useCallback(
+    async (jobId: string) => {
+      setZipPanelError(null);
+      try {
+        const res = await fetch(`/api/events/${eventId}/zip-export/${jobId}/sign`, { method: "POST" });
+        const body = (await res.json()) as { url?: string; error?: string };
+        if (!res.ok || !body.url) throw new Error(body.error ?? ui.gallery.zipExportErrorGeneric);
+        window.location.href = body.url;
+      } catch (e) {
+        setZipPanelError(e instanceof Error ? e.message : ui.gallery.zipExportErrorGeneric);
+      }
+    },
+    [eventId, ui.gallery.zipExportErrorGeneric],
+  );
+
+  const confirmStartZip = useCallback(async () => {
+    setZipBusy(true);
+    setZipPanelError(null);
+    try {
+      const res = await fetch(`/api/events/${eventId}/zip-export`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ includeVideos: zipIncludeVideos }),
+      });
+      const body = (await res.json()) as { error?: string };
+      if (res.status === 400 && body.error === "ZIP_TOO_MANY_ITEMS") {
+        setZipPanelError(ui.gallery.zipExportErrorTooMany);
+      } else if (res.status === 409) {
+        setZipPanelError(ui.gallery.zipExportErrorPending);
+      } else if (res.status === 500 && body.error === "ZIP_QUEUE_CHECK_FAILED") {
+        setZipPanelError(ui.gallery.zipExportErrorQueue);
+      } else if (!res.ok) {
+        setZipPanelError(body.error ?? ui.gallery.zipExportErrorGeneric);
+      } else {
+        setZipModalOpen(false);
+        if (supabase) {
+          const { data } = await supabase
+            .from("media_zip_exports")
+            .select("id, status, include_videos, error_message, expires_at, created_at")
+            .eq("event_id", eventId)
+            .order("created_at", { ascending: false })
+            .limit(5);
+          setZipExports((data ?? []) as ZipExportRow[]);
+        }
+      }
+    } finally {
+      setZipBusy(false);
+    }
+  }, [
+    eventId,
+    supabase,
+    zipIncludeVideos,
+    ui.gallery.zipExportErrorGeneric,
+    ui.gallery.zipExportErrorPending,
+    ui.gallery.zipExportErrorQueue,
+    ui.gallery.zipExportErrorTooMany,
+  ]);
 
   const fetchPage = useCallback(
     async (pageIndex: number, replace: boolean) => {
@@ -400,6 +498,159 @@ export function GalleryManager({ eventId }: Readonly<{ eventId: string }>) {
           </div>
         </div>
       </div>
+
+      {isPrimaryOrganizer ? (
+        <div
+          style={{
+            marginBottom: 24,
+            padding: "16px 18px",
+            borderRadius: 16,
+            border: "1.5px solid color-mix(in srgb, var(--app-gold) 28%, var(--app-border))",
+            background: "color-mix(in srgb, var(--app-gold) 6%, var(--app-surface))",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: "var(--app-muted)",
+            }}
+          >
+            {ui.gallery.zipExportCardEyebrow}
+          </p>
+          <h3
+            style={{
+              margin: "8px 0 0",
+              fontFamily: "var(--font-display)",
+              fontStyle: "italic",
+              fontWeight: 700,
+              fontSize: 22,
+              color: "var(--app-text)",
+            }}
+          >
+            {ui.gallery.zipExportTitle}
+          </h3>
+          <p style={{ margin: "10px 0 0", fontSize: 13, color: "var(--app-muted)", lineHeight: 1.55 }}>
+            {ui.gallery.zipExportBlurb}
+          </p>
+          {zipPanelError ? (
+            <p style={{ margin: "10px 0 0", fontSize: 13, color: "var(--app-danger)" }}>{zipPanelError}</p>
+          ) : null}
+          {zipExports.length > 0 ? (
+            <ul style={{ margin: "14px 0 0", paddingLeft: 18, fontSize: 13, color: "var(--app-text)" }}>
+              {zipExports.map((z) => (
+                <li key={z.id} style={{ marginBottom: 8 }}>
+                  <span style={{ color: "var(--app-muted)" }}>
+                    {z.status === "queued"
+                      ? ui.gallery.zipExportQueued
+                      : z.status === "running"
+                        ? ui.gallery.zipExportRunning
+                        : z.status === "ready"
+                          ? ui.gallery.zipExportReady
+                          : z.status === "failed"
+                            ? `${ui.gallery.zipExportFailed}${z.error_message ? ` — ${z.error_message}` : ""}`
+                            : z.status === "expired"
+                              ? ui.gallery.zipExportExpired
+                              : z.status}
+                  </span>
+                  {z.status === "ready" ? (
+                    <span style={{ marginLeft: 10 }}>
+                      <AppBtn
+                        type="button"
+                        variant="gold"
+                        size="sm"
+                        onClick={() => void downloadZipExport(z.id)}
+                      >
+                        {ui.gallery.zipExportDownload}
+                      </AppBtn>
+                    </span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <div style={{ marginTop: 14 }}>
+            <AppBtn type="button" variant="gold" size="sm" onClick={() => setZipModalOpen(true)}>
+              {ui.gallery.zipExportPrepare}
+            </AppBtn>
+          </div>
+        </div>
+      ) : null}
+
+      {zipModalOpen ? (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1200,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
+            background: "rgba(0,0,0,0.55)",
+          }}
+          onClick={zipBusy ? undefined : () => setZipModalOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: 420,
+              borderRadius: 18,
+              padding: 22,
+              background: "var(--app-surface)",
+              border: "1.5px solid var(--app-border)",
+              boxShadow: "var(--app-shadow-lg)",
+            }}
+          >
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--app-text)" }}>
+              {ui.gallery.zipExportModalTitle}
+            </h2>
+            <p style={{ margin: "12px 0 0", fontSize: 14, lineHeight: 1.5, color: "var(--app-muted)" }}>
+              {ui.gallery.zipExportModalBody}
+            </p>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                marginTop: 16,
+                fontSize: 14,
+                color: "var(--app-text)",
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={zipIncludeVideos}
+                onChange={(e) => setZipIncludeVideos(e.target.checked)}
+                disabled={zipBusy}
+              />
+              <span>{ui.gallery.zipExportIncludeVideos}</span>
+            </label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "flex-end", marginTop: 22 }}>
+              <AppBtn type="button" variant="ghost" size="sm" disabled={zipBusy} onClick={() => setZipModalOpen(false)}>
+                {ui.common.cancel}
+              </AppBtn>
+              <AppBtn
+                type="button"
+                variant="gold"
+                size="sm"
+                disabled={zipBusy}
+                loading={zipBusy}
+                onClick={() => void confirmStartZip()}
+              >
+                {ui.gallery.zipExportStart}
+              </AppBtn>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div style={{ marginBottom: 28 }}>
         <p
