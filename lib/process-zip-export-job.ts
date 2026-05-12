@@ -1,11 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { createRequire } from "node:module";
 import { PassThrough } from "node:stream";
 import { finished } from "node:stream/promises";
 
 import { ZIP_EXPORT_EXPIRY_HOURS } from "@/lib/zip-export-constants";
 import { sendZipExportEmail } from "@/lib/zip-export-email";
 
-/** archiver@8 is ESM (`ZipArchive`); keep a minimal surface for our usage. */
+/** archiver@8 — avoid `import("archiver")` in dev: Turbopack HMR can panic with `InvalidExport` on that ESM graph. */
+const archiverRequire = createRequire(import.meta.url);
+
+/** Minimal surface for our usage. */
 type ZipArchiveInstance = {
   pipe: (dest: NodeJS.WritableStream) => unknown;
   append: (source: Buffer | string, data?: { name: string }) => unknown;
@@ -13,11 +17,11 @@ type ZipArchiveInstance = {
   on: (event: "error", listener: (err: Error) => void) => unknown;
 };
 
-async function createZipArchive(): Promise<ZipArchiveInstance> {
-  const mod = (await import("archiver")) as unknown as {
+function createZipArchive(): ZipArchiveInstance {
+  const { ZipArchive } = archiverRequire("archiver") as {
     ZipArchive: new (options?: { zlib?: { level?: number } }) => ZipArchiveInstance;
   };
-  return new mod.ZipArchive({ zlib: { level: 6 } });
+  return new ZipArchive({ zlib: { level: 6 } });
 }
 
 function siteOrigin(): string {
@@ -72,7 +76,7 @@ async function buildZipBuffer(
 
   const rows = (media ?? []) as { id: string; storage_path: string; mime_type: string | null }[];
 
-  const archive = await createZipArchive();
+  const archive = createZipArchive();
   const pass = new PassThrough();
   const chunks: Buffer[] = [];
   pass.on("data", (chunk: Buffer) => chunks.push(Buffer.from(chunk)));
