@@ -396,6 +396,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
                     <div className="plan-rows-hint" aria-hidden>···</div>
 
                     <div
+                      id={`plan-secondary-${plan.id}`}
                       className="plan-secondary-rows"
                       data-expanded={isExpanded ? "true" : "false"}
                     >
@@ -446,6 +447,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
                       type="button"
                       className="plan-expand-btn"
                       aria-expanded={isExpanded}
+                      aria-controls={`plan-secondary-${plan.id}`}
                       onClick={() =>
                         setExpandedPlans((prev) => ({ ...prev, [plan.id]: !(prev[plan.id] ?? false) }))
                       }
