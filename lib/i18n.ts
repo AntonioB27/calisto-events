@@ -54,7 +54,10 @@ type WaitlistCopy = {
   note: string;
 };
 
+export type SocialProofStat = { value: string; label: string };
+
 export type LandingCopy = {
+  socialProof: { ariaLabel: string; stats: SocialProofStat[] };
   languageLabel: string;
   languagePopupSubtitle: string;
   langContinue: string;
@@ -153,6 +156,15 @@ export function isLocale(value: string): value is Locale {
 
 const copy: Record<Locale, LandingCopy> = {
   en: {
+    socialProof: {
+      ariaLabel: "Platform highlights",
+      stats: [
+        { value: "247", label: "Events hosted" },
+        { value: "4,759", label: "Photos shared" },
+        { value: "1,140", label: "Happy guests" },
+        { value: "4.9", label: "Average rating" },
+      ],
+    },
     languageLabel: "Language",
     languagePopupSubtitle: "Choose your language and appearance to continue.",
     langContinue: "Continue",
@@ -443,6 +455,15 @@ const copy: Record<Locale, LandingCopy> = {
     brandIconAlt: "Calisto logo",
   },
   hr: {
+    socialProof: {
+      ariaLabel: "Statistike platforme",
+      stats: [
+        { value: "247", label: "Broj događaja" },
+        { value: "4.759", label: "Fotografija podijeljeno" },
+        { value: "1.140", label: "Zadovoljnih gostiju" },
+        { value: "4,9", label: "Prosječna ocjena" },
+      ],
+    },
     languageLabel: "Jezik",
     languagePopupSubtitle: "Odaberi jezik i izgled da nastaviš.",
     langContinue: "Nastavi",
@@ -729,6 +750,15 @@ const copy: Record<Locale, LandingCopy> = {
     brandIconAlt: "Calisto logotip",
   },
   de: {
+    socialProof: {
+      ariaLabel: "Plattform-Highlights",
+      stats: [
+        { value: "247", label: "Veranstaltungen" },
+        { value: "4.759", label: "Geteilte Fotos" },
+        { value: "1.140", label: "Zufriedene Gäste" },
+        { value: "4,9", label: "Ø Bewertung" },
+      ],
+    },
     languageLabel: "Sprache",
     languagePopupSubtitle: "Wähle Sprache und Darstellung, um fortzufahren.",
     langContinue: "Weiter",

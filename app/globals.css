@@ -2136,3 +2136,101 @@ html[data-theme="dark"] .auth-oauth-google-btn.app-btn--outline {
 }
 .event-date-dot--upcoming { background: var(--app-success); }
 .event-date-dot--past     { background: var(--app-subtle); }
+
+/* ════════ Social proof strip ════════ */
+.social-proof-section {
+  position: relative;
+  z-index: 2;
+  padding: 72px 0;
+  border-top: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+  overflow: hidden;
+}
+
+.social-proof-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 120% at 50% 50%, rgba(245, 199, 107, 0.055), transparent 65%);
+  pointer-events: none;
+}
+
+.social-proof-inner {
+  position: relative;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.social-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0;
+  padding: 0;
+}
+
+.social-proof-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px 32px;
+  border-right: 1px solid var(--hair-2);
+}
+
+.social-proof-stat:last-child {
+  border-right: none;
+}
+
+.social-proof-value {
+  display: block;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(3rem, 5.5vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  background: linear-gradient(140deg, var(--amber-2, #FFD28E) 0%, var(--gold) 45%, var(--amber) 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.social-proof-label {
+  display: block;
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: var(--cream-3);
+}
+
+@media (max-width: 680px) {
+  .social-proof-section { padding: 52px 0; }
+  .social-proof-inner { padding: 0 20px; }
+
+  .social-proof-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .social-proof-stat {
+    border-right: none;
+    padding: 0 16px;
+  }
+
+  .social-proof-stat:nth-child(odd) {
+    border-right: 1px solid var(--hair-2);
+  }
+
+  .social-proof-stat:nth-child(1),
+  .social-proof-stat:nth-child(2) {
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--hair);
+  }
+
+  .social-proof-stat:nth-child(3),
+  .social-proof-stat:nth-child(4) {
+    padding-top: 40px;
+  }
+}
