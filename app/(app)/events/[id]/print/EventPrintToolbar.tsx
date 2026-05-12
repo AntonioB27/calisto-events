@@ -5,21 +5,35 @@ import Link from "next/link";
 
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import type { AppUiDict } from "@/lib/app-ui/en";
-import { type PosterTemplateId, type PrintPaperId, POSTER_TEMPLATES, PRINT_PAPERS } from "@/lib/event-print/print-options";
+import type { Locale } from "@/lib/i18n";
+import { LOCALES } from "@/lib/i18n";
+import {
+  POSTER_LANG_QUERY,
+  type PosterTemplateId,
+  type PrintPaperId,
+  POSTER_TEMPLATES,
+  PRINT_PAPERS,
+} from "@/lib/event-print/print-options";
 
 export type EventPrintToolbarProps = Readonly<{
   eventId: string;
   template: PosterTemplateId;
   paper: PrintPaperId;
-  print: AppUiDict["print"];
+  posterLang: Locale;
+  /** Organizer-facing controls (UI language). */
+  chromePrint: AppUiDict["print"];
+  localeOptionLabels: AppUiDict["languagePicker"]["locales"];
 }>;
 
-function buildPrintHref(eventId: string, template: PosterTemplateId, paper: PrintPaperId): string {
+function buildPrintHref(
+  eventId: string,
+  opts: Readonly<{ template: PosterTemplateId; paper: PrintPaperId; posterLang: Locale }>,
+): string {
   const q = new URLSearchParams();
-  q.set("template", template);
-  q.set("paper", paper);
-  const qs = q.toString();
-  return `/events/${eventId}/print${qs ? `?${qs}` : ""}`;
+  q.set("template", opts.template);
+  q.set("paper", opts.paper);
+  q.set(POSTER_LANG_QUERY, opts.posterLang);
+  return `/events/${eventId}/print?${q.toString()}`;
 }
 
 function pickStyle(active: boolean): CSSProperties {
@@ -36,7 +50,22 @@ function pickStyle(active: boolean): CSSProperties {
   };
 }
 
-export function EventPrintToolbar({ eventId, template, paper, print }: EventPrintToolbarProps) {
+function localeButtonLabel(loc: Locale, localeOptionLabels: AppUiDict["languagePicker"]["locales"]): string {
+  if (loc === "en") return localeOptionLabels.en;
+  if (loc === "hr") return localeOptionLabels.hr;
+  return localeOptionLabels.de;
+}
+
+export function EventPrintToolbar({
+  eventId,
+  template,
+  paper,
+  posterLang,
+  chromePrint,
+  localeOptionLabels,
+}: EventPrintToolbarProps) {
+  const p = chromePrint;
+
   return (
     <div className="print:hidden" style={{ marginBottom: 24 }}>
       <div
@@ -50,31 +79,50 @@ export function EventPrintToolbar({ eventId, template, paper, print }: EventPrin
         }}
       >
         <AppBtn variant="ghost" size="sm" href={`/events/${eventId}?tab=share`} as={Link}>
-          {print.backShare}
+          {p.backShare}
         </AppBtn>
         <AppBtn variant="gold" size="sm" type="button" onClick={() => window.print()}>
-          {print.print}
+          {p.print}
         </AppBtn>
       </div>
 
       <p style={{ fontSize: 13, lineHeight: 1.45, color: "var(--app-muted)", maxWidth: 560, marginBottom: 20 }}>
-        {print.sheetHelper}
+        {p.sheetHelper}
       </p>
 
       <div style={{ marginBottom: 14 }}>
         <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--app-muted)" }}>
-          {print.templateSectionLabel}
+          {p.posterLanguageLabel}
+        </p>
+        <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {LOCALES.map((loc) => (
+            <Link
+              key={loc}
+              href={buildPrintHref(eventId, { template, paper, posterLang: loc })}
+              scroll={false}
+              style={pickStyle(posterLang === loc)}
+              prefetch={false}
+            >
+              {localeButtonLabel(loc, localeOptionLabels)}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 14 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--app-muted)" }}>
+          {p.templateSectionLabel}
         </p>
         <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 8 }}>
           {POSTER_TEMPLATES.map((tid) => (
             <Link
               key={tid}
-              href={buildPrintHref(eventId, tid, paper)}
+              href={buildPrintHref(eventId, { template: tid, paper, posterLang })}
               scroll={false}
               style={pickStyle(template === tid)}
               prefetch={false}
             >
-              {tid === "table-minimal" ? print.templateTableMinimal : print.templateTableBold}
+              {tid === "table-minimal" ? p.templateTableMinimal : p.templateTableBold}
             </Link>
           ))}
         </div>
@@ -82,18 +130,18 @@ export function EventPrintToolbar({ eventId, template, paper, print }: EventPrin
 
       <div>
         <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--app-muted)" }}>
-          {print.paperSectionLabel}
+          {p.paperSectionLabel}
         </p>
         <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 8 }}>
           {PRINT_PAPERS.map((pid) => (
             <Link
               key={pid}
-              href={buildPrintHref(eventId, template, pid)}
+              href={buildPrintHref(eventId, { template, paper: pid, posterLang })}
               scroll={false}
               style={pickStyle(paper === pid)}
               prefetch={false}
             >
-              {pid === "a4" ? print.paperA4 : print.paperLetter}
+              {pid === "a4" ? p.paperA4 : p.paperLetter}
             </Link>
           ))}
         </div>

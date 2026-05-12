@@ -4,7 +4,12 @@ import { EventPrintSheet } from "./EventPrintSheet";
 import { EventPrintToolbar } from "./EventPrintToolbar";
 import { getAppStrings } from "@/lib/app-ui";
 import { getEventAdminAccess } from "@/lib/event-admin-access";
-import { parsePosterTemplate, parsePrintPaper } from "@/lib/event-print/print-options";
+import {
+  parsePosterContentLocale,
+  parsePosterTemplate,
+  parsePrintPaper,
+  POSTER_LANG_QUERY,
+} from "@/lib/event-print/print-options";
 import { getWebJoinUrl } from "@/lib/join-link";
 import { getPublicOrigin } from "@/lib/public-origin";
 import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
@@ -27,9 +32,12 @@ function pickQueryValue(value: string | string[] | undefined): string | undefine
 export default async function EventPrintPage({ params, searchParams }: Props) {
   const { id } = await params;
   const resolvedSearchParams = (await searchParams) ?? {};
-  const locale = await getUiLocale();
-  const dict = getAppStrings(locale);
-  const { print: printStrings } = dict;
+  const uiLocale = await getUiLocale();
+  const uiDict = getAppStrings(uiLocale);
+  const posterLocale = parsePosterContentLocale(pickQueryValue(resolvedSearchParams[POSTER_LANG_QUERY]), uiLocale);
+  const posterDict = getAppStrings(posterLocale);
+  const deniedPrint = uiDict.print;
+  const posterPrint = posterDict.print;
 
   const supabase = await createSupabaseAuthServerClient();
   const {
@@ -54,11 +62,11 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
     return (
       <main className="join-shell min-h-screen px-4 py-10">
         <div style={{ maxWidth: 768, margin: "0 auto" }}>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--app-text)" }}>{printStrings.deniedTitle}</h1>
-          <p style={{ marginTop: 8, fontSize: "0.875rem", color: "var(--app-muted)" }}>{printStrings.deniedDeny}</p>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--app-text)" }}>{deniedPrint.deniedTitle}</h1>
+          <p style={{ marginTop: 8, fontSize: "0.875rem", color: "var(--app-muted)" }}>{deniedPrint.deniedDeny}</p>
           <p style={{ marginTop: 16 }}>
             <Link href="/dashboard" style={{ color: "var(--app-gold)", fontWeight: 600, fontSize: 14 }}>
-              {printStrings.backDashboard}
+              {deniedPrint.backDashboard}
             </Link>
           </p>
         </div>
@@ -74,9 +82,9 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
   const publicHostDisplay = publicOrigin.replace(/^https?:\/\//, "");
 
   const halfStrings = {
-    heroEyebrow: printStrings.heroEyebrow,
-    footerGoToLead: printStrings.footerGoToLead,
-    footerGoToTrail: printStrings.footerGoToTrail,
+    heroEyebrow: posterPrint.heroEyebrow,
+    footerGoToLead: posterPrint.footerGoToLead,
+    footerGoToTrail: posterPrint.footerGoToTrail,
   };
 
   return (
@@ -85,18 +93,27 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
       style={{ color: "var(--app-text)" }}
     >
       <div style={{ maxWidth: 960, margin: "0 auto" }} className="print:max-w-none">
-        <EventPrintToolbar eventId={id} template={template} paper={paper} print={printStrings} />
-
-        <EventPrintSheet
-          paper={paper}
+        <EventPrintToolbar
+          eventId={id}
           template={template}
-          eventTitle={event.title}
-          accessCode={event.access_code}
-          joinUrl={joinUrl}
-          publicHostDisplay={publicHostDisplay}
-          halfStrings={halfStrings}
-          cutHere={printStrings.cutHere}
+          paper={paper}
+          posterLang={posterLocale}
+          chromePrint={uiDict.print}
+          localeOptionLabels={uiDict.languagePicker.locales}
         />
+
+        <div lang={posterLocale}>
+          <EventPrintSheet
+            paper={paper}
+            template={template}
+            eventTitle={event.title}
+            accessCode={event.access_code}
+            joinUrl={joinUrl}
+            publicHostDisplay={publicHostDisplay}
+            halfStrings={halfStrings}
+            cutHere={posterPrint.cutHere}
+          />
+        </div>
       </div>
     </main>
   );

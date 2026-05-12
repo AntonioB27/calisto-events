@@ -558,6 +558,7 @@ export const APP_UI_HR: AppUiDict = {
     templateSectionLabel: "Izgled",
     templateTableMinimal: "Jednostavno",
     templateTableBold: "Naglašeno",
+    posterLanguageLabel: "Jezik na plakatu",
   },
 
   languagePicker: {
