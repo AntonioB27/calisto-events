@@ -10,12 +10,14 @@ import { AppCard } from "@/components/app-ui/AppCard";
 import { useAppUi } from "@/components/AppUiProvider";
 import { GoldBar } from "@/components/app-ui/GoldBar";
 import { StatRing } from "@/components/app-ui/StatRing";
-import { interpolate } from "@/lib/app-ui";
+import { formatCountdownRemaining } from "@/lib/format-upload-window-countdown";
 import { formatUiDateLong } from "@/lib/format-ui-datetime";
 import { getWebJoinUrl } from "@/lib/join-link";
 import {
   formatQuotaSublabelLocalized,
   getPlanLimits,
+  getRetentionDeletionEndMs,
+  getUploadWindowEndMs,
   isUnlimitedQuota,
   normalizePlanId,
 } from "@/lib/plan-limits";
@@ -25,6 +27,8 @@ export type OverviewTabProps = Readonly<{
   eventId: string;
   eventDate: string;
   plan: string;
+  /** From DB `events.scheduled_deletion_at`; omit only if column not migrated yet. */
+  scheduledDeletionAt?: string | null;
   accessCode: string;
   publicOrigin: string;
   /** Shown in plan card: primary organizer vs co-organizer */
@@ -70,21 +74,67 @@ function InfoCard({
   eventDate,
   planId,
   adminRoleLabel,
+  scheduledDeletionAt,
 }: {
   eventDate: string;
   planId: ReturnType<typeof normalizePlanId>;
   adminRoleLabel: string;
+  scheduledDeletionAt: string | null | undefined;
 }) {
   const ui = useAppUi();
-  const limits = useMemo(() => getPlanLimits(planId), [planId]);
+  const [nowMs, setNowMs] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNowMs(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
 
   const formatted = formatUiDateLong(eventDate, ui.locale);
 
-  const uploadDays = limits.uploadDaysAfterEvent;
-  const boldDays =
-    uploadDays === 1
-      ? interpolate(ui.overview.uploadWindowBoldOne, { n: uploadDays })
-      : interpolate(ui.overview.uploadWindowBoldMany, { n: uploadDays });
+  const uploadEndMs = useMemo(() => getUploadWindowEndMs({ planId, eventDate }), [planId, eventDate]);
+
+  const deletionEndMs = useMemo(() => {
+    if (scheduledDeletionAt) {
+      const t = new Date(scheduledDeletionAt).getTime();
+      return Number.isNaN(t) ? getRetentionDeletionEndMs({ planId, eventDate }) : t;
+    }
+    return getRetentionDeletionEndMs({ planId, eventDate });
+  }, [scheduledDeletionAt, planId, eventDate]);
+
+  const countdownDict = useMemo(
+    () => ({
+      countdownJoin: ui.overview.countdownJoin,
+      countdownDayOne: ui.overview.countdownDayOne,
+      countdownDayMany: ui.overview.countdownDayMany,
+      countdownHourOne: ui.overview.countdownHourOne,
+      countdownHourMany: ui.overview.countdownHourMany,
+      countdownMinuteOne: ui.overview.countdownMinuteOne,
+      countdownMinuteMany: ui.overview.countdownMinuteMany,
+      countdownSubMinute: ui.overview.countdownSubMinute,
+      ended: ui.overview.uploadWindowEnded,
+    }),
+    [ui.overview],
+  );
+
+  const deletionCountdownDict = useMemo(
+    () => ({
+      ...countdownDict,
+      ended: ui.overview.autoDeletionOverdue,
+    }),
+    [countdownDict, ui.overview.autoDeletionOverdue],
+  );
+
+  const uploadRemainingText =
+    uploadEndMs === null
+      ? ui.overview.uploadWindowEnded
+      : formatCountdownRemaining(uploadEndMs - nowMs, countdownDict);
+
+  const deletionRemainingText =
+    deletionEndMs === null
+      ? ui.overview.autoDeletionOverdue
+      : formatCountdownRemaining(deletionEndMs - nowMs, deletionCountdownDict);
+
+  const uploadsStillOpen = uploadEndMs !== null && uploadEndMs > nowMs;
 
   const planName = ui.plans[planId];
   const calendarIcon = (
@@ -141,16 +191,35 @@ function InfoCard({
           <span>{formatted}</span>
         </div>
         <div style={{ height: 1, background: "var(--app-border)" }} />
-        <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--app-warn)", fontWeight: 600 }}>
-          <span style={{ display: "inline-flex" }}>{hourglassIcon}</span>
-          <span>
-            {ui.overview.uploadWindowLead}{" "}
-            <strong>{boldDays}</strong> {ui.overview.uploadWindowTail}
-          </span>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 14, color: "var(--app-warn)" }}>
+          <span style={{ display: "inline-flex", flexShrink: 0, marginTop: 2 }}>{hourglassIcon}</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--app-warn)" }}>
+              {ui.overview.uploadCloseLabel}
+            </span>
+            <span style={{ fontWeight: 700, color: "var(--app-warn)", lineHeight: 1.35 }} aria-live="polite">
+              {uploadRemainingText}
+            </span>
+            {uploadsStillOpen ? (
+              <span style={{ fontSize: 12, fontWeight: 500, color: "color-mix(in srgb, var(--app-warn) 82%, var(--app-text))", lineHeight: 1.35 }}>
+                {ui.overview.uploadCloseShareHint}
+              </span>
+            ) : null}
+          </div>
         </div>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 14, color: "var(--app-muted)" }}>
           <span style={{ display: "inline-flex", flexShrink: 0, marginTop: 2 }}>{quotaIcon}</span>
-          <span>{ui.overview.planCapsNote}</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--app-muted)" }}>
+              {ui.overview.autoDeletionLabel}
+            </span>
+            <span style={{ fontWeight: 600, color: "var(--app-text)", lineHeight: 1.35 }} aria-live="polite">
+              {deletionRemainingText}
+            </span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: "var(--app-muted)", lineHeight: 1.35 }}>
+              {ui.overview.autoDeletionFooterHint}
+            </span>
+          </div>
         </div>
       </div>
     </AppCard>
@@ -233,7 +302,7 @@ function StatsCard({ eventId, planId }: { eventId: string; planId: ReturnType<ty
       {!supabase ? (
         <p style={{ fontSize: 13, color: "var(--app-muted)" }}>{ui.common.loadCountsHint}</p>
       ) : (
-        <div style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap", gap: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-evenly", flexWrap: "wrap", gap: 16 }}>
           <StatRing
             value={photos ?? 0}
             max={ringMax(photoMax, photos ?? 0)}
@@ -298,13 +367,20 @@ function AccessCodeCard({ accessCode, publicOrigin }: { accessCode: string; publ
           color: "var(--app-text)",
           letterSpacing: "0.12em",
           marginBottom: 14,
-          fontFamily: "monospace",
+          fontFamily: "var(--font-mono)",
         }}
       >
         {accessCode}
       </div>
       <div style={{ display: "flex", gap: 10 }}>
-        <AppBtn variant="outline" size="sm" type="button" onClick={() => void copy()} className="flex-1">
+        <AppBtn
+          variant="outline"
+          size="sm"
+          type="button"
+          onClick={() => void copy()}
+          className="flex-1"
+          style={copied ? { color: "var(--app-success)", borderColor: "color-mix(in srgb, var(--app-success) 40%, var(--app-border))" } : undefined}
+        >
           {copied ? ui.common.copied : ui.overview.copyCode}
         </AppBtn>
         <AppBtn variant="primary" size="sm" type="button" onClick={() => setShowQR((v) => !v)} className="flex-1">
@@ -325,7 +401,7 @@ function AccessCodeCard({ accessCode, publicOrigin }: { accessCode: string; publ
             border: "1.5px solid var(--app-border)",
           }}
         >
-          <div style={{ borderRadius: 12, padding: 12, border: "1.5px solid var(--app-border)", background: "#fff" }}>
+          <div className="qr-frame qr-reveal">
             <QRCode value={joinUrl} size={168} />
           </div>
           <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 12, color: "var(--app-muted)", margin: 0, textAlign: "center" }}>
@@ -450,16 +526,29 @@ function FeaturedPhotosCard({ eventId }: { eventId: string }) {
   );
 }
 
-export function OverviewTab({ eventId, eventDate, plan, accessCode, publicOrigin, adminRoleLabel }: OverviewTabProps) {
+export function OverviewTab({
+  eventId,
+  eventDate,
+  plan,
+  scheduledDeletionAt,
+  accessCode,
+  publicOrigin,
+  adminRoleLabel,
+}: OverviewTabProps) {
   const planId = normalizePlanId(plan);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
-        <InfoCard eventDate={eventDate} planId={planId} adminRoleLabel={adminRoleLabel} />
+      <div className="welcome-reveal welcome-reveal--d1" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+        <InfoCard
+          eventDate={eventDate}
+          planId={planId}
+          adminRoleLabel={adminRoleLabel}
+          scheduledDeletionAt={scheduledDeletionAt}
+        />
         <StatsCard eventId={eventId} planId={planId} />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+      <div className="welcome-reveal welcome-reveal--d2" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
         <AccessCodeCard accessCode={accessCode} publicOrigin={publicOrigin} />
         <FeaturedPhotosCard eventId={eventId} />
       </div>

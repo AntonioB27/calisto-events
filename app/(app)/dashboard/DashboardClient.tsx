@@ -28,6 +28,7 @@ function EventCard({
   defaultEventTitle,
   roleOrganizer,
   roleCo,
+  index,
 }: Readonly<{
   event: DashboardEventRow;
   onOpen: (e: DashboardEventRow) => void;
@@ -35,57 +36,97 @@ function EventCard({
   defaultEventTitle: string;
   roleOrganizer: string;
   roleCo: string;
+  index: number;
 }>) {
   const { emoji: storedEmoji, name: displayTitle } = splitEventTitleStored(String(event.title ?? defaultEventTitle));
   const navEmoji = displayNavEmoji(storedEmoji);
+  const isCoOrg = event.membershipRole === "co_organizer";
+  const isUpcoming = event.event_date ? new Date(event.event_date) >= new Date() : false;
 
   return (
-    <AppCard hover pad="md" onClick={() => onOpen(event)}>
-      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: "var(--app-radius-md)",
-            flexShrink: 0,
-            background:
-              "linear-gradient(135deg, color-mix(in srgb, var(--app-purple) 16%, transparent), color-mix(in srgb, var(--app-gold) 16%, transparent))",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 24,
-          }}
-        >
-          {navEmoji}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
+    <div className="welcome-reveal" style={{ animationDelay: `${0.06 + index * 0.055}s` }}>
+      <AppCard
+        hover
+        pad="md"
+        onClick={() => onOpen(event)}
+        className={isCoOrg ? "event-card--coorg" : "event-card--org"}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div
             style={{
-              fontFamily: "var(--font-display)",
-              fontStyle: "italic",
-              fontWeight: 700,
-              fontSize: 18,
-              color: "var(--app-text)",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
+              width: 48,
+              height: 48,
+              borderRadius: "var(--app-radius-md)",
+              flexShrink: 0,
+              background: isCoOrg
+                ? "linear-gradient(135deg, color-mix(in srgb, var(--app-purple) 24%, transparent), color-mix(in srgb, var(--app-purple) 10%, transparent))"
+                : "linear-gradient(135deg, color-mix(in srgb, var(--app-purple) 16%, transparent), color-mix(in srgb, var(--app-gold) 16%, transparent))",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 24,
             }}
           >
-            {displayTitle}
+            {navEmoji}
           </div>
-          <div style={{ fontSize: 12, color: "var(--app-muted)", marginTop: 3 }}>
-            {formatUiDateShort(event.event_date, locale)} ·{" "}
-            {event.membershipRole === "organizer" ? roleOrganizer : roleCo}
+
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontFamily: "var(--font-display)",
+                fontStyle: "italic",
+                fontWeight: 700,
+                fontSize: 18,
+                color: "var(--app-text)",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {displayTitle}
+            </div>
+            <div
+              style={{
+                fontSize: 12,
+                color: "var(--app-muted)",
+                marginTop: 4,
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                overflow: "hidden",
+              }}
+            >
+              <span
+                aria-hidden="true"
+                className={`event-date-dot ${isUpcoming ? "event-date-dot--upcoming" : "event-date-dot--past"}`}
+                style={{ flexShrink: 0 }}
+              />
+              <span
+                style={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  minWidth: 0,
+                }}
+              >
+                {formatUiDateShort(event.event_date, locale)}
+                {" · "}
+                <span style={{ color: isCoOrg ? "var(--app-purple)" : "inherit" }}>
+                  {isCoOrg ? roleCo : roleOrganizer}
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 8 }}>
+            <AppBadge tone={isCoOrg ? "purple" : "accent"}>{event.plan}</AppBadge>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9 18L15 12L9 6" stroke="var(--app-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
         </div>
-        <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 8 }}>
-          <AppBadge tone="accent">{event.plan}</AppBadge>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M9 18L15 12L9 6" stroke="var(--app-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-      </div>
-    </AppCard>
+      </AppCard>
+    </div>
   );
 }
 
@@ -106,26 +147,35 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
     window.location.href = `/events/${event.id}`;
   }
 
+  const isEmpty = visibleEvents.length === 0;
+
+  // Hint card delay: appears after all event cards finish staggering in
+  const hintDelay = isEmpty ? 0 : 0.06 + visibleEvents.length * 0.055 + 0.08;
+
   return (
     <div style={{ padding: "40px 0 60px" }}>
-      <AppPageHeader
-        eyebrow={ui.dashboard.eyebrow}
-        title={interpolate(ui.dashboard.helloTemplate, { name: userName })}
-        description={ui.dashboard.subtitle}
-        actions={
-          <>
-            <AppBtn as={Link} href="/join" variant="outline" size="sm">
-              {ui.dashboard.joinWithCode}
-            </AppBtn>
-            <AppBtn as={Link} href="/events/new" variant="primary" size="sm">
-              {ui.dashboard.createEvent}
-            </AppBtn>
-          </>
-        }
-      />
+      <div className="welcome-reveal">
+        <AppPageHeader
+          eyebrow={ui.dashboard.eyebrow}
+          title={interpolate(ui.dashboard.helloTemplate, { name: userName })}
+          description={isEmpty ? undefined : ui.dashboard.subtitle}
+          actions={
+            isEmpty ? undefined : (
+              <>
+                <AppBtn as={Link} href="/join" variant="outline" size="sm">
+                  {ui.dashboard.joinWithCode}
+                </AppBtn>
+                <AppBtn as={Link} href="/events/new" variant="primary" size="sm">
+                  {ui.dashboard.createEvent}
+                </AppBtn>
+              </>
+            )
+          }
+        />
+      </div>
 
       {visibleEvents.length > 0 && (
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 24 }} className="welcome-reveal welcome-reveal--d1">
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
             <div style={{ width: 3, height: 18, background: "var(--app-gold)", borderRadius: 2 }} />
             <span
@@ -139,9 +189,19 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
             >
               {ui.dashboard.yourEvents}
             </span>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: "0.08em",
+                color: "var(--app-subtle)",
+              }}
+            >
+              · {visibleEvents.length}
+            </span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {visibleEvents.map((e) => (
+            {visibleEvents.map((e, i) => (
               <EventCard
                 key={e.id}
                 event={e}
@@ -150,19 +210,21 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
                 defaultEventTitle={ui.defaults.eventTitle}
                 roleOrganizer={ui.dashboard.roleOrganizer}
                 roleCo={ui.dashboard.roleCoOrganizer}
+                index={i}
               />
             ))}
           </div>
         </div>
       )}
 
-      <AppCard pad="lg">
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, textAlign: "center" }}>
+      {isEmpty ? (
+        /* ── Empty state: atmospheric hero card with CTA ── */
+        <div className="dash-empty-card welcome-reveal welcome-reveal--d1">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="https://www.calisto-events.com/_next/image?url=%2Fbrand%2Fmascot%2Faurora_key.png&w=384&q=75"
-            alt="Aurora"
-            style={{ width: 72, height: 72, objectFit: "contain", filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.08))" }}
+            src="/brand/mascot/aurora_key.png"
+            alt=""
+            style={{ width: 88, height: 132, objectFit: "contain" }}
           />
           <p
             style={{
@@ -170,15 +232,44 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
               fontStyle: "italic",
               fontSize: 15,
               color: "var(--app-muted)",
-              maxWidth: 340,
+              maxWidth: 320,
               lineHeight: 1.6,
               margin: 0,
             }}
           >
-            {visibleEvents.length === 0 ? ui.dashboard.emptyHint : ui.dashboard.moreHint}
+            {ui.dashboard.emptyHint}
           </p>
+          <AppBtn as={Link} href="/events/new" variant="gold" size="md">
+            {ui.dashboard.createEvent}
+          </AppBtn>
         </div>
-      </AppCard>
+      ) : (
+        /* ── Non-empty: compact hint row ── */
+        <div className="welcome-reveal" style={{ animationDelay: `${hintDelay}s` }}>
+          <AppCard pad="md">
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/mascot/aurora_key.png"
+                alt=""
+                style={{ width: 36, height: 54, objectFit: "contain", flexShrink: 0, opacity: 0.8 }}
+              />
+              <p
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontStyle: "italic",
+                  fontSize: 14,
+                  color: "var(--app-muted)",
+                  margin: 0,
+                  lineHeight: 1.55,
+                }}
+              >
+                {ui.dashboard.moreHint}
+              </p>
+            </div>
+          </AppCard>
+        </div>
+      )}
     </div>
   );
 }

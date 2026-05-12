@@ -1655,3 +1655,480 @@ a.app-account-menu__item:visited {
     transform: translateX(140%);
   }
 }
+
+/* ════════ Welcome page ════════ */
+
+/* Glass card container */
+.welcome-card {
+  padding: 36px 32px 32px;
+  border-radius: var(--app-radius-xl);
+  border: 1.5px solid color-mix(in srgb, var(--app-border) 70%, transparent);
+  background:
+    radial-gradient(120% 80% at 50% -12%, color-mix(in srgb, var(--app-purple) 10%, transparent) 0%, transparent 52%),
+    color-mix(in srgb, var(--app-surface) 78%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--app-inverse) 5%, transparent),
+    var(--app-shadow-lg);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+}
+
+html[data-theme="dark"] .welcome-card {
+  background:
+    radial-gradient(120% 80% at 50% -12%, color-mix(in srgb, var(--app-purple) 14%, transparent) 0%, transparent 52%),
+    color-mix(in srgb, var(--app-surface) 65%, transparent);
+}
+
+@media (max-width: 480px) {
+  .welcome-card {
+    padding: 28px 20px 24px;
+    border-radius: var(--app-radius-lg);
+  }
+}
+
+/* Language bar: centered above card on mobile, absolute top-right on desktop */
+.welcome-lang-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 400px;
+}
+
+@media (min-width: 641px) {
+  .welcome-lang-bar {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: auto;
+    max-width: none;
+    margin-bottom: 0;
+  }
+}
+
+/* Staggered entrance reveals */
+.welcome-reveal {
+  animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.welcome-reveal--d1 { animation-delay: 0.08s; }
+.welcome-reveal--d2 { animation-delay: 0.16s; }
+.welcome-reveal--d3 { animation-delay: 0.24s; }
+.welcome-reveal--d4 { animation-delay: 0.32s; }
+.welcome-reveal--d5 { animation-delay: 0.44s; }
+.welcome-reveal--d6 { animation-delay: 0.54s; }
+
+/* Mascot gentle float loop */
+@keyframes welcomeFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+.welcome-mascot-float {
+  animation: welcomeFloat 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-reveal,
+  .welcome-reveal--d1,
+  .welcome-reveal--d2,
+  .welcome-reveal--d3,
+  .welcome-reveal--d4,
+  .welcome-reveal--d5,
+  .welcome-reveal--d6 {
+    animation: none;
+    opacity: 1;
+  }
+  .welcome-mascot-float { animation: none; }
+}
+
+/* ════════ Welcome page — bespoke CTA buttons ════════ */
+.welcome-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 22px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.18s ease,
+    background 0.18s ease;
+}
+
+.welcome-btn:active { transform: scale(0.985) !important; }
+
+/* Icon + label group — sits above pseudo-elements */
+.welcome-btn__inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── Create event: warm gold, italic serif, sparkle ── */
+.welcome-btn--create {
+  background: linear-gradient(135deg, #c5922a 0%, #f5c76b 50%, #e8a84e 100%);
+  color: #1b1208;
+  border: none;
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.20),
+    0 8px 32px rgba(197, 146, 42, 0.30);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 16.5px;
+  padding-top: 17px;
+  padding-bottom: 17px;
+}
+
+/* Film-grain texture */
+.welcome-btn--create::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+  opacity: 0.065;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Sheen sweep on hover */
+.welcome-btn--create::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  z-index: 1;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.40) 20%,
+    transparent 38%
+  );
+  transform: translateX(-150%);
+  pointer-events: none;
+}
+
+.welcome-btn--create:hover {
+  filter: brightness(1.06) saturate(1.08);
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 0 rgba(0, 0, 0, 0.20),
+    0 18px 52px rgba(197, 146, 42, 0.44);
+}
+
+.welcome-btn--create:hover::after {
+  animation: appBtnSheen 650ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ── Join event: gradient-border glass, key + chevron ── */
+.welcome-btn--join {
+  background:
+    color-mix(in srgb, var(--app-surface) 88%, transparent) padding-box,
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-gold) 72%, transparent),
+      color-mix(in srgb, var(--app-purple) 58%, transparent)
+    ) border-box;
+  border: 1.5px solid transparent;
+  color: var(--app-text);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--app-shadow-sm);
+}
+
+.welcome-btn--join .welcome-btn__inner {
+  justify-content: space-between;
+}
+
+html[data-theme="dark"] .welcome-btn--join {
+  background:
+    color-mix(in srgb, var(--app-surface) 72%, transparent) padding-box,
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-gold) 55%, transparent),
+      color-mix(in srgb, var(--app-purple) 48%, transparent)
+    ) border-box;
+}
+
+.welcome-btn--join:hover {
+  transform: translateY(-1px);
+  background:
+    color-mix(in srgb, var(--app-surface) 96%, transparent) padding-box,
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-gold) 90%, transparent),
+      color-mix(in srgb, var(--app-purple) 75%, transparent)
+    ) border-box;
+  box-shadow: var(--app-shadow-md);
+}
+
+.welcome-btn--join .welcome-btn-chevron {
+  opacity: 0.5;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease;
+  flex-shrink: 0;
+}
+
+.welcome-btn--join:hover .welcome-btn-chevron {
+  transform: translateX(3px);
+  opacity: 1;
+}
+
+/* ── Have account: pure text-link action ── */
+.welcome-btn--account {
+  background: transparent;
+  border: none;
+  color: var(--app-muted);
+  font-size: 13.5px;
+  font-weight: 500;
+  width: auto;
+  padding: 10px 14px;
+  border-radius: 8px;
+  align-self: center;
+}
+
+.welcome-btn--account .welcome-btn__inner {
+  gap: 7px;
+  width: auto;
+}
+
+.welcome-btn--account:hover {
+  color: var(--app-text);
+  background: color-mix(in srgb, var(--app-text) 5%, transparent);
+  transform: none;
+}
+
+.welcome-btn--account .welcome-btn-arrow {
+  opacity: 0.40;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease;
+  flex-shrink: 0;
+}
+
+.welcome-btn--account:hover .welcome-btn-arrow {
+  transform: translateX(3px);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-btn { transition: none; }
+  .welcome-btn--create::after { animation: none !important; }
+  .welcome-btn--create:hover { transform: none; }
+  .welcome-btn--join:hover { transform: none; }
+  .welcome-btn--join .welcome-btn-chevron,
+  .welcome-btn--account .welcome-btn-arrow { transition: none; }
+}
+
+/* ════════ Auth page — bespoke button overrides ════════ */
+
+/* Google OAuth: gradient border hints at Google's brand palette */
+.auth-oauth-google-btn.app-btn--outline {
+  background:
+    color-mix(in srgb, var(--app-surface) 92%, transparent) padding-box,
+    linear-gradient(
+      135deg,
+      rgba(66, 133, 244, 0.40),
+      rgba(52, 168, 83, 0.30) 33%,
+      rgba(251, 188, 5, 0.30) 66%,
+      rgba(234, 67, 53, 0.35)
+    ) border-box;
+  border: 1.5px solid transparent;
+  color: var(--app-text);
+  font-size: 14.5px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+html[data-theme="dark"] .auth-oauth-google-btn.app-btn--outline {
+  background:
+    color-mix(in srgb, var(--app-surface) 76%, transparent) padding-box,
+    linear-gradient(
+      135deg,
+      rgba(66, 133, 244, 0.32),
+      rgba(52, 168, 83, 0.22) 33%,
+      rgba(251, 188, 5, 0.22) 66%,
+      rgba(234, 67, 53, 0.28)
+    ) border-box;
+}
+
+.auth-oauth-google-btn.app-btn--outline:hover:not(:disabled):not([aria-disabled="true"]) {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+  background:
+    color-mix(in srgb, var(--app-surface) 98%, transparent) padding-box,
+    linear-gradient(
+      135deg,
+      rgba(66, 133, 244, 0.58),
+      rgba(52, 168, 83, 0.44) 33%,
+      rgba(251, 188, 5, 0.44) 66%,
+      rgba(234, 67, 53, 0.52)
+    ) border-box;
+}
+
+/* Submit buttons: gold gradient + italic serif, overrides app-btn--primary */
+.auth-submit-btn.app-btn--primary {
+  background: linear-gradient(135deg, #c5922a 0%, #f5c76b 50%, #e8a84e 100%);
+  color: #1b1208;
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.18),
+    0 6px 24px rgba(197, 146, 42, 0.28);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 16px;
+}
+
+/* Grain texture via ::before (replaces the default app-btn sheen placeholder) */
+.auth-submit-btn.app-btn--primary::before {
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+  opacity: 0.065;
+  mix-blend-mode: overlay;
+  transform: none;
+}
+
+/* Prevent the inherited app-btn hover from animating our grain */
+.auth-submit-btn.app-btn--primary:hover:not(:disabled):not([aria-disabled="true"])::before {
+  animation: none;
+  opacity: 0.065;
+  transform: none;
+}
+
+/* Sheen sweep via ::after */
+.auth-submit-btn.app-btn--primary::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  z-index: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.38) 20%,
+    transparent 38%
+  );
+  transform: translateX(-150%);
+  pointer-events: none;
+}
+
+.auth-submit-btn.app-btn--primary:hover:not(:disabled):not([aria-disabled="true"]) {
+  filter: brightness(1.06) saturate(1.08);
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 0 rgba(0, 0, 0, 0.20),
+    0 14px 40px rgba(197, 146, 42, 0.40);
+}
+
+.auth-submit-btn.app-btn--primary:hover:not(:disabled):not([aria-disabled="true"])::after {
+  animation: appBtnSheen 650ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Forgot password: text-link style */
+.auth-forgot-link.app-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--app-muted);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--app-muted) 38%, transparent);
+  text-underline-offset: 2px;
+}
+
+.auth-forgot-link.app-btn--ghost:hover:not(:disabled) {
+  color: var(--app-text);
+  background: color-mix(in srgb, var(--app-text) 5%, transparent);
+  border-color: transparent;
+  text-decoration-color: color-mix(in srgb, var(--app-gold) 55%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-submit-btn.app-btn--primary::after { animation: none !important; }
+  .auth-submit-btn.app-btn--primary:hover:not(:disabled):not([aria-disabled="true"]) { transform: none; }
+  .auth-oauth-google-btn.app-btn--outline:hover:not(:disabled):not([aria-disabled="true"]) { transform: none; }
+}
+
+/* ════════ Event pages ════════ */
+
+/* QR code frame — white bg is intentional for scan contrast; shadow makes it feel designed */
+.qr-frame {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.18),
+    0 1px 4px rgba(0, 0, 0, 0.10);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes qrReveal {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.qr-reveal {
+  animation: qrReveal 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .qr-reveal { animation: none; }
+}
+
+/* Guest member rows */
+.guest-member-row:hover {
+  border-color: color-mix(in srgb, var(--app-gold) 32%, var(--app-border)) !important;
+  box-shadow: var(--app-shadow-sm);
+}
+
+/* ════════ Dashboard ════════ */
+
+/* Empty state hero card */
+.dash-empty-card {
+  padding: 52px 28px 44px;
+  border-radius: var(--app-radius-xl);
+  border: 1.5px solid color-mix(in srgb, var(--app-border) 70%, transparent);
+  background:
+    radial-gradient(800px 440px at 50% -10%, color-mix(in srgb, var(--app-gold) 15%, transparent), transparent 55%),
+    radial-gradient(600px 360px at 85% 110%, color-mix(in srgb, var(--app-purple) 10%, transparent), transparent 55%),
+    var(--app-surface);
+  box-shadow:
+    var(--app-shadow-md),
+    inset 0 1px 0 color-mix(in srgb, var(--app-inverse) 5%, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .dash-empty-card { padding: 40px 20px 36px; }
+}
+
+/* Co-organiser event cards: purple-tinted left accent */
+.event-card--org.app-card {
+  border-left-color: color-mix(in srgb, var(--app-gold) 55%, var(--app-border));
+  border-left-width: 3px;
+}
+.event-card--coorg.app-card {
+  border-left-color: color-mix(in srgb, var(--app-purple) 55%, var(--app-border));
+  border-left-width: 3px;
+}
+
+/* Upcoming / past dot indicators on event cards */
+.event-date-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.event-date-dot--upcoming { background: var(--app-success); }
+.event-date-dot--past     { background: var(--app-subtle); }

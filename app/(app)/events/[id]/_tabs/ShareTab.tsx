@@ -8,6 +8,7 @@ import Link from "next/link";
 
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
+import { GoldBar } from "@/components/app-ui/GoldBar";
 
 const SHARE_TEMPLATE_KEY = "share_invite_template_v1";
 
@@ -111,17 +112,27 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
   ];
 
   return (
-    <section className="space-y-8">
-      <div>
-        <h2 className="text-lg font-semibold" style={{ color: 'var(--app-text)' }}>{ui.share.heading}</h2>
-        <p className="mt-2 text-sm" style={{ color: 'var(--app-muted)' }}>
+    <section style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+
+      {/* ── Section header ── */}
+      <div className="welcome-reveal">
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+          <GoldBar vertical />
+          <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontWeight: 700, fontSize: 20, color: "var(--app-text)" }}>
+            {ui.share.heading}
+          </span>
+        </div>
+        <p style={{ fontSize: 13, color: "var(--app-muted)", lineHeight: 1.55 }}>
           {ui.share.subtitle}
         </p>
       </div>
 
-      <div className="space-y-4">
-        <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--app-muted)' }}>{ui.share.messageStyleEyebrow}</p>
-        <div className="flex flex-wrap gap-2">
+      {/* ── Message style + share button ── */}
+      <div className="welcome-reveal welcome-reveal--d1" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--app-muted)" }}>
+          {ui.share.messageStyleEyebrow}
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {templateOptions.map(({ id, label }) => {
             const selected = template === id;
             return (
@@ -131,8 +142,8 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
                 variant={selected ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setTemplate(id)}
-                className="!rounded-full"
                 style={{
+                  borderRadius: 99,
                   borderColor: selected ? "var(--app-gold)" : undefined,
                   color: selected ? "var(--app-gold)" : undefined,
                 }}
@@ -143,46 +154,59 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
           })}
         </div>
 
-        <AppBtn variant="primary" size="lg" type="button" className="w-full !rounded-xl" onClick={() => void shareInvite()}>
+        <AppBtn variant="primary" size="lg" type="button" style={{ width: "100%", borderRadius: 14 }} onClick={() => void shareInvite()}>
           {ui.share.shareInvite}
         </AppBtn>
-        <p className="text-center text-xs italic" style={{ color: 'var(--app-muted)' }}>
+        <p style={{ textAlign: "center", fontSize: 12, fontStyle: "italic", color: "var(--app-muted)" }}>
           {ui.share.shareFootnote}
         </p>
       </div>
 
       {shareError ? (
-        <p className="text-sm" style={{ color: "var(--app-danger)" }}>
+        <p
+          style={{
+            fontSize: 13,
+            color: "var(--app-danger)",
+            background: "color-mix(in srgb, var(--app-danger) 10%, transparent)",
+            border: "1.5px solid color-mix(in srgb, var(--app-danger) 35%, transparent)",
+            padding: "10px 14px",
+            borderRadius: 10,
+          }}
+        >
           {shareError}
         </p>
       ) : null}
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <AppCard pad="md" className="!rounded-xl">
-          <p className="text-xs uppercase tracking-widest" style={{ color: "var(--app-muted)" }}>
+      {/* ── Code + link cards ── */}
+      <div className="welcome-reveal welcome-reveal--d2" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14 }}>
+        <AppCard pad="md" style={{ borderRadius: 16 }}>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--app-muted)" }}>
             {ui.invites.code}
           </p>
-          <p className="mt-2 break-all font-mono text-lg font-semibold" style={{ color: "var(--app-text)" }}>
+          <p style={{ marginTop: 8, fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 700, wordBreak: "break-all", color: "var(--app-text)" }}>
             {accessCode}
           </p>
           <AppBtn
-            variant="secondary"
+            variant="outline"
             size="sm"
             type="button"
-            className="mt-3 w-full"
+            style={{
+              marginTop: 12,
+              width: "100%",
+              ...(copied === "code" ? { color: "var(--app-success)", borderColor: "color-mix(in srgb, var(--app-success) 40%, var(--app-border))" } : {}),
+            }}
             onClick={() => void copyToClipboard("code", accessCode)}
           >
             {copied === "code" ? ui.common.copied : ui.overview.copyCode}
           </AppBtn>
         </AppCard>
 
-        <AppCard pad="md" className="!rounded-xl">
-          <p className="text-xs uppercase tracking-widest" style={{ color: "var(--app-muted)" }}>
+        <AppCard pad="md" style={{ borderRadius: 16 }}>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--app-muted)" }}>
             {ui.invites.link}
           </p>
           <a
-            className="mt-2 block break-all font-mono text-sm underline underline-offset-2"
-            style={{ color: "var(--app-gold)" }}
+            style={{ marginTop: 8, display: "block", wordBreak: "break-all", fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--app-gold)", textDecoration: "underline", textUnderlineOffset: 2 }}
             href={joinUrl}
             target="_blank"
             rel="noreferrer"
@@ -190,10 +214,14 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
             {joinUrl}
           </a>
           <AppBtn
-            variant="secondary"
+            variant="outline"
             size="sm"
             type="button"
-            className="mt-3 w-full"
+            style={{
+              marginTop: 12,
+              width: "100%",
+              ...(copied === "link" ? { color: "var(--app-success)", borderColor: "color-mix(in srgb, var(--app-success) 40%, var(--app-border))" } : {}),
+            }}
             onClick={() => void copyToClipboard("link", joinUrl)}
           >
             {copied === "link" ? ui.common.copied : ui.share.copyJoinLinkBtn}
@@ -201,37 +229,53 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
         </AppCard>
       </div>
 
-      <AppCard pad="lg" className="!rounded-xl" style={{ background: "var(--app-surface)" }}>
-        <p className="text-center text-sm font-semibold" style={{ color: "var(--app-muted)" }}>
+      {/* ── QR code card ── */}
+      <AppCard pad="lg" className="welcome-reveal welcome-reveal--d3" style={{ borderRadius: 18, background: "var(--app-surface)" }}>
+        <p style={{ textAlign: "center", fontSize: 13, fontWeight: 600, color: "var(--app-muted)", marginBottom: 18 }}>
           {ui.share.scanQr}
         </p>
-        <div
-          className="mx-auto mt-4 flex max-w-[220px] justify-center rounded-lg p-4"
-          style={{ border: "1.5px solid var(--app-border)", background: "var(--app-surface)" }}
-        >
-          <QRCode value={joinUrl} size={180} />
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+          <div className="qr-frame qr-reveal">
+            <QRCode value={joinUrl} size={180} />
+          </div>
         </div>
-        <p className="mt-3 text-center text-xs" style={{ color: "var(--app-subtle)" }}>
+        <p style={{ textAlign: "center", fontSize: 12, color: "var(--app-subtle)", marginBottom: 16 }}>
           {ui.share.joinsSameHint}
         </p>
-        <div className="mt-4">
-          <AppBtn variant="outline" size="sm" href={`/events/${eventId}/print`} as={Link} className="block w-full text-center">
-            {ui.share.printPoster}
-          </AppBtn>
-        </div>
+        <AppBtn variant="outline" size="sm" href={`/events/${eventId}/print`} as={Link} style={{ display: "block", width: "100%", textAlign: "center" }}>
+          {ui.share.printPoster}
+        </AppBtn>
       </AppCard>
 
-      <AppCard pad="md" className="!rounded-xl" style={{ background: "var(--app-bg)" }}>
-        <p className="text-xs uppercase tracking-widest" style={{ color: "var(--app-muted)" }}>
+      {/* ── Message preview ── */}
+      <AppCard pad="md" className="welcome-reveal welcome-reveal--d4" style={{ borderRadius: 16, background: "var(--app-bg)" }}>
+        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--app-muted)", marginBottom: 12 }}>
           {ui.share.previewMessage}
         </p>
         <pre
-          className="mt-3 whitespace-pre-wrap break-words font-sans text-sm leading-relaxed"
-          style={{ color: "var(--app-text)" }}
+          style={{
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+            fontFamily: "var(--font-sans)",
+            fontSize: 13,
+            lineHeight: 1.65,
+            color: "var(--app-text)",
+            margin: 0,
+          }}
         >
           {inviteText}
         </pre>
-        <AppBtn variant="ghost" size="sm" type="button" className="mt-4 w-full" onClick={() => void copyToClipboard("message", inviteText)}>
+        <AppBtn
+          variant="ghost"
+          size="sm"
+          type="button"
+          style={{
+            marginTop: 16,
+            width: "100%",
+            ...(copied === "message" ? { color: "var(--app-success)" } : {}),
+          }}
+          onClick={() => void copyToClipboard("message", inviteText)}
+        >
           {copied === "message" ? ui.common.copied : ui.share.copyFullMessage}
         </AppBtn>
       </AppCard>

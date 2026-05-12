@@ -12,6 +12,8 @@ export type PlanLimits = Readonly<{
   photos: number;
   videos: number;
   uploadDaysAfterEvent: number;
+  /** Whole-event retention: DB `scheduled_deletion_at` = event_date + this many days. */
+  retentionDaysAfterEvent: number;
 }>;
 
 /** Matches Postgres int max used for unlimited-style caps in the app DB. */
@@ -23,30 +25,35 @@ const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
     photos: 20,
     videos: 0,
     uploadDaysAfterEvent: 3,
+    retentionDaysAfterEvent: 7,
   },
   standard: {
     guests: 30,
     photos: 150,
     videos: 10,
     uploadDaysAfterEvent: 7,
+    retentionDaysAfterEvent: 30,
   },
   plus: {
     guests: 100,
     photos: 500,
     videos: 50,
     uploadDaysAfterEvent: 14,
+    retentionDaysAfterEvent: 90,
   },
   premium: {
     guests: 250,
     photos: 2000,
     videos: 200,
     uploadDaysAfterEvent: 30,
+    retentionDaysAfterEvent: 180,
   },
   max: {
     guests: PLAN_DB_INT_MAX,
     photos: PLAN_DB_INT_MAX,
     videos: PLAN_DB_INT_MAX,
     uploadDaysAfterEvent: 60,
+    retentionDaysAfterEvent: 365,
   },
 };
 
@@ -82,8 +89,25 @@ export function formatQuotaSublabel(n: number): string {
   return formatQuotaSublabelLocalized(n, "Unlimited plan", "of {n}", "en");
 }
 
-export function canGuestUpload(args: { planId: PlanId; eventDate: string; now: string }): boolean {
+/** End of guest upload window (inclusive of `eventDate` through N full days after, same instant math as `canGuestUpload`). */
+export function getUploadWindowEndMs(args: { planId: PlanId; eventDate: string }): number | null {
   const limits = getPlanLimits(args.planId);
+  const eventDateMs = new Date(args.eventDate).getTime();
+  if (Number.isNaN(eventDateMs)) return null;
+  const uploadWindowMs = limits.uploadDaysAfterEvent * 24 * 60 * 60 * 1000;
+  return eventDateMs + uploadWindowMs;
+}
+
+/** Client-side fallback for scheduled full-event deletion instant (must match DB `events_compute_scheduled_deletion_at`). */
+export function getRetentionDeletionEndMs(args: { planId: PlanId; eventDate: string }): number | null {
+  const limits = getPlanLimits(args.planId);
+  const eventDateMs = new Date(args.eventDate).getTime();
+  if (Number.isNaN(eventDateMs)) return null;
+  const retentionMs = limits.retentionDaysAfterEvent * 24 * 60 * 60 * 1000;
+  return eventDateMs + retentionMs;
+}
+
+export function canGuestUpload(args: { planId: PlanId; eventDate: string; now: string }): boolean {
   const eventDateMs = new Date(args.eventDate).getTime();
   const nowMs = new Date(args.now).getTime();
 
@@ -91,8 +115,8 @@ export function canGuestUpload(args: { planId: PlanId; eventDate: string; now: s
     return false;
   }
 
-  const uploadWindowMs = limits.uploadDaysAfterEvent * 24 * 60 * 60 * 1000;
-  const uploadWindowEndMs = eventDateMs + uploadWindowMs;
+  const uploadWindowEndMs = getUploadWindowEndMs({ planId: args.planId, eventDate: args.eventDate });
+  if (uploadWindowEndMs === null) return false;
 
   return nowMs >= eventDateMs && nowMs <= uploadWindowEndMs;
 }
