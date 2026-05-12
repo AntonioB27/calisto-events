@@ -117,6 +117,7 @@ export function splitPlanRows(rows: { label: string; value: string }[]): {
 
 export function PlanCards({ copy }: PlanCardsProps) {
   const [mobileActivePlan, setMobileActivePlan] = useState<string>("free");
+  const [expandedPlans, setExpandedPlans] = useState<Record<string, boolean>>({});
   const planRefs: MutableRefObject<Record<string, HTMLElement | null>> = useRef({});
   const activePlanRef = useRef<string | null>(mobileActivePlan);
 
@@ -238,6 +239,8 @@ export function PlanCards({ copy }: PlanCardsProps) {
         >
           {copy.plans.map((plan, idx) => {
             const [priceRow, ...restRows] = plan.rows;
+            const { primaryRows, secondaryRows } = splitPlanRows(restRows);
+            const isExpanded = expandedPlans[plan.id] ?? false;
             const config = PLAN_CONFIG[plan.id] ?? PLAN_CONFIG.free!;
             const Icon = config.icon;
             return (
@@ -349,7 +352,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
                       }}
                     />
                     <dl style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                      {restRows.map((row) => (
+                      {primaryRows.map((row) => (
                         <div
                           key={row.label}
                           className="plan-detail-row"
@@ -389,6 +392,66 @@ export function PlanCards({ copy }: PlanCardsProps) {
                         </div>
                       ))}
                     </dl>
+
+                    <div className="plan-rows-hint" aria-hidden>···</div>
+
+                    <div
+                      className="plan-secondary-rows"
+                      data-expanded={isExpanded ? "true" : "false"}
+                    >
+                      <dl style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                        {secondaryRows.map((row) => (
+                          <div
+                            key={row.label}
+                            className="plan-detail-row"
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: "minmax(130px, auto) 1fr",
+                              alignItems: "center",
+                              gap: 14,
+                              padding: "13px 0",
+                              borderBottom: "1px dashed rgba(181,171,153,0.2)",
+                              background: `linear-gradient(90deg, ${config.accentColor}10 0%, rgba(0,0,0,0) 30%)`,
+                            }}
+                          >
+                            <dt
+                              style={{
+                                fontFamily: "var(--font-mono)",
+                                fontSize: 10,
+                                color: "var(--cream-4, #6E6758)",
+                                letterSpacing: "0.09em",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {row.label}
+                            </dt>
+                            <dd
+                              style={{
+                                fontFamily: "var(--font-sans)",
+                                color: "var(--cream)",
+                                fontWeight: 600,
+                                margin: 0,
+                                textAlign: "right",
+                                lineHeight: 1.35,
+                              }}
+                            >
+                              {row.value}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="plan-expand-btn"
+                      aria-expanded={isExpanded}
+                      onClick={() =>
+                        setExpandedPlans((prev) => ({ ...prev, [plan.id]: !(prev[plan.id] ?? false) }))
+                      }
+                    >
+                      {isExpanded ? "Show less ↑" : "Show more ↓"}
+                    </button>
                   </div>
                 </div>
               </article>
