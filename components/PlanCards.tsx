@@ -103,7 +103,11 @@ const PLAN_CONFIG: Record<string, PlanConfig> = {
   },
 };
 
-const PRIMARY_LABELS = new Set(["Photos", "Videos", "Guest limit"]);
+const PRIMARY_LABELS = new Set([
+  "Photos", "Videos", "Guest limit",     // en
+  "Fotografije", "Limit gostiju",         // hr (Videos unchanged)
+  "Fotos", "Gästelimit",                  // de (Videos unchanged)
+]);
 
 export function splitPlanRows(rows: { label: string; value: string }[]): {
   primaryRows: { label: string; value: string }[];
