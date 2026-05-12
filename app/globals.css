@@ -2121,6 +2121,10 @@ html[data-theme="dark"] .auth-oauth-google-btn.app-btn--outline {
   border-left-color: color-mix(in srgb, var(--app-purple) 55%, var(--app-border));
   border-left-width: 3px;
 }
+.event-card--guest.app-card {
+  border-left-color: color-mix(in srgb, var(--app-muted) 50%, var(--app-border));
+  border-left-width: 3px;
+}
 
 /* Upcoming / past dot indicators on event cards */
 .event-date-dot {

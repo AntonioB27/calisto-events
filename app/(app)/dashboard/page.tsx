@@ -11,15 +11,20 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: owned }, { data: coOrgMemberships }] = await Promise.all([
+  const [{ data: owned }, { data: coOrgMemberships }, { data: guestMemberships }] = await Promise.all([
     supabase
       .from("events")
       .select("id, title, event_date, plan, access_code")
       .eq("organizer_id", user!.id),
     supabase.from("event_memberships").select("event_id").eq("user_id", user!.id).eq("role", "co_organizer"),
+    supabase.from("event_memberships").select("event_id").eq("user_id", user!.id).eq("role", "guest"),
   ]);
 
   const coIds = [...new Set((coOrgMemberships ?? []).map((m) => String((m as { event_id?: unknown }).event_id ?? "")))].filter(
+    Boolean,
+  );
+
+  const guestIds = [...new Set((guestMemberships ?? []).map((m) => String((m as { event_id?: unknown }).event_id ?? "")))].filter(
     Boolean,
   );
 
@@ -29,7 +34,16 @@ export default async function DashboardPage() {
     coEvents = fetched ?? [];
   }
 
-  const events = mergeDashboardEvents(owned ?? [], coEvents ?? []);
+  let guestEvents: typeof owned = [];
+  if (guestIds.length > 0) {
+    const { data: fetchedGuest } = await supabase
+      .from("events")
+      .select("id, title, event_date, plan, access_code")
+      .in("id", guestIds);
+    guestEvents = fetchedGuest ?? [];
+  }
+
+  const events = mergeDashboardEvents(owned ?? [], coEvents ?? [], guestEvents ?? []);
 
   const userName =
     user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? ui.dashboard.fallbackName;

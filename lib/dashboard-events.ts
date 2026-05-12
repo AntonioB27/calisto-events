@@ -4,7 +4,7 @@ export type DashboardEventRow = Readonly<{
   event_date: string;
   plan: string;
   access_code: string;
-  membershipRole: "organizer" | "co_organizer";
+  membershipRole: "organizer" | "co_organizer" | "guest";
 }>;
 
 type EventSelect = Pick<DashboardEventRow, "id" | "title" | "event_date" | "plan" | "access_code">;
@@ -13,10 +13,14 @@ function eventDateCompareDesc(aIso: string, bIso: string) {
   return new Date(bIso).getTime() - new Date(aIso).getTime();
 }
 
-/** Merge owned events and co-organised events for the dashboard (primary rows win on id). */
+/**
+ * Merge owned, co-organised, and guest-joined events for the dashboard.
+ * Primary organiser wins on id, then co-organiser; guest rows are dropped if the user already appears as org/co-org.
+ */
 export function mergeDashboardEvents(
   owned: readonly EventSelect[],
   coOrganized: readonly EventSelect[],
+  guestJoined: readonly EventSelect[] = [],
 ): DashboardEventRow[] {
   const primary = owned.map((row) => ({
     ...row,
@@ -32,5 +36,14 @@ export function mergeDashboardEvents(
       membershipRole: "co_organizer" as const,
     }));
 
-  return [...primary, ...secondary].sort((a, b) => eventDateCompareDesc(a.event_date, b.event_date));
+  const coveredIds = new Set<string>([...primaryIds, ...secondary.map((e) => e.id)]);
+
+  const guestRows = guestJoined
+    .filter((row) => !coveredIds.has(row.id))
+    .map((row) => ({
+      ...row,
+      membershipRole: "guest" as const,
+    }));
+
+  return [...primary, ...secondary, ...guestRows].sort((a, b) => eventDateCompareDesc(a.event_date, b.event_date));
 }

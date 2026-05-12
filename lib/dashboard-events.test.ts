@@ -25,4 +25,36 @@ describe("mergeDashboardEvents", () => {
     expect(out.map((r) => r.membershipRole)).toEqual(["co_organizer", "organizer"]);
     expect(out[0].id).toBe("c");
   });
+
+  it("includes guest-only events and sorts with others by date", () => {
+    const out = mergeDashboardEvents(
+      [{ id: "a", title: "Own", event_date: "2026-03-01T00:00:00.000Z", plan: "free", access_code: "OWN1" }],
+      [],
+      [{ id: "g", title: "GuestEvt", event_date: "2026-07-01T00:00:00.000Z", plan: "plus", access_code: "GST1" }],
+    );
+    expect(out.map((r) => ({ id: r.id, role: r.membershipRole }))).toEqual([
+      { id: "g", role: "guest" },
+      { id: "a", role: "organizer" },
+    ]);
+  });
+
+  it("drops guest row when user is already organiser of that event", () => {
+    const out = mergeDashboardEvents(
+      [{ id: "e1", title: "Same", event_date: "2026-01-01T00:00:00.000Z", plan: "free", access_code: "X" }],
+      [],
+      [{ id: "e1", title: "Same", event_date: "2026-01-01T00:00:00.000Z", plan: "free", access_code: "X" }],
+    );
+    expect(out).toHaveLength(1);
+    expect(out[0].membershipRole).toBe("organizer");
+  });
+
+  it("drops guest row when user is already co-organiser", () => {
+    const out = mergeDashboardEvents(
+      [],
+      [{ id: "e2", title: "Co", event_date: "2026-02-01T00:00:00.000Z", plan: "standard", access_code: "Y" }],
+      [{ id: "e2", title: "Co", event_date: "2026-02-01T00:00:00.000Z", plan: "standard", access_code: "Y" }],
+    );
+    expect(out).toHaveLength(1);
+    expect(out[0].membershipRole).toBe("co_organizer");
+  });
 });

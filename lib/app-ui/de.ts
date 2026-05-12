@@ -84,7 +84,7 @@ export const APP_UI_DE: AppUiDict = {
     eyebrow: "Übersicht",
     helloTemplate: "Hallo, {name}",
     fallbackName: "Freund",
-    subtitle: "Veranstaltungen, die du organisierst, sowie solche als Co‑Organisator.",
+    subtitle: "Veranstaltungen, die du organisierst, als Co‑Organisator betreust oder als Gast beigetreten bist.",
     joinWithCode: "Mit Code mitmachen",
     createEvent: "+ Veranstaltung erstellen",
     yourEvents: "Deine Veranstaltungen",
@@ -92,6 +92,7 @@ export const APP_UI_DE: AppUiDict = {
     membersMany: "Mitglieder",
     roleOrganizer: "Organisator",
     roleCoOrganizer: "Co‑Organisator",
+    roleGuest: "Gast",
     emptyHint: "Erstelle eine neue Veranstaltung oder tritt mit einem Code eines Organizers bei.",
     moreHint:
       "Erstelle noch eine Veranstaltung oder trete mit einem Code eines Organizers bei.",

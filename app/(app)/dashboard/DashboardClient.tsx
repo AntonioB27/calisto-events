@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { startTransition, useEffect, useMemo, useState } from "react";
 
+import { normalizeAccessCode } from "@/lib/access-code";
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBadge } from "@/components/app-ui/AppBadge";
 import { AppBtn } from "@/components/app-ui/AppBtn";
@@ -28,6 +29,7 @@ function EventCard({
   defaultEventTitle,
   roleOrganizer,
   roleCo,
+  roleGuest,
   index,
 }: Readonly<{
   event: DashboardEventRow;
@@ -36,11 +38,13 @@ function EventCard({
   defaultEventTitle: string;
   roleOrganizer: string;
   roleCo: string;
+  roleGuest: string;
   index: number;
 }>) {
   const { emoji: storedEmoji, name: displayTitle } = splitEventTitleStored(String(event.title ?? defaultEventTitle));
   const navEmoji = displayNavEmoji(storedEmoji);
   const isCoOrg = event.membershipRole === "co_organizer";
+  const isGuest = event.membershipRole === "guest";
   const isUpcoming = event.event_date ? new Date(event.event_date) >= new Date() : false;
 
   return (
@@ -49,7 +53,7 @@ function EventCard({
         hover
         pad="md"
         onClick={() => onOpen(event)}
-        className={isCoOrg ? "event-card--coorg" : "event-card--org"}
+        className={isGuest ? "event-card--guest" : isCoOrg ? "event-card--coorg" : "event-card--org"}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div
@@ -58,7 +62,9 @@ function EventCard({
               height: 48,
               borderRadius: "var(--app-radius-md)",
               flexShrink: 0,
-              background: isCoOrg
+              background: isGuest
+                ? "linear-gradient(135deg, color-mix(in srgb, var(--app-muted) 28%, transparent), color-mix(in srgb, var(--app-muted) 10%, transparent))"
+                : isCoOrg
                 ? "linear-gradient(135deg, color-mix(in srgb, var(--app-purple) 24%, transparent), color-mix(in srgb, var(--app-purple) 10%, transparent))"
                 : "linear-gradient(135deg, color-mix(in srgb, var(--app-purple) 16%, transparent), color-mix(in srgb, var(--app-gold) 16%, transparent))",
               display: "flex",
@@ -111,15 +117,15 @@ function EventCard({
               >
                 {formatUiDateShort(event.event_date, locale)}
                 {" · "}
-                <span style={{ color: isCoOrg ? "var(--app-purple)" : "inherit" }}>
-                  {isCoOrg ? roleCo : roleOrganizer}
+                <span style={{ color: isGuest ? "var(--app-muted)" : isCoOrg ? "var(--app-purple)" : "inherit" }}>
+                  {isGuest ? roleGuest : isCoOrg ? roleCo : roleOrganizer}
                 </span>
               </span>
             </div>
           </div>
 
           <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 8 }}>
-            <AppBadge tone={isCoOrg ? "purple" : "accent"}>{event.plan}</AppBadge>
+            <AppBadge tone={isGuest ? "default" : isCoOrg ? "purple" : "accent"}>{event.plan}</AppBadge>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M9 18L15 12L9 6" stroke="var(--app-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -144,6 +150,10 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
   const visibleEvents = useMemo(() => orderedEvents.filter((e) => !hiddenIds.has(e.id)), [orderedEvents, hiddenIds]);
 
   function handleOpen(event: DashboardEventRow) {
+    if (event.membershipRole === "guest") {
+      window.location.href = `/join/${encodeURIComponent(normalizeAccessCode(event.access_code))}`;
+      return;
+    }
     window.location.href = `/events/${event.id}`;
   }
 
@@ -210,6 +220,7 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
                 defaultEventTitle={ui.defaults.eventTitle}
                 roleOrganizer={ui.dashboard.roleOrganizer}
                 roleCo={ui.dashboard.roleCoOrganizer}
+                roleGuest={ui.dashboard.roleGuest}
                 index={i}
               />
             ))}
