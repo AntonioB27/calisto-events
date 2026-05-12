@@ -559,11 +559,26 @@ export function PlanCards({ copy }: PlanCardsProps) {
           opacity: 0;
           transition: max-height 280ms ease, opacity 220ms ease;
         }
-        .plan-card:hover .plan-secondary-rows,
+
+        /* Revealed by keyboard focus or data-expanded (works on all devices) */
         .plan-card:focus-within .plan-secondary-rows,
         .plan-secondary-rows[data-expanded="true"] {
-          max-height: 200px;
+          max-height: 400px;
           opacity: 1;
+        }
+        .plan-card:focus-within .plan-rows-hint {
+          opacity: 0;
+        }
+
+        /* Hover reveal — only on real pointer devices to avoid iOS synthesized hover */
+        @media (hover: hover) and (pointer: fine) {
+          .plan-card:hover .plan-secondary-rows {
+            max-height: 400px;
+            opacity: 1;
+          }
+          .plan-card:hover .plan-rows-hint {
+            opacity: 0;
+          }
         }
 
         /* Hint dots — visible on desktop, fade on hover */
@@ -576,10 +591,6 @@ export function PlanCards({ copy }: PlanCardsProps) {
           opacity: 0.55;
           transition: opacity 220ms ease;
           pointer-events: none;
-        }
-        .plan-card:hover .plan-rows-hint,
-        .plan-card:focus-within .plan-rows-hint {
-          opacity: 0;
         }
 
         /* Mobile expand button — hidden on desktop, shown on mobile */
