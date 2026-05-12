@@ -1,0 +1,24 @@
+name: Process ZIP exports
+
+on:
+  schedule:
+    # Runs every 5 minutes — processes queued gallery ZIP jobs
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # allow manual trigger from GitHub Actions UI
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Trigger ZIP export processor
+        run: |
+          curl -sf -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.APP_URL }}/api/cron/process-zip-exports"
+
+      - name: Expire stale ZIP jobs
+        run: |
+          curl -sf -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.APP_URL }}/api/cron/expire-zip-exports"
