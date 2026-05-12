@@ -170,9 +170,9 @@ const copy: Record<Locale, LandingCopy> = {
     joinWaitlistShort: "Join waitlist",
     heroBadge: "Meet Aurora",
     heroIntro: "Hi, I'm Aurora, I'll guide you through Calisto.",
-    heroTitle: "One shared album for your wedding or event!",
+    heroTitle: "One album. Every guest.",
     heroDescription:
-      "Calisto helps guests upload and browse photos and videos in one place. No app download is required; guests can upload with a simple code or QR invite. You pick a plan tier for limits and upload windows — in-app paid checkout is planned, not live yet.",
+      "Browse photos and videos in one place. No app download. Just scan the QR code and view gallery or upload. Try it for FREE!",
     heroAuroraCardBlurb:
       "I'd rather you be in the moment than digging through camera rolls on Monday. I'm here so the messy, wonderful parts of your day—the toasts, the candid grins, the kid with cake on his face—stay in one story you can reopen without a scavenger hunt.",
     heroPrimaryCta: "Join the waitlist",
@@ -460,9 +460,9 @@ const copy: Record<Locale, LandingCopy> = {
     joinWaitlistShort: "Pridruži se listi",
     heroBadge: "Upoznaj Auroru",
     heroIntro: "Bok, ja sam Aurora, predstavljam ti Calisto.",
-    heroTitle: "Jedan zajednički album za tvoje vjenčanje ili događaj!",
+    heroTitle: "Jedan album. Svi gosti.",
     heroDescription:
-      "Gosti na jednom mjestu dijele fotografije i videa. Bez preuzimanja aplikacije — pristup je kodom ili QR-om. Odabireš paket radi limita i upload prozora; integrirani checkout je u planu, još nije aktivan u web aplikaciji.",
+      "Pregledavaj fotografije i videozapise na jednom mjestu. Bez preuzimanja aplikacije. Skeniraj QR kod i otvori galeriju ili učitaj. Probaj besplatno!",
     heroAuroraCardBlurb:
       "Želim da budeš na plesu, a ne da u ponedjeljak pretražuješ deset mapi s fotkama. Tu sam da taj neuredno lijepi dan — toaste, prvi ples, taj tren s kolačem — ostane jedna priča koju možeš otvoriti bez detektivskog posla.",
     heroPrimaryCta: "Pridruži se listi čekanja",
@@ -746,9 +746,9 @@ const copy: Record<Locale, LandingCopy> = {
     joinWaitlistShort: "Zur Warteliste",
     heroBadge: "Lerne Aurora kennen",
     heroIntro: "Hi, ich bin Aurora, ich stelle dir Calisto vor.",
-    heroTitle: "Ein gemeinsames Album für Hochzeit oder Event!",
+    heroTitle: "Ein Album. Jeder Gast.",
     heroDescription:
-      "Calisto hilft Gästen, Fotos und Videos an einem Ort hochzuladen und anzusehen. Kein App-Download nötig; Gäste laden mit Code oder QR aus dem Browser ein. Du wählst einen Tarif für Limits und Upload-Fenster — integrierter Checkout in der Web-App ist geplant, aber noch nicht live.",
+      "Fotos und Videos an einem Ort durchstöbern. Kein App-Download. QR-Code scannen, Galerie ansehen oder hochladen. Kostenlos ausprobieren!",
     heroAuroraCardBlurb:
       "Lieber tanzt du auf der Feier, als dass du am Montag hundert Chatverläufe durchsuchst. Ich will, dass der Tag als eine lebendige Geschichte bleibt — Reden, Umarmungen, das schiefe Gruppenfoto — die man wiederfindet, ohne Schatzsuche.",
     heroPrimaryCta: "Zur Warteliste",
