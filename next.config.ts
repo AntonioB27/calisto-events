@@ -26,10 +26,25 @@ const NEXT_PUBLIC_SUPABASE_ANON_KEY = firstNonempty(
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
 );
 
+/** RFC 8288 / RFC 9727 §3 — agent discovery on marketing home routes. */
+const AGENT_DISCOVERY_LINK =
+  '</.well-known/api-catalog>; rel="api-catalog", ' +
+  '</openapi.json>; rel="service-desc", ' +
+  '</docs/api>; rel="service-doc", ' +
+  '</.well-known/agent-skills/index.json>; rel="describedby"';
+
 const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  },
+  async headers() {
+    return [
+      { source: "/", headers: [{ key: "Link", value: AGENT_DISCOVERY_LINK }] },
+      { source: "/en", headers: [{ key: "Link", value: AGENT_DISCOVERY_LINK }] },
+      { source: "/hr", headers: [{ key: "Link", value: AGENT_DISCOVERY_LINK }] },
+      { source: "/de", headers: [{ key: "Link", value: AGENT_DISCOVERY_LINK }] },
+    ];
   },
 };
 

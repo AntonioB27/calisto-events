@@ -10,6 +10,7 @@ import { PlanCards } from "@/components/PlanCards";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { WaitlistForm } from "@/components/WaitlistForm";
+import { WebMcpTools } from "@/components/WebMcpTools";
 import { getLandingCopy, isLocale, LOCALES, type Locale } from "@/lib/i18n";
 
 type LocalePageProps = {
@@ -30,6 +31,7 @@ export default async function LocalePage({ params }: LocalePageProps) {
 
   return (
     <div className="vibrant-page-bg flex min-h-0 flex-1 flex-col overflow-x-clip">
+      <WebMcpTools />
       <div className="page-vignette" aria-hidden />
       <LanguageSelectorPopup copy={copy} locale={locale as Locale} />
       <SiteHeader copy={copy} locale={locale as Locale} />

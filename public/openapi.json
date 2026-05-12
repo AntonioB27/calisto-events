@@ -1,0 +1,54 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Calisto public HTTP API",
+    "version": "0.1.0",
+    "description": "Public, unauthenticated or session-backed routes exposed by the Calisto marketing and join flows. Organizer APIs under /api/events require Supabase session cookies."
+  },
+  "servers": [{ "url": "/", "description": "Same origin" }],
+  "paths": {
+    "/api/waitlist": {
+      "post": {
+        "summary": "Join product waitlist",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "locale": { "type": "string", "enum": ["en", "hr", "de"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Accepted" },
+          "400": { "description": "Invalid payload" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/join/preview": {
+      "get": {
+        "summary": "Preview event metadata by access code",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Event preview" },
+          "404": { "description": "Unknown or invalid code" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    }
+  }
+}

@@ -1,10 +1,34 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
 import { CALISTO_UI_LOCALE_COOKIE } from "@/lib/ui-locale-constants";
+
+function wantsMarkdownLanding(request: NextRequest): boolean {
+  if (request.method !== "GET" && request.method !== "HEAD") return false;
+  const accept = request.headers.get("accept");
+  if (!accept) return false;
+  return /\btext\/markdown\b/i.test(accept);
+}
+
+function localeFromMarketingHomePath(pathname: string): string | null {
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length === 0) return DEFAULT_LOCALE;
+  if (segments.length === 1 && isLocale(segments[0]!)) return segments[0]!;
+  return null;
+}
 
 /** Refreshes the Supabase session cookie on navigations (`@supabase/ssr`). */
 export async function middleware(request: NextRequest) {
+  if (wantsMarkdownLanding(request)) {
+    const locale = localeFromMarketingHomePath(request.nextUrl.pathname);
+    if (locale) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/internal/markdown-home/${locale}`;
+      return NextResponse.rewrite(url);
+    }
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const firstSegment = request.nextUrl.pathname.split("/").filter(Boolean)[0] ?? "";
