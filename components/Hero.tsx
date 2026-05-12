@@ -49,7 +49,7 @@ export function Hero({ copy }: HeroProps) {
             {/* CTAs */}
             <div className="flex items-center flex-wrap" style={{ marginTop: 40, gap: 14 }}>
               <a
-                href="#waitlist"
+                href="/welcome"
                 className="inline-flex items-center gap-2.5"
                 style={{
                   fontFamily: "var(--font-sans)",

@@ -38,7 +38,7 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
         <div className="flex items-center justify-self-end gap-3 shrink-0 md:order-3">
           <LanguageSelectorBar copy={copy} locale={locale} variant="header" />
           <a
-            href="#waitlist"
+            href="/welcome"
             className="hidden sm:inline-flex items-center gap-2"
             style={{
               fontFamily: "var(--font-sans)",
@@ -58,7 +58,7 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
             <span aria-hidden style={{ transition: "transform 300ms" }}>→</span>
           </a>
           <a
-            href="#waitlist"
+            href="/welcome"
             className="sm:hidden"
             style={{
               fontFamily: "var(--font-sans)",

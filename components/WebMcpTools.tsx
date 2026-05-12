@@ -62,11 +62,13 @@ export function WebMcpTools() {
 
     reg({
         name: "calisto_open_waitlist",
-        description: "Scroll to the waitlist form at the bottom of the landing page.",
+        description:
+          "Open the Calisto app welcome page (/welcome) where visitors can create an event, join with a code, or sign in.",
         inputSchema: { type: "object", properties: {}, additionalProperties: false },
         execute: async (_args, { signal }) => {
           if (signal.aborted) throw new DOMException("Aborted", "AbortError");
-          return scrollToId("waitlist");
+          window.location.assign("/welcome");
+          return { ok: true as const, path: "/welcome" };
         },
       });
 
