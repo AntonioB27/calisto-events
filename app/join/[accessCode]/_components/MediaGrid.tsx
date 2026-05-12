@@ -119,19 +119,48 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
             <li
               key={item.id}
               className="mb-2 break-inside-avoid overflow-hidden rounded-xl bg-[var(--app-surface-2)]"
+              style={{ border: "1px solid var(--app-border)", position: "relative" }}
             >
               {item.signedUrl ? (
                 isVideoMime(item.mime_type) ? (
-                  <video
-                    src={item.signedUrl}
-                    className="block h-auto w-full max-w-full"
-                    controls
-                    playsInline
-                    muted
-                  />
+                  <>
+                    <video
+                      src={item.signedUrl}
+                      className="block h-auto w-full max-w-full"
+                      controls
+                      playsInline
+                      muted
+                    />
+                    <div
+                      aria-hidden
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        background: "rgba(0,0,0,0.55)",
+                        backdropFilter: "blur(4px)",
+                        borderRadius: 20,
+                        padding: "2px 8px",
+                        fontSize: 10,
+                        fontWeight: 600,
+                        color: "#fff",
+                        letterSpacing: "0.05em",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      Video
+                    </div>
+                  </>
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.signedUrl} alt="" className="block h-auto w-full max-w-full" />
+                  <img
+                    src={item.signedUrl}
+                    alt=""
+                    className="block h-auto w-full max-w-full"
+                    style={{ transition: "transform 0.3s" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.03)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                  />
                 )
               ) : (
                 <div className="min-h-32 w-full bg-[var(--app-border)]" />

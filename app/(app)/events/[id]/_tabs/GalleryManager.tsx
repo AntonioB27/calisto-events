@@ -656,10 +656,10 @@ export function GalleryManager({
         <p
           style={{
             margin: "0 0 12px",
-            fontSize: 12,
-            fontWeight: 700,
+            fontFamily: "var(--font-mono)",
+            fontSize: "10.5px",
             textTransform: "uppercase",
-            letterSpacing: "0.2em",
+            letterSpacing: "0.28em",
             color: "var(--app-muted)",
           }}
         >
@@ -879,9 +879,10 @@ export function GalleryManager({
               style={{
                 position: 'absolute', top: -14, right: -14,
                 width: 36, height: 36, borderRadius: '50%',
-                background: '#fff', border: 'none', cursor: 'pointer',
+                background: 'var(--app-surface)', border: '1px solid var(--app-border)', cursor: 'pointer',
+                color: 'var(--app-text)',
                 fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.35)',
               }}
             >
               ×

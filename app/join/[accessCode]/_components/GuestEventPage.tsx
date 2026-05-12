@@ -199,7 +199,7 @@ export function GuestEventPage({
           </nav>
         ) : null}
 
-        <h1 style={{ marginBottom: 4, fontSize: "1.5rem", fontWeight: 800, color: "var(--app-text)" }}>{eventTitle}</h1>
+        <h1 style={{ marginBottom: 6, fontFamily: "var(--font-display)", fontStyle: "italic", fontWeight: 400, fontSize: "clamp(28px, 6vw, 48px)", lineHeight: 1.05, letterSpacing: "-0.02em", color: "var(--app-text)" }}>{eventTitle}</h1>
         <p style={{ marginBottom: 32, fontSize: 14, color: "var(--app-muted)" }}>{ui.guestJoin.tagline}</p>
 
         {hasSession ? <GuestLeaveEvent eventId={eventId} canShow={canLeaveAsGuest} /> : null}
@@ -243,10 +243,10 @@ export function GuestEventPage({
               <h2
                 style={{
                   marginBottom: 16,
-                  fontSize: 12,
-                  fontWeight: 700,
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "10.5px",
                   textTransform: "uppercase",
-                  letterSpacing: "0.2em",
+                  letterSpacing: "0.28em",
                   color: "var(--app-muted)",
                 }}
               >
@@ -259,10 +259,10 @@ export function GuestEventPage({
               <h2
                 style={{
                   marginBottom: 16,
-                  fontSize: 12,
-                  fontWeight: 700,
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "10.5px",
                   textTransform: "uppercase",
-                  letterSpacing: "0.2em",
+                  letterSpacing: "0.28em",
                   color: "var(--app-muted)",
                 }}
               >
