@@ -741,7 +741,7 @@ const copy: Record<Locale, LandingCopy> = {
     pageDescription:
       "Calisto gostima omogućuje učitavanje i pregled fotografija i videa na jednom mjestu. Podijeli kod ili QR; paketi određuju limite u web aplikaciji — integrirana plaćanja su na roadmapu.",
     auroraQuote: "Svaka uspomena zaslužuje dom. Pobrinut ću se da bude lijepa, organizirana i zauvijek vaša.",
-    auroraQuoteIntro: "",
+    auroraQuoteIntro: "Od Aurore · Vaš Calisto vodič",
     auroraQuoteSectionAria: "Poruka od Aurore",
     auroraLabel: "Aurora",
     auroraJobTitle: "Calisto vodič",

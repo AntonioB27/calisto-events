@@ -9,11 +9,27 @@ import { getUiTheme } from "@/lib/ui-theme";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Calisto",
-  description: "Calisto landing page with multilingual support.",
+  title: {
+    default: "Calisto — shared event photos & videos",
+    template: "%s | Calisto",
+  },
+  description:
+    "Calisto lets wedding and event guests upload and browse photos and videos together. No app download — just a QR code or join link.",
   icons: {
     icon: "/brand/calisto-icon.png",
     apple: "/brand/calisto-icon.png",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Calisto — shared event photos & videos",
+    description:
+      "Calisto lets wedding and event guests upload and browse photos and videos together. No app download — just a QR code or join link.",
+  },
+  openGraph: {
+    type: "website",
+    title: "Calisto — shared event photos & videos",
+    description:
+      "Calisto lets wedding and event guests upload and browse photos and videos together. No app download — just a QR code or join link.",
   },
 };
 
