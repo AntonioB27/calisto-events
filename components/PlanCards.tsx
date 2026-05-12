@@ -548,10 +548,69 @@ export function PlanCards({ copy }: PlanCardsProps) {
           transform: translateY(-3px);
           filter: saturate(1.12);
         }
-        .plan-card .plan-detail-row:last-child {
+        .plan-secondary-rows .plan-detail-row:last-child {
           border-bottom: none !important;
         }
+
+        /* Secondary rows — hidden by default, revealed by hover, focus, or data-expanded */
+        .plan-secondary-rows {
+          max-height: 0;
+          overflow: hidden;
+          opacity: 0;
+          transition: max-height 280ms ease, opacity 220ms ease;
+        }
+        .plan-card:hover .plan-secondary-rows,
+        .plan-card:focus-within .plan-secondary-rows,
+        .plan-secondary-rows[data-expanded="true"] {
+          max-height: 200px;
+          opacity: 1;
+        }
+
+        /* Hint dots — visible on desktop, fade on hover */
+        .plan-rows-hint {
+          text-align: center;
+          color: var(--cream-4, #6E6758);
+          font-size: 13px;
+          letter-spacing: 0.15em;
+          padding: 6px 0 2px;
+          opacity: 0.55;
+          transition: opacity 220ms ease;
+          pointer-events: none;
+        }
+        .plan-card:hover .plan-rows-hint,
+        .plan-card:focus-within .plan-rows-hint {
+          opacity: 0;
+        }
+
+        /* Mobile expand button — hidden on desktop, shown on mobile */
+        .plan-expand-btn {
+          display: none;
+        }
+
         @media (max-width: 780px) {
+          .plan-rows-hint {
+            display: none;
+          }
+          .plan-expand-btn {
+            display: block;
+            width: 100%;
+            margin-top: 8px;
+            padding: 8px 0;
+            background: none;
+            border: none;
+            border-top: 1px dashed rgba(181,171,153,0.2);
+            color: var(--cream-4, #6E6758);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-align: center;
+            transition: color 180ms ease;
+          }
+          .plan-expand-btn:hover {
+            color: var(--cream-3, #B5AB99);
+          }
           .plan-card-shell {
             grid-template-columns: 1fr;
           }
@@ -571,6 +630,19 @@ export function PlanCards({ copy }: PlanCardsProps) {
             text-align: left !important;
           }
         }
+
+        /* Reduced motion — always show secondary rows, hide hint and button */
+        @media (prefers-reduced-motion: reduce) {
+          .plan-secondary-rows {
+            max-height: none !important;
+            opacity: 1 !important;
+            transition: none !important;
+          }
+          .plan-rows-hint {
+            display: none !important;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .plan-card,
           .plan-detail-row,
