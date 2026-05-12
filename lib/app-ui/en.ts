@@ -326,6 +326,8 @@ export const APP_UI_EN = {
     zipExportDownload: "Download ZIP",
     zipExportErrorGeneric: "Could not start export.",
     zipExportErrorPending: "Another export is already in progress.",
+    zipExportErrorQueue:
+      "The export queue could not be read. If you use your own Supabase project, apply the latest migrations (including `media_zip_exports`). Otherwise try again in a moment.",
     zipExportErrorTooMany: "Too many items for one ZIP. Remove some uploads or export without videos.",
   },
 

@@ -88,12 +88,13 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     .from("media_zip_exports")
     .select("id")
     .eq("event_id", eventId)
-    .in("status", ["queued", "running"])
+    .or("status.eq.queued,status.eq.running")
+    .limit(1)
     .maybeSingle();
 
   if (pendErr) {
-    console.error("[zip-export] pending check", pendErr.message);
-    return NextResponse.json({ error: "Could not verify export queue." }, { status: 500 });
+    console.error("[zip-export] pending check", pendErr.code ?? "", pendErr.message, pendErr.details ?? "");
+    return NextResponse.json({ error: "ZIP_QUEUE_CHECK_FAILED" }, { status: 500 });
   }
 
   if (pending?.id) {

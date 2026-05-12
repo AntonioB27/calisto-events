@@ -28,8 +28,10 @@ vi.mock("@/lib/supabase-auth-server", () => ({
         return {
           select: () => ({
             eq: () => ({
-              in: () => ({
-                maybeSingle: pendingMaybeSingle,
+              or: () => ({
+                limit: () => ({
+                  maybeSingle: pendingMaybeSingle,
+                }),
               }),
             }),
           }),

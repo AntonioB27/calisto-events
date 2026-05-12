@@ -231,6 +231,8 @@ export function GalleryManager({
         setZipPanelError(ui.gallery.zipExportErrorTooMany);
       } else if (res.status === 409) {
         setZipPanelError(ui.gallery.zipExportErrorPending);
+      } else if (res.status === 500 && body.error === "ZIP_QUEUE_CHECK_FAILED") {
+        setZipPanelError(ui.gallery.zipExportErrorQueue);
       } else if (!res.ok) {
         setZipPanelError(body.error ?? ui.gallery.zipExportErrorGeneric);
       } else {
@@ -254,6 +256,7 @@ export function GalleryManager({
     zipIncludeVideos,
     ui.gallery.zipExportErrorGeneric,
     ui.gallery.zipExportErrorPending,
+    ui.gallery.zipExportErrorQueue,
     ui.gallery.zipExportErrorTooMany,
   ]);
 

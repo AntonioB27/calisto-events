@@ -339,6 +339,8 @@ export const APP_UI_DE: AppUiDict = {
     zipExportDownload: "ZIP herunterladen",
     zipExportErrorGeneric: "Export konnte nicht gestartet werden.",
     zipExportErrorPending: "Ein anderer Export läuft bereits.",
+    zipExportErrorQueue:
+      "Die Export‑Warteschlange konnte nicht gelesen werden. Bei eigenem Supabase‑Projekt die neuesten Migrationen anwenden (inkl. `media_zip_exports`). Sonst kurz warten und erneut versuchen.",
     zipExportErrorTooMany: "Zu viele Elemente für ein ZIP. Uploads reduzieren oder ohne Videos exportieren.",
   },
 

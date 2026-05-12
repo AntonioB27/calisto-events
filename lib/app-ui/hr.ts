@@ -332,6 +332,8 @@ export const APP_UI_HR: AppUiDict = {
     zipExportDownload: "Preuzmi ZIP",
     zipExportErrorGeneric: "Nismo mogli pokrenuti izvoz.",
     zipExportErrorPending: "Drugi izvoz je već u tijeku.",
+    zipExportErrorQueue:
+      "Nismo mogli pročitati red izvoza. Ako koristiš vlastiti Supabase projekt, primijeni najnovije migracije (uključujući `media_zip_exports`). Inače pokušaj ponovo za trenutak.",
     zipExportErrorTooMany: "Previše stavki za jedan ZIP. Ukloni neke uploadove ili izvezi bez videozapisa.",
   },
 
