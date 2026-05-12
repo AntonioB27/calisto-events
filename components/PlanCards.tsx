@@ -103,6 +103,18 @@ const PLAN_CONFIG: Record<string, PlanConfig> = {
   },
 };
 
+const PRIMARY_LABELS = new Set(["Photos", "Videos", "Guest limit"]);
+
+export function splitPlanRows(rows: { label: string; value: string }[]): {
+  primaryRows: { label: string; value: string }[];
+  secondaryRows: { label: string; value: string }[];
+} {
+  return {
+    primaryRows: rows.filter((r) => PRIMARY_LABELS.has(r.label)),
+    secondaryRows: rows.filter((r) => !PRIMARY_LABELS.has(r.label)),
+  };
+}
+
 export function PlanCards({ copy }: PlanCardsProps) {
   const [mobileActivePlan, setMobileActivePlan] = useState<string>("free");
   const planRefs: MutableRefObject<Record<string, HTMLElement | null>> = useRef({});
