@@ -5,10 +5,11 @@ import { FeatureGrid } from "@/components/FeatureGrid";
 import { Hero } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
 import { AppPreviewWindow } from "@/components/AppPreviewWindow";
+import { SocialProof } from "@/components/SocialProof";
 import { PlanCards } from "@/components/PlanCards";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { WaitlistForm } from "@/components/WaitlistForm";
+import { Reviews } from "@/components/Reviews";
 import { WebMcpTools } from "@/components/WebMcpTools";
 import { getLandingCopy, isLocale, LOCALES, type Locale } from "@/lib/i18n";
 
@@ -35,13 +36,14 @@ export default async function LocalePage({ params }: LocalePageProps) {
       <SiteHeader copy={copy} locale={locale as Locale} />
       <main className="flex-1">
         <Hero copy={copy} />
+        <SocialProof copy={copy} />
         <AppPreviewWindow copy={copy} />
         <FeatureGrid copy={copy} />
         <HowItWorks copy={copy} />
         <PlanCards copy={copy} />
         <AuroraQuote copy={copy} />
         <FAQ copy={copy} />
-        <WaitlistForm copy={copy.waitlist} mascotAlt={copy.auroraMascotAlt} locale={locale as Locale} />
+        <Reviews locale={locale as Locale} />
       </main>
       <SiteFooter copy={copy} locale={locale as Locale} />
     </div>
