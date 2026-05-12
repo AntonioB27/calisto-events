@@ -239,20 +239,18 @@ const copy: Record<Locale, LandingCopy> = {
         mascotBubble: "One gallery, all the magic.",
       },
       {
-        title: "Roles",
-        description: "Guests upload and browse, and organizers manage access.",
+        title: "Organizer & guests",
+        description: "You run the event, guests upload and browse. You can add a co-organizer too.",
         mascotBubble: "Right people, right permissions.",
       },
       {
-        title: "Photos & videos by plan",
-        description:
-          "Photos are included in every plan, and paid plans unlock videos, higher limits, and longer retention.",
+        title: "Photos & videos",
+        description: "Every plan includes photos. Paid plans add videos, more storage, and longer access.",
         mascotBubble: "I'll match the plan to your story.",
       },
       {
-        title: "ZIP export",
-        description:
-          "Primary organizers can queue a full gallery ZIP from the Gallery tab. We prepare it in the background, email you when it is ready, and keep the download link valid for 24 hours.",
+        title: "Download your gallery",
+        description: "When the event is over, download everything in one file — ready in minutes, yours to keep.",
         mascotBubble: "Whole album, one download.",
       },
     ],
@@ -536,19 +534,18 @@ const copy: Record<Locale, LandingCopy> = {
         mascotBubble: "Jedna galerija, svi u istom trenu.",
       },
       {
-        title: "Uloge",
-        description: "Gosti učitavaju i gledaju, a organizatori vode pristup.",
+        title: "Organizator i gosti",
+        description: "Ti vodiš događaj, gosti učitavaju i gledaju. Možeš dodati i suorganizatora.",
         mascotBubble: "Uloge koje drže red.",
       },
       {
-        title: "Fotografije i videa po paketu",
-        description: "Fotografije su uključene u svaki paket, a plaćeni otključavaju videa, veće limite i duže čuvanje.",
+        title: "Fotografije i videa",
+        description: "Svaki paket uključuje fotografije. Plaćeni paketi dodaju videa, više prostora i duži pristup.",
         mascotBubble: "Paket uskladim s pričom.",
       },
       {
-        title: "ZIP izvoz",
-        description:
-          "Primarni organizator može u redu pripreme pokrenuti ZIP cijele galerije iz kartice Galerija. ZIP se radi u pozadini, šaljemo e‑mail kad bude spreman, a poveznica za preuzimanje vrijedi 24 sata.",
+        title: "Preuzmi svoju galeriju",
+        description: "Kad događaj završi, preuzmi sve u jednoj datoteci — gotovo za par minuta, tvoje zauvijek.",
         mascotBubble: "Cijeli album u jednom preuzimanju.",
       },
     ],
@@ -832,20 +829,18 @@ const copy: Record<Locale, LandingCopy> = {
         mascotBubble: "Eine Galerie, alle im gleichen Takt.",
       },
       {
-        title: "Rollen",
-        description: "Gäste laden hoch und stöbern, Organisator:innen verwalten den Zugang.",
+        title: "Organisator & Gäste",
+        description: "Du leitest das Event, Gäste laden hoch und stöbern. Du kannst auch einen Mitorganisator hinzufügen.",
         mascotBubble: "Die passenden Berechtigungen.",
       },
       {
-        title: "Fotos & Videos nach Tarif",
-        description:
-          "Fotos sind in jedem Tarif enthalten; kostenpflichtige Tarife schalten Videos, höhere Limits und längere Upload-Fenster frei.",
+        title: "Fotos & Videos",
+        description: "Jeder Tarif enthält Fotos. Kostenpflichtige Tarife fügen Videos, mehr Speicher und längeren Zugang hinzu.",
         mascotBubble: "Ich passe den Tarif an eure Geschichte an.",
       },
       {
-        title: "ZIP-Export",
-        description:
-          "Primär-Organisator:innen können in der Galerie einen ZIP der gesamten Sammlung anstoßen. Wir bereiten ihn im Hintergrund vor, senden eine E-Mail, sobald er fertig ist, und der Download-Link bleibt 24 Stunden gültig.",
+        title: "Galerie herunterladen",
+        description: "Wenn das Event vorbei ist, lade alles in einer Datei herunter — in Minuten fertig, für immer deins.",
         mascotBubble: "Ganzes Album, ein Download.",
       },
     ],
