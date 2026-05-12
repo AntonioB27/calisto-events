@@ -5,6 +5,7 @@ import { CalistoThemeInit } from "@/components/CalistoThemeInit";
 import { getAppStrings } from "@/lib/app-ui";
 import { bcp47FromUiLocale } from "@/lib/locale-bcp47";
 import { getUiLocale } from "@/lib/ui-locale";
+import { getUiTheme } from "@/lib/ui-theme";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,9 +25,10 @@ export default async function RootLayout({
   const locale = await getUiLocale();
   const dict = getAppStrings(locale);
   const lang = bcp47FromUiLocale(locale);
+  const theme = await getUiTheme();
 
   return (
-    <html lang={lang} translate="no" className="notranslate h-full scroll-smooth antialiased" suppressHydrationWarning>
+    <html lang={lang} translate="no" data-theme={theme ?? undefined} className="notranslate h-full scroll-smooth antialiased" suppressHydrationWarning>
       <head>
         <meta name="google" content="notranslate" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

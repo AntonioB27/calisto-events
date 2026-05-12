@@ -27,4 +27,10 @@ export function applyCalistoTheme(t: CalistoTheme) {
   } catch {
     /* ignore */
   }
+  // Also write a cookie so the server can render the correct theme on the next request.
+  try {
+    document.cookie = `${CALISTO_THEME_STORAGE_KEY}=${t}; path=/; max-age=31536000; SameSite=Lax`;
+  } catch {
+    /* ignore */
+  }
 }
