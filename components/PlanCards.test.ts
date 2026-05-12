@@ -12,7 +12,7 @@ const rows = [
 
 const rowsHr = [
   { label: "Fotografije", value: "150" },
-  { label: "Videos", value: "10" },
+  { label: "Videa", value: "10" },
   { label: "Limit gostiju", value: "30" },
   { label: "ZIP izvoz", value: "Galerija — primarni organizator, 24h link" },
   { label: "Prozor za prijenos", value: "7 dana" },
@@ -43,9 +43,9 @@ describe("splitPlanRows", () => {
     ]);
   });
 
-  it("puts Fotografije, Videos, Limit gostiju into primaryRows (hr)", () => {
+  it("puts Fotografije, Videa, Limit gostiju into primaryRows (hr)", () => {
     const { primaryRows } = splitPlanRows(rowsHr);
-    expect(primaryRows.map((r) => r.label)).toEqual(["Fotografije", "Videos", "Limit gostiju"]);
+    expect(primaryRows.map((r) => r.label)).toEqual(["Fotografije", "Videa", "Limit gostiju"]);
   });
 
   it("puts Fotos, Videos, Gästelimit into primaryRows (de)", () => {

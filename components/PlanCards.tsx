@@ -105,7 +105,7 @@ const PLAN_CONFIG: Record<string, PlanConfig> = {
 
 const PRIMARY_LABELS = new Set([
   "Photos", "Videos", "Guest limit",     // en
-  "Fotografije", "Limit gostiju",         // hr (Videos unchanged)
+  "Fotografije", "Videa", "Limit gostiju", // hr
   "Fotos", "Gästelimit",                  // de (Videos unchanged)
 ]);
 
