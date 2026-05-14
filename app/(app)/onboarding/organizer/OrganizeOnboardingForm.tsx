@@ -1,7 +1,5 @@
 "use client";
 
-import type { EventKind } from "@/lib/event-kind";
-import { EVENT_KINDS } from "@/lib/event-kind";
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
@@ -12,10 +10,13 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
+const ONBOARDING_PLANNING_KINDS = ["wedding", "birthday", "corporate", "other"] as const;
+type OnboardingPlanningKind = (typeof ONBOARDING_PLANNING_KINDS)[number];
+
 export function OrganizeOnboardingForm() {
   const ui = useAppUi();
   const router = useRouter();
-  const [kind, setKind] = useState<EventKind | null>(null);
+  const [kind, setKind] = useState<OnboardingPlanningKind | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,7 +87,7 @@ export function OrganizeOnboardingForm() {
             {ui.onboardingForm.kindEyebrow}
           </p>
           <div className="grid grid-cols-2 gap-2">
-            {EVENT_KINDS.map((k) => (
+            {ONBOARDING_PLANNING_KINDS.map((k) => (
               <AppBtn
                 key={k}
                 type="button"

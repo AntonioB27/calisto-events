@@ -1,11 +1,14 @@
 import type { Locale } from "@/lib/i18n";
 import { isLocale } from "@/lib/i18n";
 
+import { TABLE_QR_PRINT_TEMPLATE_IDS, type TableQrPrintTemplateId } from "./template-catalog";
+
 /** Query key for poster on-paper language (`?posterLang=de`). */
 export const POSTER_LANG_QUERY = "posterLang";
 
-export const POSTER_TEMPLATES = ["table-minimal", "table-bold"] as const;
-export type PosterTemplateId = (typeof POSTER_TEMPLATES)[number];
+/** @deprecated Use TABLE_QR_PRINT_TEMPLATE_IDS from template-catalog for new code. */
+export const POSTER_TEMPLATES = TABLE_QR_PRINT_TEMPLATE_IDS;
+export type PosterTemplateId = TableQrPrintTemplateId;
 export const DEFAULT_POSTER_TEMPLATE: PosterTemplateId = "table-minimal";
 
 export const PRINT_PAPERS = ["a4", "letter"] as const;
