@@ -1,22 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { parseEventKind, type EventKind } from "./event-kind";
+import { DEFAULT_EVENT_KIND, normalizeEventKind } from "./event-kind";
 
-describe("parseEventKind", () => {
-  it("returns known kinds", () => {
-    const cases: Array<[string, EventKind]> = [
-      ["wedding", "wedding"],
-      ["birthday", "birthday"],
-      ["corporate", "corporate"],
-      ["other", "other"],
-    ];
-    for (const [raw, expected] of cases) {
-      expect(parseEventKind(raw)).toBe(expected);
-    }
+describe("normalizeEventKind", () => {
+  it("returns generic for empty or unknown", () => {
+    expect(normalizeEventKind(undefined)).toBe(DEFAULT_EVENT_KIND);
+    expect(normalizeEventKind(null)).toBe(DEFAULT_EVENT_KIND);
+    expect(normalizeEventKind("")).toBe(DEFAULT_EVENT_KIND);
+    expect(normalizeEventKind("corporate")).toBe(DEFAULT_EVENT_KIND);
   });
 
-  it("falls back to other for unknown values", () => {
-    expect(parseEventKind("nope")).toBe("other");
-    expect(parseEventKind(null)).toBe("other");
+  it("accepts known kinds", () => {
+    expect(normalizeEventKind("wedding")).toBe("wedding");
+    expect(normalizeEventKind("generic")).toBe("generic");
   });
 });

@@ -438,6 +438,13 @@ export const APP_UI_HR: AppUiDict = {
     scheduleNoteLead: "Spremljeno kao ",
     scheduleNoteTrail:
       "(kalendar). Promjena datuma ili paketa mijenja prozor za goste i kapacitet medija ovog događaja.",
+    eventKindLabel: "Vrsta događaja",
+    eventKindHint:
+      "Koristi se za predloške ispisa i buduće značajke ovisne o vrsti (npr. vjenčanje).",
+    eventKindOptionGeneric: "Općenito",
+    eventKindOptionWedding: "Vjenčanje",
+    saveEventKind: "Spremi vrstu događaja",
+    eventKindSaveFail: "Vrstu događaja nije bilo moguće spremiti.",
     eventDateUtc: "Datum događaja (UTC kalendarski dan)",
     planTier: "Razine paketa",
     saveSchedule: "Spremi datum i plan",

@@ -447,6 +447,13 @@ export const APP_UI_DE: AppUiDict = {
     scheduleNoteLead: "Gespeichert als ",
     scheduleNoteTrail:
       "(Kalenderdatum). Datum oder Tarif wirken sich auf Gast‑Zeitfenster und Medien‑Limits aus.",
+    eventKindLabel: "Veranstaltungstyp",
+    eventKindHint:
+      "Für Druckvorlagen und künftige typ-spezifische Funktionen (z. B. Hochzeit).",
+    eventKindOptionGeneric: "Allgemein",
+    eventKindOptionWedding: "Hochzeit",
+    saveEventKind: "Typ speichern",
+    eventKindSaveFail: "Typ konnte nicht gespeichert werden.",
     eventDateUtc: "Datum (Kalendertag, UTC)",
     planTier: "Tarif",
     saveSchedule: "Datum & Tarif speichern",

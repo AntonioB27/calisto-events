@@ -14,6 +14,7 @@ import { GuestsTab } from "./_tabs/GuestsTab";
 import { OverviewTab } from "./_tabs/OverviewTab";
 import { SettingsTab } from "./_tabs/SettingsTab";
 import { ShareTab } from "./_tabs/ShareTab";
+import { normalizeEventKind } from "@/lib/event-kind";
 
 type EventPageProps = Readonly<{
   params: Promise<{
@@ -51,7 +52,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
 
   const { data: event } = await supabase
     .from("events")
-    .select("id, title, event_date, plan, access_code, organizer_id, scheduled_deletion_at")
+    .select("id, title, event_date, plan, access_code, organizer_id, scheduled_deletion_at, event_kind")
     .eq("id", id)
     .maybeSingle();
 
@@ -87,6 +88,11 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     String(event.title ?? uiCopy.defaults.eventTitle),
   );
   const navEmoji = displayNavEmoji(storedEmoji);
+  const storedEventKind = normalizeEventKind(
+    typeof (event as { event_kind?: unknown }).event_kind === "string"
+      ? (event as { event_kind: string }).event_kind
+      : undefined,
+  );
 
   return (
     <div style={{ padding: '40px 0 60px' }}>
@@ -141,6 +147,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             eventDate={event.event_date}
             plan={event.plan}
             accessCode={event.access_code}
+            storedEventKind={storedEventKind}
           />
         )}
       </div>
