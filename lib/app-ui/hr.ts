@@ -248,9 +248,23 @@ export const APP_UI_HR: AppUiDict = {
     tabGuests: "Gosti",
     tabGallery: "Galerija",
     tabShare: "Dijeli",
+    tabPrints: "Ispisi",
     tabSettings: "Postavke",
     subtitle: "Podijelite s gostima da se mogu pridružiti.",
     tabsAria: "Odjeljci događaja",
+  },
+
+  printsTab: {
+    kindEyebrow: "Ispisi",
+    kindTitle: "Kakav je ovo događaj?",
+    kindHint: "Koristimo to za prijedlog odgovarajućih predložaka pozivnica i kartica za stol.",
+    kindOptionGeneric: "Opći događaj",
+    kindOptionWedding: "Vjenčanje",
+    confirmKindFail: "Spremanje nije uspjelo. Pokušajte ponovno.",
+    title: "Ispisi",
+    subtitle: "Pozivnice i kartice za stol bit će ovdje.",
+    catalogStubLead: "Katalog predložaka (pregled) —",
+    catalogStubTrail: "predlošci za vrstu vašeg događaja:",
   },
 
   overview: {
@@ -438,13 +452,6 @@ export const APP_UI_HR: AppUiDict = {
     scheduleNoteLead: "Spremljeno kao ",
     scheduleNoteTrail:
       "(kalendar). Promjena datuma ili paketa mijenja prozor za goste i kapacitet medija ovog događaja.",
-    eventKindLabel: "Vrsta događaja",
-    eventKindHint:
-      "Koristi se za predloške ispisa i buduće značajke ovisne o vrsti (npr. vjenčanje).",
-    eventKindOptionGeneric: "Općenito",
-    eventKindOptionWedding: "Vjenčanje",
-    saveEventKind: "Spremi vrstu događaja",
-    eventKindSaveFail: "Vrstu događaja nije bilo moguće spremiti.",
     eventDateUtc: "Datum događaja (UTC kalendarski dan)",
     planTier: "Razine paketa",
     saveSchedule: "Spremi datum i plan",

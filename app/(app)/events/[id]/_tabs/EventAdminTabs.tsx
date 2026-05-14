@@ -17,6 +17,8 @@ function labelForAdminTab(tab: EventAdminTabId, t: ReturnType<typeof useAppUi>):
       return t.eventNav.tabGallery;
     case "share":
       return t.eventNav.tabShare;
+    case "prints":
+      return t.eventNav.tabPrints;
     case "settings":
       return t.eventNav.tabSettings;
   }
@@ -55,6 +57,19 @@ function TabIcon({ tab }: { tab: EventAdminTabId }) {
           <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           <path d="M16 6L12 2L8 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           <line x1="12" y1="2" x2="12" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+      );
+    case "prints":
+      return (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 9V4h12v5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M6 14H4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2h2M18 14h2a2 2 0 0 0 2-2v-1a2 2 0 0 0-2-2h-2M6 14v7h12v-7"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       );
     case "settings":

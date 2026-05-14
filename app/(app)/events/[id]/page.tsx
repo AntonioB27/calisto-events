@@ -13,6 +13,7 @@ import { GalleryTab } from "./_tabs/GalleryTab";
 import { GuestsTab } from "./_tabs/GuestsTab";
 import { OverviewTab } from "./_tabs/OverviewTab";
 import { SettingsTab } from "./_tabs/SettingsTab";
+import { PrintsTab } from "./_tabs/PrintsTab";
 import { ShareTab } from "./_tabs/ShareTab";
 import { normalizeEventKind } from "@/lib/event-kind";
 
@@ -52,7 +53,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
 
   const { data: event } = await supabase
     .from("events")
-    .select("id, title, event_date, plan, access_code, organizer_id, scheduled_deletion_at, event_kind")
+    .select("id, title, event_date, plan, access_code, organizer_id, scheduled_deletion_at, event_kind, prints_event_kind_set_at")
     .eq("id", id)
     .maybeSingle();
 
@@ -67,7 +68,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   const isPrimaryOrganizer = access.isPrimaryOrganizer;
 
   let selectedTab = resolveEventTab(pickQueryValue(resolvedSearchParams.tab));
-  if (selectedTab === "settings" && !isPrimaryOrganizer) {
+  if ((selectedTab === "settings" || selectedTab === "prints") && !isPrimaryOrganizer) {
     selectedTab = "overview";
   }
 
@@ -93,6 +94,9 @@ export default async function EventPage({ params, searchParams }: EventPageProps
       ? (event as { event_kind: string }).event_kind
       : undefined,
   );
+  const printsEventKindSetAtRaw = (event as { prints_event_kind_set_at?: unknown }).prints_event_kind_set_at;
+  const printsEventKindSetAt =
+    typeof printsEventKindSetAtRaw === "string" && printsEventKindSetAtRaw.length > 0 ? printsEventKindSetAtRaw : null;
 
   return (
     <div style={{ padding: '40px 0 60px' }}>
@@ -138,6 +142,9 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             publicOrigin={publicOrigin}
           />
         )}
+        {selectedTab === "prints" && isPrimaryOrganizer && (
+          <PrintsTab eventId={id} eventKind={storedEventKind} printsEventKindSetAt={printsEventKindSetAt} />
+        )}
         {selectedTab === "settings" && isPrimaryOrganizer && (
           <SettingsTab
             eventId={id}
@@ -147,7 +154,6 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             eventDate={event.event_date}
             plan={event.plan}
             accessCode={event.access_code}
-            storedEventKind={storedEventKind}
           />
         )}
       </div>

@@ -10,23 +10,15 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
-const ONBOARDING_PLANNING_KINDS = ["wedding", "birthday", "corporate", "other"] as const;
-type OnboardingPlanningKind = (typeof ONBOARDING_PLANNING_KINDS)[number];
-
 export function OrganizeOnboardingForm() {
   const ui = useAppUi();
   const router = useRouter();
-  const [kind, setKind] = useState<OnboardingPlanningKind | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!kind) {
-      setError(ui.onboardingForm.choosePlanning);
-      return;
-    }
     setBusy(true);
     setError(null);
 
@@ -50,12 +42,6 @@ export function OrganizeOnboardingForm() {
       );
 
       if (saveError) throw saveError;
-
-      try {
-        window.localStorage.setItem("calisto_onboarding_event_kind", kind);
-      } catch {
-        /* ignore */
-      }
 
       router.replace("/dashboard");
       router.refresh();
@@ -81,28 +67,6 @@ export function OrganizeOnboardingForm() {
             {ui.onboardingForm.subtitle}
           </p>
         </header>
-
-        <section>
-          <p style={{ marginBottom: 12, fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--app-muted)' }}>
-            {ui.onboardingForm.kindEyebrow}
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {ONBOARDING_PLANNING_KINDS.map((k) => (
-              <AppBtn
-                key={k}
-                type="button"
-                variant={kind === k ? "gold" : "outline"}
-                className="w-full !justify-start !text-left"
-                onClick={() => {
-                  setKind(k);
-                  if (error) setError(null);
-                }}
-              >
-                {ui.onboardingKinds[k]}
-              </AppBtn>
-            ))}
-          </div>
-        </section>
 
         <section>
           <AppFormRow label={ui.onboardingForm.displayNameLabel} labelFor="displayName">
@@ -132,7 +96,7 @@ export function OrganizeOnboardingForm() {
           </p>
         ) : null}
 
-        <AppBtn type="submit" variant="primary" className="w-full" disabled={busy || !kind} loading={busy}>
+        <AppBtn type="submit" variant="primary" className="w-full" disabled={busy} loading={busy}>
           {ui.onboardingForm.continueDashboard}
         </AppBtn>
       </form>

@@ -3,6 +3,8 @@ export const EVENT_ADMIN_TABS = [
   { id: "guests", visibleTo: "all" as const },
   { id: "gallery", visibleTo: "all" as const },
   { id: "share", visibleTo: "all" as const },
+  /** Primary organizer only — print templates & stationery */
+  { id: "prints", visibleTo: "organizer" as const },
   /** Primary organizer only — hidden for other roles if they ever get event access */
   { id: "settings", visibleTo: "organizer" as const },
 ] as const;

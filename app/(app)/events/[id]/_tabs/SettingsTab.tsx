@@ -13,8 +13,6 @@ import { AppInput } from "@/components/app-ui/AppInput";
 import { GoldBar } from "@/components/app-ui/GoldBar";
 import { ConfirmDialog } from "@/components/app-ui/ConfirmDialog";
 import { composeEventTitle } from "@/lib/event-title";
-import type { EventKind } from "@/lib/event-kind";
-import { EVENT_KINDS } from "@/lib/event-kind";
 import { bcp47FromUiLocale } from "@/lib/locale-bcp47";
 import type { PlanId } from "@/lib/plan-limits";
 import { normalizePlanId } from "@/lib/plan-limits";
@@ -45,7 +43,6 @@ type SettingsTabProps = Readonly<{
   eventDate: string;
   plan: string;
   accessCode: string;
-  storedEventKind: EventKind;
 }>;
 
 function SectionHeader({ label }: { label: string }) {
@@ -75,7 +72,6 @@ export function SettingsTab({
   eventDate,
   plan,
   accessCode,
-  storedEventKind,
 }: SettingsTabProps) {
   const ui = useAppUi();
   const router = useRouter();
@@ -98,8 +94,6 @@ export function SettingsTab({
   const [scheduleDate, setScheduleDate] = useState("");
   const [schedulePlan, setSchedulePlan] = useState<PlanId>("free");
   const [scheduleSaving, setScheduleSaving] = useState(false);
-  const [eventKind, setEventKind] = useState<EventKind>(storedEventKind);
-  const [kindSaving, setKindSaving] = useState(false);
   const titleTrim = fullStoredTitle.trim();
   const phraseTrim = deletePhrase.trim();
   const typedDeleteWord = phraseTrim.toUpperCase() === "DELETE";
@@ -118,10 +112,6 @@ export function SettingsTab({
   useEffect(() => {
     setSchedulePlan(normalizePlanId(plan));
   }, [plan]);
-
-  useEffect(() => {
-    setEventKind(storedEventKind);
-  }, [storedEventKind]);
 
   useEffect(() => {
     if (!pickerOpen) return;
@@ -197,24 +187,8 @@ export function SettingsTab({
   }
 
   const dirty = name.trim() !== storedName.trim() || emoji.trim() !== storedEmoji.trim();
-  const kindDirty = eventKind !== storedEventKind;
   const scheduleDirty =
     scheduleDate !== toDateInputUtc(eventDate) || schedulePlan !== normalizePlanId(plan);
-
-  async function saveEventKind() {
-    if (!supabase || kindSaving || !kindDirty) return;
-    setKindSaving(true);
-    setError(null);
-    try {
-      const { error: upErr } = await supabase.from("events").update({ event_kind: eventKind }).eq("id", eventId);
-      if (upErr) throw new Error(upErr.message);
-      router.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : ui.settingsTab.eventKindSaveFail);
-    } finally {
-      setKindSaving(false);
-    }
-  }
 
   async function saveSchedule() {
     if (!supabase || scheduleSaving || !scheduleDirty) return;
@@ -413,24 +387,6 @@ export function SettingsTab({
               {ui.settingsTab.scheduleNoteTrail}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 420 }}>
-              <AppFormRow label={ui.settingsTab.eventKindLabel}>
-                <select
-                  id="settings-event-kind"
-                  className="app-input"
-                  style={{ width: "100%", borderRadius: "var(--app-radius-md, 12px)", padding: "10px 12px" }}
-                  value={eventKind}
-                  onChange={(e) => setEventKind(e.target.value as EventKind)}
-                >
-                  {EVENT_KINDS.map((k) => (
-                    <option key={k} value={k}>
-                      {k === "generic" ? ui.settingsTab.eventKindOptionGeneric : ui.settingsTab.eventKindOptionWedding}
-                    </option>
-                  ))}
-                </select>
-              </AppFormRow>
-              <p style={{ margin: "-8px 0 0", fontSize: 12, color: "var(--app-subtle)", lineHeight: 1.45 }}>
-                {ui.settingsTab.eventKindHint}
-              </p>
               <AppFormRow label={ui.settingsTab.eventDateUtc}>
                 <AppInput id="settings-event-date" type="date" value={scheduleDate} onChange={setScheduleDate} />
               </AppFormRow>
@@ -449,30 +405,6 @@ export function SettingsTab({
                   ))}
                 </select>
               </AppFormRow>
-            </div>
-            <div style={{ marginTop: 14, display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
-              <AppBtn
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={!kindDirty || kindSaving}
-                loading={kindSaving}
-                onClick={() => void saveEventKind()}
-              >
-                {ui.settingsTab.saveEventKind}
-              </AppBtn>
-              <AppBtn
-                type="button"
-                variant="ghost"
-                size="sm"
-                disabled={!kindDirty || kindSaving}
-                onClick={() => {
-                  setEventKind(storedEventKind);
-                  setError(null);
-                }}
-              >
-                {ui.settingsTab.reset}
-              </AppBtn>
             </div>
             <div style={{ marginTop: 18, display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
               <AppBtn

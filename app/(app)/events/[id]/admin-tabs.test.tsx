@@ -54,7 +54,7 @@ describe("EventAdminTabs", () => {
   it("renders all expected tabs with hrefs and a single selected marker when organizer tabs are visible", () => {
     const html = renderToStaticMarkup(
       <AppUiProvider value={{ locale: "en", ...provider }}>
-        <EventAdminTabs eventId="evt_123" selectedTab="guests" showOrganizerOnlyTabs />
+        <EventAdminTabs eventId="evt_123" eventTitle="My Event" selectedTab="guests" showOrganizerOnlyTabs />
       </AppUiProvider>,
     );
 
@@ -63,6 +63,7 @@ describe("EventAdminTabs", () => {
       guests: en.eventNav.tabGuests,
       gallery: en.eventNav.tabGallery,
       share: en.eventNav.tabShare,
+      prints: en.eventNav.tabPrints,
       settings: en.eventNav.tabSettings,
     };
     for (const tab of EVENT_ADMIN_TABS) {
@@ -77,12 +78,14 @@ describe("EventAdminTabs", () => {
   it("hides organizer-only tabs when showOrganizerOnlyTabs is false", () => {
     const html = renderToStaticMarkup(
       <AppUiProvider value={{ locale: "en", ...provider }}>
-        <EventAdminTabs eventId="evt_123" selectedTab="overview" showOrganizerOnlyTabs={false} />
+        <EventAdminTabs eventId="evt_123" eventTitle="My Event" selectedTab="overview" showOrganizerOnlyTabs={false} />
       </AppUiProvider>,
     );
 
     expect(html).not.toContain(`>${en.eventNav.tabSettings}<`);
+    expect(html).not.toContain(`>${en.eventNav.tabPrints}<`);
     expect(html).not.toContain("tab=settings");
+    expect(html).not.toContain("tab=prints");
     expect(html).toContain(">Overview<");
     expect(html).toContain("/events/evt_123?tab=gallery");
   });
@@ -97,5 +100,6 @@ describe("Event page tabs", () => {
     expect(resolveEventTab("gallery")).toBe("gallery");
     expect(resolveEventTab("guests")).toBe("guests");
     expect(resolveEventTab("settings")).toBe("settings");
+    expect(resolveEventTab("prints")).toBe("prints");
   });
 });

@@ -254,9 +254,23 @@ export const APP_UI_DE: AppUiDict = {
     tabGuests: "Gäste",
     tabGallery: "Galerie",
     tabShare: "Teilen",
+    tabPrints: "Drucke",
     tabSettings: "Einstellungen",
     subtitle: "Teilen mit Gästen, damit diese beitreten können.",
     tabsAria: "Bereiche der Veranstaltung",
+  },
+
+  printsTab: {
+    kindEyebrow: "Drucke",
+    kindTitle: "Um welche Art Veranstaltung handelt es sich?",
+    kindHint: "Damit schlagen wir passende Einladungs- und Tischvorlagen vor.",
+    kindOptionGeneric: "Allgemeine Veranstaltung",
+    kindOptionWedding: "Hochzeit",
+    confirmKindFail: "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    title: "Drucke",
+    subtitle: "Einladungen und Tischkarten folgen hier.",
+    catalogStubLead: "Vorlagenkatalog (Vorschau) —",
+    catalogStubTrail: "Vorlagen für deinen Veranstaltungstyp:",
   },
 
   overview: {
@@ -447,13 +461,6 @@ export const APP_UI_DE: AppUiDict = {
     scheduleNoteLead: "Gespeichert als ",
     scheduleNoteTrail:
       "(Kalenderdatum). Datum oder Tarif wirken sich auf Gast‑Zeitfenster und Medien‑Limits aus.",
-    eventKindLabel: "Veranstaltungstyp",
-    eventKindHint:
-      "Für Druckvorlagen und künftige typ-spezifische Funktionen (z. B. Hochzeit).",
-    eventKindOptionGeneric: "Allgemein",
-    eventKindOptionWedding: "Hochzeit",
-    saveEventKind: "Typ speichern",
-    eventKindSaveFail: "Typ konnte nicht gespeichert werden.",
     eventDateUtc: "Datum (Kalendertag, UTC)",
     planTier: "Tarif",
     saveSchedule: "Datum & Tarif speichern",

@@ -245,9 +245,23 @@ export const APP_UI_EN = {
     tabGuests: "Guests",
     tabGallery: "Gallery",
     tabShare: "Share",
+    tabPrints: "Prints",
     tabSettings: "Settings",
     subtitle: "Share with guests to let them join.",
     tabsAria: "Event sections",
+  },
+
+  printsTab: {
+    kindEyebrow: "Prints",
+    kindTitle: "What kind of event is this?",
+    kindHint: "We use this to suggest the right invitation and table templates.",
+    kindOptionGeneric: "General event",
+    kindOptionWedding: "Wedding",
+    confirmKindFail: "Could not save. Try again.",
+    title: "Prints",
+    subtitle: "Invitations and table cards will live here.",
+    catalogStubLead: "Template catalog (preview) —",
+    catalogStubTrail: "templates for your event type:",
   },
 
   overview: {
@@ -431,13 +445,6 @@ export const APP_UI_EN = {
     scheduleNoteLead: "Saved as ",
     scheduleNoteTrail:
       "(calendar). Changing the date or plan updates guest upload windows and media limits for this event — in-app checkout for paid tiers is not live yet.",
-    eventKindLabel: "Event type",
-    eventKindHint:
-      "Used for print templates and future type-specific features (for example wedding stationery).",
-    eventKindOptionGeneric: "General",
-    eventKindOptionWedding: "Wedding",
-    saveEventKind: "Save event type",
-    eventKindSaveFail: "Could not save event type.",
     eventDateUtc: "Event date (UTC calendar day)",
     planTier: "Plan tier",
     saveSchedule: "Save date & plan",
