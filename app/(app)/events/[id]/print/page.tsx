@@ -152,7 +152,14 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
       className="join-shell min-h-screen px-4 py-10 print:bg-white print:px-0 print:py-0"
       style={{ color: "var(--app-text)" }}
     >
-      <div style={{ maxWidth: 960, margin: "0 auto" }} className="print:max-w-none">
+      <div
+        style={{
+          maxWidth: isInvitationPrint ? "100%" : 960,
+          margin: "0 auto",
+          width: "100%",
+        }}
+        className="print:max-w-none"
+      >
         <EventPrintToolbar
           eventId={id}
           activeTemplate={routeTemplate}
@@ -166,7 +173,7 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
           sheetHelperLine={isInvitationPrint ? uiDict.print.sheetHelperInvitation : uiDict.print.sheetHelper}
         />
 
-        <div lang={posterLocale}>
+        <div lang={posterLocale} className={isInvitationPrint ? "print-invite-page-root" : undefined}>
           {isInvitationPrint && mergedInvitation ? (
             <WeddingInviteSimplePrintSheet
               paper={paper}

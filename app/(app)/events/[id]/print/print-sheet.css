@@ -209,112 +209,189 @@
   color: #555;
 }
 
-/* --- Wedding invitation · simple (botanical portrait, no QR) --- */
+/* --- Wedding invitation: ISO A4 (210×297mm) / US Letter, floral art --- */
 
-.print-invite-outer {
-  margin-left: auto;
-  margin-right: auto;
+.print-invite-page-root {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   width: 100%;
-  max-width: 210mm;
-  border-radius: 12px;
-  border: 1px solid var(--app-border);
-  background: var(--app-surface-2);
-  overflow: hidden;
-}
-
-.print-invite-outer--letter {
-  max-width: 216mm;
+  padding: 16px 10px 48px;
+  box-sizing: border-box;
 }
 
 @media print {
-  .print-invite-outer {
-    max-width: none;
-    width: 100%;
+  .print-invite-page-root {
+    padding: 0;
+    display: block;
+  }
+}
+
+.print-invite-outer.print-invite-botanical {
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid rgba(88, 58, 78, 0.22);
+  background: #ece6ec;
+  box-shadow: 0 16px 56px rgba(38, 18, 42, 0.14);
+  container-type: inline-size;
+  container-name: invite;
+}
+
+/* Exact A4 aspect on screen; exact mm when printed */
+.print-invite-outer.print-invite-botanical--a4 {
+  width: min(100%, 210mm);
+  max-width: 210mm;
+  aspect-ratio: 210 / 297;
+  height: auto;
+}
+
+@media print {
+  .print-invite-outer.print-invite-botanical--a4 {
+    width: 210mm;
+    height: 297mm;
+    max-width: 210mm;
+    aspect-ratio: auto;
     border-radius: 0;
     border: none;
-    background: #fff;
     box-shadow: none;
+    background: #fff;
+  }
+
+  .print-invite-botanical__card {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+/* US Letter 8.5" × 11" */
+.print-invite-outer.print-invite-botanical--letter {
+  width: min(100%, 8.5in);
+  max-width: 8.5in;
+  aspect-ratio: 8.5 / 11;
+  height: auto;
+}
+
+@media print {
+  .print-invite-outer.print-invite-botanical--letter {
+    width: 8.5in;
+    height: 11in;
+    max-width: none;
+    aspect-ratio: auto;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    background: #fff;
   }
 }
 
 .print-invite-botanical__card {
   position: relative;
-  min-height: 260mm;
   box-sizing: border-box;
-  padding: 10mm 11mm 14mm;
-  background: #fff;
-  color: #3d3a35;
-  font-family: var(--font-sans, "Inter", system-ui, sans-serif);
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  padding: 12mm 14mm 14mm;
+  background: linear-gradient(168deg, #fffefc 0%, #faf5f8 38%, #f4ecf2 100%);
+  color: #4a4238;
   text-align: center;
   overflow: hidden;
 }
 
-@media screen {
-  .print-invite-botanical__card {
-    min-height: 72vh;
-  }
+.print-invite-botanical__floralSvg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.88;
 }
 
 .print-invite-botanical__corners {
   position: absolute;
   inset: 0;
+  z-index: 1;
   pointer-events: none;
-  z-index: 0;
 }
 
 .print-invite-botanical__corner {
   position: absolute;
-  width: 52%;
-  height: 46%;
-  opacity: 0.88;
+  width: 58%;
+  height: 52%;
+  opacity: 0.92;
+  mix-blend-mode: multiply;
 }
 
 .print-invite-botanical__corner--tl {
-  top: -6%;
-  left: -10%;
+  top: -10%;
+  left: -14%;
   background:
-    radial-gradient(ellipse 55% 48% at 18% 22%, rgba(155, 107, 159, 0.42), transparent 62%),
-    radial-gradient(ellipse 40% 36% at 28% 32%, rgba(196, 168, 196, 0.38), transparent 58%),
-    radial-gradient(ellipse 28% 24% at 8% 38%, rgba(90, 124, 90, 0.28), transparent 55%);
+    radial-gradient(ellipse 58% 52% at 20% 24%, rgba(150, 88, 158, 0.5), transparent 64%),
+    radial-gradient(ellipse 42% 38% at 32% 36%, rgba(205, 165, 210, 0.42), transparent 60%),
+    radial-gradient(ellipse 32% 28% at 10% 40%, rgba(78, 118, 72, 0.32), transparent 58%);
 }
 
 .print-invite-botanical__corner--tr {
-  top: -4%;
-  right: -10%;
+  top: -8%;
+  right: -14%;
   background:
-    radial-gradient(ellipse 50% 44% at 78% 18%, rgba(186, 160, 210, 0.35), transparent 60%),
-    radial-gradient(ellipse 36% 30% at 88% 28%, rgba(212, 196, 230, 0.45), transparent 55%),
-    radial-gradient(circle 3px at 72% 22%, rgba(212, 175, 55, 0.35), transparent 40%),
-    radial-gradient(circle 2px at 82% 32%, rgba(212, 175, 55, 0.28), transparent 35%);
+    radial-gradient(ellipse 54% 48% at 80% 20%, rgba(175, 135, 195, 0.48), transparent 62%),
+    radial-gradient(ellipse 40% 34% at 92% 30%, rgba(225, 205, 238, 0.5), transparent 58%),
+    radial-gradient(circle 2.5px at 76% 26%, rgba(212, 175, 55, 0.45), transparent 38%),
+    radial-gradient(circle 2px at 88% 40%, rgba(212, 175, 55, 0.32), transparent 32%);
 }
 
 .print-invite-botanical__corner--bl {
-  bottom: -8%;
-  left: -8%;
+  bottom: -12%;
+  left: -10%;
   background:
-    radial-gradient(ellipse 48% 42% at 22% 72%, rgba(168, 130, 178, 0.32), transparent 58%),
-    radial-gradient(circle 2px at 18% 82%, rgba(212, 175, 55, 0.22), transparent 32%);
+    radial-gradient(ellipse 52% 46% at 24% 76%, rgba(155, 95, 165, 0.45), transparent 62%),
+    radial-gradient(circle 2px at 14% 86%, rgba(212, 175, 55, 0.28), transparent 30%);
 }
 
 .print-invite-botanical__corner--br {
-  bottom: -10%;
-  right: -12%;
+  bottom: -14%;
+  right: -16%;
   background:
-    radial-gradient(ellipse 58% 50% at 82% 78%, rgba(140, 95, 150, 0.4), transparent 62%),
-    radial-gradient(ellipse 36% 32% at 70% 88%, rgba(90, 124, 90, 0.26), transparent 55%);
+    radial-gradient(ellipse 62% 54% at 82% 80%, rgba(125, 72, 138, 0.52), transparent 64%),
+    radial-gradient(ellipse 38% 34% at 68% 90%, rgba(88, 128, 82, 0.3), transparent 56%);
+}
+
+.print-invite-botanical__top,
+.print-invite-botanical__bottom {
+  position: relative;
+  z-index: 2;
+}
+
+.print-invite-botanical__top {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+}
+
+.print-invite-botanical__bottom {
+  flex: 0 0 auto;
+  padding-top: 4mm;
 }
 
 .print-invite-botanical__eyebrow {
-  position: relative;
-  z-index: 1;
   margin: 0 auto;
-  max-width: 38ch;
-  font-size: clamp(0.62rem, 1.35vw, 0.72rem);
+  max-width: 40ch;
+  font-family: "Cormorant Garamond", "Times New Roman", serif;
+  font-size: clamp(9px, 2.05cqi, 12px);
   font-weight: 600;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  line-height: 1.5;
-  color: #5c574d;
+  line-height: 1.45;
+  color: #5a5348;
 }
 
 .print-invite-botanical__eyebrow--tight {
@@ -323,19 +400,19 @@
 
 .print-invite-botanical__wreathBlock {
   position: relative;
-  z-index: 1;
   display: grid;
   place-items: center;
-  margin: 5mm auto 2mm;
-  min-height: 118px;
+  margin: 4mm auto 1mm;
+  width: 100%;
+  min-height: clamp(120px, 38cqi, 200px);
 }
 
 .print-invite-botanical__wreathSvg {
   position: absolute;
-  width: min(72vw, 220px);
-  height: min(72vw, 220px);
-  max-width: 220px;
-  max-height: 220px;
+  width: min(78cqi, 240px);
+  height: min(78cqi, 240px);
+  max-width: 72mm;
+  max-height: 72mm;
 }
 
 .print-invite-botanical__names {
@@ -344,128 +421,135 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 12px 8px;
-  max-width: 90%;
+  padding: 10px 6px;
+  max-width: 92%;
 }
 
 .print-invite-botanical__script {
-  font-family: "Playfair Display", var(--font-display, "Lora", Georgia, serif);
-  font-style: italic;
+  font-family: "Dancing Script", "Brush Script MT", cursive;
+  font-style: normal;
   font-weight: 600;
-  color: #7a4f86;
+  color: #6b3f78;
 }
 
 .print-invite-botanical__namesLine {
   margin: 0;
-  font-size: clamp(1.85rem, 5.2vw, 2.85rem);
-  line-height: 1.08;
-  letter-spacing: 0.01em;
+  font-size: clamp(26px, 7.5cqi, 46px);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
 }
 
 .print-invite-botanical__ampersand {
-  margin: 2px 0;
-  font-family: "Playfair Display", var(--font-display, Georgia, serif);
-  font-style: italic;
-  font-size: clamp(1.6rem, 4.5vw, 2.35rem);
+  margin: 0;
+  font-family: "Dancing Script", cursive;
+  font-size: clamp(22px, 6.2cqi, 38px);
   font-weight: 600;
-  color: #9b6b9f;
+  color: #8b5694;
 }
 
 .print-invite-botanical__dateBlock {
-  position: relative;
-  z-index: 1;
   margin-top: 4mm;
+  width: 100%;
+  max-width: 95%;
 }
 
 .print-invite-botanical__dateMonth {
   margin: 0;
-  font-size: clamp(0.68rem, 1.5vw, 0.78rem);
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(10px, 2.35cqi, 13px);
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #5c574d;
+  color: #5a5348;
 }
 
 .print-invite-botanical__dateRow {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(6px, 2vw, 14px);
-  margin-top: 3mm;
-  flex-wrap: nowrap;
+  gap: 0.5em;
+  margin-top: 2.5mm;
+  width: 100%;
 }
 
 .print-invite-botanical__dateSide {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: clamp(0.62rem, 1.35vw, 0.72rem);
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #5c574d;
+  gap: 0.35em;
+  flex: 1 1 30%;
   min-width: 0;
-  flex: 1 1 28%;
   justify-content: center;
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(9px, 2cqi, 11.5px);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5a5348;
+}
+
+.print-invite-botanical__dateSideText {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .print-invite-botanical__hairline {
-  flex: 0 0 14px;
+  flex: 1 1 12%;
   height: 1px;
-  background: #b8b3a8;
-  min-width: 8px;
+  background: #9a9186;
+  min-width: 3px;
+  max-width: 36%;
 }
 
 .print-invite-botanical__dateNum {
   margin: 0;
   flex: 0 0 auto;
-  font-family: "Playfair Display", var(--font-display, Georgia, serif);
+  font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
   font-style: normal;
   font-weight: 700;
-  font-size: clamp(2.6rem, 9vw, 4.25rem);
-  line-height: 1;
-  color: #7a4f86;
+  font-size: clamp(40px, 13cqi, 72px);
+  line-height: 0.95;
+  color: #6b3f78;
 }
 
 .print-invite-botanical__dateYear {
-  margin: 2mm 0 0;
-  font-size: clamp(0.68rem, 1.5vw, 0.78rem);
+  margin: 1.5mm 0 0;
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(10px, 2.35cqi, 13px);
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #5c574d;
+  color: #5a5348;
 }
 
 .print-invite-botanical__supplement {
-  position: relative;
-  z-index: 1;
   margin: 3mm auto 0;
-  max-width: 40ch;
-  font-size: clamp(0.65rem, 1.4vw, 0.75rem);
+  max-width: 42ch;
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(9px, 2cqi, 11px);
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #6a655b;
+  color: #6a6258;
 }
 
 .print-invite-botanical__venue {
-  position: relative;
-  z-index: 1;
-  margin: 5mm auto 0;
-  max-width: 36ch;
-  font-size: clamp(0.65rem, 1.45vw, 0.76rem);
+  margin: 0 auto;
+  max-width: 38ch;
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(9px, 2.15cqi, 11.5px);
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   line-height: 1.55;
-  color: #5c574d;
+  color: #5a5348;
 }
 
 .print-invite-botanical__reception {
-  position: relative;
-  z-index: 1;
-  margin: 8mm auto 0;
-  font-size: clamp(1.15rem, 3.2vw, 1.65rem);
-  font-weight: 500;
-  color: #7a4f86;
+  margin: 5mm auto 0;
+  font-family: "Dancing Script", cursive;
+  font-size: clamp(22px, 6.5cqi, 36px);
+  font-weight: 600;
+  color: #6b3f78;
 }
