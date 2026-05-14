@@ -39,11 +39,10 @@ export function defaultFieldValuesForTemplate(
   if (templateId !== "wedding-invite-simple") return {};
   const { partnerA, partnerB } = guessPartnerNamesFromEventTitle(eventDisplayName);
   const partnerBLine = partnerB || partnerA;
-  const dateLine = formatEventDateForPrintField(eventDateIso, locale);
   return {
     partner_a: partnerA,
     partner_b: partnerBLine,
     venue: "",
-    extra_line: dateLine,
+    extra_line: "",
   };
 }

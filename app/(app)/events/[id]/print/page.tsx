@@ -174,13 +174,12 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
               partnerB={mergedInvitation.partner_b ?? ""}
               venue={mergedInvitation.venue ?? ""}
               extraLine={mergedInvitation.extra_line ?? ""}
-              joinUrl={joinUrl}
-              accessCode={event.access_code}
-              publicHostDisplay={publicHostDisplay}
+              eventDateIso={typeof event.event_date === "string" ? event.event_date : ""}
+              locale={posterLocale}
               strings={{
-                qrEyebrow: posterPrint.inviteQrEyebrow,
-                footerGoToLead: posterPrint.footerGoToLead,
-                footerGoToTrail: posterPrint.footerGoToTrail,
+                togetherWithFamilies: posterPrint.inviteTogetherWithFamilies,
+                inviteCelebrationOn: posterPrint.inviteCelebrationOn,
+                receptionToFollow: posterPrint.inviteReceptionFollow,
               }}
             />
           ) : (

@@ -10,6 +10,6 @@ describe("mergeInvitationDraftWithDefaults", () => {
     expect(m.partner_a).toBe("A");
     expect(m.partner_b).toBe("B");
     expect(m.venue).toBe("City Hall");
-    expect(m.extra_line.length).toBeGreaterThan(0);
+    expect(m.extra_line).toBe("");
   });
 });
