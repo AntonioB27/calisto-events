@@ -24,6 +24,10 @@ export type PrintTemplateDef = Readonly<{
 export const TABLE_QR_PRINT_TEMPLATE_IDS = ["table-minimal", "table-bold"] as const;
 export type TableQrPrintTemplateId = (typeof TABLE_QR_PRINT_TEMPLATE_IDS)[number];
 
+/** Invitation layouts (field values + optional QR block on the print route). */
+export const INVITATION_PRINT_TEMPLATE_IDS = ["wedding-invite-simple"] as const;
+export type InvitationPrintTemplateId = (typeof INVITATION_PRINT_TEMPLATE_IDS)[number];
+
 export const PRINT_TEMPLATE_DEFINITIONS: readonly PrintTemplateDef[] = [
   {
     id: "table-minimal",
@@ -69,4 +73,8 @@ export function isKnownPrintTemplateId(templateId: string): boolean {
 
 export function isTableQrTemplateId(id: string): id is TableQrPrintTemplateId {
   return (TABLE_QR_PRINT_TEMPLATE_IDS as readonly string[]).includes(id);
+}
+
+export function isInvitationPrintTemplateId(id: string): id is InvitationPrintTemplateId {
+  return (INVITATION_PRINT_TEMPLATE_IDS as readonly string[]).includes(id);
 }

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { listPrintTemplatesForEventKind } from "./template-catalog";
+import {
+  isInvitationPrintTemplateId,
+  isTableQrTemplateId,
+  listPrintTemplatesForEventKind,
+} from "./template-catalog";
 import { validatePrintTemplateFieldValues } from "./validate-print-template-fields";
 
 describe("template-catalog", () => {
@@ -14,6 +18,13 @@ describe("template-catalog", () => {
     const ids = listPrintTemplatesForEventKind("generic").map((t) => t.id);
     expect(ids).not.toContain("wedding-invite-simple");
     expect(ids).toContain("table-bold");
+  });
+
+  it("classifies template ids", () => {
+    expect(isInvitationPrintTemplateId("wedding-invite-simple")).toBe(true);
+    expect(isInvitationPrintTemplateId("table-minimal")).toBe(false);
+    expect(isTableQrTemplateId("table-bold")).toBe(true);
+    expect(isTableQrTemplateId("wedding-invite-simple")).toBe(false);
   });
 });
 

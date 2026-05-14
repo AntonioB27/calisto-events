@@ -317,7 +317,7 @@ export function PrintsTab({
                     {templateHint[t.id] ? (
                       <p style={{ margin: 0, fontSize: 13, color: "var(--app-muted)" }}>{templateHint[t.id]}</p>
                     ) : null}
-                    <div style={{ marginTop: 8 }}>
+                    <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
                       <AppBtn
                         type="button"
                         variant="gold"
@@ -326,6 +326,13 @@ export function PrintsTab({
                         onClick={() => void saveDraft(t.id)}
                       >
                         {ui.printsTab.saveDraft}
+                      </AppBtn>
+                      <AppBtn
+                        href={`/events/${eventId}/print?template=${encodeURIComponent(t.id)}`}
+                        as={Link}
+                        variant="secondary"
+                      >
+                        {ui.printsTab.openPrintPreview}
                       </AppBtn>
                     </div>
                   </div>

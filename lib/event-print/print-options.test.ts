@@ -6,7 +6,24 @@ import {
   parsePosterContentLocale,
   parsePosterTemplate,
   parsePrintPaper,
+  parsePrintRouteTemplate,
 } from "./print-options";
+
+describe("parsePrintRouteTemplate", () => {
+  it("defaults for undefined", () => {
+    expect(parsePrintRouteTemplate(undefined)).toBe(DEFAULT_POSTER_TEMPLATE);
+  });
+  it("accepts table templates", () => {
+    expect(parsePrintRouteTemplate("table-minimal")).toBe("table-minimal");
+    expect(parsePrintRouteTemplate("table-bold")).toBe("table-bold");
+  });
+  it("accepts wedding invitation template", () => {
+    expect(parsePrintRouteTemplate("wedding-invite-simple")).toBe("wedding-invite-simple");
+  });
+  it("rejects unknown", () => {
+    expect(parsePrintRouteTemplate("hacker")).toBe(DEFAULT_POSTER_TEMPLATE);
+  });
+});
 
 describe("parsePosterTemplate", () => {
   it("defaults for undefined", () => {
@@ -20,6 +37,9 @@ describe("parsePosterTemplate", () => {
   });
   it("rejects unknown", () => {
     expect(parsePosterTemplate("hacker")).toBe(DEFAULT_POSTER_TEMPLATE);
+  });
+  it("maps invitation route id to default table (table-only parser)", () => {
+    expect(parsePosterTemplate("wedding-invite-simple")).toBe(DEFAULT_POSTER_TEMPLATE);
   });
 });
 
