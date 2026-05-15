@@ -40,73 +40,107 @@ function PrintPageRules({ paper }: Readonly<{ paper: PrintPaperId }>) {
   );
 }
 
+/**
+ * Botanical wreath built from 24 SVG leaf paths arranged programmatically
+ * around a circle. Alternates larger/smaller leaves for natural density.
+ */
 function InviteWreath() {
+  const CX = 120;
+  const CY = 120;
+  const LEAF_COUNT = 24;
+  const BASE_R = 70; // radius to leaf base
+
   return (
     <svg className="print-invite-botanical__wreathSvg" viewBox="0 0 240 240" aria-hidden>
-      <circle cx="120" cy="120" r="102" fill="none" stroke="#8faa8f" strokeWidth={1.15} opacity={0.95} />
-      <circle cx="120" cy="120" r="96" fill="none" stroke="#b8d4ae" strokeWidth={0.65} opacity={0.55} />
-      <circle cx="120" cy="120" r="90" fill="none" stroke="#dfead8" strokeWidth={0.4} opacity={0.4} />
-      <path
-        d="M 188 78 C 214 96 210 138 178 162"
-        fill="none"
-        stroke="#5d7a56"
-        strokeWidth={1.5}
-        strokeLinecap="round"
-      />
-      <path
-        d="M 182 92 Q 198 108 188 128 M 192 100 L 202 92 M 186 118 L 198 112"
-        fill="none"
-        stroke="#5d7a56"
-        strokeWidth={1.05}
-        strokeLinecap="round"
-      />
+      {/* Thin inner ring — frames the names */}
+      <circle cx={CX} cy={CY} r={54} fill="none" stroke="#8a9e82" strokeWidth={0.55} opacity={0.32} />
+
+      {/* Leaves: 24 evenly spaced, alternating large/small */}
+      {Array.from({ length: LEAF_COUNT }, (_, i) => {
+        const angle = (i * 360) / LEAF_COUNT;
+        const isMain = i % 2 === 0;
+        return (
+          <g key={i} transform={`translate(${CX},${CY}) rotate(${angle}) translate(0,${-BASE_R})`}>
+            {isMain ? (
+              <path d="M 0 0 Q 5 -9 0 -18 Q -5 -9 0 0 Z" fill="#5e7a52" />
+            ) : (
+              <path d="M 0 0 Q 3.5 -6.5 0 -13 Q -3.5 -6.5 0 0 Z" fill="#7a9870" opacity={0.78} />
+            )}
+          </g>
+        );
+      })}
+
+      {/* Thin outer ring — completes the wreath frame */}
+      <circle cx={CX} cy={CY} r={90} fill="none" stroke="#8a9e82" strokeWidth={0.45} opacity={0.22} />
     </svg>
   );
 }
 
-/** Watercolor-style blooms + lavender wash (no baked text). */
-function InviteFloralArt() {
+/**
+ * One corner sprig (top-left orientation). CSS mirrors it for the other three corners.
+ * Two curved stems grow from the corner; leaves branch off each stem pointing inward.
+ */
+function CornerSprig() {
   return (
-    <svg className="print-invite-botanical__floralSvg" viewBox="0 0 400 560" preserveAspectRatio="none" aria-hidden>
-      <defs>
-        <radialGradient id="invBloomA" cx="35%" cy="22%" r="55%">
-          <stop offset="0%" stopColor="rgba(155, 95, 160, 0.55)" />
-          <stop offset="55%" stopColor="rgba(200, 160, 205, 0.22)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-        </radialGradient>
-        <radialGradient id="invBloomB" cx="78%" cy="18%" r="50%">
-          <stop offset="0%" stopColor="rgba(175, 140, 195, 0.45)" />
-          <stop offset="60%" stopColor="rgba(220, 200, 235, 0.2)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-        </radialGradient>
-        <radialGradient id="invBloomC" cx="18%" cy="88%" r="48%">
-          <stop offset="0%" stopColor="rgba(140, 85, 150, 0.5)" />
-          <stop offset="65%" stopColor="rgba(190, 140, 185, 0.18)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-        </radialGradient>
-        <radialGradient id="invBloomD" cx="85%" cy="86%" r="52%">
-          <stop offset="0%" stopColor="rgba(130, 75, 145, 0.52)" />
-          <stop offset="58%" stopColor="rgba(175, 120, 170, 0.2)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-        </radialGradient>
-        <radialGradient id="invLeaf" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="rgba(95, 130, 88, 0.35)" />
-          <stop offset="100%" stopColor="rgba(95, 130, 88, 0)" />
-        </radialGradient>
-      </defs>
-      <rect width="400" height="560" fill="url(#invBloomA)" />
-      <rect width="400" height="560" fill="url(#invBloomB)" />
-      <rect width="400" height="560" fill="url(#invBloomC)" />
-      <rect width="400" height="560" fill="url(#invBloomD)" />
-      <ellipse cx="72" cy="48" rx="38" ry="28" fill="url(#invLeaf)" transform="rotate(-25 72 48)" />
-      <ellipse cx="330" cy="520" rx="44" ry="34" fill="url(#invLeaf)" transform="rotate(18 330 520)" />
-      <g fill="rgba(212, 175, 55, 0.35)" opacity={0.9}>
-        <circle cx="310" cy="64" r="1.2" />
-        <circle cx="328" cy="88" r="0.9" />
-        <circle cx="292" cy="102" r="1" />
-        <circle cx="88" cy="498" r="1.1" />
-        <circle cx="52" cy="472" r="0.85" />
+    <svg viewBox="0 0 72 72" aria-hidden>
+      {/* Stem along top edge */}
+      <path d="M 4 3 C 22 3 44 7 58 22" fill="none" stroke="#6b8260" strokeWidth={0.85} strokeLinecap="round" opacity={0.65} />
+      {/* Stem along left edge */}
+      <path d="M 3 4 C 3 22 7 44 22 58" fill="none" stroke="#6b8260" strokeWidth={0.85} strokeLinecap="round" opacity={0.65} />
+
+      {/* Leaves on top stem — branch downward */}
+      <g transform="translate(14, 4) rotate(175)">
+        <path d="M 0 0 Q 5 -9 0 -18 Q -5 -9 0 0 Z" fill="#5e7a52" />
       </g>
+      <g transform="translate(30, 8) rotate(162)">
+        <path d="M 0 0 Q 4 -7 0 -15 Q -4 -7 0 0 Z" fill="#7a9870" />
+      </g>
+      <g transform="translate(46, 16) rotate(180)">
+        <path d="M 0 0 Q 3.5 -6 0 -12 Q -3.5 -6 0 0 Z" fill="#5e7a52" />
+      </g>
+
+      {/* Leaves on left stem — branch rightward */}
+      <g transform="translate(4, 14) rotate(85)">
+        <path d="M 0 0 Q 5 -9 0 -18 Q -5 -9 0 0 Z" fill="#5e7a52" />
+      </g>
+      <g transform="translate(8, 30) rotate(98)">
+        <path d="M 0 0 Q 4 -7 0 -15 Q -4 -7 0 0 Z" fill="#7a9870" />
+      </g>
+      <g transform="translate(16, 46) rotate(82)">
+        <path d="M 0 0 Q 3.5 -6 0 -12 Q -3.5 -6 0 0 Z" fill="#5e7a52" />
+      </g>
+
+      {/* Larger diagonal leaf from the corner junction */}
+      <g transform="translate(8, 8) rotate(133)">
+        <path d="M 0 0 Q 5.5 -10 0 -21 Q -5.5 -10 0 0 Z" fill="#5e7a52" />
+      </g>
+    </svg>
+  );
+}
+
+function CornerBotanicals() {
+  return (
+    <>
+      <div className="print-invite-botanical__corner-deco print-invite-botanical__corner-deco--tl"><CornerSprig /></div>
+      <div className="print-invite-botanical__corner-deco print-invite-botanical__corner-deco--tr"><CornerSprig /></div>
+      <div className="print-invite-botanical__corner-deco print-invite-botanical__corner-deco--bl"><CornerSprig /></div>
+      <div className="print-invite-botanical__corner-deco print-invite-botanical__corner-deco--br"><CornerSprig /></div>
+    </>
+  );
+}
+
+/** Thin ornamental line divider with a centered diamond accent. */
+function BotanicalLine() {
+  return (
+    <svg
+      className="print-invite-botanical__line"
+      viewBox="0 0 180 14"
+      preserveAspectRatio="xMidYMid meet"
+      aria-hidden
+    >
+      <line x1="0" y1="7" x2="78" y2="7" stroke="#b0a898" strokeWidth="0.65" />
+      <path d="M 90 3 L 94 7 L 90 11 L 86 7 Z" fill="#7a9870" opacity="0.72" />
+      <line x1="102" y1="7" x2="180" y2="7" stroke="#b0a898" strokeWidth="0.65" />
     </svg>
   );
 }
@@ -150,28 +184,22 @@ export function WeddingInviteSimplePrintSheet({
           data-template="wedding-invite-simple"
           aria-label={strings.togetherWithFamilies}
         >
-          <InviteFloralArt />
-          <div className="print-invite-botanical__corners" aria-hidden>
-            <span className="print-invite-botanical__corner print-invite-botanical__corner--tl" />
-            <span className="print-invite-botanical__corner print-invite-botanical__corner--tr" />
-            <span className="print-invite-botanical__corner print-invite-botanical__corner--bl" />
-            <span className="print-invite-botanical__corner print-invite-botanical__corner--br" />
-          </div>
-
+          <CornerBotanicals />
           <div className="print-invite-botanical__top">
             <p className="print-invite-botanical__eyebrow">{strings.togetherWithFamilies}</p>
+            <BotanicalLine />
 
             <div className="print-invite-botanical__wreathBlock">
               <InviteWreath />
               <div className="print-invite-botanical__names">
                 {singleName ? (
                   <h1 className="print-invite-botanical__script print-invite-botanical__namesLine" style={nameClamp}>
-                    {a || "\u00a0"}
+                    {a || " "}
                   </h1>
                 ) : (
                   <>
                     <h1 className="print-invite-botanical__script print-invite-botanical__namesLine" style={nameClamp}>
-                      {a || "\u00a0"}
+                      {a || " "}
                     </h1>
                     <p className="print-invite-botanical__ampersand" aria-hidden>
                       &
@@ -189,20 +217,15 @@ export function WeddingInviteSimplePrintSheet({
             {dateParts ? (
               <div className="print-invite-botanical__dateBlock">
                 <p className="print-invite-botanical__dateMonth">{dateParts.month}</p>
-                <div className="print-invite-botanical__dateRow">
-                  <div className="print-invite-botanical__dateSide">
-                    <span className="print-invite-botanical__hairline" aria-hidden />
-                    <span className="print-invite-botanical__dateSideText">{dateParts.weekday}</span>
-                    <span className="print-invite-botanical__hairline" aria-hidden />
-                  </div>
+                <div className="print-invite-botanical__dateDayRow">
+                  <span className="print-invite-botanical__hairline" aria-hidden />
                   <p className="print-invite-botanical__dateNum">{dateParts.day}</p>
-                  <div className="print-invite-botanical__dateSide">
-                    <span className="print-invite-botanical__hairline" aria-hidden />
-                    <span className="print-invite-botanical__dateSideText">{timeToken ?? "\u00a0"}</span>
-                    <span className="print-invite-botanical__hairline" aria-hidden />
-                  </div>
+                  <span className="print-invite-botanical__hairline" aria-hidden />
                 </div>
-                <p className="print-invite-botanical__dateYear">{dateParts.year}</p>
+                <p className="print-invite-botanical__dateWeekday">{dateParts.weekday}</p>
+                <p className="print-invite-botanical__dateYear">
+                  {timeToken ? `${dateParts.year} · ${timeToken}` : dateParts.year}
+                </p>
               </div>
             ) : null}
 
@@ -211,8 +234,8 @@ export function WeddingInviteSimplePrintSheet({
 
           <div className="print-invite-botanical__bottom">
             {venueLine ? <p className="print-invite-botanical__venue">{venueLine}</p> : null}
-
             <p className="print-invite-botanical__script print-invite-botanical__reception">{strings.receptionToFollow}</p>
+            <BotanicalLine />
           </div>
         </article>
       </div>
