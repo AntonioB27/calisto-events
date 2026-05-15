@@ -66,7 +66,7 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
   };
 
   return (
-    <div style={{ padding: "40px 0 60px" }}>
+    <div className="welcome-reveal welcome-reveal--d1">
       <AppPageHeader
         eyebrow={ui.createStep1.eyebrow}
         title={ui.createStep1.title}
@@ -86,7 +86,7 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
         <input type="hidden" name="step" value="2" />
         <input type="hidden" name="emoji" value={emoji} />
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 260px", gap: 16 }}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_260px]">
           <AppCard pad="md" style={{ marginBottom: 0 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <AppFormRow label={ui.createStep1.eventTitleLabel}>
@@ -121,16 +121,7 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
 
           <div ref={boxRef} style={{ position: "relative" }}>
             <AppCard pad="md" style={{ borderRadius: 18 }}>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  color: "var(--app-muted)",
-                }}
-              >
+              <p className="app-form-row__label" style={{ margin: 0 }}>
                 {ui.createStep1.eventIconEyebrow}
               </p>
               <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>

@@ -101,25 +101,98 @@ export default async function NewEventPage({ searchParams }: NewEventPageProps) 
   });
 
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 0 60px' }}>
+    <div className="px-4 py-10" style={{ maxWidth: 640, margin: "0 auto" }}>
       <ResumeDraftClient />
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
-        <MascotSpot src="/brand/mascot/aurora_planning.png" size={132} variant="stack" />
-      </div>
-      <h1
+
+      {/* Step progress header */}
+      <div
+        className="welcome-reveal"
         style={{
-          fontFamily: "var(--font-display)",
-          fontStyle: "italic",
-          fontWeight: 700,
-          fontSize: 36,
-          color: "var(--app-text)",
-          lineHeight: 1.1,
-          margin: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          marginBottom: 24,
         }}
       >
-        Create event
-      </h1>
-      <p style={{ marginTop: 10, fontSize: 13, color: "var(--app-muted)" }}>Step {step} of 3</p>
+        <div>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: "0.20em",
+              textTransform: "uppercase",
+              color: "var(--app-gold)",
+            }}
+          >
+            New event
+          </p>
+          <div style={{ display: "flex", alignItems: "center", marginTop: 12 }}>
+            {([1, 2, 3] as const).map((n) => {
+              const cur = Number(step);
+              const done = n < cur;
+              const active = n === cur;
+              return (
+                <div key={n} style={{ display: "flex", alignItems: "center" }}>
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 11,
+                      fontFamily: "var(--font-mono)",
+                      fontWeight: 800,
+                      background: active
+                        ? "linear-gradient(135deg, var(--app-purple) 0%, var(--app-purple-2) 100%)"
+                        : done
+                        ? "color-mix(in srgb, var(--app-gold) 18%, var(--app-surface-2))"
+                        : "var(--app-surface-2)",
+                      border: `1.5px solid ${
+                        active
+                          ? "transparent"
+                          : done
+                          ? "color-mix(in srgb, var(--app-gold) 42%, transparent)"
+                          : "var(--app-border)"
+                      }`,
+                      color: active ? "#fff" : done ? "var(--app-gold)" : "var(--app-subtle)",
+                      boxShadow: active
+                        ? "0 3px 12px color-mix(in srgb, var(--app-purple) 30%, transparent)"
+                        : "none",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {done ? "✓" : n}
+                  </div>
+                  {n < 3 && (
+                    <div
+                      style={{
+                        width: 24,
+                        height: 1.5,
+                        background: done
+                          ? "color-mix(in srgb, var(--app-gold) 45%, var(--app-border))"
+                          : "var(--app-border)",
+                        borderRadius: 1,
+                        margin: "0 6px",
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <MascotSpot
+          src="/brand/mascot/aurora_planning.png"
+          size={72}
+          variant="stack"
+          className="welcome-mascot-float"
+        />
+      </div>
 
       {step === "1" && <Step1Details defaultName={name} defaultEmoji={emoji} defaultDate={date} />}
       {step === "2" && (

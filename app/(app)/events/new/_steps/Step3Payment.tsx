@@ -14,6 +14,7 @@ import { isPaidPlanForCheckout } from "@/lib/event-stripe-checkout";
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
+import { AppPageHeader } from "@/components/app-ui/AppPageHeader";
 
 type Step3PaymentProps = {
   name: string;
@@ -83,43 +84,59 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
     router.push(href);
   };
 
+  const pageHeader = (
+    <AppPageHeader
+      eyebrow={ui.createStep3.stepEyebrow}
+      title={ui.createStep3.confirmHeading}
+    />
+  );
+
   if (validationError) {
     return (
-      <AppCard pad="md" className="mt-8">
-        <p style={{ margin: 0, fontSize: 14, color: "var(--app-danger)" }}>{ui.validateCreate.nameRequired}</p>
-        <AppBtn as={Link} href="/events/new?step=1" variant="outline" size="sm" style={{ marginTop: 16 }}>
-          {ui.createStep3.validationBack}
-        </AppBtn>
-      </AppCard>
+      <div className="welcome-reveal welcome-reveal--d1">
+        {pageHeader}
+        <AppCard pad="md" className="mt-8">
+          <p style={{ margin: 0, fontSize: 14, color: "var(--app-danger)" }}>{ui.validateCreate.nameRequired}</p>
+          <AppBtn as={Link} href="/events/new?step=1" variant="outline" size="sm" style={{ marginTop: 16 }}>
+            {ui.createStep3.validationBack}
+          </AppBtn>
+        </AppCard>
+      </div>
     );
   }
 
   if (!isSessionReady) {
     return (
-      <AppCard pad="md" className="mt-8">
-        <p style={{ margin: 0, fontSize: 14, color: "var(--app-muted)" }}>{ui.createStep3.checkingSession}</p>
-      </AppCard>
+      <div className="welcome-reveal welcome-reveal--d1">
+        {pageHeader}
+        <AppCard pad="md" className="mt-8">
+          <p style={{ margin: 0, fontSize: 14, color: "var(--app-muted)" }}>{ui.createStep3.checkingSession}</p>
+        </AppCard>
+      </div>
     );
   }
 
   if (requiresAuth) {
     return (
-      <AppCard pad="lg" className="mt-8">
-        <h2 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "var(--app-text)" }}>
-          {ui.createStep3.needAuthHeading}
-        </h2>
-        <p style={{ margin: "0 0 16px", fontSize: 14, color: "var(--app-muted)", lineHeight: 1.55 }}>
-          {ui.createStep3.needAuthBody}
-        </p>
-        <div style={{ display: "flex", gap: 12 }}>
-          <AppBtn type="button" variant="primary" onClick={() => goToAuth(loginHref)}>
-            {ui.createStep3.logInBtn}
-          </AppBtn>
-          <AppBtn type="button" variant="secondary" onClick={() => goToAuth(registerHref)}>
-            {ui.createStep3.createAcctBtn}
-          </AppBtn>
-        </div>
-      </AppCard>
+      <div className="welcome-reveal welcome-reveal--d1">
+        {pageHeader}
+        <AppCard pad="lg" className="mt-8">
+          <h2 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "var(--app-text)" }}>
+            {ui.createStep3.needAuthHeading}
+          </h2>
+          <p style={{ margin: "0 0 16px", fontSize: 14, color: "var(--app-muted)", lineHeight: 1.55 }}>
+            {ui.createStep3.needAuthBody}
+          </p>
+          <div style={{ display: "flex", gap: 12 }}>
+            <AppBtn type="button" variant="primary" onClick={() => goToAuth(loginHref)}>
+              {ui.createStep3.logInBtn}
+            </AppBtn>
+            <AppBtn type="button" variant="secondary" onClick={() => goToAuth(registerHref)}>
+              {ui.createStep3.createAcctBtn}
+            </AppBtn>
+          </div>
+        </AppCard>
+      </div>
     );
   }
 
@@ -184,6 +201,8 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
   }
 
   return (
+    <div className="welcome-reveal welcome-reveal--d1">
+      {pageHeader}
     <AppCard
       pad="lg"
       className="mt-8"
@@ -215,8 +234,8 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
       />
 
       <div style={{ position: "relative" }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-          <div style={{ minWidth: 220 }}>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="sm:flex-1 sm:min-w-0">
             <p
               style={{
                 margin: 0,
@@ -255,12 +274,13 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
           </div>
 
           <div
+            className="sm:shrink-0"
             style={{
               borderRadius: 16,
               border: "1.5px solid color-mix(in srgb, var(--app-border) 75%, transparent)",
               background: "color-mix(in srgb, var(--app-surface) 65%, transparent)",
               padding: 14,
-              minWidth: 220,
+              minWidth: 200,
               boxShadow: "var(--app-shadow-sm)",
             }}
           >
@@ -352,5 +372,6 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
         </div>
       </div>
     </AppCard>
+    </div>
   );
 }

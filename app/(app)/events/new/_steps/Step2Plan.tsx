@@ -79,7 +79,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
   );
 
   return (
-    <div style={{ padding: "40px 0 60px" }}>
+    <div className="welcome-reveal welcome-reveal--d1">
       <AppPageHeader eyebrow={ui.createStep2.eyebrow} title={ui.createStep2.heading} description={ui.createStep2.description} />
 
       <form action="/events/new" method="get">
