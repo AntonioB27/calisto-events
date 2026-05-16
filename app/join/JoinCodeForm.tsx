@@ -18,7 +18,7 @@ type JoinPreview = {
   planId: string | null;
 };
 
-export function JoinCodeForm() {
+export function JoinCodeForm({ isLoggedIn }: { isLoggedIn: boolean }) {
   const ui = useAppUi();
   const router = useRouter();
   const [stage, setStage] = useState<"enter" | "scan" | "choice">("enter");
@@ -45,6 +45,10 @@ export function JoinCodeForm() {
       const data = (await response.json()) as JoinPreview;
       setResolvedCode(normalized);
       setPreview(data);
+      if (isLoggedIn) {
+        router.push(`/join/${encodeURIComponent(normalized)}`);
+        return true;
+      }
       setStage("choice");
       return true;
     } catch {
