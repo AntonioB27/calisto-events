@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { AuroraQuote } from "@/components/AuroraQuote";
 import { FAQ } from "@/components/FAQ";
 import { FeatureGrid } from "@/components/FeatureGrid";
@@ -12,6 +12,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { WaitlistForm } from "@/components/WaitlistForm";
 import { WebMcpTools } from "@/components/WebMcpTools";
 import { getLandingCopy, isLocale, LOCALES, type Locale } from "@/lib/i18n";
+import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 
 type LocalePageProps = {
   params: Promise<{ locale: string }>;
@@ -25,6 +26,12 @@ export default async function LocalePage({ params }: LocalePageProps) {
   const { locale } = await params;
   if (!isLocale(locale)) {
     notFound();
+  }
+
+  const supabase = await createSupabaseAuthServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    redirect("/dashboard");
   }
 
   const copy = getLandingCopy(locale);
