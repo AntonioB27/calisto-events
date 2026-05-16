@@ -28,12 +28,6 @@ export default async function LocalePage({ params }: LocalePageProps) {
     notFound();
   }
 
-  const supabase = await createSupabaseAuthServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) {
-    redirect("/dashboard");
-  }
-
   const copy = getLandingCopy(locale);
 
   return (
