@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { isAccessCodeValid, normalizeAccessCode } from "@/lib/access-code";
 import type { PlanId } from "@/lib/plan-limits";
 import { clientIpFromRequest, consumeRateLimitToken } from "@/lib/simple-ip-rate-limit";
-import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
+import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 const JOIN_PREVIEW_RATE_LIMIT = { max: 120, windowMs: 60_000 } as const;
 
@@ -41,7 +41,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     return notFound();
   }
 
-  const supabase = await createSupabaseAuthServerClient();
+  const supabase = getSupabaseServerClient();
   const { data: event, error } = await supabase
     .from("events")
     .select("title, event_date, plan")
