@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   MascotSpot,
   WELCOME_HERO_COLUMN_MAX_WIDTH_PX,
@@ -7,10 +8,17 @@ import {
 import { getLandingCopy } from "@/lib/i18n";
 import { getUiLocale } from "@/lib/ui-locale";
 import { getWelcomePageCopy } from "@/lib/welcome-page-copy";
+import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 
 import { WelcomeLanguageBar } from "./WelcomeLanguageBar";
 
 export default async function WelcomePage() {
+  const supabase = await createSupabaseAuthServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    redirect("/dashboard");
+  }
+
   const locale = await getUiLocale();
   const landing = getLandingCopy(locale);
   const copy = getWelcomePageCopy(locale);
