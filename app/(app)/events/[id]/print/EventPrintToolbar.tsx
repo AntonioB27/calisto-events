@@ -11,7 +11,6 @@ import { LOCALES } from "@/lib/i18n";
 import {
   POSTER_LANG_QUERY,
   POSTER_TEMPLATES,
-  PRINT_PAPERS,
   type PrintPaperId,
   type PrintRouteTemplateId,
 } from "@/lib/event-print/print-options";
@@ -147,12 +146,76 @@ export function EventPrintToolbar({
           </p>
           <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 8 }}>
             <Link
-              href={buildPrintHref(eventId, { template: "wedding-invite-simple", paper, posterLang })}
+              href={buildPrintHref(eventId, { template: "wedding-invite-blue-floral", paper, posterLang })}
               scroll={false}
-              style={pickStyle(activeTemplate === "wedding-invite-simple")}
+              style={pickStyle(activeTemplate === "wedding-invite-blue-floral")}
               prefetch={false}
             >
-              {p.templateWeddingInviteSimple}
+              {p.templateWeddingInviteBlueFloral}
+            </Link>
+            <Link
+              href={buildPrintHref(eventId, { template: "wedding-invite-geometric", paper, posterLang })}
+              scroll={false}
+              style={pickStyle(activeTemplate === "wedding-invite-geometric")}
+              prefetch={false}
+            >
+              {p.templateWeddingInviteGeometric}
+            </Link>
+            <Link
+              href={buildPrintHref(eventId, { template: "wedding-invite-watercolor-coast", paper, posterLang })}
+              scroll={false}
+              style={pickStyle(activeTemplate === "wedding-invite-watercolor-coast")}
+              prefetch={false}
+            >
+              {p.templateWeddingInviteWatercolorCoast}
+            </Link>
+            <Link
+              href={buildPrintHref(eventId, { template: "wedding-invite-navy-botanical", paper, posterLang })}
+              scroll={false}
+              style={pickStyle(activeTemplate === "wedding-invite-navy-botanical")}
+              prefetch={false}
+            >
+              {p.templateWeddingInviteNavyBotanical}
+            </Link>
+            <Link
+              href={buildPrintHref(eventId, { template: "wedding-invite-terra-pill", paper, posterLang })}
+              scroll={false}
+              style={pickStyle(activeTemplate === "wedding-invite-terra-pill")}
+              prefetch={false}
+            >
+              {p.templateWeddingInviteTerraPill}
+            </Link>
+            <Link
+              href={buildPrintHref(eventId, { template: "wedding-invite-gold-arch-floral", paper, posterLang })}
+              scroll={false}
+              style={pickStyle(activeTemplate === "wedding-invite-gold-arch-floral")}
+              prefetch={false}
+            >
+              {p.templateWeddingInviteGoldArchFloral}
+            </Link>
+            <Link
+              href={buildPrintHref(eventId, { template: "wedding-invite-cherry-blossom", paper, posterLang })}
+              scroll={false}
+              style={pickStyle(activeTemplate === "wedding-invite-cherry-blossom")}
+              prefetch={false}
+            >
+              {p.templateWeddingInviteCherryBlossom}
+            </Link>
+            <Link
+              href={buildPrintHref(eventId, { template: "wedding-invite-olive-gold-frame", paper, posterLang })}
+              scroll={false}
+              style={pickStyle(activeTemplate === "wedding-invite-olive-gold-frame")}
+              prefetch={false}
+            >
+              {p.templateWeddingInviteOliveGoldFrame}
+            </Link>
+            <Link
+              href={buildPrintHref(eventId, { template: "wedding-invite-grayscale-glitter", paper, posterLang })}
+              scroll={false}
+              style={pickStyle(activeTemplate === "wedding-invite-grayscale-glitter")}
+              prefetch={false}
+            >
+              {p.templateWeddingInviteGrayscaleGlitter}
             </Link>
           </div>
         </div>
@@ -185,32 +248,6 @@ export function EventPrintToolbar({
         </div>
       </div>
 
-      <div>
-        <p
-          style={{
-            fontSize: 11,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.12em",
-            color: "var(--app-muted)",
-          }}
-        >
-          {p.paperSectionLabel}
-        </p>
-        <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {PRINT_PAPERS.map((pid) => (
-            <Link
-              key={pid}
-              href={buildPrintHref(eventId, { template: activeTemplate, paper: pid, posterLang })}
-              scroll={false}
-              style={pickStyle(paper === pid)}
-              prefetch={false}
-            >
-              {pid === "a4" ? p.paperA4 : p.paperLetter}
-            </Link>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

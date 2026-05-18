@@ -34,7 +34,7 @@ type ZipExportRow = {
   created_at: string;
 };
 
-const PAGE_SIZE = 60;
+const PAGE_SIZE = 24;
 
 function isVideoMime(mime: string | null | undefined) {
   return Boolean(mime && mime.startsWith("video/"));
@@ -267,6 +267,13 @@ export function GalleryManager({
       const from = pageIndex * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
 
+      // ── Round-trip 1 ────────────────────────────────────────────────────────
+      // Two Postgres queries run in parallel (~50–150 ms on a good connection).
+      //
+      // SLOW POINT — minor: the `events` row is fetched on every page load,
+      // including page 2, 3, … even though organizer_id/plan/event_date never
+      // change during a session. Caching this in a ref after the first fetch
+      // would save one Postgres query per "Load more" click.
       const [{ data: evRow }, { data: rows, error: fetchErr }] = await Promise.all([
         supabase.from("events").select("organizer_id, plan, event_date").eq("id", eventId).maybeSingle(),
         supabase
@@ -293,18 +300,46 @@ export function GalleryManager({
 
       const typed = (rows ?? []) as MediaRow[];
       const uploaderIds = Array.from(new Set(typed.map((r) => r.uploaded_by).filter(Boolean)));
+      const paths = typed.map((r) => r.storage_path);
+
+      // ── Round-trip 2 ────────────────────────────────────────────────────────
+      // createSignedUrls and the label lookups are independent of each other,
+      // so we run them all in parallel. This is the current ceiling — nothing
+      // renders until both settle.
+      //
+      // SLOW POINT — major: createSignedUrls is the dominant cost here.
+      // It sends all 24 storage paths to Supabase's storage service, which
+      // signs each one with a JWT and returns them. Typical latency: 100–500 ms.
+      // This happens on every mount, every filter switch, every tab revisit —
+      // even though the signed URLs remain valid for a full hour (3600 s).
+      //
+      // Next optimization: cache { path → signedUrl } in sessionStorage with
+      // an expiresAt timestamp. On subsequent loads, skip createSignedUrls for
+      // paths whose cached URL hasn't expired. Worst-case savings: ~300 ms
+      // per revisit; best-case: eliminates RT2 entirely for warm sessions.
+      const [signedResult, labelsResult] = await Promise.all([
+        paths.length
+          ? supabase.storage.from("event-media").createSignedUrls(paths, 3600)
+          : Promise.resolve({ data: [] as SignedUrlEntry[] }),
+        uploaderIds.length > 0
+          ? Promise.all([
+              supabase
+                .from("event_memberships")
+                .select("user_id, display_name_at_event")
+                .eq("event_id", eventId)
+                .in("user_id", uploaderIds),
+              supabase.from("profiles").select("id, display_name").in("id", uploaderIds),
+            ])
+          : Promise.resolve(null),
+      ]);
+
+      const urlMap = Object.fromEntries(
+        ((signedResult.data ?? []) as SignedUrlEntry[]).map((s) => [s.path, s.signedUrl]),
+      );
 
       let labelMap = new Map<string, string>();
-      if (uploaderIds.length > 0) {
-        const [{ data: mems, error: memErr }, { data: profs, error: profErr }] = await Promise.all([
-          supabase
-            .from("event_memberships")
-            .select("user_id, display_name_at_event")
-            .eq("event_id", eventId)
-            .in("user_id", uploaderIds),
-          supabase.from("profiles").select("id, display_name").in("id", uploaderIds),
-        ]);
-
+      if (labelsResult) {
+        const [{ data: mems, error: memErr }, { data: profs, error: profErr }] = labelsResult;
         labelMap = buildUploaderLabelMap(
           uploaderIds,
           organizerId,
@@ -314,12 +349,15 @@ export function GalleryManager({
         );
       }
 
-      const paths = typed.map((r) => r.storage_path);
-      const { data: signedData } = paths.length
-        ? await supabase.storage.from("event-media").createSignedUrls(paths, 3600)
-        : { data: [] as SignedUrlEntry[] };
-      const urlMap = Object.fromEntries((signedData ?? []).map((s: SignedUrlEntry) => [s.path, s.signedUrl]));
-
+      // ── Render ──────────────────────────────────────────────────────────────
+      // All data is assembled synchronously here — no more async work.
+      // Images start downloading only as they enter the viewport (loading="lazy").
+      //
+      // SLOW POINT — image download, not fixable in JS: each photo is served at
+      // full resolution (typically 3–10 MB). The real long-term fix is generating
+      // thumbnails (e.g. via a Supabase Edge Function or imgproxy) and serving
+      // ~400 px wide versions (~50–150 KB each) in the grid, opening the
+      // full-res image only in the lightbox.
       const mapped: MediaItem[] = typed.map((r) => ({
         ...r,
         signedUrl: urlMap[r.storage_path],
@@ -738,6 +776,8 @@ export function GalleryManager({
                       src={signedUrl}
                       alt=""
                       className="block h-auto w-full max-w-full"
+                      loading="lazy"
+                      decoding="async"
                       style={{ transition: 'transform 0.3s' }}
                       onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.03)')}
                       onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}

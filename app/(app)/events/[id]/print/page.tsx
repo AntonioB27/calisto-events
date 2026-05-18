@@ -2,7 +2,17 @@ import Link from "next/link";
 
 import { EventPrintSheet } from "./EventPrintSheet";
 import { EventPrintToolbar } from "./EventPrintToolbar";
-import { WeddingInviteSimplePrintSheet } from "./WeddingInviteSimplePrintSheet";
+import { WeddingInviteBlueFloraPrintSheet } from "./WeddingInviteBlueFloraPrintSheet";
+import { WeddingInviteCherryBlossomPrintSheet } from "./WeddingInviteCherryBlossomPrintSheet";
+import { WeddingInviteGeometricPrintSheet } from "./WeddingInviteGeometricPrintSheet";
+import { WeddingInviteWatercolorCoastPrintSheet } from "./WeddingInviteWatercolorCoastPrintSheet";
+import { WeddingInviteGoldArchFloralPrintSheet } from "./WeddingInviteGoldArchFloralPrintSheet";
+import { WeddingInviteGrayscaleGlitterPrintSheet } from "./WeddingInviteGrayscaleGlitterPrintSheet";
+import { WeddingInviteNavyBotanicalPrintSheet } from "./WeddingInviteNavyBotanicalPrintSheet";
+import { WeddingInviteOliveGoldPrintSheet } from "./WeddingInviteOliveGoldPrintSheet";
+import { WeddingInviteTerracottaPillPrintSheet } from "./WeddingInviteTerracottaPillPrintSheet";
+import { parseInvitationFieldVisibility } from "@/lib/event-print/invitation-field-visibility";
+import type { WeddingInviteDetails, WeddingInviteDetailsStrings } from "@/lib/event-print/wedding-invite-details";
 import { getAppStrings } from "@/lib/app-ui";
 import { getEventAdminAccess } from "@/lib/event-admin-access";
 import { splitEventTitleStored } from "@/lib/event-title";
@@ -147,6 +157,38 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
     mergedInvitation = mergeInvitationDraftWithDefaults(routeTemplate, eventDisplayName, eventDateIso, posterLocale, stored);
   }
 
+  const inviteVisibility = mergedInvitation
+    ? parseInvitationFieldVisibility(mergedInvitation)
+    : null;
+
+  const inviteDetails: WeddingInviteDetails | null =
+    isInvitationPrint && mergedInvitation
+      ? {
+          connectorSymbol: mergedInvitation.connector_symbol ?? "ampersand",
+          gatheringType: mergedInvitation.gathering_type ?? "",
+          gatheringAddress: mergedInvitation.gathering_address ?? "",
+          gatheringTime: mergedInvitation.gathering_time ?? "",
+          partnerAGatheringAddress: mergedInvitation.partner_a_gathering_address ?? "",
+          partnerAGatheringTime: mergedInvitation.partner_a_gathering_time ?? "",
+          partnerBGatheringAddress: mergedInvitation.partner_b_gathering_address ?? "",
+          partnerBGatheringTime: mergedInvitation.partner_b_gathering_time ?? "",
+          churchAddress: mergedInvitation.church_address ?? "",
+          churchTime: mergedInvitation.church_time ?? "",
+          dinnerAddress: mergedInvitation.dinner_address ?? "",
+          dinnerTime: mergedInvitation.dinner_time ?? "",
+          quoteText: mergedInvitation.quote_text ?? "",
+          quoteAuthor: mergedInvitation.quote_author ?? "",
+        }
+      : null;
+
+  const detailStrings: WeddingInviteDetailsStrings = {
+    gatheringTitle: posterPrint.inviteDetailsGathering,
+    churchTitle: posterPrint.inviteDetailsChurch,
+    dinnerTitle: posterPrint.inviteDetailsDinner,
+  };
+
+  const eventDateIso = typeof event.event_date === "string" ? event.event_date : "";
+
   return (
     <main
       className="join-shell min-h-screen px-4 py-10 print:bg-white print:px-0 print:py-0"
@@ -174,20 +216,166 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
         />
 
         <div lang={posterLocale} className={isInvitationPrint ? "print-invite-page-root" : undefined}>
-          {isInvitationPrint && mergedInvitation ? (
-            <WeddingInviteSimplePrintSheet
+          {isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-olive-gold-frame" ? (
+            <WeddingInviteOliveGoldPrintSheet
+              paper={paper}
+              partnerA={mergedInvitation.partner_a ?? ""}
+              partnerB={mergedInvitation.partner_b ?? ""}
+              extraLine={mergedInvitation.extra_line ?? ""}
+              eventDateIso={eventDateIso}
+              locale={posterLocale}
+              strings={{
+                withLove: posterPrint.inviteOliveWithLove,
+                cordiallyLine1: posterPrint.inviteOliveCordiallyLine1,
+                cordiallyLine2: posterPrint.inviteOliveCordiallyLine2,
+              }}
+              details={inviteDetails}
+              detailStrings={detailStrings}
+              visibility={inviteVisibility}
+            />
+          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-cherry-blossom" ? (
+            <WeddingInviteCherryBlossomPrintSheet
+              paper={paper}
+              partnerA={mergedInvitation.partner_a ?? ""}
+              partnerB={mergedInvitation.partner_b ?? ""}
+              extraLine={mergedInvitation.extra_line ?? ""}
+              eventDateIso={eventDateIso}
+              locale={posterLocale}
+              strings={{
+                preambleStart: posterPrint.inviteCherryPreambleStart,
+                preambleScript: posterPrint.inviteCherryPreambleScript,
+                preambleMid: posterPrint.inviteCherryPreambleMid,
+                preambleEnd: posterPrint.inviteCherryPreambleEnd,
+                and: posterPrint.inviteAnd,
+              }}
+              details={inviteDetails}
+              detailStrings={detailStrings}
+              visibility={inviteVisibility}
+            />
+          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-gold-arch-floral" ? (
+            <WeddingInviteGoldArchFloralPrintSheet
+              paper={paper}
+              partnerA={mergedInvitation.partner_a ?? ""}
+              partnerB={mergedInvitation.partner_b ?? ""}
+              extraLine={mergedInvitation.extra_line ?? ""}
+              eventDateIso={eventDateIso}
+              locale={posterLocale}
+              strings={{
+                headline: posterPrint.inviteGoldArchHeadline,
+                and: posterPrint.inviteAnd,
+              }}
+              details={inviteDetails}
+              detailStrings={detailStrings}
+              visibility={inviteVisibility}
+            />
+          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-terra-pill" ? (
+            <WeddingInviteTerracottaPillPrintSheet
+              paper={paper}
+              partnerA={mergedInvitation.partner_a ?? ""}
+              partnerB={mergedInvitation.partner_b ?? ""}
+              extraLine={mergedInvitation.extra_line ?? ""}
+              eventDateIso={eventDateIso}
+              locale={posterLocale}
+              strings={{
+                pleaseJoinUsFor: posterPrint.inviteTerraPleaseJoinUsFor,
+                theWeddingOf: posterPrint.inviteTerraTheWeddingOf,
+                and: posterPrint.inviteAnd,
+              }}
+              details={inviteDetails}
+              detailStrings={detailStrings}
+              visibility={inviteVisibility}
+            />
+          ) : isInvitationPrint && mergedInvitation && routeTemplate === "wedding-invite-grayscale-glitter" ? (
+            <WeddingInviteGrayscaleGlitterPrintSheet
+              paper={paper}
+              partnerA={mergedInvitation.partner_a ?? ""}
+              partnerB={mergedInvitation.partner_b ?? ""}
+              connectorSymbol={mergedInvitation.connector_symbol ?? "ampersand"}
+              extraLine={mergedInvitation.extra_line ?? ""}
+              eventDateIso={eventDateIso}
+              locale={posterLocale}
+              strings={{
+                togetherWithFamilies: posterPrint.inviteGlitterTogetherFamilies,
+                cordiallyInviteCaps: posterPrint.inviteGlitterCordiallyInviteCaps,
+                weddingWord: posterPrint.inviteGlitterWeddingWord,
+                on: posterPrint.inviteGlitterOn,
+                and: posterPrint.inviteAnd,
+              }}
+              visibility={inviteVisibility}
+            />
+          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-navy-botanical" ? (
+            <WeddingInviteNavyBotanicalPrintSheet
+              paper={paper}
+              partnerA={mergedInvitation.partner_a ?? ""}
+              partnerB={mergedInvitation.partner_b ?? ""}
+              extraLine={mergedInvitation.extra_line ?? ""}
+              eventDateIso={eventDateIso}
+              locale={posterLocale}
+              strings={{
+                togetherWithOurFamilies: posterPrint.inviteTogetherWithOurFamilies,
+                honorUniteMarriage: posterPrint.inviteHonorUniteMarriage,
+                and: posterPrint.inviteAnd,
+              }}
+              details={inviteDetails}
+              detailStrings={detailStrings}
+              visibility={inviteVisibility}
+            />
+          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-watercolor-coast" ? (
+            <WeddingInviteWatercolorCoastPrintSheet
               paper={paper}
               partnerA={mergedInvitation.partner_a ?? ""}
               partnerB={mergedInvitation.partner_b ?? ""}
               venue={mergedInvitation.venue ?? ""}
+              venueLine2={mergedInvitation.venue_line_2 ?? ""}
               extraLine={mergedInvitation.extra_line ?? ""}
-              eventDateIso={typeof event.event_date === "string" ? event.event_date : ""}
+              eventDateIso={eventDateIso}
               locale={posterLocale}
               strings={{
-                togetherWithFamilies: posterPrint.inviteTogetherWithFamilies,
-                inviteCelebrationOn: posterPrint.inviteCelebrationOn,
+                pleaseJoinUs: posterPrint.inviteWatercolorPleaseJoinUs,
+                forOurCeremony: posterPrint.inviteWatercolorForCeremony,
+                and: posterPrint.inviteAnd,
                 receptionToFollow: posterPrint.inviteReceptionFollow,
               }}
+              details={inviteDetails}
+              detailStrings={detailStrings}
+              visibility={inviteVisibility}
+            />
+          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-geometric" ? (
+            <WeddingInviteGeometricPrintSheet
+              paper={paper}
+              partnerA={mergedInvitation.partner_a ?? ""}
+              partnerB={mergedInvitation.partner_b ?? ""}
+              venue={mergedInvitation.venue ?? ""}
+              venueLine2={mergedInvitation.venue_line_2 ?? ""}
+              extraLine={mergedInvitation.extra_line ?? ""}
+              eventDateIso={eventDateIso}
+              locale={posterLocale}
+              strings={{
+                withJoyYouAre: posterPrint.inviteWithJoyYouAre,
+                invitedToWeddingOf: posterPrint.inviteInvitedToWeddingOf,
+                and: posterPrint.inviteAnd,
+                receptionToFollow: posterPrint.inviteReceptionFollow,
+              }}
+              details={inviteDetails}
+              detailStrings={detailStrings}
+              visibility={inviteVisibility}
+            />
+          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-blue-floral" ? (
+            <WeddingInviteBlueFloraPrintSheet
+              paper={paper}
+              partnerA={mergedInvitation.partner_a ?? ""}
+              partnerB={mergedInvitation.partner_b ?? ""}
+              extraLine={mergedInvitation.extra_line ?? ""}
+              eventDateIso={eventDateIso}
+              locale={posterLocale}
+              strings={{
+                withJoyYouAre: posterPrint.inviteWithJoyYouAre,
+                invitedToWeddingOf: posterPrint.inviteInvitedToWeddingOf,
+                and: posterPrint.inviteAnd,
+              }}
+              details={inviteDetails}
+              detailStrings={detailStrings}
+              visibility={inviteVisibility}
             />
           ) : (
             <EventPrintSheet

@@ -17,7 +17,7 @@ describe("guessPartnerNamesFromEventTitle", () => {
 
 describe("defaultFieldValuesForTemplate", () => {
   it("mirrors partner A into partner B when title has no second name", () => {
-    const v = defaultFieldValuesForTemplate("wedding-invite-simple", "Solo name", "2026-06-01", "en");
+    const v = defaultFieldValuesForTemplate("wedding-invite-blue-floral", "Solo name", "2026-06-01", "en");
     expect(v.partner_a).toBe("Solo name");
     expect(v.partner_b).toBe("Solo name");
   });

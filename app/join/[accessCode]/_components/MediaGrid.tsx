@@ -23,7 +23,7 @@ type SignedUrlEntry = {
   signedUrl: string;
 };
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 24;
 
 function isVideoMime(mime: string | null | undefined) {
   return Boolean(mime && mime.startsWith("video/"));
@@ -54,6 +54,9 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
         const from = pageIndex * PAGE_SIZE;
         const to = from + PAGE_SIZE - 1;
 
+        // ── Round-trip 1 ──────────────────────────────────────────────────────
+        // Fetches 24 rows of metadata from Postgres (~50–150 ms).
+        // Fast and cheap — only paths and mime types, no heavy columns.
         const { data: rows, error: fetchErr } = await supabase
           .from("media_items")
           .select("id, storage_path, mime_type")
@@ -70,6 +73,12 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
           return;
         }
 
+        // ── Round-trip 2 — the bottleneck ─────────────────────────────────────
+        // Sends all 24 paths to Supabase Storage for JWT signing. A single HTTP
+        // request, but it can take 100–500 ms and blocks everything below it.
+        // This is unavoidable on the first visit, but on revisits (tab switch,
+        // filter change, refresh) the URLs are still valid for ~1 hour.
+        // Caching them in sessionStorage would make those revisits instant.
         const paths = typedRows.map((r) => r.storage_path);
         const { data: signedData } = await supabase.storage.from("event-media").createSignedUrls(paths, 3600);
         const urlMap = Object.fromEntries((signedData ?? []).map((s: SignedUrlEntry) => [s.path, s.signedUrl]));
@@ -131,7 +140,7 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
                   />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.signedUrl} alt="" className="block h-auto w-full max-w-full" />
+                  <img src={item.signedUrl} alt="" className="block h-auto w-full max-w-full" loading="lazy" decoding="async" />
                 )
               ) : (
                 <div className="min-h-32 w-full bg-[var(--app-border)]" />

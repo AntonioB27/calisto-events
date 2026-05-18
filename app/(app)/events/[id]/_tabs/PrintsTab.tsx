@@ -13,17 +13,37 @@ import { GoldBar } from "@/components/app-ui/GoldBar";
 import { EVENT_KINDS, type EventKind } from "@/lib/event-kind";
 import { defaultFieldValuesForTemplate } from "@/lib/event-print/print-field-defaults";
 import {
+  defaultVisibilityFieldValues,
+  parseInvitationFieldVisibility,
+  visibilityStorageKey,
+  type InvitationVisibilityKey,
+} from "@/lib/event-print/invitation-field-visibility";
+import { InvitationEventDetailsModal } from "./InvitationEventDetailsModal";
+import {
   isTableQrTemplateId,
   listPrintTemplatesForEventKind,
   type PrintTemplateDef,
 } from "@/lib/event-print/template-catalog";
+import type { WeddingInviteDetails, WeddingInviteDetailsStrings } from "@/lib/event-print/wedding-invite-details";
 import type { Locale } from "@/lib/i18n";
+import { WeddingInviteBlueFloraPrintSheet } from "../print/WeddingInviteBlueFloraPrintSheet";
+import { WeddingInviteGeometricPrintSheet } from "../print/WeddingInviteGeometricPrintSheet";
+import { WeddingInviteWatercolorCoastPrintSheet } from "../print/WeddingInviteWatercolorCoastPrintSheet";
+import { WeddingInviteNavyBotanicalPrintSheet } from "../print/WeddingInviteNavyBotanicalPrintSheet";
+import { WeddingInviteGrayscaleGlitterPrintSheet } from "../print/WeddingInviteGrayscaleGlitterPrintSheet";
+import { WeddingInviteTerracottaPillPrintSheet } from "../print/WeddingInviteTerracottaPillPrintSheet";
+import { WeddingInviteGoldArchFloralPrintSheet } from "../print/WeddingInviteGoldArchFloralPrintSheet";
+import { WeddingInviteCherryBlossomPrintSheet } from "../print/WeddingInviteCherryBlossomPrintSheet";
+import { WeddingInviteOliveGoldPrintSheet } from "../print/WeddingInviteOliveGoldPrintSheet";
+import { InvitationDesignCarousel } from "./InvitationDesignCarousel";
+
+import "../print/print-sheet.css";
+import "./prints-form.css";
+import "../prints/setup/prints-setup.css";
 
 type PrintsTabProps = Readonly<{
   eventId: string;
-  /** Current `events.event_kind` (may be default until gate completes). */
   eventKind: EventKind;
-  /** When non-null, organizer completed the Prints event-type step. */
   printsEventKindSetAt: string | null;
   eventDisplayName: string;
   eventDateIso: string;
@@ -31,48 +51,49 @@ type PrintsTabProps = Readonly<{
   printDraftByTemplateId: Readonly<Record<string, Readonly<Record<string, string>>>>;
 }>;
 
-function buildInvitationFieldState(
-  templatesWithFields: readonly PrintTemplateDef[],
-  drafts: Readonly<Record<string, Readonly<Record<string, string>>>>,
+function initSharedFields(
   eventDisplayName: string,
   eventDateIso: string,
   locale: Locale,
-): Record<string, Record<string, string>> {
-  const out: Record<string, Record<string, string>> = {};
-  for (const t of templatesWithFields) {
-    const defaults = defaultFieldValuesForTemplate(t.id, eventDisplayName, eventDateIso, locale);
-    out[t.id] = { ...defaults, ...(drafts[t.id] ?? {}) };
-  }
-  return out;
+  drafts: Readonly<Record<string, Readonly<Record<string, string>>>>,
+): Record<string, string> {
+  const defaults = defaultFieldValuesForTemplate(
+    "wedding-invite-blue-floral",
+    eventDisplayName,
+    eventDateIso,
+    locale,
+  );
+  const draft =
+    drafts["wedding-invite-olive-gold-frame"] ??
+    drafts["wedding-invite-cherry-blossom"] ??
+    drafts["wedding-invite-gold-arch-floral"] ??
+    drafts["wedding-invite-terra-pill"] ??
+    drafts["wedding-invite-grayscale-glitter"] ??
+    drafts["wedding-invite-navy-botanical"] ??
+    drafts["wedding-invite-blue-floral"] ??
+    drafts["wedding-invite-geometric"] ??
+    {};
+  return { ...defaults, ...defaultVisibilityFieldValues(), venue_line_2: "", ...draft };
 }
 
-function templateCardTitle(t: PrintTemplateDef, tab: AppUiDict["printsTab"]): string {
-  switch (t.id) {
-    case "table-minimal":
-      return tab.templateTableMinimal;
-    case "table-bold":
-      return tab.templateTableBold;
-    case "wedding-invite-simple":
-      return tab.templateWeddingInviteSimple;
-    default:
-      return t.id;
+
+function templateCardTitle(id: string, tab: AppUiDict["printsTab"]): string {
+  switch (id) {
+    case "table-minimal": return tab.templateTableMinimal;
+    case "table-bold": return tab.templateTableBold;
+    case "wedding-invite-blue-floral": return tab.templateWeddingInviteBlueFloral;
+    case "wedding-invite-geometric": return tab.templateWeddingInviteGeometric;
+    case "wedding-invite-watercolor-coast": return tab.templateWeddingInviteWatercolorCoast;
+    case "wedding-invite-navy-botanical": return tab.templateWeddingInviteNavyBotanical;
+    case "wedding-invite-grayscale-glitter": return tab.templateWeddingInviteGrayscaleGlitter;
+    case "wedding-invite-terra-pill": return tab.templateWeddingInviteTerraPill;
+    case "wedding-invite-gold-arch-floral": return tab.templateWeddingInviteGoldArchFloral;
+    case "wedding-invite-cherry-blossom": return tab.templateWeddingInviteCherryBlossom;
+    case "wedding-invite-olive-gold-frame": return tab.templateWeddingInviteOliveGoldFrame;
+    default: return id;
   }
 }
 
-function inviteFieldLabel(key: string, tab: AppUiDict["printsTab"]): string {
-  switch (key) {
-    case "partner_a":
-      return tab.inviteFieldPartnerA;
-    case "partner_b":
-      return tab.inviteFieldPartnerB;
-    case "venue":
-      return tab.inviteFieldVenue;
-    case "extra_line":
-      return tab.inviteFieldExtraLine;
-    default:
-      return key;
-  }
-}
 
 export function PrintsTab({
   eventId,
@@ -85,34 +106,26 @@ export function PrintsTab({
 }: PrintsTabProps) {
   const ui = useAppUi();
   const router = useRouter();
+
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [busyTemplateId, setBusyTemplateId] = useState<string | null>(null);
-  const [templateError, setTemplateError] = useState<Readonly<Record<string, string | null>>>({});
-  const [templateHint, setTemplateHint] = useState<Readonly<Record<string, string | null>>>({});
-
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveHint, setSaveHint] = useState<string | null>(null);
+  const [contentRevision, setContentRevision] = useState(0);
   const templates = useMemo(() => listPrintTemplatesForEventKind(eventKind), [eventKind]);
-  const invitationTemplates = useMemo(
-    () => templates.filter((t) => t.category === "invitation"),
-    [templates],
-  );
+  const invitationTemplates = useMemo(() => templates.filter((t) => t.category === "invitation"), [templates]);
   const tableTemplates = useMemo(() => templates.filter((t) => t.category === "table_qr"), [templates]);
 
   const draftFingerprint = useMemo(() => JSON.stringify(printDraftByTemplateId), [printDraftByTemplateId]);
 
-  const [invitationFields, setInvitationFields] = useState<Record<string, Record<string, string>>>(() =>
-    buildInvitationFieldState(
-      listPrintTemplatesForEventKind(eventKind).filter((t) => t.fields.length > 0),
-      printDraftByTemplateId,
-      eventDisplayName,
-      eventDateIso,
-      uiLocale,
-    ),
+  const [sharedFields, setSharedFields] = useState<Record<string, string>>(() =>
+    initSharedFields(eventDisplayName, eventDateIso, uiLocale, printDraftByTemplateId),
   );
 
   useEffect(() => {
-    const withFields = listPrintTemplatesForEventKind(eventKind).filter((t) => t.fields.length > 0);
-    setInvitationFields(buildInvitationFieldState(withFields, printDraftByTemplateId, eventDisplayName, eventDateIso, uiLocale));
+    setSharedFields(initSharedFields(eventDisplayName, eventDateIso, uiLocale, printDraftByTemplateId));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftFingerprint, eventKind, eventDisplayName, eventDateIso, uiLocale]);
 
   async function confirmKind(kind: EventKind) {
@@ -136,92 +149,85 @@ export function PrintsTab({
     }
   }
 
-  async function saveDraft(templateId: string) {
-    const values = invitationFields[templateId];
-    if (!values) return;
-    setBusyTemplateId(templateId);
-    setTemplateError((prev) => ({ ...prev, [templateId]: null }));
-    setTemplateHint((prev) => ({ ...prev, [templateId]: null }));
+  async function saveAllDrafts() {
+    if (invitationTemplates.length === 0) return;
+    setSaving(true);
+    setSaveError(null);
+    setSaveHint(null);
     try {
-      const res = await fetch(`/api/events/${eventId}/print-template-instance`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ templateId, fieldValues: values }),
-      });
-      const payload = (await res.json().catch(() => null)) as { error?: string } | null;
-      if (!res.ok) {
-        throw new Error(typeof payload?.error === "string" ? payload.error : ui.printsTab.draftSaveFail);
-      }
-      setTemplateHint((prev) => ({ ...prev, [templateId]: ui.printsTab.draftSaved }));
+      await Promise.all(
+        invitationTemplates.map((t) =>
+          fetch(`/api/events/${eventId}/print-template-instance`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ templateId: t.id, fieldValues: sharedFields }),
+          }).then(async (res) => {
+            if (!res.ok) {
+              const p = (await res.json().catch(() => null)) as { error?: string } | null;
+              throw new Error(typeof p?.error === "string" ? p.error : ui.printsTab.draftSaveFail);
+            }
+          }),
+        ),
+      );
+      setSaveHint(ui.printsTab.draftSaved);
       router.refresh();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : ui.printsTab.draftSaveFail;
-      setTemplateError((prev) => ({ ...prev, [templateId]: msg }));
+      setSaveError(e instanceof Error ? e.message : ui.printsTab.draftSaveFail);
     } finally {
-      setBusyTemplateId(null);
+      setSaving(false);
     }
+  }
+
+  function setField(key: string, value: string) {
+    setSaveHint(null);
+    setSharedFields((prev) => ({ ...prev, [key]: value }));
+    setContentRevision((prev) => prev + 1);
+  }
+
+  const fieldVisibility = useMemo(
+    () => parseInvitationFieldVisibility(sharedFields),
+    [sharedFields],
+  );
+
+  function setVisibility(key: InvitationVisibilityKey, on: boolean) {
+    setField(visibilityStorageKey(key), on ? "1" : "0");
+  }
+
+  const [collapsedSections, setCollapsedSections] = useState<ReadonlySet<string>>(new Set<string>());
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  function toggleSection(id: string) {
+    setCollapsedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   }
 
   if (!printsEventKindSetAt) {
     return (
-      <section style={{ maxWidth: 560 }}>
+      <section className="prints-tab prints-tab--narrow">
         <div style={{ marginBottom: 20 }}>
           <GoldBar />
-          <p
-            style={{
-              marginTop: 12,
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "var(--app-muted)",
-            }}
-          >
+          <p style={{ marginTop: 12, fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--app-muted)" }}>
             {ui.printsTab.kindEyebrow}
           </p>
-          <h2
-            style={{
-              marginTop: 8,
-              fontFamily: "var(--font-display)",
-              fontStyle: "italic",
-              fontWeight: 700,
-              fontSize: 32,
-              color: "var(--app-text)",
-              lineHeight: 1.15,
-            }}
-          >
+          <h2 style={{ marginTop: 8, fontFamily: "var(--font-display)", fontStyle: "italic", fontWeight: 700, fontSize: 32, color: "var(--app-text)", lineHeight: 1.15 }}>
             {ui.printsTab.kindTitle}
           </h2>
           <p style={{ marginTop: 10, fontSize: 14, color: "var(--app-muted)", lineHeight: 1.55 }}>{ui.printsTab.kindHint}</p>
         </div>
 
         {error ? (
-          <p
-            style={{
-              marginBottom: 14,
-              fontSize: 13,
-              color: "var(--app-danger)",
-              background: "color-mix(in srgb, var(--app-danger) 10%, transparent)",
-              padding: "10px 14px",
-              borderRadius: 10,
-              border: "1.5px solid color-mix(in srgb, var(--app-danger) 35%, transparent)",
-            }}
-          >
+          <p style={{ marginBottom: 14, fontSize: 13, color: "var(--app-danger)", background: "color-mix(in srgb, var(--app-danger) 10%, transparent)", padding: "10px 14px", borderRadius: 10, border: "1.5px solid color-mix(in srgb, var(--app-danger) 35%, transparent)" }}>
             {error}
           </p>
         ) : null}
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {EVENT_KINDS.map((k) => (
-            <AppBtn
-              key={k}
-              type="button"
-              variant="gold"
-              className="w-full !justify-center"
-              disabled={busy}
-              loading={busy}
-              onClick={() => void confirmKind(k)}
-            >
+            <AppBtn key={k} type="button" variant="gold" className="w-full !justify-center" disabled={busy} loading={busy} onClick={() => void confirmKind(k)}>
               {k === "generic" ? ui.printsTab.kindOptionGeneric : ui.printsTab.kindOptionWedding}
             </AppBtn>
           ))}
@@ -230,42 +236,211 @@ export function PrintsTab({
     );
   }
 
-  const inputStyle: CSSProperties = {
-    width: "100%",
-    marginTop: 6,
-    padding: "10px 12px",
-    borderRadius: 12,
-    border: "1.5px solid color-mix(in srgb, var(--app-muted) 35%, transparent)",
-    background: "var(--app-surface)",
-    color: "var(--app-text)",
-    fontSize: 14,
-    boxSizing: "border-box",
-  };
-
   const sectionTitleStyle: CSSProperties = {
     margin: "28px 0 12px",
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: 700,
-    letterSpacing: "0.12em",
+    letterSpacing: "0.14em",
     textTransform: "uppercase",
     color: "var(--app-muted)",
   };
 
+  const blueFlorealStrings = {
+    withJoyYouAre: ui.print.inviteWithJoyYouAre,
+    invitedToWeddingOf: ui.print.inviteInvitedToWeddingOf,
+    and: ui.print.inviteAnd,
+  };
+
+  const navyBotanicalStrings = {
+    togetherWithOurFamilies: ui.print.inviteTogetherWithOurFamilies,
+    honorUniteMarriage: ui.print.inviteHonorUniteMarriage,
+    and: ui.print.inviteAnd,
+  };
+
+  const terraPillStrings = {
+    pleaseJoinUsFor: ui.print.inviteTerraPleaseJoinUsFor,
+    theWeddingOf: ui.print.inviteTerraTheWeddingOf,
+    and: ui.print.inviteAnd,
+  };
+
+  const goldArchStrings = {
+    headline: ui.print.inviteGoldArchHeadline,
+    and: ui.print.inviteAnd,
+  };
+
+  const cherryBlossomStrings = {
+    preambleStart: ui.print.inviteCherryPreambleStart,
+    preambleScript: ui.print.inviteCherryPreambleScript,
+    preambleMid: ui.print.inviteCherryPreambleMid,
+    preambleEnd: ui.print.inviteCherryPreambleEnd,
+    and: ui.print.inviteAnd,
+  };
+
+  const oliveGoldStrings = {
+    withLove: ui.print.inviteOliveWithLove,
+    cordiallyLine1: ui.print.inviteOliveCordiallyLine1,
+    cordiallyLine2: ui.print.inviteOliveCordiallyLine2,
+  };
+
+  const watercolorCoastStrings = {
+    pleaseJoinUs: ui.print.inviteWatercolorPleaseJoinUs,
+    forOurCeremony: ui.print.inviteWatercolorForCeremony,
+    and: ui.print.inviteAnd,
+    receptionToFollow: ui.print.inviteReceptionFollow,
+  };
+
+  const glitterStrings = {
+    togetherWithFamilies: ui.print.inviteGlitterTogetherFamilies,
+    cordiallyInviteCaps: ui.print.inviteGlitterCordiallyInviteCaps,
+    weddingWord: ui.print.inviteGlitterWeddingWord,
+    on: ui.print.inviteGlitterOn,
+    and: ui.print.inviteAnd,
+  };
+
+  const previewDetails: WeddingInviteDetails = {
+    connectorSymbol: sharedFields.connector_symbol ?? "ampersand",
+    gatheringType: sharedFields.gathering_type ?? "",
+    gatheringAddress: sharedFields.gathering_address ?? "",
+    gatheringTime: sharedFields.gathering_time ?? "",
+    partnerAGatheringAddress: sharedFields.partner_a_gathering_address ?? "",
+    partnerAGatheringTime: sharedFields.partner_a_gathering_time ?? "",
+    partnerBGatheringAddress: sharedFields.partner_b_gathering_address ?? "",
+    partnerBGatheringTime: sharedFields.partner_b_gathering_time ?? "",
+    churchAddress: sharedFields.church_address ?? "",
+    churchTime: sharedFields.church_time ?? "",
+    dinnerAddress: sharedFields.dinner_address ?? "",
+    dinnerTime: sharedFields.dinner_time ?? "",
+    quoteText: sharedFields.quote_text ?? "",
+    quoteAuthor: sharedFields.quote_author ?? "",
+  };
+
+  const previewDetailStrings: WeddingInviteDetailsStrings = {
+    gatheringTitle: ui.print.inviteDetailsGathering,
+    churchTitle: ui.print.inviteDetailsChurch,
+    dinnerTitle: ui.print.inviteDetailsDinner,
+  };
+
+  function renderInvitePreview(t: PrintTemplateDef) {
+    const commonProps = {
+      paper: "a4" as const,
+      partnerA: sharedFields.partner_a ?? "",
+      partnerB: sharedFields.partner_b ?? "",
+      venue: sharedFields.venue ?? "",
+      venueLine2: sharedFields.venue_line_2 ?? "",
+      extraLine: sharedFields.extra_line ?? "",
+      eventDateIso,
+      locale: uiLocale,
+      details: previewDetails,
+      detailStrings: previewDetailStrings,
+      visibility: fieldVisibility,
+    };
+    if (t.id === "wedding-invite-olive-gold-frame") {
+      return (
+        <WeddingInviteOliveGoldPrintSheet {...commonProps} strings={oliveGoldStrings} />
+      );
+    }
+    if (t.id === "wedding-invite-cherry-blossom") {
+      return (
+        <WeddingInviteCherryBlossomPrintSheet {...commonProps} strings={cherryBlossomStrings} />
+      );
+    }
+    if (t.id === "wedding-invite-gold-arch-floral") {
+      return (
+        <WeddingInviteGoldArchFloralPrintSheet {...commonProps} strings={goldArchStrings} />
+      );
+    }
+    if (t.id === "wedding-invite-terra-pill") {
+      return (
+        <WeddingInviteTerracottaPillPrintSheet {...commonProps} strings={terraPillStrings} />
+      );
+    }
+    if (t.id === "wedding-invite-grayscale-glitter") {
+      return (
+        <WeddingInviteGrayscaleGlitterPrintSheet
+          paper={commonProps.paper}
+          partnerA={commonProps.partnerA}
+          partnerB={commonProps.partnerB}
+          connectorSymbol={sharedFields.connector_symbol ?? "ampersand"}
+          extraLine={commonProps.extraLine}
+          eventDateIso={commonProps.eventDateIso}
+          locale={commonProps.locale}
+          strings={glitterStrings}
+          visibility={fieldVisibility}
+        />
+      );
+    }
+    if (t.id === "wedding-invite-navy-botanical") {
+      return (
+        <WeddingInviteNavyBotanicalPrintSheet {...commonProps} strings={navyBotanicalStrings} />
+      );
+    }
+    if (t.id === "wedding-invite-watercolor-coast") {
+      return (
+        <WeddingInviteWatercolorCoastPrintSheet {...commonProps} strings={watercolorCoastStrings} />
+      );
+    }
+    if (t.id === "wedding-invite-geometric") {
+      return (
+        <WeddingInviteGeometricPrintSheet
+          {...commonProps}
+          strings={{
+            ...blueFlorealStrings,
+            receptionToFollow: ui.print.inviteReceptionFollow,
+          }}
+        />
+      );
+    }
+    if (t.id === "wedding-invite-blue-floral") {
+      return (
+        <WeddingInviteBlueFloraPrintSheet {...commonProps} strings={blueFlorealStrings} />
+      );
+    }
+    return null;
+  }
+
   return (
-    <section style={{ maxWidth: 720 }}>
-      <div style={{ marginBottom: 22 }}>
-        <GoldBar />
-        <h2
+    <section className="prints-tab">
+      {process.env.NODE_ENV === "development" ? (
+        <Link
+          href={`/events/${eventId}/prints/setup`}
           style={{
-            marginTop: 12,
-            fontFamily: "var(--font-display)",
-            fontStyle: "italic",
+            position: "fixed",
+            bottom: 20,
+            right: 20,
+            zIndex: 999,
+            background: "#1a1025",
+            border: "1px solid #5b2d8e",
+            color: "#c5922a",
+            fontSize: 11,
             fontWeight: 700,
-            fontSize: 32,
-            color: "var(--app-text)",
-            lineHeight: 1.15,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            padding: "7px 14px",
+            borderRadius: 8,
+            textDecoration: "none",
+            boxShadow: "0 4px 16px rgba(91,45,142,0.4)",
           }}
         >
+          DEV · Wizard
+        </Link>
+      ) : null}
+      {invitationTemplates.length > 0 ? (
+        <>
+          {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+          <link
+            href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Dancing+Script:wght@500;600;700&family=Montserrat:wght@200;300;400;500&display=swap"
+            rel="stylesheet"
+          />
+        </>
+      ) : null}
+
+      <div style={{ marginBottom: 22 }}>
+        <GoldBar />
+        <h2 style={{ marginTop: 12, fontFamily: "var(--font-display)", fontStyle: "italic", fontWeight: 700, fontSize: 32, color: "var(--app-text)", lineHeight: 1.15 }}>
           {ui.printsTab.title}
         </h2>
         <p style={{ marginTop: 8, fontSize: 14, color: "var(--app-muted)", lineHeight: 1.55 }}>{ui.printsTab.subtitle}</p>
@@ -273,93 +448,88 @@ export function PrintsTab({
 
       {invitationTemplates.length > 0 ? (
         <>
-          <h3 style={sectionTitleStyle}>{ui.printsTab.categoryInvitation}</h3>
-          <div className="flex flex-col gap-4">
-            {invitationTemplates.map((t) => (
-              <AppCard key={t.id} pad="lg" style={{ borderRadius: 18 }}>
-                <h4
-                  style={{
-                    margin: 0,
-                    fontFamily: "var(--font-display)",
-                    fontStyle: "italic",
-                    fontWeight: 700,
-                    fontSize: 22,
-                    color: "var(--app-text)",
-                  }}
-                >
-                  {templateCardTitle(t, ui.printsTab)}
-                </h4>
-                {t.fields.length > 0 ? (
-                  <div style={{ marginTop: 16 }} className="flex flex-col gap-3">
-                    {t.fields.map((f) => (
-                      <label key={f.key} style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--app-muted)" }}>
-                        {inviteFieldLabel(f.key, ui.printsTab)}
-                        {f.required ? <span style={{ color: "var(--app-danger)" }}> *</span> : null}
-                        <input
-                          style={inputStyle}
-                          value={invitationFields[t.id]?.[f.key] ?? ""}
-                          maxLength={f.maxLength}
-                          autoComplete="off"
-                          onChange={(e) => {
-                            const v = e.target.value;
-                            setTemplateHint((prev) => ({ ...prev, [t.id]: null }));
-                            setInvitationFields((prev) => ({
-                              ...prev,
-                              [t.id]: { ...(prev[t.id] ?? {}), [f.key]: v },
-                            }));
-                          }}
-                        />
-                      </label>
-                    ))}
-                    {templateError[t.id] ? (
-                      <p style={{ margin: 0, fontSize: 13, color: "var(--app-danger)" }}>{templateError[t.id]}</p>
-                    ) : null}
-                    {templateHint[t.id] ? (
-                      <p style={{ margin: 0, fontSize: 13, color: "var(--app-muted)" }}>{templateHint[t.id]}</p>
-                    ) : null}
-                    <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
-                      <AppBtn
-                        type="button"
-                        variant="gold"
-                        disabled={busyTemplateId !== null}
-                        loading={busyTemplateId === t.id}
-                        onClick={() => void saveDraft(t.id)}
-                      >
-                        {ui.printsTab.saveDraft}
-                      </AppBtn>
-                      <AppBtn
-                        href={`/events/${eventId}/print?template=${encodeURIComponent(t.id)}`}
-                        as={Link}
-                        variant="secondary"
-                      >
-                        {ui.printsTab.openPrintPreview}
-                      </AppBtn>
-                    </div>
+          {(() => {
+            const hasInvitationDraft = invitationTemplates.some((t) => t.id in printDraftByTemplateId);
+
+            if (!hasInvitationDraft) {
+              return (
+                <div className="psw-empty">
+                  <div className="psw-empty-mascot-wrap">
+                    <div className="psw-empty-halo" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/brand/mascot.png" alt="" className="psw-empty-mascot" />
                   </div>
-                ) : null}
-              </AppCard>
-            ))}
-          </div>
+                  <div className="psw-empty-bar" />
+                  <p className="psw-empty-eyebrow">{ui.printsSetup.emptyEyebrow}</p>
+                  <h3 className="psw-empty-heading">{ui.printsSetup.emptyHeading}</h3>
+                  <p className="psw-empty-subhead">{ui.printsSetup.emptySubhead}</p>
+                  <div className="psw-empty-cta">
+                    <Link href={`/events/${eventId}/prints/setup`} className="psw-btn psw-btn--gold">
+                      {ui.printsSetup.emptyCta}
+                    </Link>
+                  </div>
+                  <p className="psw-empty-meta">{ui.printsSetup.emptyMeta}</p>
+                </div>
+              );
+            }
+
+            return (
+              <>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "28px 0 12px", gap: 12 }}>
+                  <h3 style={{ ...sectionTitleStyle, margin: 0 }}>{ui.printsTab.categoryInvitation}</h3>
+                  <AppBtn type="button" variant="outline" size="sm" onClick={() => setDetailsOpen(true)}>
+                    {ui.printsTab.eventDetails}
+                  </AppBtn>
+                </div>
+
+                <InvitationDesignCarousel
+                  eventId={eventId}
+                  templates={invitationTemplates}
+                  renderPreview={renderInvitePreview}
+                  getTitle={(id) => templateCardTitle(id, ui.printsTab)}
+                  openPrintPreviewLabel={ui.printsTab.openPrintPreview}
+                  prevLabel={ui.printsTab.inviteCarouselPrev}
+                  nextLabel={ui.printsTab.inviteCarouselNext}
+                  swipeHint={ui.printsTab.inviteCarouselSwipeHint}
+                  counterTemplate={ui.printsTab.inviteCarouselCounter}
+                  inviteFontScaleLabel={ui.printsTab.inviteFontScaleLabel}
+                  inviteFontScaleHint={ui.printsTab.inviteFontScaleHint}
+                  inviteAutoFitToggle={ui.printsTab.inviteAutoFitToggle}
+                  inviteAutoFitNotice={ui.printsTab.inviteAutoFitNotice}
+                  inviteAutoFitUndo={ui.printsTab.inviteAutoFitUndo}
+                  contentRevision={contentRevision}
+                  onAutoHide={(key) => setVisibility(key, false)}
+                  onAutoRestore={(keys) => keys.forEach((k) => setVisibility(k, true))}
+                />
+
+
+                <InvitationEventDetailsModal
+                  open={detailsOpen}
+                  onClose={() => setDetailsOpen(false)}
+                  sharedFields={sharedFields}
+                  setField={setField}
+                  setVisibility={setVisibility}
+                  collapsedSections={collapsedSections}
+                  toggleSection={toggleSection}
+                  saving={saving}
+                  saveError={saveError}
+                  saveHint={saveHint}
+                  onSave={() => void saveAllDrafts()}
+                />
+              </>
+            );
+          })()}
         </>
       ) : null}
 
       {tableTemplates.length > 0 ? (
         <>
-          <h3 style={sectionTitleStyle}>{ui.printsTab.categoryTableQr}</h3>
+          <h3 style={{ ...sectionTitleStyle, marginTop: invitationTemplates.length > 0 ? 40 : 28 }}>{ui.printsTab.categoryTableQr}</h3>
           <div className="flex flex-col gap-4">
             {tableTemplates.map((t) => (
               <AppCard key={t.id} pad="lg" style={{ borderRadius: 18 }}>
-                <h4
-                  style={{
-                    margin: 0,
-                    fontFamily: "var(--font-display)",
-                    fontStyle: "italic",
-                    fontWeight: 700,
-                    fontSize: 22,
-                    color: "var(--app-text)",
-                  }}
-                >
-                  {templateCardTitle(t, ui.printsTab)}
+                <h4 style={{ margin: 0, fontFamily: "var(--font-display)", fontStyle: "italic", fontWeight: 700, fontSize: 22, color: "var(--app-text)" }}>
+                  {templateCardTitle(t.id, ui.printsTab)}
                 </h4>
                 <p style={{ margin: "12px 0 0", fontSize: 14, color: "var(--app-muted)", lineHeight: 1.55 }}>
                   {ui.printsTab.tableTemplateHint}

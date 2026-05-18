@@ -19,7 +19,7 @@ export const DEFAULT_POSTER_TEMPLATE: PosterTemplateId = "table-minimal";
 export const PRINT_ROUTE_TEMPLATE_IDS = [...TABLE_QR_PRINT_TEMPLATE_IDS, ...INVITATION_PRINT_TEMPLATE_IDS] as const;
 export type PrintRouteTemplateId = (typeof PRINT_ROUTE_TEMPLATE_IDS)[number];
 
-export const PRINT_PAPERS = ["a4", "letter"] as const;
+export const PRINT_PAPERS = ["a4"] as const;
 export type PrintPaperId = (typeof PRINT_PAPERS)[number];
 export const DEFAULT_PRINT_PAPER: PrintPaperId = "a4";
 

@@ -4,6 +4,8 @@ import {
   guessTimeTokenFromExtraLine,
   isExtraLineSameAsFormattedDate,
   weddingInviteDateParts,
+  weddingInviteGlitterTimeYearLine,
+  weddingInviteWatercolorPipeDateLine,
 } from "./wedding-invite-date-parts";
 import { formatEventDateForPrintField } from "./print-field-defaults";
 
@@ -31,6 +33,24 @@ describe("guessTimeTokenFromExtraLine", () => {
   it("returns null when no time", () => {
     expect(guessTimeTokenFromExtraLine("")).toBeNull();
     expect(guessTimeTokenFromExtraLine("City Hall only")).toBeNull();
+  });
+});
+
+describe("weddingInviteWatercolorPipeDateLine", () => {
+  it("formats en date with pipes", () => {
+    expect(weddingInviteWatercolorPipeDateLine("2026-05-30T12:00:00.000Z", "en")).toBe(
+      "30TH | MAY | 2026",
+    );
+  });
+});
+
+describe("weddingInviteGlitterTimeYearLine", () => {
+  it("joins time prose and spelled year for en", () => {
+    const iso = "2026-06-23T12:00:00.000Z";
+    const line = weddingInviteGlitterTimeYearLine(iso, "en", "at six thirty in the evening");
+    expect(line).toContain("at six thirty in the evening");
+    expect(line).toContain("two thousand twenty six");
+    expect(line).toContain(" / ");
   });
 });
 

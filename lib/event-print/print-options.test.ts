@@ -18,7 +18,7 @@ describe("parsePrintRouteTemplate", () => {
     expect(parsePrintRouteTemplate("table-bold")).toBe("table-bold");
   });
   it("accepts wedding invitation template", () => {
-    expect(parsePrintRouteTemplate("wedding-invite-simple")).toBe("wedding-invite-simple");
+    expect(parsePrintRouteTemplate("wedding-invite-blue-floral")).toBe("wedding-invite-blue-floral");
   });
   it("rejects unknown", () => {
     expect(parsePrintRouteTemplate("hacker")).toBe(DEFAULT_POSTER_TEMPLATE);
@@ -39,7 +39,7 @@ describe("parsePosterTemplate", () => {
     expect(parsePosterTemplate("hacker")).toBe(DEFAULT_POSTER_TEMPLATE);
   });
   it("maps invitation route id to default table (table-only parser)", () => {
-    expect(parsePosterTemplate("wedding-invite-simple")).toBe(DEFAULT_POSTER_TEMPLATE);
+    expect(parsePosterTemplate("wedding-invite-blue-floral")).toBe(DEFAULT_POSTER_TEMPLATE);
   });
 });
 

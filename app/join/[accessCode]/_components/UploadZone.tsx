@@ -26,6 +26,7 @@ function mapUploadError(status: number, raw: unknown): string {
     }
   }
   if (status === 401) return "Please sign in to upload.";
+  if (status === 413) return "File is too large (max 50 MB for photos, 280 MB for videos).";
   if (status === 415) return "Only image and video files are supported.";
   return "Upload failed.";
 }
