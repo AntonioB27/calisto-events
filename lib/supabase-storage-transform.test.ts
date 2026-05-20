@@ -27,4 +27,10 @@ describe("toThumbnailUrl", () => {
     const other = "https://other.cdn.com/image.jpg?token=XYZ";
     expect(toThumbnailUrl(other)).toBe(other + "&width=400&quality=80");
   });
+
+  it("uses ? separator when the url has no existing query string", () => {
+    const noQuery = "https://other.cdn.com/image.jpg";
+    const result = toThumbnailUrl(noQuery);
+    expect(result).toBe("https://other.cdn.com/image.jpg?width=400&quality=80");
+  });
 });
