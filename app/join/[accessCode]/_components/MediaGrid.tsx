@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
+import { MediaLikeBadge } from "@/components/app-ui/MediaLikeBadge";
 import { PhotoLightbox } from "@/components/app-ui/PhotoLightbox";
 import { interpolate } from "@/lib/app-ui";
 import {
@@ -64,8 +65,8 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
   const [lightbox, setLightbox] = useState<MediaItem | null>(null);
   const [lightboxLikers, setLightboxLikers] = useState<LikerRow[]>([]);
   const [lightboxLikersLoading, setLightboxLikersLoading] = useState(false);
-  const [likeTogglePending, setLikeTogglePending] = useState(false);
   const [likeToggleError, setLikeToggleError] = useState<string | null>(null);
+  const [pendingLikeId, setPendingLikeId] = useState<string | null>(null);
 
   const lightboxCopy = useMemo(
     () => ({
@@ -222,31 +223,31 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
     void fetchPage(nextPage, false);
   }
 
-  async function handleToggleLike() {
-    if (!lightbox || likeTogglePending) return;
+  async function handleToggleLikeForItem(mediaItemId: string, uploadedBy: string) {
+    if (pendingLikeId) return;
     const supabase = maybeCreateSupabaseBrowserClient();
     if (!supabase) return;
 
-    const wasLiked = likedByMe.has(lightbox.id);
-    const prevCount = likeCounts.get(lightbox.id) ?? 0;
+    const wasLiked = likedByMe.has(mediaItemId);
+    const prevCount = likeCounts.get(mediaItemId) ?? 0;
 
-    setLikeTogglePending(true);
+    setPendingLikeId(mediaItemId);
     setLikeToggleError(null);
     setLikedByMe((prev) => {
       const next = new Set(prev);
-      if (wasLiked) next.delete(lightbox.id);
-      else next.add(lightbox.id);
+      if (wasLiked) next.delete(mediaItemId);
+      else next.add(mediaItemId);
       return next;
     });
     setLikeCounts((prev) => {
       const next = new Map(prev);
-      next.set(lightbox.id, Math.max(0, prevCount + (wasLiked ? -1 : 1)));
+      next.set(mediaItemId, Math.max(0, prevCount + (wasLiked ? -1 : 1)));
       return next;
     });
 
     try {
       await toggleLike(supabase, {
-        mediaItemId: lightbox.id,
+        mediaItemId,
         eventId,
         currentlyLiked: wasLiked,
       });
@@ -255,10 +256,10 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
         viewerId: userId,
         organizerId: organizerUserId,
         canManageEvent,
-        uploadedBy: lightbox.uploaded_by,
+        uploadedBy,
       });
-      if (showLikers) {
-        const likers = await fetchLikersForMedia(supabase, lightbox.id, {
+      if (lightbox?.id === mediaItemId && showLikers) {
+        const likers = await fetchLikersForMedia(supabase, mediaItemId, {
           eventId,
           organizerId: organizerUserId,
           labelDefaults: { organizer: ui.guests.organizerLabelFallback, guest: ui.guests.guestLabelFallback },
@@ -268,18 +269,18 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
     } catch {
       setLikedByMe((prev) => {
         const next = new Set(prev);
-        if (wasLiked) next.add(lightbox.id);
-        else next.delete(lightbox.id);
+        if (wasLiked) next.add(mediaItemId);
+        else next.delete(mediaItemId);
         return next;
       });
       setLikeCounts((prev) => {
         const next = new Map(prev);
-        next.set(lightbox.id, prevCount);
+        next.set(mediaItemId, prevCount);
         return next;
       });
       setLikeToggleError(ui.likes.toggleFail);
     } finally {
-      setLikeTogglePending(false);
+      setPendingLikeId(null);
     }
   }
 
@@ -317,21 +318,38 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
                     muted
                   />
                 ) : (
-                  <button
-                    type="button"
-                    aria-label={ui.gallery.openPhotoAria}
-                    onClick={() => setLightbox(item)}
-                    className="block w-full cursor-pointer border-0 bg-transparent p-0"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={item.thumbnailUrl ?? item.signedUrl}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="block h-auto w-full max-w-full"
-                    />
-                  </button>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      aria-label={ui.gallery.openPhotoAria}
+                      onClick={() => setLightbox(item)}
+                      className="block w-full cursor-pointer border-0 bg-transparent p-0"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.thumbnailUrl ?? item.signedUrl}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="block h-auto w-full max-w-full"
+                      />
+                    </button>
+                    <div className="pointer-events-none absolute right-2 top-2">
+                      <div className="pointer-events-auto">
+                        <MediaLikeBadge
+                          liked={likedByMe.has(item.id)}
+                          count={likeCounts.get(item.id) ?? 0}
+                          pending={pendingLikeId === item.id}
+                          likeAria={ui.likes.heartLikeAria}
+                          unlikeAria={ui.likes.heartUnlikeAria}
+                          onToggle={(e) => {
+                            e.stopPropagation();
+                            void handleToggleLikeForItem(item.id, item.uploaded_by);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 )
               ) : (
                 <div className="min-h-32 w-full bg-[var(--app-border)]" />
@@ -355,11 +373,11 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
           canViewLikers={lightboxCanViewLikers}
           likers={lightboxLikers}
           likersLoading={lightboxLikersLoading}
-          togglePending={likeTogglePending}
+          togglePending={pendingLikeId === lightbox.id}
           toggleError={likeToggleError}
           copy={lightboxCopy}
           onClose={() => setLightbox(null)}
-          onToggleLike={() => void handleToggleLike()}
+          onToggleLike={() => void handleToggleLikeForItem(lightbox.id, lightbox.uploaded_by)}
         />
       ) : null}
     </div>

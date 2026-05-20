@@ -9,6 +9,7 @@ import { interpolate } from "@/lib/app-ui";
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { ConfirmDialog } from "@/components/app-ui/ConfirmDialog";
+import { MediaLikeBadge } from "@/components/app-ui/MediaLikeBadge";
 import { PhotoLightbox } from "@/components/app-ui/PhotoLightbox";
 import { buildMemberLabelMap } from "@/lib/event-member-labels";
 import {
@@ -128,8 +129,8 @@ export function GalleryManager({
   const [likedByMe, setLikedByMe] = useState<Set<string>>(() => new Set());
   const [lightboxLikers, setLightboxLikers] = useState<LikerRow[]>([]);
   const [lightboxLikersLoading, setLightboxLikersLoading] = useState(false);
-  const [likeTogglePending, setLikeTogglePending] = useState(false);
   const [likeToggleError, setLikeToggleError] = useState<string | null>(null);
+  const [pendingLikeId, setPendingLikeId] = useState<string | null>(null);
   const [mediaFilter, setMediaFilter] = useState<MediaFilterId>("all");
   const [pendingDelete, setPendingDelete] = useState<MediaItem | null>(null);
   const [zipExports, setZipExports] = useState<ZipExportRow[]>([]);
@@ -469,34 +470,34 @@ export function GalleryManager({
     void fetchPage(next, false);
   }
 
-  async function handleToggleLike() {
-    if (!lightbox || !supabase || likeTogglePending) return;
+  async function handleToggleLikeForItem(mediaItemId: string) {
+    if (!supabase || pendingLikeId) return;
 
-    const wasLiked = likedByMe.has(lightbox.id);
-    const prevCount = likeCounts.get(lightbox.id) ?? 0;
+    const wasLiked = likedByMe.has(mediaItemId);
+    const prevCount = likeCounts.get(mediaItemId) ?? 0;
 
-    setLikeTogglePending(true);
+    setPendingLikeId(mediaItemId);
     setLikeToggleError(null);
     setLikedByMe((prev) => {
       const next = new Set(prev);
-      if (wasLiked) next.delete(lightbox.id);
-      else next.add(lightbox.id);
+      if (wasLiked) next.delete(mediaItemId);
+      else next.add(mediaItemId);
       return next;
     });
     setLikeCounts((prev) => {
       const next = new Map(prev);
-      next.set(lightbox.id, Math.max(0, prevCount + (wasLiked ? -1 : 1)));
+      next.set(mediaItemId, Math.max(0, prevCount + (wasLiked ? -1 : 1)));
       return next;
     });
 
     try {
       await toggleLike(supabase, {
-        mediaItemId: lightbox.id,
+        mediaItemId,
         eventId,
         currentlyLiked: wasLiked,
       });
-      if (eventOrganizerId) {
-        const likers = await fetchLikersForMedia(supabase, lightbox.id, {
+      if (eventOrganizerId && lightbox?.id === mediaItemId) {
+        const likers = await fetchLikersForMedia(supabase, mediaItemId, {
           eventId,
           organizerId: eventOrganizerId,
           labelDefaults: { organizer: ui.guests.organizerLabelFallback, guest: ui.guests.guestLabelFallback },
@@ -506,18 +507,18 @@ export function GalleryManager({
     } catch {
       setLikedByMe((prev) => {
         const next = new Set(prev);
-        if (wasLiked) next.add(lightbox.id);
-        else next.delete(lightbox.id);
+        if (wasLiked) next.add(mediaItemId);
+        else next.delete(mediaItemId);
         return next;
       });
       setLikeCounts((prev) => {
         const next = new Map(prev);
-        next.set(lightbox.id, prevCount);
+        next.set(mediaItemId, prevCount);
         return next;
       });
       setLikeToggleError(ui.likes.toggleFail);
     } finally {
-      setLikeTogglePending(false);
+      setPendingLikeId(null);
     }
   }
 
@@ -889,6 +890,21 @@ export function GalleryManager({
                 ) : (
                   <div className="min-h-[160px] w-full bg-[var(--app-border)]" />
                 )}
+                {!isVideo ? (
+                  <div
+                    className="absolute right-2 top-2 z-[1]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MediaLikeBadge
+                      liked={likedByMe.has(item.id)}
+                      count={likeCounts.get(item.id) ?? 0}
+                      pending={pendingLikeId === item.id}
+                      likeAria={ui.likes.heartLikeAria}
+                      unlikeAria={ui.likes.heartUnlikeAria}
+                      onToggle={() => void handleToggleLikeForItem(item.id)}
+                    />
+                  </div>
+                ) : null}
                 <div
                   className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/70 from-30% to-transparent px-2 pb-2 pt-6 md:px-3.5 md:pb-3 md:pt-7"
                 >
@@ -931,13 +947,13 @@ export function GalleryManager({
           canViewLikers
           likers={lightboxLikers}
           likersLoading={lightboxLikersLoading}
-          togglePending={likeTogglePending}
+          togglePending={pendingLikeId === lightbox.id}
           toggleError={likeToggleError}
           secondaryError={lightboxDownloadError}
           copy={lightboxCopy}
           uploaderLabel={lightbox.uploaderLabel}
           onClose={() => setLightbox(null)}
-          onToggleLike={() => void handleToggleLike()}
+          onToggleLike={() => void handleToggleLikeForItem(lightbox.id)}
           footerActions={
             <button
               type="button"

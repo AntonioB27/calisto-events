@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 
 import type { LikerRow } from "@/lib/media-likes";
+import { LikeHeartIcon } from "@/components/app-ui/LikeHeartIcon";
 
 export type PhotoLightboxCopy = Readonly<{
   lightboxAria: string;
@@ -31,24 +32,6 @@ type Props = Readonly<{
   uploaderLabel?: string;
   secondaryError?: string | null;
 }>;
-
-function HeartIcon({ filled }: Readonly<{ filled: boolean }>) {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill={filled ? "currentColor" : "none"}
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
-    </svg>
-  );
-}
 
 export function PhotoLightbox({
   signedUrl,
@@ -151,7 +134,7 @@ export function PhotoLightbox({
                   opacity: togglePending ? 0.7 : 1,
                 }}
               >
-                <HeartIcon filled={likedByMe} />
+                <LikeHeartIcon filled={likedByMe} />
               </button>
               <span
                 style={{
