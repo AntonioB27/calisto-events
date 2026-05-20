@@ -268,7 +268,13 @@ export function GuestEventPage({
               >
                 {ui.guestJoin.sectionGallery}
               </h2>
-              <MediaGrid eventId={eventId} refreshKey={refreshKey} />
+              <MediaGrid
+                eventId={eventId}
+                refreshKey={refreshKey}
+                userId={userId}
+                organizerUserId={organizerUserId}
+                canManageEvent={canManageEvent}
+              />
             </section>
           </>
         ) : null}

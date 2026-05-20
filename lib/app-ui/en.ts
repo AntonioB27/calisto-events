@@ -141,6 +141,15 @@ export const APP_UI_EN = {
     welcomeLink: "Welcome",
   },
 
+  likes: {
+    heartLikeAria: "Like this photo",
+    heartUnlikeAria: "Unlike this photo",
+    likeCount: "{count} likes",
+    likersHeading: "Liked by",
+    likersEmpty: "No likes yet",
+    toggleFail: "Could not update like. Please try again.",
+  },
+
   guestJoin: {
     loading: "Loading…",
     joining: "Joining event…",
@@ -323,6 +332,8 @@ export const APP_UI_EN = {
     downloadPhotoFail: "Could not download this photo.",
     downloadFailedWithStatus: "Download failed ({status}).",
     deleteBusy: "…",
+    emptyGuest: "No media yet — be the first to upload!",
+    openPhotoAria: "Open photo full screen",
     zipExportCardEyebrow: "Primary organizer",
     zipExportTitle: "Bulk ZIP export",
     zipExportBlurb:

@@ -9,6 +9,14 @@ import { interpolate } from "@/lib/app-ui";
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { ConfirmDialog } from "@/components/app-ui/ConfirmDialog";
+import { PhotoLightbox } from "@/components/app-ui/PhotoLightbox";
+import { buildMemberLabelMap } from "@/lib/event-member-labels";
+import {
+  fetchLikeSummaryForMedia,
+  fetchLikersForMedia,
+  toggleLike,
+  type LikerRow,
+} from "@/lib/media-likes";
 import { canGuestUpload, normalizePlanId, type PlanId } from "@/lib/plan-limits";
 import { getCachedUrls, invalidateCachedUrl, storeCachedUrls, warmCache } from "@/lib/signed-url-cache";
 
@@ -99,34 +107,6 @@ function segmentedHighlightLeft(idx: number) {
 type MembershipLabellingRow = { user_id: string; display_name_at_event: string | null };
 type ProfileLabellingRow = { id: string; display_name: string | null };
 
-/** Same priority as GuestsManager: event display name → profile → Organizer / Guest */
-function buildUploaderLabelMap(
-  userIds: string[],
-  organizerId: string | null,
-  memberships: MembershipLabellingRow[] | null | undefined,
-  profiles: ProfileLabellingRow[] | null | undefined,
-  defaults: Readonly<{ organizer: string; guest: string }>,
-): Map<string, string> {
-  const atEvent = new Map<string, string | null>();
-  for (const m of memberships ?? []) {
-    atEvent.set(m.user_id, m.display_name_at_event);
-  }
-  const profById = new Map<string, string | null>();
-  for (const p of profiles ?? []) {
-    profById.set(p.id, p.display_name);
-  }
-
-  const out = new Map<string, string>();
-  for (const id of userIds) {
-    const label =
-      atEvent.get(id)?.trim() ||
-      profById.get(id)?.trim() ||
-      (organizerId !== null && id === organizerId ? defaults.organizer : defaults.guest);
-    out.set(id, label);
-  }
-  return out;
-}
-
 export function GalleryManager({
   eventId,
   isPrimaryOrganizer,
@@ -142,6 +122,14 @@ export function GalleryManager({
   const [lightbox, setLightbox] = useState<MediaItem | null>(null);
   const [lightboxDownloading, setLightboxDownloading] = useState(false);
   const [lightboxDownloadError, setLightboxDownloadError] = useState<string | null>(null);
+  const [eventOrganizerId, setEventOrganizerId] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [likeCounts, setLikeCounts] = useState<Map<string, number>>(() => new Map());
+  const [likedByMe, setLikedByMe] = useState<Set<string>>(() => new Set());
+  const [lightboxLikers, setLightboxLikers] = useState<LikerRow[]>([]);
+  const [lightboxLikersLoading, setLightboxLikersLoading] = useState(false);
+  const [likeTogglePending, setLikeTogglePending] = useState(false);
+  const [likeToggleError, setLikeToggleError] = useState<string | null>(null);
   const [mediaFilter, setMediaFilter] = useState<MediaFilterId>("all");
   const [pendingDelete, setPendingDelete] = useState<MediaItem | null>(null);
   const [zipExports, setZipExports] = useState<ZipExportRow[]>([]);
@@ -151,6 +139,27 @@ export function GalleryManager({
   const [zipPanelError, setZipPanelError] = useState<string | null>(null);
 
   const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
+
+  const lightboxCopy = useMemo(
+    () => ({
+      lightboxAria: ui.gallery.lightboxAria,
+      closeLightboxAria: ui.gallery.closeLightboxAria,
+      heartLikeAria: ui.likes.heartLikeAria,
+      heartUnlikeAria: ui.likes.heartUnlikeAria,
+      likeCount: (count: number) => interpolate(ui.likes.likeCount, { count }),
+      likersHeading: ui.likes.likersHeading,
+      likersEmpty: ui.likes.likersEmpty,
+      toggleFail: ui.likes.toggleFail,
+    }),
+    [ui],
+  );
+
+  useEffect(() => {
+    if (!supabase) return;
+    void supabase.auth.getUser().then((res: { data: { user: { id: string } | null } | null }) => {
+      setCurrentUserId(res.data?.user?.id ?? null);
+    });
+  }, [supabase]);
 
   const uploadsOpen = useMemo(
     () =>
@@ -178,8 +187,42 @@ export function GalleryManager({
     if (!lightbox) {
       setLightboxDownloading(false);
       setLightboxDownloadError(null);
+      setLightboxLikers([]);
+      setLightboxLikersLoading(false);
+      setLikeToggleError(null);
+      return;
     }
-  }, [lightbox]);
+
+    if (!supabase || !eventOrganizerId) return;
+
+    let cancelled = false;
+    setLightboxLikersLoading(true);
+    void fetchLikersForMedia(supabase, lightbox.id, {
+      eventId,
+      organizerId: eventOrganizerId,
+      labelDefaults: { organizer: ui.guests.organizerLabelFallback, guest: ui.guests.guestLabelFallback },
+    })
+      .then((likers) => {
+        if (!cancelled) setLightboxLikers(likers);
+      })
+      .catch(() => {
+        if (!cancelled) setLightboxLikers([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLightboxLikersLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    lightbox,
+    supabase,
+    eventOrganizerId,
+    eventId,
+    ui.guests.guestLabelFallback,
+    ui.guests.organizerLabelFallback,
+  ]);
 
   useEffect(() => {
     if (!supabase || !isPrimaryOrganizer) return;
@@ -287,6 +330,7 @@ export function GalleryManager({
 
       const ev = evRow as { organizer_id?: unknown; plan?: unknown; event_date?: unknown } | null;
       const organizerId = ev && typeof ev.organizer_id === "string" ? ev.organizer_id : null;
+      if (organizerId) setEventOrganizerId(organizerId);
       if (ev && typeof ev.plan === "string" && typeof ev.event_date === "string" && ev.event_date) {
         setEventUpload({ planId: normalizePlanId(ev.plan), eventDate: ev.event_date });
       } else {
@@ -295,13 +339,14 @@ export function GalleryManager({
 
       const typed = (rows ?? []) as MediaRow[];
       const uploaderIds = Array.from(new Set(typed.map((r) => r.uploaded_by).filter(Boolean)));
+      const photoIds = typed.filter((r) => !isVideoMime(r.mime_type)).map((r) => r.id);
 
       // Split paths into already-cached signed URLs and those that still need signing.
       const allPaths = typed.map((r) => r.storage_path);
       const { cached: cachedUrls, missing: missingPaths } = getCachedUrls(allPaths);
 
       // Parallelise: uploader label lookups ∥ signing only the uncached paths (RT2)
-      const [labelResult, signedResult] = await Promise.all([
+      const [labelResult, signedResult, likeSummary] = await Promise.all([
         uploaderIds.length > 0
           ? Promise.all([
               supabase
@@ -315,12 +360,13 @@ export function GalleryManager({
         missingPaths.length > 0
           ? supabase.storage.from("event-media").createSignedUrls(missingPaths, 3600)
           : Promise.resolve({ data: [] as SignedUrlEntry[] }),
+        fetchLikeSummaryForMedia(supabase, photoIds, currentUserId),
       ]);
 
       let labelMap = new Map<string, string>();
       if (labelResult) {
         const [{ data: mems, error: memErr }, { data: profs, error: profErr }] = labelResult;
-        labelMap = buildUploaderLabelMap(
+        labelMap = buildMemberLabelMap(
           uploaderIds,
           organizerId,
           memErr ? null : (mems as MembershipLabellingRow[] | null),
@@ -349,10 +395,20 @@ export function GalleryManager({
       }));
 
       setItems((prev) => (replace ? mapped : [...prev, ...mapped]));
+      setLikeCounts((prev) => {
+        const next = replace ? new Map<string, number>() : new Map(prev);
+        for (const [id, count] of likeSummary.counts) next.set(id, count);
+        return next;
+      });
+      setLikedByMe((prev) => {
+        const next = replace ? new Set<string>() : new Set(prev);
+        for (const id of likeSummary.likedByMe) next.add(id);
+        return next;
+      });
       setHasMore(typed.length === PAGE_SIZE);
       setLoading(false);
     },
-    [eventId, supabase, ui.gallery.loadFailed, ui.guests.guestLabelFallback, ui.guests.organizerLabelFallback],
+    [eventId, supabase, currentUserId, ui.gallery.loadFailed, ui.guests.guestLabelFallback, ui.guests.organizerLabelFallback],
   );
 
   useEffect(() => {
@@ -365,7 +421,7 @@ export function GalleryManager({
     setPage(0);
     setItems([]);
     void fetchPage(0, true);
-  }, [fetchPage, supabase]);
+  }, [fetchPage, supabase, currentUserId]);
 
   async function confirmDeletePending() {
     if (!supabase) return;
@@ -388,6 +444,16 @@ export function GalleryManager({
 
       invalidateCachedUrl(item.storage_path);
       setItems((prev) => prev.filter((x) => x.id !== item.id));
+      setLikeCounts((prev) => {
+        const next = new Map(prev);
+        next.delete(item.id);
+        return next;
+      });
+      setLikedByMe((prev) => {
+        const next = new Set(prev);
+        next.delete(item.id);
+        return next;
+      });
       if (lightbox?.id === item.id) setLightbox(null);
       setPendingDelete(null);
     } catch (e) {
@@ -401,6 +467,58 @@ export function GalleryManager({
     const next = page + 1;
     setPage(next);
     void fetchPage(next, false);
+  }
+
+  async function handleToggleLike() {
+    if (!lightbox || !supabase || likeTogglePending) return;
+
+    const wasLiked = likedByMe.has(lightbox.id);
+    const prevCount = likeCounts.get(lightbox.id) ?? 0;
+
+    setLikeTogglePending(true);
+    setLikeToggleError(null);
+    setLikedByMe((prev) => {
+      const next = new Set(prev);
+      if (wasLiked) next.delete(lightbox.id);
+      else next.add(lightbox.id);
+      return next;
+    });
+    setLikeCounts((prev) => {
+      const next = new Map(prev);
+      next.set(lightbox.id, Math.max(0, prevCount + (wasLiked ? -1 : 1)));
+      return next;
+    });
+
+    try {
+      await toggleLike(supabase, {
+        mediaItemId: lightbox.id,
+        eventId,
+        currentlyLiked: wasLiked,
+      });
+      if (eventOrganizerId) {
+        const likers = await fetchLikersForMedia(supabase, lightbox.id, {
+          eventId,
+          organizerId: eventOrganizerId,
+          labelDefaults: { organizer: ui.guests.organizerLabelFallback, guest: ui.guests.guestLabelFallback },
+        });
+        setLightboxLikers(likers);
+      }
+    } catch {
+      setLikedByMe((prev) => {
+        const next = new Set(prev);
+        if (wasLiked) next.add(lightbox.id);
+        else next.delete(lightbox.id);
+        return next;
+      });
+      setLikeCounts((prev) => {
+        const next = new Map(prev);
+        next.set(lightbox.id, prevCount);
+        return next;
+      });
+      setLikeToggleError(ui.likes.toggleFail);
+    } finally {
+      setLikeTogglePending(false);
+    }
   }
 
   const filtered = items.filter(item => {
@@ -805,115 +923,67 @@ export function GalleryManager({
         </AppBtn>
       ) : null}
 
-      {/* Lightbox */}
-      {lightbox && (
-        <div
-          onClick={() => setLightbox(null)}
-          role="dialog"
-          aria-modal="true"
-          aria-label={ui.gallery.lightboxAria}
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 1000, padding: 24,
-          }}
-        >
-          <div onClick={e => e.stopPropagation()} style={{ position: 'relative', maxWidth: 800, maxHeight: '85vh' }}>
-            {lightbox.signedUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={lightbox.signedUrl} alt="" style={{ maxWidth: '100%', maxHeight: '80vh', borderRadius: 16, display: 'block' }} />
-            )}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: 16,
-                left: 16,
-                right: 16,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
-              }}
-            >
-              {lightboxDownloadError ? (
-                <div
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: '#fde8e8',
-                    background: 'rgba(180,30,40,0.75)',
-                    padding: '8px 12px',
-                    borderRadius: 12,
-                  }}
-                  role="alert"
-                >
-                  {lightboxDownloadError}
-                </div>
-              ) : null}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-              <div style={{ color: '#fff', fontSize: 14, fontWeight: 600, background: 'rgba(0,0,0,0.5)', padding: '6px 14px', borderRadius: 20, minWidth: 0 }}>
-                📷 {lightbox.uploaderLabel}
-              </div>
-              <button
-                type="button"
-                aria-label={ui.gallery.downloadPhotoAria}
-                disabled={lightboxDownloading || !lightbox.signedUrl}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const url = lightbox.signedUrl;
-                  if (!url || lightboxDownloading) return;
-                  void (async () => {
-                    setLightboxDownloading(true);
-                    setLightboxDownloadError(null);
-                    try {
-                      await downloadFromSignedUrl(url, downloadFilename(lightbox), (status) =>
-                        interpolate(ui.gallery.downloadFailedWithStatus, { status }),
-                      );
-                    } catch (err) {
-                      setLightboxDownloadError(err instanceof Error ? err.message : ui.gallery.downloadPhotoFail);
-                    } finally {
-                      setLightboxDownloading(false);
-                    }
-                  })();
-                }}
-                style={{
-                  flexShrink: 0,
-                  padding: '8px 18px',
-                  borderRadius: 20,
-                  border: 'none',
-                  cursor: lightboxDownloading ? 'wait' : 'pointer',
-                  opacity: lightboxDownloading ? 0.7 : 1,
-                  fontFamily: 'inherit',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  letterSpacing: '0.02em',
-                  color: '#1b1208',
-                  background:
-                    'linear-gradient(152deg, var(--app-gold-2) 0%, var(--app-gold) 55%, color-mix(in srgb, var(--app-gold) 88%, #fff) 100%)',
-                  boxShadow:
-                    '0 1px 0 color-mix(in srgb, #fff 55%, transparent) inset, 0 2px 14px color-mix(in srgb, var(--app-gold) 38%, transparent)',
-                }}
-              >
-                {lightboxDownloading ? ui.gallery.downloadWorking : ui.gallery.downloadBtn}
-              </button>
-              </div>
-            </div>
+      {lightbox ? (
+        <PhotoLightbox
+          signedUrl={lightbox.signedUrl}
+          likeCount={likeCounts.get(lightbox.id) ?? 0}
+          likedByMe={likedByMe.has(lightbox.id)}
+          canViewLikers
+          likers={lightboxLikers}
+          likersLoading={lightboxLikersLoading}
+          togglePending={likeTogglePending}
+          toggleError={likeToggleError}
+          secondaryError={lightboxDownloadError}
+          copy={lightboxCopy}
+          uploaderLabel={lightbox.uploaderLabel}
+          onClose={() => setLightbox(null)}
+          onToggleLike={() => void handleToggleLike()}
+          footerActions={
             <button
               type="button"
-              aria-label={ui.gallery.closeLightboxAria}
-              onClick={() => setLightbox(null)}
+              aria-label={ui.gallery.downloadPhotoAria}
+              disabled={lightboxDownloading || !lightbox.signedUrl}
+              onClick={(e) => {
+                e.stopPropagation();
+                const url = lightbox.signedUrl;
+                if (!url || lightboxDownloading) return;
+                void (async () => {
+                  setLightboxDownloading(true);
+                  setLightboxDownloadError(null);
+                  try {
+                    await downloadFromSignedUrl(url, downloadFilename(lightbox), (status) =>
+                      interpolate(ui.gallery.downloadFailedWithStatus, { status }),
+                    );
+                  } catch (err) {
+                    setLightboxDownloadError(err instanceof Error ? err.message : ui.gallery.downloadPhotoFail);
+                  } finally {
+                    setLightboxDownloading(false);
+                  }
+                })();
+              }}
               style={{
-                position: 'absolute', top: -14, right: -14,
-                width: 36, height: 36, borderRadius: '50%',
-                background: '#fff', border: 'none', cursor: 'pointer',
-                fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+                flexShrink: 0,
+                padding: "8px 18px",
+                borderRadius: 20,
+                border: "none",
+                cursor: lightboxDownloading ? "wait" : "pointer",
+                opacity: lightboxDownloading ? 0.7 : 1,
+                fontFamily: "inherit",
+                fontSize: 13,
+                fontWeight: 600,
+                letterSpacing: "0.02em",
+                color: "#1b1208",
+                background:
+                  "linear-gradient(152deg, var(--app-gold-2) 0%, var(--app-gold) 55%, color-mix(in srgb, var(--app-gold) 88%, #fff) 100%)",
+                boxShadow:
+                  "0 1px 0 color-mix(in srgb, #fff 55%, transparent) inset, 0 2px 14px color-mix(in srgb, var(--app-gold) 38%, transparent)",
               }}
             >
-              ×
+              {lightboxDownloading ? ui.gallery.downloadWorking : ui.gallery.downloadBtn}
             </button>
-          </div>
-        </div>
-      )}
+          }
+        />
+      ) : null}
     </section>
   );
 }

@@ -143,6 +143,15 @@ export const APP_UI_HR: AppUiDict = {
     welcomeLink: "Dobro došli",
   },
 
+  likes: {
+    heartLikeAria: "Lajkaj fotografiju",
+    heartUnlikeAria: "Ukloni lajk",
+    likeCount: "{count} lajkova",
+    likersHeading: "Lajkali",
+    likersEmpty: "Još nema lajkova",
+    toggleFail: "Lajk nije mogao biti ažuriran. Pokušajte ponovo.",
+  },
+
   guestJoin: {
     loading: "Učitavanje…",
     joining: "Pridruživanje događaju…",
@@ -329,6 +338,8 @@ export const APP_UI_HR: AppUiDict = {
     downloadPhotoFail: "Nismo mogli preuzeti fotografiju.",
     downloadFailedWithStatus: "Preuzimanje nije uspjelo ({status}).",
     deleteBusy: "…",
+    emptyGuest: "Još nema medija — budite prvi koji će uploadati!",
+    openPhotoAria: "Otvori fotografiju preko cijelog ekrana",
     zipExportCardEyebrow: "Primarni organizator",
     zipExportTitle: "ZIP skupni izvoz",
     zipExportBlurb:

@@ -1,8 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
+import { PhotoLightbox } from "@/components/app-ui/PhotoLightbox";
+import { interpolate } from "@/lib/app-ui";
+import {
+  canViewLikers,
+  fetchLikeSummaryForMedia,
+  fetchLikersForMedia,
+  toggleLike,
+  type LikerRow,
+} from "@/lib/media-likes";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { getCachedUrls, storeCachedUrls, warmCache } from "@/lib/signed-url-cache";
 import { toThumbnailUrl } from "@/lib/supabase-storage-transform";
@@ -11,6 +21,7 @@ type MediaItem = {
   id: string;
   storage_path: string;
   mime_type: string | null;
+  uploaded_by: string;
   signedUrl: string | undefined;
   thumbnailUrl: string | undefined;
 };
@@ -19,6 +30,7 @@ type MediaRow = {
   id: string;
   storage_path: string;
   mime_type: string | null;
+  uploaded_by: string;
 };
 
 type SignedUrlEntry = {
@@ -35,14 +47,39 @@ function isVideoMime(mime: string | null | undefined) {
 type Props = {
   eventId: string;
   refreshKey: number;
+  userId: string | null;
+  organizerUserId: string;
+  canManageEvent: boolean;
 };
 
-export function MediaGrid({ eventId, refreshKey }: Props) {
+export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canManageEvent }: Props) {
+  const ui = useAppUi();
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(0);
+  const [likeCounts, setLikeCounts] = useState<Map<string, number>>(() => new Map());
+  const [likedByMe, setLikedByMe] = useState<Set<string>>(() => new Set());
+  const [lightbox, setLightbox] = useState<MediaItem | null>(null);
+  const [lightboxLikers, setLightboxLikers] = useState<LikerRow[]>([]);
+  const [lightboxLikersLoading, setLightboxLikersLoading] = useState(false);
+  const [likeTogglePending, setLikeTogglePending] = useState(false);
+  const [likeToggleError, setLikeToggleError] = useState<string | null>(null);
+
+  const lightboxCopy = useMemo(
+    () => ({
+      lightboxAria: ui.gallery.lightboxAria,
+      closeLightboxAria: ui.gallery.closeLightboxAria,
+      heartLikeAria: ui.likes.heartLikeAria,
+      heartUnlikeAria: ui.likes.heartUnlikeAria,
+      likeCount: (count: number) => interpolate(ui.likes.likeCount, { count }),
+      likersHeading: ui.likes.likersHeading,
+      likersEmpty: ui.likes.likersEmpty,
+      toggleFail: ui.likes.toggleFail,
+    }),
+    [ui],
+  );
 
   useEffect(() => {
     warmCache(eventId);
@@ -53,7 +90,7 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
       try {
         const supabase = maybeCreateSupabaseBrowserClient();
         if (!supabase) {
-          setError("Supabase is not configured.");
+          setError(ui.supabase.galleryBody);
           setLoading(false);
           setHasMore(false);
           return;
@@ -63,7 +100,7 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
 
         const { data: rows, error: fetchErr } = await supabase
           .from("media_items")
-          .select("id, storage_path, mime_type")
+          .select("id, storage_path, mime_type, uploaded_by")
           .eq("event_id", eventId)
           .order("created_at", { ascending: false })
           .range(from, to);
@@ -76,6 +113,9 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
           setLoading(false);
           return;
         }
+
+        const photoIds = typedRows.filter((r) => !isVideoMime(r.mime_type)).map((r) => r.id);
+        const likeSummary = await fetchLikeSummaryForMedia(supabase, photoIds, userId);
 
         const allPaths = typedRows.map((r) => r.storage_path);
         const { cached: cachedUrls, missing: missingPaths } = getCachedUrls(allPaths);
@@ -94,19 +134,30 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
           id: r.id,
           storage_path: r.storage_path,
           mime_type: r.mime_type,
+          uploaded_by: r.uploaded_by,
           signedUrl: urlMap[r.storage_path],
           thumbnailUrl: urlMap[r.storage_path] ? toThumbnailUrl(urlMap[r.storage_path]) : undefined,
         }));
 
         setItems((prev) => (replace ? mapped : [...prev, ...mapped]));
+        setLikeCounts((prev) => {
+          const next = replace ? new Map<string, number>() : new Map(prev);
+          for (const [id, count] of likeSummary.counts) next.set(id, count);
+          return next;
+        });
+        setLikedByMe((prev) => {
+          const next = replace ? new Set<string>() : new Set(prev);
+          for (const id of likeSummary.likedByMe) next.add(id);
+          return next;
+        });
         setHasMore(typedRows.length === PAGE_SIZE);
         setLoading(false);
       } catch {
-        setError("Failed to load gallery. Please refresh.");
+        setError(ui.gallery.loadFailed);
         setLoading(false);
       }
     },
-    [eventId],
+    [eventId, userId, ui.gallery.loadFailed, ui.supabase.galleryBody],
   );
 
   useEffect(() => {
@@ -116,18 +167,137 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
     void fetchPage(0, true);
   }, [fetchPage, refreshKey]);
 
+  useEffect(() => {
+    if (!lightbox) {
+      setLightboxLikers([]);
+      setLightboxLikersLoading(false);
+      setLikeToggleError(null);
+      return;
+    }
+
+    const showLikers = canViewLikers({
+      viewerId: userId,
+      organizerId: organizerUserId,
+      canManageEvent,
+      uploadedBy: lightbox.uploaded_by,
+    });
+    if (!showLikers) return;
+
+    let cancelled = false;
+    const supabase = maybeCreateSupabaseBrowserClient();
+    if (!supabase) return;
+
+    setLightboxLikersLoading(true);
+    void fetchLikersForMedia(supabase, lightbox.id, {
+      eventId,
+      organizerId: organizerUserId,
+      labelDefaults: { organizer: ui.guests.organizerLabelFallback, guest: ui.guests.guestLabelFallback },
+    })
+      .then((likers) => {
+        if (!cancelled) setLightboxLikers(likers);
+      })
+      .catch(() => {
+        if (!cancelled) setLightboxLikers([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLightboxLikersLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    lightbox,
+    userId,
+    organizerUserId,
+    canManageEvent,
+    eventId,
+    ui.guests.guestLabelFallback,
+    ui.guests.organizerLabelFallback,
+  ]);
+
   function loadMore() {
     const nextPage = page + 1;
     setPage(nextPage);
     void fetchPage(nextPage, false);
   }
 
+  async function handleToggleLike() {
+    if (!lightbox || likeTogglePending) return;
+    const supabase = maybeCreateSupabaseBrowserClient();
+    if (!supabase) return;
+
+    const wasLiked = likedByMe.has(lightbox.id);
+    const prevCount = likeCounts.get(lightbox.id) ?? 0;
+
+    setLikeTogglePending(true);
+    setLikeToggleError(null);
+    setLikedByMe((prev) => {
+      const next = new Set(prev);
+      if (wasLiked) next.delete(lightbox.id);
+      else next.add(lightbox.id);
+      return next;
+    });
+    setLikeCounts((prev) => {
+      const next = new Map(prev);
+      next.set(lightbox.id, Math.max(0, prevCount + (wasLiked ? -1 : 1)));
+      return next;
+    });
+
+    try {
+      await toggleLike(supabase, {
+        mediaItemId: lightbox.id,
+        eventId,
+        currentlyLiked: wasLiked,
+      });
+
+      const showLikers = canViewLikers({
+        viewerId: userId,
+        organizerId: organizerUserId,
+        canManageEvent,
+        uploadedBy: lightbox.uploaded_by,
+      });
+      if (showLikers) {
+        const likers = await fetchLikersForMedia(supabase, lightbox.id, {
+          eventId,
+          organizerId: organizerUserId,
+          labelDefaults: { organizer: ui.guests.organizerLabelFallback, guest: ui.guests.guestLabelFallback },
+        });
+        setLightboxLikers(likers);
+      }
+    } catch {
+      setLikedByMe((prev) => {
+        const next = new Set(prev);
+        if (wasLiked) next.add(lightbox.id);
+        else next.delete(lightbox.id);
+        return next;
+      });
+      setLikeCounts((prev) => {
+        const next = new Map(prev);
+        next.set(lightbox.id, prevCount);
+        return next;
+      });
+      setLikeToggleError(ui.likes.toggleFail);
+    } finally {
+      setLikeTogglePending(false);
+    }
+  }
+
+  const lightboxCanViewLikers = lightbox
+    ? canViewLikers({
+        viewerId: userId,
+        organizerId: organizerUserId,
+        canManageEvent,
+        uploadedBy: lightbox.uploaded_by,
+      })
+    : false;
+
   return (
     <div>
-      {loading ? <p style={{ color: "var(--app-muted)" }}>Loading gallery…</p> : null}
+      {loading ? <p style={{ color: "var(--app-muted)" }}>{ui.gallery.loading}</p> : null}
       {error ? <p style={{ color: "var(--app-danger)" }}>{error}</p> : null}
       {!loading && items.length === 0 ? (
-        <p style={{ color: "var(--app-muted)" }}>No media yet — be the first to upload!</p>
+        <p style={{ color: "var(--app-muted)" }}>{ui.gallery.emptyGuest}</p>
       ) : null}
 
       {items.length > 0 ? (
@@ -147,8 +317,21 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
                     muted
                   />
                 ) : (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.thumbnailUrl ?? item.signedUrl} alt="" loading="lazy" decoding="async" className="block h-auto w-full max-w-full" />
+                  <button
+                    type="button"
+                    aria-label={ui.gallery.openPhotoAria}
+                    onClick={() => setLightbox(item)}
+                    className="block w-full cursor-pointer border-0 bg-transparent p-0"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.thumbnailUrl ?? item.signedUrl}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="block h-auto w-full max-w-full"
+                    />
+                  </button>
                 )
               ) : (
                 <div className="min-h-32 w-full bg-[var(--app-border)]" />
@@ -160,8 +343,24 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
 
       {hasMore ? (
         <AppBtn variant="outline" type="button" className="mt-6 w-full" onClick={loadMore}>
-          Load more
+          {ui.gallery.loadMore}
         </AppBtn>
+      ) : null}
+
+      {lightbox ? (
+        <PhotoLightbox
+          signedUrl={lightbox.signedUrl}
+          likeCount={likeCounts.get(lightbox.id) ?? 0}
+          likedByMe={likedByMe.has(lightbox.id)}
+          canViewLikers={lightboxCanViewLikers}
+          likers={lightboxLikers}
+          likersLoading={lightboxLikersLoading}
+          togglePending={likeTogglePending}
+          toggleError={likeToggleError}
+          copy={lightboxCopy}
+          onClose={() => setLightbox(null)}
+          onToggleLike={() => void handleToggleLike()}
+        />
       ) : null}
     </div>
   );

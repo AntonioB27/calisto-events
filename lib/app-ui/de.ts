@@ -146,6 +146,15 @@ export const APP_UI_DE: AppUiDict = {
     welcomeLink: "Willkommen",
   },
 
+  likes: {
+    heartLikeAria: "Foto liken",
+    heartUnlikeAria: "Like entfernen",
+    likeCount: "{count} Likes",
+    likersHeading: "Gefällt",
+    likersEmpty: "Noch keine Likes",
+    toggleFail: "Like konnte nicht aktualisiert werden. Bitte erneut versuchen.",
+  },
+
   guestJoin: {
     loading: "Laden …",
     joining: "Beitritt zur Veranstaltung …",
@@ -336,6 +345,8 @@ export const APP_UI_DE: AppUiDict = {
     downloadPhotoFail: "Download nicht möglich.",
     downloadFailedWithStatus: "Download fehlgeschlagen ({status}).",
     deleteBusy: "…",
+    emptyGuest: "Noch keine Medien — lade als Erste:r hoch!",
+    openPhotoAria: "Foto im Vollbild öffnen",
     zipExportCardEyebrow: "Primär‑Organisation",
     zipExportTitle: "ZIP‑Sammelexport",
     zipExportBlurb:
