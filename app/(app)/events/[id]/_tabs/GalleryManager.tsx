@@ -3,12 +3,14 @@
 import { UploadZone } from "@/app/join/[accessCode]/_components/UploadZone";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toThumbnailUrl } from "@/lib/supabase-storage-transform";
 
 import { interpolate } from "@/lib/app-ui";
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { ConfirmDialog } from "@/components/app-ui/ConfirmDialog";
 import { canGuestUpload, normalizePlanId, type PlanId } from "@/lib/plan-limits";
+import { getCachedUrls, invalidateCachedUrl, storeCachedUrls, warmCache } from "@/lib/signed-url-cache";
 
 type MediaRow = {
   id: string;
@@ -18,7 +20,7 @@ type MediaRow = {
   uploaded_by: string;
 };
 
-type MediaItem = MediaRow & { signedUrl?: string; uploaderLabel: string };
+type MediaItem = MediaRow & { signedUrl?: string; thumbnailUrl?: string; uploaderLabel: string };
 
 type SignedUrlEntry = {
   path: string | null;
@@ -294,17 +296,30 @@ export function GalleryManager({
       const typed = (rows ?? []) as MediaRow[];
       const uploaderIds = Array.from(new Set(typed.map((r) => r.uploaded_by).filter(Boolean)));
 
-      let labelMap = new Map<string, string>();
-      if (uploaderIds.length > 0) {
-        const [{ data: mems, error: memErr }, { data: profs, error: profErr }] = await Promise.all([
-          supabase
-            .from("event_memberships")
-            .select("user_id, display_name_at_event")
-            .eq("event_id", eventId)
-            .in("user_id", uploaderIds),
-          supabase.from("profiles").select("id, display_name").in("id", uploaderIds),
-        ]);
+      // Split paths into already-cached signed URLs and those that still need signing.
+      const allPaths = typed.map((r) => r.storage_path);
+      const { cached: cachedUrls, missing: missingPaths } = getCachedUrls(allPaths);
 
+      // Parallelise: uploader label lookups ∥ signing only the uncached paths (RT2)
+      const [labelResult, signedResult] = await Promise.all([
+        uploaderIds.length > 0
+          ? Promise.all([
+              supabase
+                .from("event_memberships")
+                .select("user_id, display_name_at_event")
+                .eq("event_id", eventId)
+                .in("user_id", uploaderIds),
+              supabase.from("profiles").select("id, display_name").in("id", uploaderIds),
+            ])
+          : Promise.resolve(null),
+        missingPaths.length > 0
+          ? supabase.storage.from("event-media").createSignedUrls(missingPaths, 3600)
+          : Promise.resolve({ data: [] as SignedUrlEntry[] }),
+      ]);
+
+      let labelMap = new Map<string, string>();
+      if (labelResult) {
+        const [{ data: mems, error: memErr }, { data: profs, error: profErr }] = labelResult;
         labelMap = buildUploaderLabelMap(
           uploaderIds,
           organizerId,
@@ -314,15 +329,18 @@ export function GalleryManager({
         );
       }
 
-      const paths = typed.map((r) => r.storage_path);
-      const { data: signedData } = paths.length
-        ? await supabase.storage.from("event-media").createSignedUrls(paths, 3600)
-        : { data: [] as SignedUrlEntry[] };
-      const urlMap = Object.fromEntries((signedData ?? []).map((s: SignedUrlEntry) => [s.path, s.signedUrl]));
+      const freshUrlMap = Object.fromEntries(
+        ((signedResult as { data: SignedUrlEntry[] | null }).data ?? []).map((s: SignedUrlEntry) => [s.path, s.signedUrl]),
+      );
+      if (Object.keys(freshUrlMap).length > 0) {
+        storeCachedUrls(eventId, freshUrlMap);
+      }
+      const urlMap = { ...cachedUrls, ...freshUrlMap };
 
       const mapped: MediaItem[] = typed.map((r) => ({
         ...r,
         signedUrl: urlMap[r.storage_path],
+        thumbnailUrl: urlMap[r.storage_path] ? toThumbnailUrl(urlMap[r.storage_path]) : undefined,
         uploaderLabel:
           labelMap.get(r.uploaded_by) ??
           (organizerId !== null && r.uploaded_by === organizerId
@@ -336,6 +354,10 @@ export function GalleryManager({
     },
     [eventId, supabase, ui.gallery.loadFailed, ui.guests.guestLabelFallback, ui.guests.organizerLabelFallback],
   );
+
+  useEffect(() => {
+    warmCache(eventId);
+  }, [eventId]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -364,6 +386,7 @@ export function GalleryManager({
       const { error: storageError } = await supabase.storage.from("event-media").remove([item.storage_path]);
       if (storageError) throw storageError;
 
+      invalidateCachedUrl(item.storage_path);
       setItems((prev) => prev.filter((x) => x.id !== item.id));
       if (lightbox?.id === item.id) setLightbox(null);
       setPendingDelete(null);
@@ -735,8 +758,10 @@ export function GalleryManager({
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={signedUrl}
+                      src={item.thumbnailUrl ?? signedUrl}
                       alt=""
+                      loading="lazy"
+                      decoding="async"
                       className="block h-auto w-full max-w-full"
                       style={{ transition: 'transform 0.3s' }}
                       onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.03)')}

@@ -4,12 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { getCachedUrls, storeCachedUrls, warmCache } from "@/lib/signed-url-cache";
+import { toThumbnailUrl } from "@/lib/supabase-storage-transform";
 
 type MediaItem = {
   id: string;
   storage_path: string;
   mime_type: string | null;
   signedUrl: string | undefined;
+  thumbnailUrl: string | undefined;
 };
 
 type MediaRow = {
@@ -41,6 +44,10 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(0);
 
+  useEffect(() => {
+    warmCache(eventId);
+  }, [eventId]);
+
   const fetchPage = useCallback(
     async (pageIndex: number, replace: boolean) => {
       try {
@@ -70,15 +77,25 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
           return;
         }
 
-        const paths = typedRows.map((r) => r.storage_path);
-        const { data: signedData } = await supabase.storage.from("event-media").createSignedUrls(paths, 3600);
-        const urlMap = Object.fromEntries((signedData ?? []).map((s: SignedUrlEntry) => [s.path, s.signedUrl]));
+        const allPaths = typedRows.map((r) => r.storage_path);
+        const { cached: cachedUrls, missing: missingPaths } = getCachedUrls(allPaths);
+
+        const { data: signedData } = missingPaths.length
+          ? await supabase.storage.from("event-media").createSignedUrls(missingPaths, 3600)
+          : { data: [] as SignedUrlEntry[] };
+
+        const freshUrlMap = Object.fromEntries((signedData ?? []).map((s: SignedUrlEntry) => [s.path, s.signedUrl]));
+        if (Object.keys(freshUrlMap).length > 0) {
+          storeCachedUrls(eventId, freshUrlMap);
+        }
+        const urlMap = { ...cachedUrls, ...freshUrlMap };
 
         const mapped: MediaItem[] = typedRows.map((r) => ({
           id: r.id,
           storage_path: r.storage_path,
           mime_type: r.mime_type,
           signedUrl: urlMap[r.storage_path],
+          thumbnailUrl: urlMap[r.storage_path] ? toThumbnailUrl(urlMap[r.storage_path]) : undefined,
         }));
 
         setItems((prev) => (replace ? mapped : [...prev, ...mapped]));
@@ -131,7 +148,7 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
                   />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.signedUrl} alt="" className="block h-auto w-full max-w-full" />
+                  <img src={item.thumbnailUrl ?? item.signedUrl} alt="" loading="lazy" decoding="async" className="block h-auto w-full max-w-full" />
                 )
               ) : (
                 <div className="min-h-32 w-full bg-[var(--app-border)]" />
