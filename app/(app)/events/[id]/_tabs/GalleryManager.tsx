@@ -3,6 +3,7 @@
 import { UploadZone } from "@/app/join/[accessCode]/_components/UploadZone";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toThumbnailUrl } from "@/lib/supabase-storage-transform";
 
 import { interpolate } from "@/lib/app-ui";
 import { useAppUi } from "@/components/AppUiProvider";
@@ -19,7 +20,7 @@ type MediaRow = {
   uploaded_by: string;
 };
 
-type MediaItem = MediaRow & { signedUrl?: string; uploaderLabel: string };
+type MediaItem = MediaRow & { signedUrl?: string; thumbnailUrl?: string; uploaderLabel: string };
 
 type SignedUrlEntry = {
   path: string | null;
@@ -339,6 +340,7 @@ export function GalleryManager({
       const mapped: MediaItem[] = typed.map((r) => ({
         ...r,
         signedUrl: urlMap[r.storage_path],
+        thumbnailUrl: urlMap[r.storage_path] ? toThumbnailUrl(urlMap[r.storage_path]) : undefined,
         uploaderLabel:
           labelMap.get(r.uploaded_by) ??
           (organizerId !== null && r.uploaded_by === organizerId
@@ -756,7 +758,7 @@ export function GalleryManager({
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={signedUrl}
+                      src={item.thumbnailUrl ?? signedUrl}
                       alt=""
                       loading="lazy"
                       decoding="async"
