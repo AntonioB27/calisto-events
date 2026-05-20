@@ -5,12 +5,14 @@ import { useCallback, useEffect, useState } from "react";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { getCachedUrls, storeCachedUrls, warmCache } from "@/lib/signed-url-cache";
+import { toThumbnailUrl } from "@/lib/supabase-storage-transform";
 
 type MediaItem = {
   id: string;
   storage_path: string;
   mime_type: string | null;
   signedUrl: string | undefined;
+  thumbnailUrl: string | undefined;
 };
 
 type MediaRow = {
@@ -93,6 +95,7 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
           storage_path: r.storage_path,
           mime_type: r.mime_type,
           signedUrl: urlMap[r.storage_path],
+          thumbnailUrl: urlMap[r.storage_path] ? toThumbnailUrl(urlMap[r.storage_path]) : undefined,
         }));
 
         setItems((prev) => (replace ? mapped : [...prev, ...mapped]));
@@ -145,7 +148,7 @@ export function MediaGrid({ eventId, refreshKey }: Props) {
                   />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.signedUrl} alt="" loading="lazy" decoding="async" className="block h-auto w-full max-w-full" />
+                  <img src={item.thumbnailUrl ?? item.signedUrl} alt="" loading="lazy" decoding="async" className="block h-auto w-full max-w-full" />
                 )
               ) : (
                 <div className="min-h-32 w-full bg-[var(--app-border)]" />
