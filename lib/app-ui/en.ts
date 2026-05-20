@@ -334,6 +334,7 @@ export const APP_UI_EN = {
     deleteBusy: "…",
     emptyGuest: "No media yet — be the first to upload!",
     openPhotoAria: "Open photo full screen",
+    uploadedByYouAria: "Your upload",
     zipExportCardEyebrow: "Primary organizer",
     zipExportTitle: "Bulk ZIP export",
     zipExportBlurb:

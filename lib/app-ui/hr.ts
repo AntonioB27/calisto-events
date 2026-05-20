@@ -340,6 +340,7 @@ export const APP_UI_HR: AppUiDict = {
     deleteBusy: "…",
     emptyGuest: "Još nema medija — budite prvi koji će uploadati!",
     openPhotoAria: "Otvori fotografiju preko cijelog ekrana",
+    uploadedByYouAria: "Tvoj upload",
     zipExportCardEyebrow: "Primarni organizator",
     zipExportTitle: "ZIP skupni izvoz",
     zipExportBlurb:

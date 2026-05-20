@@ -5,7 +5,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { MediaLikeBadge } from "@/components/app-ui/MediaLikeBadge";
+import { MediaUploaderChip } from "@/components/app-ui/MediaUploaderChip";
 import { PhotoLightbox } from "@/components/app-ui/PhotoLightbox";
+import { buildMemberLabelMap } from "@/lib/event-member-labels";
 import { interpolate } from "@/lib/app-ui";
 import {
   canViewLikers,
@@ -25,6 +27,7 @@ type MediaItem = {
   uploaded_by: string;
   signedUrl: string | undefined;
   thumbnailUrl: string | undefined;
+  uploaderLabel: string;
 };
 
 type MediaRow = {
@@ -116,16 +119,43 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
         }
 
         const photoIds = typedRows.filter((r) => !isVideoMime(r.mime_type)).map((r) => r.id);
-        const likeSummary = await fetchLikeSummaryForMedia(supabase, photoIds, userId);
+        const uploaderIds = Array.from(new Set(typedRows.map((r) => r.uploaded_by).filter(Boolean)));
 
         const allPaths = typedRows.map((r) => r.storage_path);
         const { cached: cachedUrls, missing: missingPaths } = getCachedUrls(allPaths);
 
-        const { data: signedData } = missingPaths.length
-          ? await supabase.storage.from("event-media").createSignedUrls(missingPaths, 3600)
-          : { data: [] as SignedUrlEntry[] };
+        const [likeSummary, labelResult, signedData] = await Promise.all([
+          fetchLikeSummaryForMedia(supabase, photoIds, userId),
+          uploaderIds.length > 0
+            ? Promise.all([
+                supabase
+                  .from("event_memberships")
+                  .select("user_id, display_name_at_event")
+                  .eq("event_id", eventId)
+                  .in("user_id", uploaderIds),
+                supabase.from("profiles").select("id, display_name").in("id", uploaderIds),
+              ])
+            : Promise.resolve(null),
+          missingPaths.length
+            ? supabase.storage.from("event-media").createSignedUrls(missingPaths, 3600)
+            : Promise.resolve({ data: [] as SignedUrlEntry[] }),
+        ]);
 
-        const freshUrlMap = Object.fromEntries((signedData ?? []).map((s: SignedUrlEntry) => [s.path, s.signedUrl]));
+        let labelMap = new Map<string, string>();
+        if (labelResult) {
+          const [{ data: mems, error: memErr }, { data: profs, error: profErr }] = labelResult;
+          labelMap = buildMemberLabelMap(
+            uploaderIds,
+            organizerUserId,
+            memErr ? null : (mems as Array<{ user_id: string; display_name_at_event: string | null }> | null),
+            profErr ? null : (profs as Array<{ id: string; display_name: string | null }> | null),
+            { organizer: ui.guests.organizerLabelFallback, guest: ui.guests.guestLabelFallback },
+          );
+        }
+
+        const freshUrlMap = Object.fromEntries(
+          ((signedData as { data: SignedUrlEntry[] | null }).data ?? []).map((s: SignedUrlEntry) => [s.path, s.signedUrl]),
+        );
         if (Object.keys(freshUrlMap).length > 0) {
           storeCachedUrls(eventId, freshUrlMap);
         }
@@ -138,6 +168,11 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
           uploaded_by: r.uploaded_by,
           signedUrl: urlMap[r.storage_path],
           thumbnailUrl: urlMap[r.storage_path] ? toThumbnailUrl(urlMap[r.storage_path]) : undefined,
+          uploaderLabel:
+            labelMap.get(r.uploaded_by) ??
+            (r.uploaded_by === organizerUserId
+              ? ui.guests.organizerLabelFallback
+              : ui.guests.guestLabelFallback),
         }));
 
         setItems((prev) => (replace ? mapped : [...prev, ...mapped]));
@@ -158,7 +193,7 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
         setLoading(false);
       }
     },
-    [eventId, userId, ui.gallery.loadFailed, ui.supabase.galleryBody],
+    [eventId, userId, organizerUserId, ui.gallery.loadFailed, ui.guests.guestLabelFallback, ui.guests.organizerLabelFallback, ui.supabase.galleryBody],
   );
 
   useEffect(() => {
@@ -310,13 +345,22 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
             >
               {item.signedUrl ? (
                 isVideoMime(item.mime_type) ? (
-                  <video
-                    src={item.signedUrl}
-                    className="block h-auto w-full max-w-full"
-                    controls
-                    playsInline
-                    muted
-                  />
+                  <div className="relative">
+                    <video
+                      src={item.signedUrl}
+                      className="block h-auto w-full max-w-full"
+                      controls
+                      playsInline
+                      muted
+                    />
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 from-25% to-transparent px-2 pb-2 pt-5">
+                      <MediaUploaderChip
+                        label={item.uploaderLabel}
+                        isMine={Boolean(userId && item.uploaded_by === userId)}
+                        mineAria={ui.gallery.uploadedByYouAria}
+                      />
+                    </div>
+                  </div>
                 ) : (
                   <div className="relative">
                     <button
@@ -349,6 +393,13 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
                         />
                       </div>
                     </div>
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 from-25% to-transparent px-2 pb-2 pt-5">
+                      <MediaUploaderChip
+                        label={item.uploaderLabel}
+                        isMine={Boolean(userId && item.uploaded_by === userId)}
+                        mineAria={ui.gallery.uploadedByYouAria}
+                      />
+                    </div>
                   </div>
                 )
               ) : (
@@ -376,6 +427,9 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
           togglePending={pendingLikeId === lightbox.id}
           toggleError={likeToggleError}
           copy={lightboxCopy}
+          uploaderLabel={lightbox.uploaderLabel}
+          isMineUpload={Boolean(userId && lightbox.uploaded_by === userId)}
+          uploadedByYouAria={ui.gallery.uploadedByYouAria}
           onClose={() => setLightbox(null)}
           onToggleLike={() => void handleToggleLikeForItem(lightbox.id, lightbox.uploaded_by)}
         />

@@ -10,6 +10,7 @@ import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { ConfirmDialog } from "@/components/app-ui/ConfirmDialog";
 import { MediaLikeBadge } from "@/components/app-ui/MediaLikeBadge";
+import { MediaUploaderChip } from "@/components/app-ui/MediaUploaderChip";
 import { PhotoLightbox } from "@/components/app-ui/PhotoLightbox";
 import { buildMemberLabelMap } from "@/lib/event-member-labels";
 import {
@@ -908,9 +909,11 @@ export function GalleryManager({
                 <div
                   className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/70 from-30% to-transparent px-2 pb-2 pt-6 md:px-3.5 md:pb-3 md:pt-7"
                 >
-                  <span className="min-w-0 truncate text-[10px] font-semibold text-white md:text-[13px]">
-                    {item.uploaderLabel}
-                  </span>
+                  <MediaUploaderChip
+                    label={item.uploaderLabel}
+                    isMine={Boolean(currentUserId && item.uploaded_by === currentUserId)}
+                    mineAria={ui.gallery.uploadedByYouAria}
+                  />
                   <button
                     type="button"
                     disabled={busyId !== null}
@@ -952,6 +955,8 @@ export function GalleryManager({
           secondaryError={lightboxDownloadError}
           copy={lightboxCopy}
           uploaderLabel={lightbox.uploaderLabel}
+          isMineUpload={Boolean(currentUserId && lightbox.uploaded_by === currentUserId)}
+          uploadedByYouAria={ui.gallery.uploadedByYouAria}
           onClose={() => setLightbox(null)}
           onToggleLike={() => void handleToggleLikeForItem(lightbox.id)}
           footerActions={

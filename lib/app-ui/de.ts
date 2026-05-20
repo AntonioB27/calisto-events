@@ -347,6 +347,7 @@ export const APP_UI_DE: AppUiDict = {
     deleteBusy: "…",
     emptyGuest: "Noch keine Medien — lade als Erste:r hoch!",
     openPhotoAria: "Foto im Vollbild öffnen",
+    uploadedByYouAria: "Dein Upload",
     zipExportCardEyebrow: "Primär‑Organisation",
     zipExportTitle: "ZIP‑Sammelexport",
     zipExportBlurb:

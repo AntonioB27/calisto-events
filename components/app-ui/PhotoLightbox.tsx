@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import type { LikerRow } from "@/lib/media-likes";
 import { LikeHeartIcon } from "@/components/app-ui/LikeHeartIcon";
+import { UserIcon } from "@/components/app-ui/UserIcon";
 
 export type PhotoLightboxCopy = Readonly<{
   lightboxAria: string;
@@ -30,6 +31,8 @@ type Props = Readonly<{
   onToggleLike: () => void;
   footerActions?: ReactNode;
   uploaderLabel?: string;
+  isMineUpload?: boolean;
+  uploadedByYouAria?: string;
   secondaryError?: string | null;
 }>;
 
@@ -47,6 +50,8 @@ export function PhotoLightbox({
   onToggleLike,
   footerActions,
   uploaderLabel,
+  isMineUpload = false,
+  uploadedByYouAria,
   secondaryError,
 }: Props) {
   return (
@@ -151,19 +156,23 @@ export function PhotoLightbox({
               {uploaderLabel ? (
                 <span
                   style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
                     color: "#fff",
                     fontSize: 14,
                     fontWeight: 600,
-                    background: "rgba(0,0,0,0.5)",
-                    padding: "6px 14px",
-                    borderRadius: 20,
                     minWidth: 0,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    maxWidth: "100%",
+                    filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.55))",
                   }}
                 >
-                  📷 {uploaderLabel}
+                  {isMineUpload ? (
+                    <span aria-label={uploadedByYouAria} title={uploadedByYouAria} style={{ display: "flex", flexShrink: 0 }}>
+                      <UserIcon size={14} />
+                    </span>
+                  ) : null}
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{uploaderLabel}</span>
                 </span>
               ) : null}
             </div>
