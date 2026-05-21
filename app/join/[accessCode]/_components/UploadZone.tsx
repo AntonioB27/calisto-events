@@ -13,6 +13,8 @@ type Props = {
   eventId: string;
   onUploaded: () => void;
   disabled?: boolean;
+  /** When true the drop zone renders as an invisible overlay so a parent can act as the visual affordance. The upload queue floats below the parent. */
+  ghost?: boolean;
 };
 
 function mapUploadError(status: number, raw: unknown): string {
@@ -30,7 +32,7 @@ function mapUploadError(status: number, raw: unknown): string {
   return "Upload failed.";
 }
 
-export function UploadZone({ eventId, onUploaded, disabled }: Props) {
+export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [queue, setQueue] = useState<UploadItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -151,18 +153,103 @@ export function UploadZone({ eventId, onUploaded, disabled }: Props) {
     };
   })();
 
+  const sharedDropHandlers = {
+    onDragOver: (e: React.DragEvent) => { e.preventDefault(); if (!disabled) setIsDragging(true); },
+    onDragLeave: () => setIsDragging(false),
+    onDrop: handleDrop,
+    onClick: () => { if (!disabled) inputRef.current?.click(); },
+  };
+
+  const fileInput = (
+    <input
+      ref={inputRef}
+      type="file"
+      accept="image/*,video/*"
+      multiple
+      disabled={disabled}
+      className="sr-only"
+      onChange={(e) => handleFiles(e.target.files)}
+    />
+  );
+
+  const queue_list = queue.length > 0 ? (
+    <ul style={{ display: "flex", flexDirection: "column", gap: 8, margin: 0, padding: 0, listStyle: "none" }}>
+      {queue.map((item) => {
+        const isUploading = item.status === "pending" && item.id === uploadingId;
+        return (
+          <li
+            key={item.id}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              borderRadius: 12,
+              border: "1.5px solid var(--app-border)",
+              background: "var(--app-surface)",
+              padding: "8px 16px",
+              fontSize: 14,
+            }}
+          >
+            <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--app-text)" }}>
+              {item.file.name}
+            </span>
+            <span
+              style={{
+                flexShrink: 0,
+                fontWeight: 600,
+                color:
+                  item.status === "done"
+                    ? "var(--app-success)"
+                    : item.status === "error"
+                      ? "var(--app-danger)"
+                      : "var(--app-muted)",
+              }}
+            >
+              {item.status === "done" && "✓"}
+              {item.status === "error" && (item.errorMessage ?? "Error")}
+              {isUploading && "Uploading…"}
+              {item.status === "pending" && !isUploading && "Pending"}
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  ) : null;
+
+  if (ghost) {
+    return (
+      // Invisible overlay that covers the parent (parent must be position:relative).
+      // The queue floats below it so upload progress remains visible.
+      <div style={{ position: "absolute", inset: 0, zIndex: 10, overflow: "visible" }}>
+        <div
+          {...sharedDropHandlers}
+          style={{
+            position: "absolute",
+            inset: 0,
+            cursor: disabled ? "not-allowed" : "pointer",
+            opacity: 0,
+            // Show a faint gold tint on drag-over so users get feedback through the parent
+            background: isDragging ? "rgba(197,146,42,0.15)" : "transparent",
+            transition: "background 0.15s",
+            zIndex: 10,
+          }}
+        >
+          {fileInput}
+        </div>
+        {queue_list ? (
+          <div style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, right: 0, zIndex: 20 }}>
+            {queue_list}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          if (!disabled) setIsDragging(true);
-        }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={handleDrop}
-        onClick={() => {
-          if (!disabled) inputRef.current?.click();
-        }}
+        {...sharedDropHandlers}
         style={{
           display: "flex",
           flexDirection: "column",
@@ -179,61 +266,9 @@ export function UploadZone({ eventId, onUploaded, disabled }: Props) {
         <span style={{ fontSize: "1.875rem" }}>📷</span>
         <p style={{ fontSize: 14, fontWeight: 600, color: "var(--app-text)" }}>Drag &amp; drop photos or videos here</p>
         <p style={{ fontSize: 12, color: "var(--app-subtle)" }}>or tap to browse</p>
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*,video/*"
-          multiple
-          disabled={disabled}
-          className="sr-only"
-          onChange={(e) => handleFiles(e.target.files)}
-        />
+        {fileInput}
       </div>
-
-      {queue.length > 0 ? (
-        <ul style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {queue.map((item) => {
-            const isUploading = item.status === "pending" && item.id === uploadingId;
-            return (
-              <li
-                key={item.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 12,
-                  borderRadius: 12,
-                  border: "1.5px solid var(--app-border)",
-                  background: "var(--app-surface)",
-                  padding: "8px 16px",
-                  fontSize: 14,
-                }}
-              >
-                <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--app-text)" }}>
-                  {item.file.name}
-                </span>
-                <span
-                  style={{
-                    flexShrink: 0,
-                    fontWeight: 600,
-                    color:
-                      item.status === "done"
-                        ? "var(--app-success)"
-                        : item.status === "error"
-                          ? "var(--app-danger)"
-                          : "var(--app-muted)",
-                  }}
-                >
-                  {item.status === "done" && "✓"}
-                  {item.status === "error" && (item.errorMessage ?? "Error")}
-                  {isUploading && "Uploading…"}
-                  {item.status === "pending" && !isUploading && "Pending"}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      ) : null}
+      {queue_list}
     </div>
   );
 }

@@ -52,6 +52,19 @@ function isVideoMime(mime: string | null | undefined) {
   return Boolean(mime && mime.startsWith("video/"));
 }
 
+function uploaderColor(seed: string): string {
+  const palette = [
+    "linear-gradient(135deg, #8B4FD8, #5B2D8E)",
+    "linear-gradient(135deg, #D4A843, #A67620)",
+    "linear-gradient(135deg, #E08585, #B04A4A)",
+    "linear-gradient(135deg, #5BA8D9, #2A6FB0)",
+    "linear-gradient(135deg, #6BBE8E, #2E8050)",
+  ];
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) % palette.length;
+  return palette[h];
+}
+
 const MIME_EXT: Partial<Record<string, string>> = {
   "image/jpeg": "jpg",
   "image/png": "png",
@@ -529,6 +542,17 @@ export function GalleryManager({
     return !isVideoMime(item.mime_type);
   });
 
+  // Derived for the editorial header: unique uploaders (up to 5) + total counts
+  const uniqueUploaderEntries = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const item of items) {
+      if (!seen.has(item.uploaded_by)) seen.set(item.uploaded_by, item.uploaderLabel);
+      if (seen.size >= 5) break;
+    }
+    return [...seen.entries()];
+  }, [items]);
+  const totalGuests = useMemo(() => new Set(items.map((i) => i.uploaded_by)).size, [items]);
+
   if (!supabase) {
     return (
       <div
@@ -566,163 +590,181 @@ export function GalleryManager({
           setPendingDelete(null);
         }}
       />
-      {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ width: 32, height: 3, background: 'var(--app-gold)', borderRadius: 2, marginBottom: 10 }} />
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-          <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, fontSize: 42, color: 'var(--app-text)' }}>
+
+      {/* ── HEADER — Editorial V1 ── */}
+      <div style={{ marginBottom: 22 }}>
+        {/* Title row + Aurora */}
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: "0 0 6px", fontSize: 10, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(197,146,42,0.75)" }}>
               {ui.gallery.title}
-            </h2>
-            <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 15, color: "var(--app-muted)", marginTop: 4 }}>
-              {ui.gallery.subtitle}
             </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-            <div
-              role="tablist"
-              aria-label={ui.gallery.filterAria}
-              className="flex shrink-0 rounded-[14px] p-[3px] shadow-[0_10px_28px_-14px_rgba(0,0,0,0.18)]"
+            <h2
               style={{
-                background:
-                  "linear-gradient(145deg, color-mix(in srgb, var(--app-gold) 22%, var(--app-border)), color-mix(in srgb, var(--app-border) 55%, var(--app-surface)))",
-                boxShadow:
-                  "0 0 0 1px color-mix(in srgb, var(--app-gold) 12%, transparent), 0 10px 28px -14px rgba(0,0,0,0.18)",
+                fontFamily: "var(--font-display)",
+                fontStyle: "italic",
+                fontWeight: 700,
+                fontSize: 32,
+                color: "var(--app-text)",
+                lineHeight: 1.05,
+                margin: "0 0 12px",
+                letterSpacing: "-0.01em",
               }}
             >
-              <div
-                className="relative flex min-w-0 gap-0.5 rounded-[11px] p-0.5"
-                style={{ background: "color-mix(in srgb, var(--app-surface) 96%, var(--app-card))" }}
-              >
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute bottom-0.5 left-0 top-0.5 z-0 rounded-[9px] motion-reduce:transition-none motion-reduce:duration-0"
-                  style={{
-                    width: "calc((100% - 8px) / 3)",
-                    left: segmentedHighlightLeft(mediaFilterSlideIndex(mediaFilter)),
-                    transition:
-                      "left 400ms cubic-bezier(0.32, 0.76, 0.15, 1), opacity 260ms ease, box-shadow 400ms cubic-bezier(0.32, 0.76, 0.15, 1), transform 400ms cubic-bezier(0.32, 0.76, 0.15, 1)",
-                    background:
-                      "linear-gradient(152deg, var(--app-gold-2) 0%, var(--app-gold) 55%, color-mix(in srgb, var(--app-gold) 88%, #fff) 100%)",
-                    boxShadow:
-                      "0 1px 0 color-mix(in srgb, #fff 55%, transparent) inset, 0 2px 14px color-mix(in srgb, var(--app-gold) 34%, transparent)",
-                  }}
-                />
-                {mediaFilterOpts.map((opt) => {
-                  const on = mediaFilter === opt.id;
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={on}
-                      onClick={() => setMediaFilter(opt.id)}
-                      className={`relative z-10 flex min-w-0 flex-1 items-center justify-center rounded-[9px] border-0 px-2 py-2.5 text-[12px] transition-[color,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--app-gold)_55%,transparent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-surface)] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 sm:min-w-[5.5rem] sm:px-3.5 sm:text-[13px] ${
-                        on
-                          ? ""
-                          : "text-[var(--app-muted)] hover:bg-[color-mix(in_srgb,var(--app-text)_5%,transparent)] hover:text-[var(--app-text)]"
-                      } `}
-                      style={{
-                        cursor: "pointer",
-                        fontWeight: on ? 600 : 500,
-                        letterSpacing: on ? "-0.01em" : "0.01em",
-                        color: on ? "#1b1208" : undefined,
-                      }}
-                    >
-                      <span className="whitespace-nowrap">{opt.label}</span>
-                    </button>
-                  );
-                })}
+              {ui.gallery.subtitle}
+            </h2>
+
+            {/* Stacked guest avatars + counts */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                {uniqueUploaderEntries.map(([userId, label], i) => (
+                  <div
+                    key={userId}
+                    title={label}
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: "50%",
+                      background: uploaderColor(userId),
+                      marginLeft: i === 0 ? 0 : -7,
+                      border: "1.5px solid var(--app-bg)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 9,
+                      fontWeight: 700,
+                      color: "#fff",
+                      zIndex: 5 - i,
+                      position: "relative",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {label[0]?.toUpperCase()}
+                  </div>
+                ))}
+                {totalGuests > 5 ? (
+                  <div
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: "50%",
+                      background: "rgba(255,255,255,0.08)",
+                      marginLeft: -7,
+                      border: "1.5px solid var(--app-bg)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 9,
+                      fontWeight: 700,
+                      color: "var(--app-muted)",
+                      position: "relative",
+                    }}
+                  >
+                    +{totalGuests - 5}
+                  </div>
+                ) : null}
               </div>
+              {items.length > 0 ? (
+                <span
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontStyle: "italic",
+                    fontSize: 11,
+                    color: "var(--app-muted)",
+                  }}
+                >
+                  {interpolate(ui.gallery.memoriesCount, { count: items.length })}
+                  {totalGuests > 0 ? ` · ${interpolate(ui.gallery.guestsCount, { count: totalGuests })}` : ""}
+                </span>
+              ) : null}
             </div>
-            <AppBtn variant="ghost" size="sm" type="button" onClick={() => void fetchPage(0, true)}>
-              {ui.common.refresh}
-            </AppBtn>
           </div>
+
+          {/* Aurora camera mascot with gold halo */}
+          <div style={{ position: "relative", flexShrink: 0 }}>
+            <div
+              aria-hidden
+              style={{
+                position: "absolute",
+                inset: -10,
+                background: "radial-gradient(circle, rgba(197,146,42,0.28), transparent 70%)",
+                filter: "blur(10px)",
+              }}
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/mascot/aurora_camera.png"
+              alt=""
+              aria-hidden
+              style={{
+                width: 72,
+                height: 72,
+                objectFit: "contain",
+                position: "relative",
+                zIndex: 1,
+                filter: "drop-shadow(0 6px 18px rgba(197,146,42,0.22))",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Filter tabs + refresh */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 18 }}>
+          <div
+            role="tablist"
+            aria-label={ui.gallery.filterAria}
+            style={{
+              flex: 1,
+              display: "flex",
+              gap: 4,
+              padding: 3,
+              background: "var(--app-surface-2)",
+              borderRadius: 12,
+              border: "1px solid var(--app-border)",
+            }}
+          >
+            {mediaFilterOpts.map((opt) => {
+              const on = mediaFilter === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => setMediaFilter(opt.id)}
+                  style={{
+                    flex: 1,
+                    padding: "8px 0",
+                    border: "none",
+                    borderRadius: 10,
+                    background: on ? "var(--app-surface)" : "transparent",
+                    color: on ? "var(--app-text)" : "var(--app-muted)",
+                    fontSize: 12,
+                    fontWeight: on ? 600 : 500,
+                    fontFamily: "inherit",
+                    cursor: "pointer",
+                    textTransform: "capitalize",
+                    transition: "all 0.18s",
+                    boxShadow: on ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
+                  }}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          <AppBtn variant="ghost" size="sm" type="button" onClick={() => void fetchPage(0, true)}>
+            {ui.common.refresh}
+          </AppBtn>
+          {isPrimaryOrganizer ? (
+            <AppBtn variant="outline" size="sm" type="button" onClick={() => setZipModalOpen(true)}>
+              {ui.gallery.zipExportPrepare}
+            </AppBtn>
+          ) : null}
         </div>
       </div>
 
-      {isPrimaryOrganizer ? (
-        <div
-          style={{
-            marginBottom: 24,
-            padding: "16px 18px",
-            borderRadius: 16,
-            border: "1.5px solid color-mix(in srgb, var(--app-gold) 28%, var(--app-border))",
-            background: "color-mix(in srgb, var(--app-gold) 6%, var(--app-surface))",
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              fontSize: 11,
-              fontWeight: 800,
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: "var(--app-muted)",
-            }}
-          >
-            {ui.gallery.zipExportCardEyebrow}
-          </p>
-          <h3
-            style={{
-              margin: "8px 0 0",
-              fontFamily: "var(--font-display)",
-              fontStyle: "italic",
-              fontWeight: 700,
-              fontSize: 22,
-              color: "var(--app-text)",
-            }}
-          >
-            {ui.gallery.zipExportTitle}
-          </h3>
-          <p style={{ margin: "10px 0 0", fontSize: 13, color: "var(--app-muted)", lineHeight: 1.55 }}>
-            {ui.gallery.zipExportBlurb}
-          </p>
-          {zipPanelError ? (
-            <p style={{ margin: "10px 0 0", fontSize: 13, color: "var(--app-danger)" }}>{zipPanelError}</p>
-          ) : null}
-          {zipExports.length > 0 ? (
-            <ul style={{ margin: "14px 0 0", paddingLeft: 18, fontSize: 13, color: "var(--app-text)" }}>
-              {zipExports.map((z) => (
-                <li key={z.id} style={{ marginBottom: 8 }}>
-                  <span style={{ color: "var(--app-muted)" }}>
-                    {z.status === "queued"
-                      ? ui.gallery.zipExportQueued
-                      : z.status === "running"
-                        ? ui.gallery.zipExportRunning
-                        : z.status === "ready"
-                          ? ui.gallery.zipExportReady
-                          : z.status === "failed"
-                            ? `${ui.gallery.zipExportFailed}${z.error_message ? ` — ${z.error_message}` : ""}`
-                            : z.status === "expired"
-                              ? ui.gallery.zipExportExpired
-                              : z.status}
-                  </span>
-                  {z.status === "ready" ? (
-                    <span style={{ marginLeft: 10 }}>
-                      <AppBtn
-                        type="button"
-                        variant="gold"
-                        size="sm"
-                        onClick={() => void downloadZipExport(z.id)}
-                      >
-                        {ui.gallery.zipExportDownload}
-                      </AppBtn>
-                    </span>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          <div style={{ marginTop: 14 }}>
-            <AppBtn type="button" variant="gold" size="sm" onClick={() => setZipModalOpen(true)}>
-              {ui.gallery.zipExportPrepare}
-            </AppBtn>
-          </div>
-        </div>
-      ) : null}
-
+      {/* ── ZIP MODAL ── */}
       {zipModalOpen ? (
         <div
           role="alertdialog"
@@ -735,7 +777,8 @@ export function GalleryManager({
             alignItems: "center",
             justifyContent: "center",
             padding: 20,
-            background: "rgba(0,0,0,0.55)",
+            background: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(4px)",
           }}
           onClick={zipBusy ? undefined : () => setZipModalOpen(false)}
         >
@@ -743,20 +786,59 @@ export function GalleryManager({
             onClick={(e) => e.stopPropagation()}
             style={{
               width: "100%",
-              maxWidth: 420,
-              borderRadius: 18,
+              maxWidth: 400,
+              borderRadius: 16,
               padding: 22,
               background: "var(--app-surface)",
-              border: "1.5px solid var(--app-border)",
+              border: "1px solid var(--app-border)",
               boxShadow: "var(--app-shadow-lg)",
             }}
           >
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--app-text)" }}>
+            <h2 style={{ margin: 0, fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 20, fontWeight: 700, color: "var(--app-text)" }}>
               {ui.gallery.zipExportModalTitle}
             </h2>
-            <p style={{ margin: "12px 0 0", fontSize: 14, lineHeight: 1.5, color: "var(--app-muted)" }}>
+            <p style={{ margin: "10px 0 0", fontSize: 13, lineHeight: 1.55, color: "var(--app-muted)" }}>
               {ui.gallery.zipExportModalBody}
             </p>
+            {zipExports.length > 0 ? (
+              <ul style={{ margin: "14px 0 0", padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
+                {zipExports.map((z) => (
+                  <li key={z.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, padding: "8px 10px", borderRadius: 10, background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: 7,
+                        height: 7,
+                        borderRadius: "50%",
+                        flexShrink: 0,
+                        background: z.status === "ready" ? "var(--app-success)" : z.status === "failed" ? "var(--app-danger)" : "var(--app-gold)",
+                      }}
+                    />
+                    <span style={{ flex: 1, color: "var(--app-muted)" }}>
+                      {z.status === "queued"
+                        ? ui.gallery.zipExportQueued
+                        : z.status === "running"
+                          ? ui.gallery.zipExportRunning
+                          : z.status === "ready"
+                            ? ui.gallery.zipExportReady
+                            : z.status === "failed"
+                              ? `${ui.gallery.zipExportFailed}${z.error_message ? ` — ${z.error_message}` : ""}`
+                              : z.status === "expired"
+                                ? ui.gallery.zipExportExpired
+                                : z.status}
+                    </span>
+                    {z.status === "ready" ? (
+                      <AppBtn type="button" variant="gold" size="sm" onClick={() => void downloadZipExport(z.id)}>
+                        {ui.gallery.zipExportDownload}
+                      </AppBtn>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {zipPanelError ? (
+              <p style={{ margin: "10px 0 0", fontSize: 12, color: "var(--app-danger)" }}>{zipPanelError}</p>
+            ) : null}
             <label
               style={{
                 display: "flex",
@@ -776,18 +858,11 @@ export function GalleryManager({
               />
               <span>{ui.gallery.zipExportIncludeVideos}</span>
             </label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "flex-end", marginTop: 22 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
               <AppBtn type="button" variant="ghost" size="sm" disabled={zipBusy} onClick={() => setZipModalOpen(false)}>
                 {ui.common.cancel}
               </AppBtn>
-              <AppBtn
-                type="button"
-                variant="gold"
-                size="sm"
-                disabled={zipBusy}
-                loading={zipBusy}
-                onClick={() => void confirmStartZip()}
-              >
+              <AppBtn type="button" variant="gold" size="sm" disabled={zipBusy} loading={zipBusy} onClick={() => void confirmStartZip()}>
                 {ui.gallery.zipExportStart}
               </AppBtn>
             </div>
@@ -795,153 +870,270 @@ export function GalleryManager({
         </div>
       ) : null}
 
-      <div style={{ marginBottom: 28 }}>
-        <p
+      {/* ── UPLOAD SECTION — Polaroid style ── */}
+      {/* Outer wrapper has overflow:visible so the ghost queue can float below */}
+      <div style={{ marginBottom: 28, position: "relative" }}>
+        {/* Washi tape strip */}
+        <div
+          aria-hidden
           style={{
-            margin: "0 0 12px",
-            fontSize: 12,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.2em",
-            color: "var(--app-muted)",
-          }}
-        >
-          {ui.guestJoin.sectionUpload}
-        </p>
-        {!uploadsOpen ? (
-          <p
-            style={{
-              margin: "0 0 14px",
-              padding: "12px 14px",
-              borderRadius: 12,
-              fontSize: 13,
-              color: "var(--app-warn)",
-              background: "color-mix(in srgb, var(--app-warn) 12%, transparent)",
-              border: "1.5px solid color-mix(in srgb, var(--app-warn) 45%, transparent)",
-              lineHeight: 1.5,
-            }}
-          >
-            {ui.guestJoin.uploadClosedBanner}
-          </p>
-        ) : null}
-        <UploadZone
-          eventId={eventId}
-          disabled={!uploadsOpen}
-          onUploaded={() => {
-            setPage(0);
-            void fetchPage(0, true);
+            position: "absolute",
+            top: -8,
+            left: "33%",
+            width: 64,
+            height: 14,
+            background: "rgba(212,168,67,0.48)",
+            border: "0.5px solid rgba(212,168,67,0.6)",
+            transform: "rotate(-3deg)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.22)",
+            zIndex: 2,
+            borderRadius: 2,
+            pointerEvents: "none",
           }}
         />
+        {/* Polaroid card — position:relative so ghost UploadZone can cover it exactly */}
+        <div
+          style={{
+            position: "relative",
+            background: uploadsOpen ? "#f4f0ea" : "rgba(244,240,234,0.55)",
+            borderRadius: 2,
+            boxShadow: "0 8px 28px rgba(0,0,0,0.42), 0 2px 6px rgba(0,0,0,0.2)",
+            transform: "rotate(-0.5deg)",
+            padding: "14px 14px 18px",
+            opacity: uploadsOpen ? 1 : 0.7,
+            cursor: uploadsOpen ? "pointer" : "not-allowed",
+            overflow: "visible",
+          }}
+        >
+          {/* Visual affordance — pointer-events:none, ghost UploadZone handles clicks/drops */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, pointerEvents: "none" }}>
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 4,
+                background: "rgba(0,0,0,0.07)",
+                border: "1.5px dashed rgba(0,0,0,0.18)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path d="M12 5v14M5 12h14" stroke="rgba(60,40,20,0.5)" strokeWidth="2.4" strokeLinecap="round" />
+              </svg>
+            </div>
+            <div style={{ flex: 1, textAlign: "left" }}>
+              <p style={{ margin: 0, fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 16, fontWeight: 700, color: "#2a1d0f", lineHeight: 1.2 }}>
+                {ui.gallery.addMemory}
+              </p>
+              <p style={{ margin: "3px 0 0", fontSize: 11, color: "rgba(60,40,20,0.55)" }}>
+                {uploadsOpen ? ui.gallery.addMemoryHint : ui.guestJoin.uploadClosedBanner}
+              </p>
+            </div>
+          </div>
+
+          {/* Ghost UploadZone — invisible overlay on top of the polaroid, queue floats below */}
+          <UploadZone
+            eventId={eventId}
+            disabled={!uploadsOpen}
+            ghost
+            onUploaded={() => {
+              setPage(0);
+              void fetchPage(0, true);
+            }}
+          />
+        </div>
       </div>
 
+      {/* ── ERROR / LOADING / EMPTY ── */}
       {error ? (
         <p style={{ marginBottom: 16, fontSize: 13, color: "var(--app-danger)" }}>{error}</p>
       ) : null}
-      {loading && (
-        <p style={{ color: "var(--app-muted)", fontSize: 14 }}>{ui.gallery.loading}</p>
-      )}
-      {!loading && filtered.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <span style={{ fontSize: 48, opacity: 0.4 }}>📷</span>
-          <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 15, color: 'var(--app-muted)', marginTop: 12 }}>
+
+      {loading ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0" }}>
+          <span
+            className="animate-pulse"
+            style={{
+              display: "inline-block",
+              width: 7,
+              height: 7,
+              borderRadius: "50%",
+              background: "var(--app-gold)",
+              boxShadow: "0 0 6px var(--app-gold)",
+              flexShrink: 0,
+            }}
+          />
+          <span
+            style={{
+              fontFamily: "var(--font-display)",
+              fontStyle: "italic",
+              fontSize: 15,
+              color: "var(--app-muted)",
+            }}
+          >
+            {ui.gallery.loading}
+          </span>
+        </div>
+      ) : null}
+
+      {!loading && filtered.length === 0 ? (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            padding: "44px 16px 64px",
+            textAlign: "center",
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/mascot/aurora_gallery.png"
+            alt=""
+            aria-hidden
+            style={{
+              width: 112,
+              height: 112,
+              objectFit: "contain",
+              marginBottom: 18,
+              filter: "drop-shadow(0 8px 22px color-mix(in srgb, var(--app-gold) 25%, transparent))",
+              opacity: 0.9,
+            }}
+          />
+          <p
+            style={{
+              fontFamily: "var(--font-display)",
+              fontStyle: "italic",
+              fontWeight: 700,
+              fontSize: 20,
+              color: "var(--app-text)",
+              margin: "0 0 6px",
+            }}
+          >
             {ui.gallery.empty}
           </p>
         </div>
-      )}
-
-      {/* Column flow avoids grid “row lanes” — variable heights stack without hollow gaps */}
-      {filtered.length > 0 && (
-        <div className="columns-3 [column-gap:8px] md:columns-[220px] md:[column-gap:12px]">
-          {filtered.map(item => {
-            const signedUrl = item.signedUrl;
-            const isVideo = isVideoMime(item.mime_type);
-            const busy = busyId === item.id;
-            return (
-              <div
-                key={item.id}
-                onClick={() => !isVideo && setLightbox(item)}
-                className="relative mb-2 break-inside-avoid overflow-hidden rounded-[14px] md:mb-3"
-                style={{
-                  boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-                  cursor: isVideo ? 'default' : 'pointer',
-                }}
-              >
-                {signedUrl ? (
-                  isVideo ? (
-                    <video
-                      src={signedUrl}
-                      className="block h-auto w-full max-w-full"
-                      controls
-                      playsInline
-                      muted
-                    />
-                  ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={item.thumbnailUrl ?? signedUrl}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="block h-auto w-full max-w-full"
-                      style={{ transition: 'transform 0.3s' }}
-                      onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.03)')}
-                      onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-                    />
-                  )
-                ) : (
-                  <div className="min-h-[160px] w-full bg-[var(--app-border)]" />
-                )}
-                {!isVideo ? (
-                  <div
-                    className="absolute right-2 top-2 z-[1]"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MediaLikeBadge
-                      liked={likedByMe.has(item.id)}
-                      count={likeCounts.get(item.id) ?? 0}
-                      pending={pendingLikeId === item.id}
-                      likeAria={ui.likes.heartLikeAria}
-                      unlikeAria={ui.likes.heartUnlikeAria}
-                      onToggle={() => void handleToggleLikeForItem(item.id)}
-                    />
-                  </div>
-                ) : null}
-                <div
-                  className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/70 from-30% to-transparent px-2 pb-2 pt-6 md:px-3.5 md:pb-3 md:pt-7"
-                >
-                  <MediaUploaderChip
-                    label={item.uploaderLabel}
-                    isMine={Boolean(currentUserId && item.uploaded_by === currentUserId)}
-                    mineAria={ui.gallery.uploadedByYouAria}
-                  />
-                  <button
-                    type="button"
-                    disabled={busyId !== null}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPendingDelete(item);
-                    }}
-                    className="shrink-0 rounded-full border-0 bg-black/50 px-2 py-1 text-[10px] font-semibold text-white md:px-2.5 md:text-[11px]"
-                    style={{
-                      cursor: busy ? 'not-allowed' : 'pointer',
-                      opacity: busy ? 0.5 : 1,
-                    }}
-                  >
-                    {busy ? ui.gallery.deleteBusy : ui.common.delete}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {hasMore ? (
-        <AppBtn variant="outline" type="button" className="mt-4 w-full" onClick={loadMore}>
-          {ui.gallery.loadMore}
-        </AppBtn>
       ) : null}
 
+      {/* ── PHOTO GRID ── */}
+      {filtered.length > 0 ? (() => {
+        const renderBottomBar = (item: MediaItem) => {
+          const busy = busyId === item.id;
+          return (
+            <div
+              style={{
+                position: "absolute",
+                inset: "auto 0 0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 4,
+                padding: "40px 10px 10px",
+                background: "linear-gradient(transparent, rgba(0,0,0,0.72))",
+              }}
+            >
+              <MediaUploaderChip
+                label={item.uploaderLabel}
+                isMine={Boolean(currentUserId && item.uploaded_by === currentUserId)}
+                mineAria={ui.gallery.uploadedByYouAria}
+              />
+              <button
+                type="button"
+                disabled={busyId !== null}
+                onClick={(e) => { e.stopPropagation(); setPendingDelete(item); }}
+                style={{
+                  flexShrink: 0,
+                  background: "rgba(0,0,0,0.52)",
+                  border: "1px solid rgba(255,255,255,0.14)",
+                  borderRadius: 20,
+                  padding: "3px 9px",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: "rgba(255,255,255,0.88)",
+                  cursor: busy ? "not-allowed" : "pointer",
+                  opacity: busy ? 0.5 : 1,
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  fontFamily: "inherit",
+                }}
+              >
+                {busy ? ui.gallery.deleteBusy : ui.common.delete}
+              </button>
+            </div>
+          );
+        };
+
+        const renderLikeBadge = (item: MediaItem) => (
+          <div style={{ position: "absolute", top: 10, right: 10, zIndex: 1 }} onClick={(e) => e.stopPropagation()}>
+            <MediaLikeBadge
+              liked={likedByMe.has(item.id)}
+              count={likeCounts.get(item.id) ?? 0}
+              pending={pendingLikeId === item.id}
+              likeAria={ui.likes.heartLikeAria}
+              unlikeAria={ui.likes.heartUnlikeAria}
+              onToggle={() => void handleToggleLikeForItem(item.id)}
+            />
+          </div>
+        );
+
+        const renderMedia = (item: MediaItem) => {
+          const isVideo = isVideoMime(item.mime_type);
+          if (!item.signedUrl) return <div style={{ width: "100%", minHeight: 80, background: "var(--app-surface-2)" }} />;
+          if (isVideo) return <video src={item.signedUrl} style={{ display: "block", width: "100%", height: "auto" }} controls playsInline muted />;
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={item.thumbnailUrl ?? item.signedUrl}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              style={{ display: "block", width: "100%", height: "auto", transition: "transform 0.35s" }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.04)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            />
+          );
+        };
+
+        return (
+          <div style={{ columnCount: 3, columnGap: 4 }}>
+            {filtered.map((item) => {
+              const isVideo = isVideoMime(item.mime_type);
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => !isVideo && setLightbox(item)}
+                  style={{
+                    position: "relative",
+                    breakInside: "avoid",
+                    marginBottom: 4,
+                    borderRadius: 8,
+                    overflow: "hidden",
+                    cursor: isVideo ? "default" : "pointer",
+                  }}
+                >
+                  {renderMedia(item)}
+                  {renderBottomBar(item)}
+                  {!isVideo ? renderLikeBadge(item) : null}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })() : null}
+
+      {/* ── LOAD MORE ── */}
+      {hasMore ? (
+        <div style={{ marginTop: 18 }}>
+          <AppBtn variant="outline" type="button" className="w-full" onClick={loadMore}>
+            {ui.gallery.loadMore}
+          </AppBtn>
+        </div>
+      ) : null}
+
+      {/* ── LIGHTBOX ── */}
       {lightbox ? (
         <PhotoLightbox
           signedUrl={lightbox.signedUrl}

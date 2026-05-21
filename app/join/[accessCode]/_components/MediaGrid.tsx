@@ -330,85 +330,93 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
 
   return (
     <div>
-      {loading ? <p style={{ color: "var(--app-muted)" }}>{ui.gallery.loading}</p> : null}
+      {loading ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0" }}>
+          <span
+            className="animate-pulse"
+            style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "var(--app-gold)", boxShadow: "0 0 6px var(--app-gold)", flexShrink: 0 }}
+          />
+          <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 15, color: "var(--app-muted)" }}>
+            {ui.gallery.loading}
+          </span>
+        </div>
+      ) : null}
       {error ? <p style={{ color: "var(--app-danger)" }}>{error}</p> : null}
       {!loading && items.length === 0 ? (
-        <p style={{ color: "var(--app-muted)" }}>{ui.gallery.emptyGuest}</p>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "44px 16px 64px", textAlign: "center" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/mascot/aurora_gallery.png"
+            alt=""
+            aria-hidden
+            style={{ width: 100, height: 100, objectFit: "contain", marginBottom: 16, filter: "drop-shadow(0 6px 20px color-mix(in srgb, var(--app-gold) 22%, transparent))", opacity: 0.9 }}
+          />
+          <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontWeight: 700, fontSize: 19, color: "var(--app-text)", margin: "0 0 6px" }}>
+            {ui.gallery.emptyGuest}
+          </p>
+        </div>
       ) : null}
 
-      {items.length > 0 ? (
-        <ul className="m-0 list-none columns-2 [column-gap:8px] p-0 sm:columns-3 lg:columns-4">
-          {items.map((item) => (
-            <li
-              key={item.id}
-              className="mb-2 break-inside-avoid overflow-hidden rounded-xl bg-[var(--app-surface-2)]"
-            >
-              {item.signedUrl ? (
-                isVideoMime(item.mime_type) ? (
-                  <div className="relative">
-                    <video
-                      src={item.signedUrl}
-                      className="block h-auto w-full max-w-full"
-                      controls
-                      playsInline
-                      muted
-                    />
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 from-25% to-transparent px-2 pb-2 pt-5">
-                      <MediaUploaderChip
-                        label={item.uploaderLabel}
-                        isMine={Boolean(userId && item.uploaded_by === userId)}
-                        mineAria={ui.gallery.uploadedByYouAria}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <button
-                      type="button"
-                      aria-label={ui.gallery.openPhotoAria}
-                      onClick={() => setLightbox(item)}
-                      className="block w-full cursor-pointer border-0 bg-transparent p-0"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={item.thumbnailUrl ?? item.signedUrl}
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                        className="block h-auto w-full max-w-full"
-                      />
-                    </button>
-                    <div className="pointer-events-none absolute right-2 top-2">
-                      <div className="pointer-events-auto">
-                        <MediaLikeBadge
-                          liked={likedByMe.has(item.id)}
-                          count={likeCounts.get(item.id) ?? 0}
-                          pending={pendingLikeId === item.id}
-                          likeAria={ui.likes.heartLikeAria}
-                          unlikeAria={ui.likes.heartUnlikeAria}
-                          onToggle={(e) => {
-                            e.stopPropagation();
-                            void handleToggleLikeForItem(item.id, item.uploaded_by);
-                          }}
-                        />
-                      </div>
-                    </div>
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 from-25% to-transparent px-2 pb-2 pt-5">
-                      <MediaUploaderChip
-                        label={item.uploaderLabel}
-                        isMine={Boolean(userId && item.uploaded_by === userId)}
-                        mineAria={ui.gallery.uploadedByYouAria}
-                      />
-                    </div>
-                  </div>
-                )
-              ) : (
-                <div className="min-h-32 w-full bg-[var(--app-border)]" />
-              )}
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      {items.length > 0 ? (() => {
+        const renderMedia = (item: MediaItem) => {
+          const isVideo = isVideoMime(item.mime_type);
+          if (!item.signedUrl) return <div style={{ width: "100%", minHeight: 80, background: "var(--app-surface-2)" }} />;
+          if (isVideo) return <video src={item.signedUrl} style={{ display: "block", width: "100%", height: "auto" }} controls playsInline muted />;
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={item.thumbnailUrl ?? item.signedUrl}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              style={{ display: "block", width: "100%", height: "auto", transition: "transform 0.35s" }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.04)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            />
+          );
+        };
+
+        const renderOverlay = (item: MediaItem) => {
+          const isVideo = isVideoMime(item.mime_type);
+          return (
+            <>
+              <div style={{ position: "absolute", inset: "auto 0 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4, padding: "30px 8px 8px", background: "linear-gradient(transparent, rgba(0,0,0,0.7))", pointerEvents: "none" }}>
+                <MediaUploaderChip label={item.uploaderLabel} isMine={Boolean(userId && item.uploaded_by === userId)} mineAria={ui.gallery.uploadedByYouAria} />
+              </div>
+              {!isVideo ? (
+                <div style={{ position: "absolute", top: 6, right: 6, zIndex: 1 }}>
+                  <MediaLikeBadge
+                    liked={likedByMe.has(item.id)}
+                    count={likeCounts.get(item.id) ?? 0}
+                    pending={pendingLikeId === item.id}
+                    likeAria={ui.likes.heartLikeAria}
+                    unlikeAria={ui.likes.heartUnlikeAria}
+                    onToggle={(e) => { e.stopPropagation(); void handleToggleLikeForItem(item.id, item.uploaded_by); }}
+                  />
+                </div>
+              ) : null}
+            </>
+          );
+        };
+
+        return (
+          <div style={{ columnCount: 3, columnGap: 4 }}>
+            {items.map((item) => {
+              const isVideo = isVideoMime(item.mime_type);
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => !isVideo && setLightbox(item)}
+                  style={{ position: "relative", breakInside: "avoid", marginBottom: 4, borderRadius: 8, overflow: "hidden", cursor: isVideo ? "default" : "pointer" }}
+                >
+                  {renderMedia(item)}
+                  {renderOverlay(item)}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })() : null}
 
       {hasMore ? (
         <AppBtn variant="outline" type="button" className="mt-6 w-full" onClick={loadMore}>

@@ -240,19 +240,74 @@ export function GuestEventPage({
         {hasSession ? (
           <>
             <section style={{ marginBottom: 40 }}>
-              <h2
-                style={{
-                  marginBottom: 16,
-                  fontSize: 12,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.2em",
-                  color: "var(--app-muted)",
-                }}
-              >
-                {ui.guestJoin.sectionUpload}
-              </h2>
-              <UploadZone eventId={eventId} disabled={!uploadsOpen} onUploaded={() => setRefreshKey((k) => k + 1)} />
+              {/* Polaroid-style upload affordance */}
+              <div style={{ position: "relative" }}>
+                {/* Washi tape */}
+                <div
+                  aria-hidden
+                  style={{
+                    position: "absolute",
+                    top: -8,
+                    left: "33%",
+                    width: 64,
+                    height: 14,
+                    background: "rgba(212,168,67,0.48)",
+                    border: "0.5px solid rgba(212,168,67,0.6)",
+                    transform: "rotate(-3deg)",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.22)",
+                    zIndex: 2,
+                    borderRadius: 2,
+                    pointerEvents: "none",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "relative",
+                    background: uploadsOpen ? "#f4f0ea" : "rgba(244,240,234,0.55)",
+                    borderRadius: 2,
+                    boxShadow: "0 8px 28px rgba(0,0,0,0.42), 0 2px 6px rgba(0,0,0,0.2)",
+                    transform: "rotate(-0.5deg)",
+                    padding: "14px 14px 18px",
+                    opacity: uploadsOpen ? 1 : 0.7,
+                    cursor: uploadsOpen ? "pointer" : "not-allowed",
+                    overflow: "visible",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, pointerEvents: "none" }}>
+                    <div
+                      style={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 4,
+                        background: "rgba(0,0,0,0.07)",
+                        border: "1.5px dashed rgba(0,0,0,0.18)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+                        <path d="M12 5v14M5 12h14" stroke="rgba(60,40,20,0.5)" strokeWidth="2.4" strokeLinecap="round" />
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1, textAlign: "left" }}>
+                      <p style={{ margin: 0, fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 16, fontWeight: 700, color: "#2a1d0f", lineHeight: 1.2 }}>
+                        {ui.gallery.addMemory}
+                      </p>
+                      <p style={{ margin: "3px 0 0", fontSize: 11, color: "rgba(60,40,20,0.55)" }}>
+                        {uploadsOpen ? ui.gallery.addMemoryHint : ui.guestJoin.uploadClosedBanner}
+                      </p>
+                    </div>
+                  </div>
+                  <UploadZone
+                    eventId={eventId}
+                    disabled={!uploadsOpen}
+                    ghost
+                    onUploaded={() => setRefreshKey((k) => k + 1)}
+                  />
+                </div>
+              </div>
             </section>
 
             <section>
