@@ -24,6 +24,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function TermsPage({ params }: Props) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+  const copy = getLandingCopy(locale);
 
-  return <LegalDocPage locale={locale} title="Terms of Use" sections={TERMS_SECTIONS} />;
+  return (
+    <LegalDocPage
+      locale={locale}
+      title={copy.footerTerms}
+      englishNotice={copy.legalEnglishNotice || undefined}
+      sections={TERMS_SECTIONS}
+    />
+  );
 }

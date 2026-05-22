@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { appButtonClassNames } from "@/components/app-ui/AppBtn";
 
 export default function ResetPasswordSuccessPage() {
+  const ui = useAppUi();
+
   return (
     <main
       className="app-shell"
@@ -27,7 +32,7 @@ export default function ResetPasswordSuccessPage() {
               lineHeight: 1,
             }}
           >
-            Password updated
+            {ui.passwordReset.successTitle}
           </h1>
           <p
             style={{
@@ -38,7 +43,7 @@ export default function ResetPasswordSuccessPage() {
               marginTop: 10,
             }}
           >
-            You can sign in with your new password.
+            {ui.passwordReset.successSubtitle}
           </p>
         </div>
         <div
@@ -51,7 +56,7 @@ export default function ResetPasswordSuccessPage() {
           }}
         >
           <Link href="/auth/login" className={appButtonClassNames({ variant: "primary", size: "lg", className: "w-full" })}>
-            Go to sign in
+            {ui.passwordReset.goToSignIn}
           </Link>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
 import { AppFormRow } from "@/components/app-ui/AppFormRow";
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function WelcomeModal({ eventTitle, accessCode, onSessionReady }: Props) {
+  const ui = useAppUi();
   const router = useRouter();
   const [showNicknameInput, setShowNicknameInput] = useState(false);
   const [nickname, setNickname] = useState("");
@@ -28,7 +30,7 @@ export function WelcomeModal({ eventTitle, accessCode, onSessionReady }: Props) 
     e.preventDefault();
     const trimmed = nickname.trim();
     if (trimmed.length < 2 || trimmed.length > 30) {
-      setNicknameError("Nickname must be 2–30 characters.");
+      setNicknameError(ui.welcomeModal.nicknameError);
       return;
     }
     setNicknameError(null);
@@ -37,7 +39,7 @@ export function WelcomeModal({ eventTitle, accessCode, onSessionReady }: Props) 
     try {
       const supabase = maybeCreateSupabaseBrowserClient();
       if (!supabase) {
-        setNicknameError("Supabase is not configured. Please try again later.");
+        setNicknameError(ui.welcomeModal.supabaseMissing);
         return;
       }
       const { error: anonError } = await supabase.auth.signInAnonymously();
@@ -55,7 +57,7 @@ export function WelcomeModal({ eventTitle, accessCode, onSessionReady }: Props) 
 
       onSessionReady();
     } catch {
-      setNicknameError("Something went wrong. Please try again.");
+      setNicknameError(ui.welcomeModal.genericError);
     } finally {
       setBusy(false);
     }
@@ -85,12 +87,10 @@ export function WelcomeModal({ eventTitle, accessCode, onSessionReady }: Props) 
             color: "var(--app-gold)",
           }}
         >
-          You&apos;re invited
+          {ui.welcomeModal.eyebrow}
         </p>
         <h1 style={{ marginTop: 4, fontSize: "1.5rem", fontWeight: 600, color: "var(--app-text)" }}>{eventTitle}</h1>
-        <p style={{ marginTop: 8, fontSize: 14, color: "var(--app-muted)" }}>
-          Join to upload photos &amp; videos and browse the gallery.
-        </p>
+        <p style={{ marginTop: 8, fontSize: 14, color: "var(--app-muted)" }}>{ui.welcomeModal.body}</p>
 
         {!showNicknameInput ? (
           <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12 }}>
@@ -100,7 +100,7 @@ export function WelcomeModal({ eventTitle, accessCode, onSessionReady }: Props) 
               className="w-full"
               onClick={() => router.push(`/auth/login?mode=register&returnTo=${encodeURIComponent(returnTo)}`)}
             >
-              Create account
+              {ui.welcomeModal.createAccount}
             </AppBtn>
             <AppBtn
               type="button"
@@ -108,15 +108,15 @@ export function WelcomeModal({ eventTitle, accessCode, onSessionReady }: Props) 
               className="w-full"
               onClick={() => router.push(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`)}
             >
-              Log in
+              {ui.welcomeModal.logIn}
             </AppBtn>
             <AppBtn type="button" variant="ghost" className="w-full" onClick={() => setShowNicknameInput(true)}>
-              Continue as guest
+              {ui.welcomeModal.continueGuest}
             </AppBtn>
           </div>
         ) : (
           <form onSubmit={handleGuestSubmit} style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12 }}>
-            <AppFormRow label="Your nickname" labelFor="nickname" errorText={nicknameError}>
+            <AppFormRow label={ui.welcomeModal.nicknameLabel} labelFor="nickname" errorText={nicknameError}>
               <AppInput
                 id="nickname"
                 type="text"
@@ -125,16 +125,16 @@ export function WelcomeModal({ eventTitle, accessCode, onSessionReady }: Props) 
                   setNickname(v);
                   if (nicknameError) setNicknameError(null);
                 }}
-                placeholder="e.g. Maria"
+                placeholder={ui.welcomeModal.nicknamePlaceholder}
                 maxLength={30}
                 autoFocus
               />
             </AppFormRow>
             <AppBtn type="submit" variant="gold" className="w-full" disabled={busy} loading={busy}>
-              Enter as guest
+              {ui.welcomeModal.enterGuest}
             </AppBtn>
             <AppBtn type="button" variant="ghost" size="sm" onClick={() => setShowNicknameInput(false)}>
-              ← Back
+              {ui.common.back}
             </AppBtn>
           </form>
         )}

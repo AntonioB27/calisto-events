@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
 import { AppFormRow } from "@/components/app-ui/AppFormRow";
@@ -17,6 +18,7 @@ function buildRedirectTo() {
 }
 
 export default function ForgotPasswordPage() {
+  const ui = useAppUi();
   const [email, setEmail] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +28,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     const clean = email.trim();
     if (!clean) {
-      setError("Enter your email address.");
+      setError(ui.passwordReset.emailRequired);
       return;
     }
 
@@ -42,7 +44,7 @@ export default function ForgotPasswordPage() {
       if (resetError) throw resetError;
       setSent(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send reset email.");
+      setError(err instanceof Error ? err.message : ui.passwordReset.sendFail);
     } finally {
       setPending(false);
     }
@@ -71,7 +73,7 @@ export default function ForgotPasswordPage() {
               color: "var(--app-muted)",
             }}
           >
-            Welcome to
+            {ui.auth.welcomeEyebrow}
           </p>
           <h1
             style={{
@@ -83,7 +85,7 @@ export default function ForgotPasswordPage() {
               lineHeight: 1,
             }}
           >
-            Reset Password
+            {ui.passwordReset.forgotTitle}
           </h1>
           <p
             style={{
@@ -94,7 +96,7 @@ export default function ForgotPasswordPage() {
               marginTop: 10,
             }}
           >
-            Enter your email and we&apos;ll send you a reset link.
+            {ui.passwordReset.forgotSubtitle}
           </p>
         </div>
 
@@ -111,16 +113,16 @@ export default function ForgotPasswordPage() {
                 lineHeight: 1.6,
               }}
             >
-              Check your inbox for a link to set a new password. You can close this tab.
+              {ui.passwordReset.sentMessage}
             </div>
           ) : (
             <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <AppFormRow label="Email" labelFor="forgot-email">
+              <AppFormRow label={ui.auth.email} labelFor="forgot-email">
                 <AppInput
                   id="forgot-email"
                   name="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={ui.auth.emailPlaceholderAlt}
                   autoComplete="email"
                   value={email}
                   onChange={setEmail}
@@ -145,26 +147,26 @@ export default function ForgotPasswordPage() {
               ) : null}
 
               <AppBtn type="submit" variant="primary" className="w-full" disabled={pending} loading={pending}>
-                Send reset link
+                {ui.passwordReset.sendSubmit}
               </AppBtn>
             </form>
           )}
 
           <div style={{ textAlign: "center", marginTop: 20 }}>
             <AppBtn variant="ghost" size="sm" href="/auth/login" as={Link}>
-              Back to sign in
+              {ui.passwordReset.backToSignIn}
             </AppBtn>
           </div>
         </AppCard>
 
         <p style={{ textAlign: "center", marginTop: 20, fontSize: 12, color: "var(--app-muted)" }}>
-          By continuing you agree to Calisto&apos;s{" "}
+          {ui.auth.legalPrefix}{" "}
           <Link href="/terms" style={{ textDecoration: "underline", color: "inherit" }}>
-            Terms
-          </Link>
-          {" "}and{" "}
+            {ui.auth.terms}
+          </Link>{" "}
+          {ui.auth.and}{" "}
           <Link href="/privacy" style={{ textDecoration: "underline", color: "inherit" }}>
-            Privacy Policy
+            {ui.auth.privacy}
           </Link>
           .
         </p>

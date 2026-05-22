@@ -6,10 +6,11 @@ import type { Locale } from "@/lib/i18n";
 type LegalDocPageProps = Readonly<{
   locale: Locale;
   title: string;
+  englishNotice?: string;
   sections: readonly LegalSection[];
 }>;
 
-export function LegalDocPage({ locale, title, sections }: LegalDocPageProps) {
+export function LegalDocPage({ locale, title, englishNotice, sections }: LegalDocPageProps) {
   return (
     <div className="vibrant-page-bg flex min-h-0 flex-1 flex-col overflow-x-clip">
       <div className="page-vignette" aria-hidden />
@@ -23,7 +24,7 @@ export function LegalDocPage({ locale, title, sections }: LegalDocPageProps) {
           </Link>
         </p>
 
-        {locale !== "en" ? (
+        {englishNotice ? (
           <p
             style={{
               margin: "0 0 28px",
@@ -33,7 +34,7 @@ export function LegalDocPage({ locale, title, sections }: LegalDocPageProps) {
               fontFamily: "var(--font-sans)",
             }}
           >
-            The legal text on this page is provided in English.
+            {englishNotice}
           </p>
         ) : null}
 

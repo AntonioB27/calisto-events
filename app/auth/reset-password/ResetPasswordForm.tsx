@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useEffect, useRef, useState } from "react";
 
+import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
 import { AppFormRow } from "@/components/app-ui/AppFormRow";
@@ -11,6 +12,7 @@ import { AppInput } from "@/components/app-ui/AppInput";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 function ResetPasswordInner() {
+  const ui = useAppUi();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [ready, setReady] = useState(false);
@@ -69,11 +71,11 @@ function ResetPasswordInner() {
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+      setError(ui.passwordReset.passwordTooShort);
       return;
     }
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      setError(ui.passwordReset.passwordsMismatch);
       return;
     }
 
@@ -87,7 +89,7 @@ function ResetPasswordInner() {
       router.replace("/auth/reset-password/success");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not update password.");
+      setError(err instanceof Error ? err.message : ui.passwordReset.updateFail);
     } finally {
       setPending(false);
     }
@@ -104,7 +106,7 @@ function ResetPasswordInner() {
   if (!ready) {
     return (
       <main className="app-shell" style={shellStyle}>
-        <p style={{ fontSize: 14, color: "var(--app-muted)" }}>Verifying reset link…</p>
+        <p style={{ fontSize: 14, color: "var(--app-muted)" }}>{ui.passwordReset.verifying}</p>
       </main>
     );
   }
@@ -125,18 +127,18 @@ function ResetPasswordInner() {
                 lineHeight: 1,
               }}
             >
-              Link expired
+              {ui.passwordReset.expiredTitle}
             </h1>
           </div>
           <AppCard pad="lg" style={{ borderRadius: 18, boxShadow: "var(--app-shadow-sm)", display: "flex", flexDirection: "column", gap: 16 }}>
             <p style={{ fontSize: 14, color: "var(--app-muted)", lineHeight: 1.6 }}>
-              Open the latest link from your email, or request a new one.
+              {ui.passwordReset.expiredBody}
             </p>
             <AppBtn variant="gold" size="sm" href="/auth/forgot-password" as={Link}>
-              Request a new reset link
+              {ui.passwordReset.requestNewLink}
             </AppBtn>
             <AppBtn variant="ghost" size="sm" href="/auth/login" as={Link}>
-              Back to sign in
+              {ui.passwordReset.backToSignIn}
             </AppBtn>
           </AppCard>
         </div>
@@ -158,7 +160,7 @@ function ResetPasswordInner() {
               color: "var(--app-muted)",
             }}
           >
-            Account
+            {ui.passwordReset.accountEyebrow}
           </p>
           <h1
             style={{
@@ -170,7 +172,7 @@ function ResetPasswordInner() {
               lineHeight: 1,
             }}
           >
-            Set a new password
+            {ui.passwordReset.setTitle}
           </h1>
           <p
             style={{
@@ -181,18 +183,18 @@ function ResetPasswordInner() {
               marginTop: 10,
             }}
           >
-            Choose a strong password you haven&apos;t used here before.
+            {ui.passwordReset.setSubtitle}
           </p>
         </div>
 
         <AppCard pad="lg" style={{ borderRadius: 18, boxShadow: "var(--app-shadow-sm)" }}>
           <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <AppFormRow label="New password" labelFor="reset-password">
+            <AppFormRow label={ui.passwordReset.newPasswordLabel} labelFor="reset-password">
               <AppInput
                 id="reset-password"
                 name="password"
                 type="password"
-                placeholder="New password"
+                placeholder={ui.passwordReset.newPasswordPlaceholder}
                 autoComplete="new-password"
                 value={password}
                 onChange={(v) => {
@@ -202,12 +204,12 @@ function ResetPasswordInner() {
                 disabled={pending}
               />
             </AppFormRow>
-            <AppFormRow label="Confirm password" labelFor="reset-confirm">
+            <AppFormRow label={ui.passwordReset.confirmPasswordLabel} labelFor="reset-confirm">
               <AppInput
                 id="reset-confirm"
                 name="confirm"
                 type="password"
-                placeholder="Confirm new password"
+                placeholder={ui.passwordReset.confirmPasswordPlaceholder}
                 autoComplete="new-password"
                 value={confirm}
                 onChange={(v) => {
@@ -232,13 +234,13 @@ function ResetPasswordInner() {
               </p>
             ) : null}
             <AppBtn type="submit" variant="primary" className="w-full" disabled={pending} loading={pending}>
-              Update password
+              {ui.passwordReset.updateSubmit}
             </AppBtn>
           </form>
 
           <div style={{ textAlign: "center", marginTop: 20 }}>
             <AppBtn variant="ghost" size="sm" href="/auth/login" as={Link}>
-              Back to sign in
+              {ui.passwordReset.backToSignIn}
             </AppBtn>
           </div>
         </AppCard>
@@ -247,24 +249,27 @@ function ResetPasswordInner() {
   );
 }
 
+function ResetPasswordSuspenseFallback() {
+  const ui = useAppUi();
+  return (
+    <main
+      className="app-shell"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        padding: 24,
+      }}
+    >
+      <p style={{ fontSize: 14, color: "var(--app-muted)" }}>{ui.common.loading}</p>
+    </main>
+  );
+}
+
 export function ResetPasswordForm() {
   return (
-    <Suspense
-      fallback={
-        <main
-          className="app-shell"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "100vh",
-            padding: 24,
-          }}
-        >
-          <p style={{ fontSize: 14, color: "var(--app-muted)" }}>Loading…</p>
-        </main>
-      }
-    >
+    <Suspense fallback={<ResetPasswordSuspenseFallback />}>
       <ResetPasswordInner />
     </Suspense>
   );
