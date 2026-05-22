@@ -55,13 +55,13 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     .eq("id", id)
     .maybeSingle();
 
-  const access = event
-    ? await getEventAdminAccess(supabase, {
-        eventId: id,
-        userId: user?.id,
-        organizerId: String(event.organizer_id),
-      })
-    : { canAccess: false, isPrimaryOrganizer: false };
+  const [access, guestCountResult, mediaCountResult] = await Promise.all([
+    event
+      ? getEventAdminAccess(supabase, { eventId: id, userId: user?.id, organizerId: String(event.organizer_id) })
+      : Promise.resolve({ canAccess: false, isPrimaryOrganizer: false }),
+    supabase.from("event_memberships").select("*", { count: "exact", head: true }).eq("event_id", id),
+    supabase.from("media_items").select("*", { count: "exact", head: true }).eq("event_id", id),
+  ]);
 
   const isPrimaryOrganizer = access.isPrimaryOrganizer;
 
@@ -89,13 +89,16 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   const navEmoji = displayNavEmoji(storedEmoji);
 
   return (
-    <div style={{ padding: '40px 0 60px' }}>
+    <div style={{ padding: '0 0 60px' }}>
       <EventAdminTabs
         eventId={id}
         selectedTab={selectedTab}
         eventTitle={eventName}
         eventEmoji={navEmoji}
         showOrganizerOnlyTabs={isPrimaryOrganizer}
+        guestCount={guestCountResult.count ?? 0}
+        mediaCount={mediaCountResult.count ?? 0}
+        eventDate={event.event_date ?? null}
       />
 
       {!isPrimaryOrganizer ? (

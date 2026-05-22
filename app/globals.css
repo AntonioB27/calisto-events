@@ -58,8 +58,8 @@
   --color-foreground: var(--foreground);
   --color-primary:    var(--primary);
 
-  --font-display: "Lora", "Georgia", "Times New Roman", serif;
-  --font-sans:    "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  --font-display: "DM Serif Display", "Georgia", serif;
+  --font-sans:    "DM Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
   --font-mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
 }
 
@@ -77,9 +77,11 @@ html[data-theme="light"] {
 
 body {
   background:
-    radial-gradient(1300px 760px at 12% -8%, rgba(168, 95, 176, 0.34), transparent 58%),
-    radial-gradient(980px 560px at 96% 14%, rgba(240, 179, 75, 0.28), transparent 60%),
-    radial-gradient(900px 620px at 84% 92%, rgba(193, 95, 148, 0.2), transparent 58%),
+    radial-gradient(ellipse 120% 45% at 50% 0%, rgba(91, 45, 142, 0.32) 0%, transparent 60%),
+    radial-gradient(1300px 760px at 12% -8%, rgba(168, 95, 176, 0.22), transparent 58%),
+    radial-gradient(980px 560px at 96% 14%, rgba(240, 179, 75, 0.24), transparent 60%),
+    radial-gradient(900px 620px at 84% 92%, rgba(193, 95, 148, 0.16), transparent 58%),
+    radial-gradient(ellipse 60% 28% at 100% 100%, rgba(197, 146, 42, 0.08) 0%, transparent 60%),
     linear-gradient(180deg, #140d1f 0%, #0d0a14 48%, #0c0a0f 100%);
   color: var(--cream);
   font-family: var(--font-sans);
@@ -93,9 +95,11 @@ body {
 
 [data-theme="light"] body {
   background:
-    radial-gradient(1300px 760px at 12% -8%, rgba(168, 95, 176, 0.12), transparent 58%),
-    radial-gradient(980px 560px at 96% 14%, rgba(240, 179, 75, 0.16), transparent 60%),
-    radial-gradient(900px 620px at 84% 92%, rgba(193, 95, 148, 0.08), transparent 58%),
+    radial-gradient(ellipse 120% 45% at 50% 0%, rgba(91, 45, 142, 0.10) 0%, transparent 60%),
+    radial-gradient(1300px 760px at 12% -8%, rgba(168, 95, 176, 0.08), transparent 58%),
+    radial-gradient(980px 560px at 96% 14%, rgba(240, 179, 75, 0.10), transparent 60%),
+    radial-gradient(900px 620px at 84% 92%, rgba(193, 95, 148, 0.06), transparent 58%),
+    radial-gradient(ellipse 60% 28% at 100% 100%, rgba(197, 146, 42, 0.05) 0%, transparent 60%),
     linear-gradient(180deg, #fbf7f0 0%, #f1ebe2 48%, #e8e2d8 100%);
   color: var(--cream);
 }
@@ -567,6 +571,9 @@ html[data-theme="light"] body::after {
   --app-purple-2: #7b3fbe;
   --app-gold: #c5922a;
   --app-gold-2: #d4a843;
+  --app-gold-bg: #f7e9c9;
+  --app-text-sub: #5a4a36;
+  --app-border-light: #e8e0d2;
   --app-danger: #b42318;
   --app-success: #15803d;
   --app-warn: #b45309;
@@ -598,6 +605,9 @@ html[data-theme="dark"] {
   --app-purple-2: #8b6a8c;
   --app-gold: #e6a760;
   --app-gold-2: #f0b34b;
+  --app-gold-bg: rgba(230, 167, 96, 0.18);
+  --app-text-sub: #c4b49e;
+  --app-border-light: rgba(244, 234, 217, 0.08);
   --app-danger: #fca5a5;
   --app-success: #86efac;
   --app-warn: #fcd34d;
@@ -1350,67 +1360,31 @@ html[data-theme="dark"] .app-form-row__error {
   color: #fca5a5;
 }
 
-/* ════════ Event navbar (editorial rail tabs) ════════ */
-.event-navbar {
-  position: relative;
-  margin: 22px 0 24px;
-  padding: 22px 22px 14px;
-  border-radius: calc(var(--app-radius-xl) + 4px);
-  border: 1.5px solid color-mix(in srgb, var(--app-border) 80%, transparent);
-  background:
-    radial-gradient(900px 260px at 14% 0%, color-mix(in srgb, var(--app-gold) 14%, transparent), transparent 62%),
-    radial-gradient(800px 260px at 78% -10%, color-mix(in srgb, var(--app-purple) 14%, transparent), transparent 58%),
-    var(--app-surface);
-  box-shadow: var(--app-shadow-md);
-  overflow: hidden;
+/* ════════ Event hero ════════ */
+.event-hero {
+  padding: 28px 22px 0;
 }
 
-.event-navbar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--app-text) 6%, transparent) 0px,
-      transparent 1px,
-      transparent 7px
-    );
-  opacity: 0.18;
-  mix-blend-mode: multiply;
-}
-
-html[data-theme="dark"] .event-navbar::before {
-  opacity: 0.08;
-  mix-blend-mode: screen;
-}
-
-.event-navbar__inner {
-  position: relative;
-}
-
-.event-navbar__rule {
-  width: 34px;
+.event-hero__rule {
+  width: 28px;
   height: 3px;
-  background: linear-gradient(90deg, var(--app-gold), color-mix(in srgb, var(--app-gold) 55%, var(--app-purple)));
+  background: var(--app-gold);
   border-radius: 3px;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--app-gold) 18%, transparent);
   margin-bottom: 10px;
 }
 
-.event-navbar__title {
+.event-hero__title {
   font-family: var(--font-display);
   font-style: italic;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  font-size: clamp(30px, 3.2vw, 44px);
-  line-height: 1.08;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  font-size: clamp(28px, 3.4vw, 42px);
+  line-height: 1.0;
   color: var(--app-text);
   margin: 0;
 }
 
-/* Upright emoji — avoids Playfair italic skewing glyphs in event headers and forms */
+/* Upright emoji — avoids display-font italic skewing glyphs */
 .calisto-emoji-upright {
   font-style: normal;
   font-family:
@@ -1421,60 +1395,78 @@ html[data-theme="dark"] .event-navbar::before {
     sans-serif;
 }
 
-.event-navbar__sub {
-  margin-top: 6px;
-  font-size: 14px;
-  color: var(--app-muted);
-}
-
-.event-navbar__tabs {
-  margin-top: 14px;
+/* ════════ Event nav — editorial TOC strip ════════ */
+.event-toc {
   display: flex;
-  align-items: flex-end;
-  gap: 14px;
-  flex-wrap: wrap;
-  padding-bottom: 2px;
-  border-bottom: 1px solid color-mix(in srgb, var(--app-border) 80%, transparent);
+  padding: 0 22px;
+  margin-top: 4px;
+  border-bottom: 1px solid var(--app-border-light);
+  gap: 0;
 }
 
-.event-navbar__tab {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 6px 12px;
-  text-decoration: none;
-  color: var(--app-muted);
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: 0.01em;
-  transition: color 0.15s ease, transform 0.15s ease;
-}
-
-.event-navbar__tab:hover {
-  color: var(--app-text);
-  transform: translateY(-1px);
-}
-
-.event-navbar__tab::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 2px;
-  border-radius: 2px;
+.event-toc__tab {
+  appearance: none;
   background: transparent;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 14px 0;
+  margin-right: 24px;
+
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 17px;
+  letter-spacing: -0.005em;
+  color: var(--app-muted);
+
+  text-decoration: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease;
 }
 
-.event-navbar__tab[aria-current="page"] {
+.event-toc__tab:last-child {
+  margin-right: 0;
+}
+
+.event-toc__tab:hover {
+  color: var(--app-text-sub);
+}
+
+.event-toc__tab[aria-current="page"],
+.event-toc__tab.is-active {
   color: var(--app-text);
+  border-bottom-color: var(--app-gold);
 }
 
-.event-navbar__tab[aria-current="page"]::after {
-  background: linear-gradient(90deg, var(--app-gold-2), var(--app-gold));
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--app-gold) 35%, transparent);
+.event-toc__count {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--app-muted);
+  background: transparent;
+  border: 1px solid var(--app-border);
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.event-toc__tab[aria-current="page"] .event-toc__count,
+.event-toc__tab.is-active .event-toc__count {
+  color: var(--app-gold);
+  background: var(--app-gold-bg);
+  border-color: var(--app-gold-bg);
+}
+
+.event-toc__tab:focus-visible {
+  outline: 2px solid var(--app-gold);
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 
 /* App shell: account avatar popover */

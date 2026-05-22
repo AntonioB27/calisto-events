@@ -85,7 +85,7 @@ export const APP_UI_EN = {
     fallbackName: "friend",
     subtitle: "Events you organise, co‑organise, or joined as a guest.",
     joinWithCode: "Join with code",
-    createEvent: "+ Create event",
+    createEvent: "Create event",
     yourEvents: "Your events",
     memberOne: "member",
     membersMany: "members",
@@ -139,6 +139,15 @@ export const APP_UI_EN = {
     notFoundBody: "The link may be broken or the page may have moved.",
     calistoHome: "Calisto home",
     welcomeLink: "Welcome",
+  },
+
+  likes: {
+    heartLikeAria: "Like this photo",
+    heartUnlikeAria: "Unlike this photo",
+    likeCount: "{count} likes",
+    likersHeading: "Liked by",
+    likersEmpty: "No likes yet",
+    toggleFail: "Could not update like. Please try again.",
   },
 
   guestJoin: {
@@ -248,6 +257,9 @@ export const APP_UI_EN = {
     tabSettings: "Settings",
     subtitle: "Share with guests to let them join.",
     tabsAria: "Event sections",
+    myEvents: "My events",
+    memoriesCount: "{count} memories",
+    guestsCount: "{count} guests",
   },
 
   overview: {
@@ -309,6 +321,11 @@ export const APP_UI_EN = {
     deleteBody: "This removes the item from your gallery and deletes the stored file. This cannot be undone.",
     title: "Gallery",
     subtitle: "Browse uploaded photos & videos",
+    spotlightLabel: "Today's spotlight",
+    addMemory: "Add a memory",
+    addMemoryHint: "Tap to upload — or drop a file here",
+    memoriesCount: "{count} memories",
+    guestsCount: "{count} guests",
     filterAria: "Filter by media type",
     filterAll: "All",
     filterPhotos: "Photos",
@@ -323,6 +340,9 @@ export const APP_UI_EN = {
     downloadPhotoFail: "Could not download this photo.",
     downloadFailedWithStatus: "Download failed ({status}).",
     deleteBusy: "…",
+    emptyGuest: "No media yet — be the first to upload!",
+    openPhotoAria: "Open photo full screen",
+    uploadedByYouAria: "Your upload",
     zipExportCardEyebrow: "Primary organizer",
     zipExportTitle: "Bulk ZIP export",
     zipExportBlurb:

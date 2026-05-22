@@ -143,6 +143,15 @@ export const APP_UI_HR: AppUiDict = {
     welcomeLink: "Dobro došli",
   },
 
+  likes: {
+    heartLikeAria: "Lajkaj fotografiju",
+    heartUnlikeAria: "Ukloni lajk",
+    likeCount: "{count} lajkova",
+    likersHeading: "Lajkali",
+    likersEmpty: "Još nema lajkova",
+    toggleFail: "Lajk nije mogao biti ažuriran. Pokušajte ponovo.",
+  },
+
   guestJoin: {
     loading: "Učitavanje…",
     joining: "Pridruživanje događaju…",
@@ -251,6 +260,9 @@ export const APP_UI_HR: AppUiDict = {
     tabSettings: "Postavke",
     subtitle: "Podijelite s gostima da se mogu pridružiti.",
     tabsAria: "Odjeljci događaja",
+    myEvents: "Moji događaji",
+    memoriesCount: "{count} uspomena",
+    guestsCount: "{count} gostiju",
   },
 
   overview: {
@@ -315,6 +327,11 @@ export const APP_UI_HR: AppUiDict = {
       "Uklanja stavku iz galerije i briše pohranu. Ovo se ne može poništiti.",
     title: "Galerija",
     subtitle: "Pregledaj poslane fotografije i videozapise",
+    spotlightLabel: "Istaknuta fotografija",
+    addMemory: "Dodaj uspomenu",
+    addMemoryHint: "Dodirni za upload — ili ispusti datoteku ovdje",
+    memoriesCount: "{count} uspomena",
+    guestsCount: "{count} gostiju",
     filterAria: "Filtriraj vrstu medija",
     filterAll: "Sve",
     filterPhotos: "Fotografije",
@@ -329,6 +346,9 @@ export const APP_UI_HR: AppUiDict = {
     downloadPhotoFail: "Nismo mogli preuzeti fotografiju.",
     downloadFailedWithStatus: "Preuzimanje nije uspjelo ({status}).",
     deleteBusy: "…",
+    emptyGuest: "Još nema medija — budite prvi koji će uploadati!",
+    openPhotoAria: "Otvori fotografiju preko cijelog ekrana",
+    uploadedByYouAria: "Tvoj upload",
     zipExportCardEyebrow: "Primarni organizator",
     zipExportTitle: "ZIP skupni izvoz",
     zipExportBlurb:

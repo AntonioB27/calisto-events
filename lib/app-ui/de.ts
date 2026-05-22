@@ -146,6 +146,15 @@ export const APP_UI_DE: AppUiDict = {
     welcomeLink: "Willkommen",
   },
 
+  likes: {
+    heartLikeAria: "Foto liken",
+    heartUnlikeAria: "Like entfernen",
+    likeCount: "{count} Likes",
+    likersHeading: "Gefällt",
+    likersEmpty: "Noch keine Likes",
+    toggleFail: "Like konnte nicht aktualisiert werden. Bitte erneut versuchen.",
+  },
+
   guestJoin: {
     loading: "Laden …",
     joining: "Beitritt zur Veranstaltung …",
@@ -257,6 +266,9 @@ export const APP_UI_DE: AppUiDict = {
     tabSettings: "Einstellungen",
     subtitle: "Teilen mit Gästen, damit diese beitreten können.",
     tabsAria: "Bereiche der Veranstaltung",
+    myEvents: "Meine Veranstaltungen",
+    memoriesCount: "{count} Erinnerungen",
+    guestsCount: "{count} Gäste",
   },
 
   overview: {
@@ -322,6 +334,11 @@ export const APP_UI_DE: AppUiDict = {
       "Entfernt den Eintrag und löscht die Datei. Das kann nicht rückgängig gemacht werden.",
     title: "Galerie",
     subtitle: "Hochgeladene Fotos & Videos durchsuchen",
+    spotlightLabel: "Foto des Tages",
+    addMemory: "Erinnerung hinzufügen",
+    addMemoryHint: "Tippen zum Hochladen — oder Datei hier ablegen",
+    memoriesCount: "{count} Erinnerungen",
+    guestsCount: "{count} Gäste",
     filterAria: "Nach Medientyp filtern",
     filterAll: "Alle",
     filterPhotos: "Fotos",
@@ -336,6 +353,9 @@ export const APP_UI_DE: AppUiDict = {
     downloadPhotoFail: "Download nicht möglich.",
     downloadFailedWithStatus: "Download fehlgeschlagen ({status}).",
     deleteBusy: "…",
+    emptyGuest: "Noch keine Medien — lade als Erste:r hoch!",
+    openPhotoAria: "Foto im Vollbild öffnen",
+    uploadedByYouAria: "Dein Upload",
     zipExportCardEyebrow: "Primär‑Organisation",
     zipExportTitle: "ZIP‑Sammelexport",
     zipExportBlurb:
