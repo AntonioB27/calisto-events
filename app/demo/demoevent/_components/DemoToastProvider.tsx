@@ -15,7 +15,7 @@ export function useDemoToast() {
 
 export function DemoToastProvider({ children }: { children: React.ReactNode }) {
   const [visible, setVisible] = useState(false);
-  const timerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const timerRef = useRef<number | null>(null);
 
   const triggerDemoToast = useCallback(() => {
     if (timerRef.current !== null) window.clearTimeout(timerRef.current);
