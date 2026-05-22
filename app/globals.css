@@ -1841,7 +1841,7 @@ html[data-theme="dark"] .welcome-card {
 }
 
 .welcome-btn--join .welcome-btn__inner {
-  justify-content: space-between;
+  justify-content: center;
 }
 
 html[data-theme="dark"] .welcome-btn--join {
@@ -1866,59 +1866,11 @@ html[data-theme="dark"] .welcome-btn--join {
   box-shadow: var(--app-shadow-md);
 }
 
-.welcome-btn--join .welcome-btn-chevron {
-  opacity: 0.5;
-  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease;
-  flex-shrink: 0;
-}
-
-.welcome-btn--join:hover .welcome-btn-chevron {
-  transform: translateX(3px);
-  opacity: 1;
-}
-
-/* ── Have account: pure text-link action ── */
-.welcome-btn--account {
-  background: transparent;
-  border: none;
-  color: var(--app-muted);
-  font-size: 13.5px;
-  font-weight: 500;
-  width: auto;
-  padding: 10px 14px;
-  border-radius: 8px;
-  align-self: center;
-}
-
-.welcome-btn--account .welcome-btn__inner {
-  gap: 7px;
-  width: auto;
-}
-
-.welcome-btn--account:hover {
-  color: var(--app-text);
-  background: color-mix(in srgb, var(--app-text) 5%, transparent);
-  transform: none;
-}
-
-.welcome-btn--account .welcome-btn-arrow {
-  opacity: 0.40;
-  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease;
-  flex-shrink: 0;
-}
-
-.welcome-btn--account:hover .welcome-btn-arrow {
-  transform: translateX(3px);
-  opacity: 1;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .welcome-btn { transition: none; }
   .welcome-btn--create::after { animation: none !important; }
   .welcome-btn--create:hover { transform: none; }
   .welcome-btn--join:hover { transform: none; }
-  .welcome-btn--join .welcome-btn-chevron,
-  .welcome-btn--account .welcome-btn-arrow { transition: none; }
 }
 
 /* ════════ Auth page — bespoke button overrides ════════ */
