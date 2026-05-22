@@ -3,7 +3,7 @@
 import { normalizeAccessCode } from "@/lib/access-code";
 import { decodeJoinCodeFromScan } from "@/lib/join-code-from-scan";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
 
@@ -38,12 +38,22 @@ function parseDatePreview(dateStr: string | null) {
 export function JoinCodeForm({ isLoggedIn }: { isLoggedIn: boolean }) {
   const ui = useAppUi();
   const router = useRouter();
+  const [isDark, setIsDark] = useState(false);
   const [stage, setStage] = useState<"enter" | "scan" | "choice">("enter");
   const [code, setCode] = useState("");
   const [resolvedCode, setResolvedCode] = useState("");
   const [preview, setPreview] = useState<JoinPreview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    const obs = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
 
   async function fetchJoinPreview(normalized: string, source: "form" | "scan"): Promise<boolean> {
     setLoadingPreview(true);
@@ -199,11 +209,11 @@ export function JoinCodeForm({ isLoggedIn }: { isLoggedIn: boolean }) {
       <div
         style={{
           width: '100%',
-          background: 'rgba(255,255,255,0.62)',
+          background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.62)',
           backdropFilter: 'blur(14px)',
           WebkitBackdropFilter: 'blur(14px)',
-          border: '1px solid rgba(255,255,255,0.78)',
-          boxShadow: '0 10px 30px -8px rgba(40,25,15,0.18), inset 0 1px 0 rgba(255,255,255,0.7)',
+          border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.78)',
+          boxShadow: isDark ? '0 10px 30px -8px rgba(0,0,0,0.4)' : '0 10px 30px -8px rgba(40,25,15,0.18), inset 0 1px 0 rgba(255,255,255,0.7)',
           borderRadius: 20,
           padding: '24px 20px',
         }}
@@ -244,7 +254,7 @@ export function JoinCodeForm({ isLoggedIn }: { isLoggedIn: boolean }) {
                 fontFamily: 'var(--font-mono, ui-monospace)',
                 textAlign: 'center',
                 letterSpacing: '0.14em',
-                background: 'rgba(255,255,255,0.85)',
+                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.85)',
                 border: `2px dashed ${code.length > 5 ? GOLD : 'var(--app-border)'}`,
                 borderRadius: 12,
                 color: 'var(--app-text)',
@@ -377,12 +387,12 @@ export function JoinCodeForm({ isLoggedIn }: { isLoggedIn: boolean }) {
                 }}
               />
               <div style={{
-                background: 'rgba(255,255,255,0.88)',
-                border: '1px solid rgba(255,255,255,0.78)',
+                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.88)',
+                border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.78)',
                 borderRadius: 14,
                 padding: '16px 16px 18px',
                 textAlign: 'left',
-                boxShadow: '0 4px 16px rgba(40,25,15,0.12)',
+                boxShadow: isDark ? '0 4px 16px rgba(0,0,0,0.3)' : '0 4px 16px rgba(40,25,15,0.12)',
                 position: 'relative',
               }}>
                 {/* Gold accent strip */}
