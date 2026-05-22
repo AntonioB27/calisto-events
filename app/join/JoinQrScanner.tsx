@@ -136,7 +136,7 @@ export function JoinQrScanner({ strings, disabled, onRawScan, onBack }: Props) {
           margin: 0,
           fontFamily: "var(--font-display)",
           fontStyle: "italic",
-          fontSize: 13,F
+          fontSize: 13,
           color: "var(--app-muted)",
           lineHeight: 1.5,
         }}
