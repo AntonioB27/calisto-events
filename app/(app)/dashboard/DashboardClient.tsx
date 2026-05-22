@@ -12,26 +12,40 @@ import { interpolate } from "@/lib/app-ui";
 import { loadSavedOrder, mergeWithSavedOrder } from "@/lib/my-events-order";
 import { loadHiddenEventIds } from "@/lib/my-events-visibility";
 
-// ── Editorial Almanac palette ─────────────────────────────────────────────────
-const INK     = '#221509';
-const INK_S   = '#5A4A36';
-const MUTED   = '#9A8570';
+// ── Editorial Almanac palette (brand accents — stable across modes) ───────────
+const INK     = '#221509';   // light-mode only; use TEXT for dynamic text color
+const INK_S   = '#5A4A36';   // light-mode only; use TEXT_S for dynamic text color
+const MUTED   = '#9A8570';   // light-mode only; use MUTED_T for dynamic text color
 const GOLD    = '#C5922A';
 const GOLD_DK = '#A37118';
 const PURPLE  = '#5B2D8E';
-const BORDER  = '#DDD4C5';
+const BORDER  = '#DDD4C5';   // light-mode only; use DIVIDER for dynamic border color
 const GOLD_FOIL = 'linear-gradient(135deg, #E6BF66 0%, #C5922A 45%, #F4D88F 70%, #946C18 100%)';
+
+// Theme-responsive values via CSS custom properties
+const TEXT    = 'var(--app-text)';
+const TEXT_S  = 'var(--app-text-sub)';
+const MUTED_T = 'var(--app-muted)';
+const DIVIDER = 'var(--app-border)';
 
 const FB = "'DM Sans', sans-serif";
 const FS = "'DM Serif Display', serif";
 const FM = "'Caveat', cursive";
 
-const glass = {
+const GLASS_LIGHT = {
   background: 'rgba(255,255,255,0.62)',
   backdropFilter: 'blur(14px)',
   WebkitBackdropFilter: 'blur(14px)',
   border: '1px solid rgba(255,255,255,0.78)',
   boxShadow: '0 10px 30px -8px rgba(40,25,15,0.18), inset 0 1px 0 rgba(255,255,255,0.7)',
+} as React.CSSProperties;
+
+const GLASS_DARK = {
+  background: 'rgba(255,255,255,0.06)',
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  boxShadow: '0 10px 30px -8px rgba(0,0,0,0.4)',
 } as React.CSSProperties;
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -63,9 +77,9 @@ function roleBannerBg(role: DashboardEventRow['membershipRole']): string {
 // ── Micro components ───────────────────────────────────────────────────────────
 function SectionMark({ n, label, trailing }: { n: string; label: string; trailing?: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, paddingBottom: 6, borderBottom: `1px solid ${BORDER}` }}>
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, paddingBottom: 6, borderBottom: `1px solid ${DIVIDER}` }}>
       <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 26, color: GOLD, letterSpacing: '-0.02em', lineHeight: 1 }}>{n}</span>
-      <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: INK_S, fontFamily: FB }}>{label}</span>
+      <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: TEXT_S, fontFamily: FB }}>{label}</span>
       <span style={{ flex: 1 }} />
       {trailing}
     </div>
@@ -75,7 +89,7 @@ function SectionMark({ n, label, trailing }: { n: string; label: string; trailin
 function planStyle(tier: string): { bg: string; border: string; color: string; shadow: string } {
   switch (tier) {
     case 'free':
-      return { bg: 'transparent', border: `1px solid ${MUTED}55`, color: MUTED, shadow: 'none' };
+      return { bg: 'transparent', border: `1px solid ${MUTED}55`, color: MUTED_T, shadow: 'none' };
     case 'standard':
       return { bg: 'linear-gradient(135deg,#4A8CB8 0%,#2D6A96 50%,#5BAACE 100%)', border: 'none', color: '#fff', shadow: 'inset 0 1px 0 rgba(255,255,255,0.35),0 1px 2px rgba(45,106,150,0.3)' };
     case 'plus':
@@ -121,10 +135,10 @@ function RoleChip({ role, label }: { role: DashboardEventRow['membershipRole']; 
 
 function DateStamp({ mon, day, year, accent, compact }: { mon: string; day: number; year: number; accent: string; compact?: boolean }) {
   return (
-    <div style={{ width: compact ? 48 : 60, flexShrink: 0, textAlign: 'center', fontFamily: FB, borderRight: `1px dashed ${BORDER}`, paddingRight: compact ? 10 : 12 }}>
-      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: MUTED }}>{mon}</div>
+    <div style={{ width: compact ? 48 : 60, flexShrink: 0, textAlign: 'center', fontFamily: FB, borderRight: `1px dashed ${DIVIDER}`, paddingRight: compact ? 10 : 12 }}>
+      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: MUTED_T }}>{mon}</div>
       <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: compact ? 32 : 42, lineHeight: 0.9, color: accent, letterSpacing: '-0.03em', marginTop: 1 }}>{day}</div>
-      <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 10.5, color: MUTED, marginTop: 1 }}>{year}</div>
+      <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 10.5, color: MUTED_T, marginTop: 1 }}>{year}</div>
     </div>
   );
 }
@@ -139,7 +153,7 @@ function ArrowIcon({ size = 13, color = '#fff' }: { size?: number; color?: strin
 
 
 // ── Featured event card ────────────────────────────────────────────────────────
-function FeaturedEvent({ event, onOpen, roleLabel }: { event: DashboardEventRow; onOpen: () => void; roleLabel: string }) {
+function FeaturedEvent({ event, onOpen, roleLabel, glassStyle }: { event: DashboardEventRow; onOpen: () => void; roleLabel: string; glassStyle: React.CSSProperties }) {
   const { emoji: storedEmoji, name } = splitEventTitleStored(String(event.title));
   const emoji = displayNavEmoji(storedEmoji);
   const date = parseDateDisplay(event.event_date);
@@ -148,7 +162,7 @@ function FeaturedEvent({ event, onOpen, roleLabel }: { event: DashboardEventRow;
   return (
     <div onClick={onOpen} role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onOpen(); }} style={{ marginTop: 14, cursor: 'pointer' }}>
       {/* Banner */}
-      <div style={{ ...glass, borderRadius: 14, overflow: 'hidden', position: 'relative', height: 128 }}>
+      <div style={{ ...glassStyle, borderRadius: 14, overflow: 'hidden', position: 'relative', height: 128 }}>
         <div style={{ position: 'absolute', inset: 0, background: roleBannerBg(event.membershipRole) }} />
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,0.12) 0 2px,transparent 2px 12px)' }} />
         {/* big emoji */}
@@ -170,7 +184,7 @@ function FeaturedEvent({ event, onOpen, roleLabel }: { event: DashboardEventRow;
         {date && <DateStamp mon={date.mon} day={date.day} year={date.year} accent={accent} />}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: MUTED, fontFamily: FB }}>Most recent</div>
-          <h2 style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 24, lineHeight: 1.05, color: INK, letterSpacing: '-0.015em', marginTop: 4 }}>{name}</h2>
+          <h2 style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 24, lineHeight: 1.05, color: TEXT, letterSpacing: '-0.015em', marginTop: 4 }}>{name}</h2>
         </div>
       </div>
     </div>
@@ -178,25 +192,25 @@ function FeaturedEvent({ event, onOpen, roleLabel }: { event: DashboardEventRow;
 }
 
 // ── Compact event row ──────────────────────────────────────────────────────────
-function CompactEventRow({ event, onOpen, roleLabel, last }: { event: DashboardEventRow; onOpen: () => void; roleLabel: string; last: boolean }) {
+function CompactEventRow({ event, onOpen, roleLabel, last, isDark }: { event: DashboardEventRow; onOpen: () => void; roleLabel: string; last: boolean; isDark: boolean }) {
   const { emoji: storedEmoji, name } = splitEventTitleStored(String(event.title));
   const emoji = displayNavEmoji(storedEmoji);
   const date = parseDateDisplay(event.event_date);
   const accent = roleAccent(event.membershipRole);
 
   return (
-    <div onClick={onOpen} role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onOpen(); }} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: last ? 'none' : `1px dashed ${BORDER}`, cursor: 'pointer' }}>
+    <div onClick={onOpen} role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onOpen(); }} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: last ? 'none' : `1px dashed ${DIVIDER}`, cursor: 'pointer' }}>
       {date && <DateStamp mon={date.mon} day={date.day} year={date.year} accent={accent} compact />}
-      <div style={{ width: 40, height: 40, flexShrink: 0, borderRadius: 10, background: `${accent}18`, border: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)' }}>{emoji}</div>
+      <div style={{ width: 40, height: 40, flexShrink: 0, borderRadius: 10, background: `${accent}18`, border: `1px solid ${DIVIDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12)' }}>{emoji}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 18, lineHeight: 1.05, color: INK, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</div>
+        <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 18, lineHeight: 1.05, color: TEXT, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5, flexWrap: 'wrap' }}>
           <RoleChip role={event.membershipRole} label={roleLabel} />
           <PlanStamp tier={event.plan} size="sm" />
         </div>
       </div>
-      <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(255,255,255,0.7)', border: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <ArrowIcon size={11} color={INK_S} />
+      <div style={{ width: 26, height: 26, borderRadius: '50%', background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.7)', border: `1px solid ${DIVIDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <ArrowIcon size={11} color={isDark ? '#c4b49e' : INK_S} />
       </div>
     </div>
   );
@@ -213,11 +227,21 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
   const ui = useAppUi();
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [orderIds, setOrderIds] = useState<string[]>([]);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     startTransition(() => setHiddenIds(new Set(loadHiddenEventIds(organizerId))));
     startTransition(() => setOrderIds(loadSavedOrder(organizerId)));
   }, [organizerId]);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    const obs = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
 
   const orderedEvents = useMemo(() => mergeWithSavedOrder(events, orderIds), [events, orderIds]);
   const visibleEvents = useMemo(() => orderedEvents.filter((e) => !hiddenIds.has(e.id)), [orderedEvents, hiddenIds]);
@@ -255,19 +279,20 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
         </div>
 
         <h1 style={{ marginTop: 12, lineHeight: 0.95, letterSpacing: '-0.025em', paddingRight: 96 }}>
-          <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 48, color: INK }}>Hello,{' '}</span>
+          <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 48, color: TEXT }}>Hello,{' '}</span>
           <span style={{ fontFamily: FM, fontWeight: 700, color: PURPLE, fontSize: 54 }}>{userName}</span>
           <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 48, color: GOLD }}>.</span>
         </h1>
 
-        <p style={{ marginTop: 10, fontFamily: FS, fontStyle: 'italic', fontSize: 14, color: INK_S, lineHeight: 1.45 }}>
+        <p style={{ marginTop: 10, fontFamily: FS, fontStyle: 'italic', fontSize: 14, color: TEXT_S, lineHeight: 1.45 }}>
           {ui.dashboard.subtitle}
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9, marginTop: 16 }}>
           <Link href="/join" style={{
-            background: 'rgba(255,255,255,0.55)', border: `1px solid ${BORDER}`,
-            color: PURPLE, padding: '12px 10px', borderRadius: 11,
+            background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)',
+            border: `1px solid ${DIVIDER}`,
+            color: 'var(--app-purple)', padding: '12px 10px', borderRadius: 11,
             fontFamily: FB, fontSize: 13, fontWeight: 600,
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
             textDecoration: 'none',
@@ -300,14 +325,14 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
               </span>
             }
           />
-          <FeaturedEvent event={featured} onOpen={() => handleOpen(featured)} roleLabel={getRoleLabel(featured.membershipRole)} />
+          <FeaturedEvent event={featured} onOpen={() => handleOpen(featured)} roleLabel={getRoleLabel(featured.membershipRole)} glassStyle={isDark ? GLASS_DARK : GLASS_LIGHT} />
           {rest.length > 0 && (
             <div style={{ marginTop: 18 }}>
-              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: MUTED, fontFamily: FB, marginBottom: 8 }}>
+              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: MUTED_T, fontFamily: FB, marginBottom: 8 }}>
                 Earlier this season
               </div>
               {rest.map((ev, i) => (
-                <CompactEventRow key={ev.id} event={ev} onOpen={() => handleOpen(ev)} roleLabel={getRoleLabel(ev.membershipRole)} last={i === rest.length - 1} />
+                <CompactEventRow key={ev.id} event={ev} onOpen={() => handleOpen(ev)} roleLabel={getRoleLabel(ev.membershipRole)} last={i === rest.length - 1} isDark={isDark} />
               ))}
             </div>
           )}
@@ -316,10 +341,10 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
 
       {/* ── Empty state ──────────────────────────────────────────── */}
       {isEmpty && (
-        <div style={{ ...glass, borderRadius: 18, padding: '32px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        <div style={{ ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 18, padding: '32px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/mascot/aurora_key.png" alt="" style={{ width: 88, height: 132, objectFit: 'contain' }} />
-          <p style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 15, color: MUTED, textAlign: 'center', lineHeight: 1.6, margin: 0 }}>
+          <p style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 15, color: MUTED_T, textAlign: 'center', lineHeight: 1.6, margin: 0 }}>
             {ui.dashboard.emptyHint}
           </p>
           <Link href="/events/new" style={{
@@ -361,7 +386,7 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
               </div>
             </div>
           </div>
-          <div style={{ marginTop: 20, textAlign: 'center', fontFamily: FS, fontStyle: 'italic', fontSize: 11.5, color: MUTED }}>
+          <div style={{ marginTop: 20, textAlign: 'center', fontFamily: FS, fontStyle: 'italic', fontSize: 11.5, color: MUTED_T }}>
             Vol. I · Calisto
           </div>
         </div>
