@@ -10,22 +10,29 @@ import { canGuestUpload, type PlanId } from "@/lib/plan-limits";
 import { displayNavEmoji, splitEventTitleStored } from "@/lib/event-title";
 
 // ── Editorial Almanac palette (matches dashboard) ─────────────────────────────
-const INK_S  = '#5A4A36';
-const MUTED  = '#9A8570';
+const TEXT_S = 'var(--app-text-sub)';
+const MUTED  = 'var(--app-muted)';
 const GOLD   = '#C5922A';
 const GOLD_DK = '#A37118';
 const PURPLE = '#5B2D8E';
-const BORDER = '#DDD4C5';
+const BORDER = 'var(--app-border)';
 const RUST   = '#B5461B';
 const FB = "'DM Sans', sans-serif";
 const FS = "'DM Serif Display', serif";
 
-const glass: React.CSSProperties = {
+const GLASS_LIGHT: React.CSSProperties = {
   background: 'rgba(255,255,255,0.62)',
   backdropFilter: 'blur(14px)',
   WebkitBackdropFilter: 'blur(14px)',
   border: '1px solid rgba(255,255,255,0.78)',
   boxShadow: '0 10px 30px -8px rgba(40,25,15,0.18), inset 0 1px 0 rgba(255,255,255,0.7)',
+};
+const GLASS_DARK: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.06)',
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  boxShadow: '0 10px 30px -8px rgba(0,0,0,0.4)',
 };
 
 function parseDateDisplay(dateStr: string | null | undefined) {
@@ -74,12 +81,22 @@ export function GuestEventPage({
   eventDate,
 }: GuestEventPageProps) {
   const ui = useAppUi();
+  const [isDark, setIsDark] = useState(false);
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [membershipReady, setMembershipReady] = useState(false);
   const [membershipRpcError, setMembershipRpcError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [canManageEvent, setCanManageEvent] = useState(false);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    const obs = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
 
   useEffect(() => {
     const supabase = maybeCreateSupabaseBrowserClient();
@@ -216,7 +233,7 @@ export function GuestEventPage({
         {/* Nav */}
         {hasSession ? (
           <nav aria-label={ui.guestJoin.signedInNavAria} style={{ marginBottom: 18, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-            <Link href="/dashboard" style={{ background: 'rgba(255,255,255,0.55)', border: `1px solid ${BORDER}`, color: PURPLE, padding: '7px 12px', borderRadius: 9, fontFamily: FB, fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+            <Link href="/dashboard" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)', border: `1px solid ${BORDER}`, color: PURPLE, padding: '7px 12px', borderRadius: 9, fontFamily: FB, fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
               ← {ui.guestJoin.myEvents}
             </Link>
             {canManageEvent ? (
@@ -228,7 +245,7 @@ export function GuestEventPage({
         ) : null}
 
         {/* Event hero banner */}
-        <div style={{ ...glass, borderRadius: 14, overflow: 'hidden', position: 'relative', height: 128, marginBottom: 0 }}>
+        <div style={{ ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 14, overflow: 'hidden', position: 'relative', height: 128, marginBottom: 0 }}>
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg,rgba(197,146,42,0.22),rgba(91,45,142,0.14))' }} />
           <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,0.12) 0 2px,transparent 2px 12px)' }} />
           {/* Big emoji */}
@@ -253,7 +270,7 @@ export function GuestEventPage({
             </div>
           )}
           <div style={{ flex: 1, paddingTop: parsedDate ? 4 : 0 }}>
-            <p style={{ margin: 0, fontFamily: FS, fontStyle: 'italic', fontSize: 14, color: INK_S, lineHeight: 1.5 }}>
+            <p style={{ margin: 0, fontFamily: FS, fontStyle: 'italic', fontSize: 14, color: TEXT_S, lineHeight: 1.5 }}>
               {ui.guestJoin.tagline}
             </p>
           </div>

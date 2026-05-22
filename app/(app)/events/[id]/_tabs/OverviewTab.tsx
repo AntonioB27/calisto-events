@@ -1,8 +1,8 @@
 "use client";
 
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import QRCode from "react-qr-code";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { Camera, Clapperboard, Users } from "lucide-react";
 
 import { useAppUi } from "@/components/AppUiProvider";
@@ -18,25 +18,35 @@ import {
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 // ── Aurora Theater palette ────────────────────────────────────────────────────
-const INK    = '#221509';
-const INK_S  = '#5A4A36';
-const MUTED  = '#9A8570';
 const GOLD   = '#C5922A';
 const PURPLE = '#5B2D8E';
 const RUST   = '#D17A2A';
-const BORDER = '#DDD4C5';
 const GOLD_FOIL = 'linear-gradient(135deg, #E6BF66 0%, #C5922A 45%, #F4D88F 70%, #946C18 100%)';
+
+const TEXT   = 'var(--app-text)';
+const TEXT_S = 'var(--app-text-sub)';
+const MUTED  = 'var(--app-muted)';
+const BORDER = 'var(--app-border)';
 
 const FB = "'DM Sans', sans-serif";
 const FS = "'DM Serif Display', serif";
 
-const glass = {
+const GLASS_LIGHT: React.CSSProperties = {
   background: 'rgba(255,255,255,0.62)',
   backdropFilter: 'blur(14px)',
   WebkitBackdropFilter: 'blur(14px)',
   border: '1px solid rgba(255,255,255,0.78)',
   boxShadow: '0 10px 30px -8px rgba(40,25,15,0.18), inset 0 1px 0 rgba(255,255,255,0.7)',
-} as React.CSSProperties;
+};
+const GLASS_DARK: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.06)',
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  boxShadow: '0 10px 30px -8px rgba(0,0,0,0.4)',
+};
+
+const DarkCtx = React.createContext(false);
 
 // ── Types and helpers ─────────────────────────────────────────────────────────
 export type OverviewTabProps = Readonly<{
@@ -111,10 +121,11 @@ function ArcGaugeCard({
   isEnded?: boolean;
   endedLabel?: string;
 }) {
+  const isDark = React.useContext(DarkCtx);
 
   return (
     <div style={{
-      ...glass,
+      ...(isDark ? GLASS_DARK : GLASS_LIGHT),
       borderRadius: 18,
       padding: '14px 14px 12px',
       display: 'flex',
@@ -191,12 +202,13 @@ function StatusRibbon({
   adminRoleLabel: string;
 }) {
   const ui = useAppUi();
+  const isDark = React.useContext(DarkCtx);
   const cal = parseDateParts(eventDate);
   const planName = ui.plans[planId];
 
   return (
     <div style={{
-      ...glass, borderRadius: 18,
+      ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 18,
       padding: '12px 14px',
       display: 'grid',
       gridTemplateColumns: '1.4fr 1px 1fr 1px 1fr',
@@ -208,9 +220,9 @@ function StatusRibbon({
         <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: MUTED, fontFamily: FB }}>Event date</div>
         {cal ? (
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
-            <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 30, color: INK, letterSpacing: '-0.02em', lineHeight: 1 }}>{cal.day}</span>
+            <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 30, color: TEXT, letterSpacing: '-0.02em', lineHeight: 1 }}>{cal.day}</span>
             <div>
-              <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 12, color: INK, fontWeight: 400, lineHeight: 1 }}>{cal.month}</div>
+              <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 12, color: TEXT, fontWeight: 400, lineHeight: 1 }}>{cal.month}</div>
               <div style={{ fontSize: 9.5, color: MUTED, fontWeight: 600, marginTop: 2, fontFamily: FB }}>{cal.year} · {cal.weekday}</div>
             </div>
           </div>
@@ -317,9 +329,10 @@ function StatTile({
   isMuted?: boolean;
   aside: React.ReactNode;
 }) {
+  const isDark = React.useContext(DarkCtx);
   return (
     <div style={{
-      ...glass, borderRadius: 16,
+      ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 16,
       padding: '12px 10px 12px 12px',
       display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
       minHeight: 116, position: 'relative', overflow: 'hidden',
@@ -327,7 +340,7 @@ function StatTile({
       <div style={{ position: 'absolute', top: -30, right: -30, width: 80, height: 80, borderRadius: '50%', background: accent, opacity: isMuted ? 0.04 : 0.1, filter: 'blur(20px)', pointerEvents: 'none' }} />
       <div>
         <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 44, color: accent, letterSpacing: '-0.04em', lineHeight: 0.85 }}>{n}</div>
-        <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 14, fontWeight: 400, color: INK, marginTop: 4 }}>{label}</div>
+        <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 14, fontWeight: 400, color: TEXT, marginTop: 4 }}>{label}</div>
         <div style={{ fontSize: 8.5, color: MUTED, fontWeight: 600, marginTop: 1, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: FB }}>{cap}</div>
       </div>
       <div style={{ alignSelf: 'flex-end' }}>{aside}</div>
@@ -369,7 +382,7 @@ function StatsTiles({ eventId, planId }: { eventId: string; planId: ReturnType<t
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
-        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: INK_S, fontFamily: FB }}>Statistics</div>
+        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: TEXT_S, fontFamily: FB }}>Statistics</div>
         {!supabase && <div style={{ fontSize: 10.5, color: MUTED, fontFamily: FB }}>{ui.common.loadCountsHint}</div>}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 8 }}>
@@ -384,6 +397,7 @@ function StatsTiles({ eventId, planId }: { eventId: string; planId: ReturnType<t
 // ── Access code card ──────────────────────────────────────────────────────────
 function AccessCard({ accessCode, publicOrigin }: { accessCode: string; publicOrigin: string }) {
   const ui = useAppUi();
+  const isDark = React.useContext(DarkCtx);
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
   const joinUrl = useMemo(() => getWebJoinUrl(publicOrigin, accessCode), [publicOrigin, accessCode]);
@@ -397,26 +411,28 @@ function AccessCard({ accessCode, publicOrigin }: { accessCode: string; publicOr
   return (
     <div style={{
       position: 'relative', borderRadius: 20, padding: '18px 16px 16px',
-      background: 'linear-gradient(140deg, rgba(139,79,216,0.18), rgba(197,146,42,0.12) 60%, transparent), rgba(255,255,255,0.72)',
+      background: isDark
+        ? 'linear-gradient(140deg, rgba(139,79,216,0.3), rgba(197,146,42,0.18) 60%, transparent), rgba(255,255,255,0.06)'
+        : 'linear-gradient(140deg, rgba(139,79,216,0.18), rgba(197,146,42,0.12) 60%, transparent), rgba(255,255,255,0.72)',
       backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
-      border: '1px solid rgba(255,255,255,0.78)',
-      boxShadow: '0 14px 32px -10px rgba(40,25,15,0.22), inset 0 1px 0 rgba(255,255,255,0.7)',
+      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.78)',
+      boxShadow: isDark ? '0 14px 32px -10px rgba(0,0,0,0.5)' : '0 14px 32px -10px rgba(40,25,15,0.22), inset 0 1px 0 rgba(255,255,255,0.7)',
       overflow: 'hidden',
     }}>
       {/* aurora glow blob */}
       <div style={{ position: 'absolute', bottom: -40, right: -30, width: 140, height: 140, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,79,216,0.5), transparent 65%)', filter: 'blur(8px)', pointerEvents: 'none' }} />
 
-      <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: INK_S, fontFamily: FB, position: 'relative' }}>
+      <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: TEXT_S, fontFamily: FB, position: 'relative' }}>
         {ui.overview.accessCodeTitle}
       </div>
 
       <div style={{
         marginTop: 12, padding: '14px 16px',
-        background: 'rgba(255,255,255,0.88)',
+        background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.88)',
         border: `1px dashed ${BORDER}`,
         borderRadius: 12,
         fontFamily: 'var(--font-mono, ui-monospace)',
-        fontSize: 20, fontWeight: 700, color: INK,
+        fontSize: 20, fontWeight: 700, color: TEXT,
         letterSpacing: '0.12em', textAlign: 'center',
         position: 'relative',
       }}>
@@ -428,9 +444,9 @@ function AccessCard({ accessCode, publicOrigin }: { accessCode: string; publicOr
           type="button"
           onClick={() => void copy()}
           style={{
-            background: copied ? 'rgba(197,146,42,0.15)' : 'rgba(255,255,255,0.9)',
+            background: copied ? 'rgba(197,146,42,0.15)' : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.9)',
             border: `1px solid ${copied ? GOLD : BORDER}`,
-            color: copied ? GOLD : INK,
+            color: copied ? GOLD : TEXT,
             padding: '11px 12px', borderRadius: 12,
             fontFamily: FB, fontSize: 13, fontWeight: 600,
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
@@ -456,7 +472,7 @@ function AccessCard({ accessCode, publicOrigin }: { accessCode: string; publicOr
       </div>
 
       {showQR && (
-        <div style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 12, padding: 20, marginTop: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, border: `1px solid ${BORDER}`, position: 'relative' }}>
+        <div style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.92)', borderRadius: 12, padding: 20, marginTop: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, border: `1px solid ${BORDER}`, position: 'relative' }}>
           <div className="qr-frame qr-reveal">
             <QRCode value={joinUrl} size={168} />
           </div>
@@ -475,6 +491,7 @@ function AccessCard({ accessCode, publicOrigin }: { accessCode: string; publicOr
 // ── Photo carousel ────────────────────────────────────────────────────────────
 function PhotoCarousel({ eventId }: { eventId: string }) {
   const ui = useAppUi();
+  const isDark = React.useContext(DarkCtx);
   const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
   const [urls, setUrls] = useState<{ id: string; signedUrl: string | undefined }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -528,8 +545,8 @@ function PhotoCarousel({ eventId }: { eventId: string }) {
           <img src="/brand/mascot/aurora_camera.png" alt="Aurora" style={{ width: 44, height: 44, objectFit: 'contain', position: 'relative' }} />
         </div>
         <div>
-          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: INK_S, fontFamily: FB }}>{ui.overview.recentPhotos}</div>
-          <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 18, color: INK, marginTop: 1 }}>The latest six</div>
+          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: TEXT_S, fontFamily: FB }}>{ui.overview.recentPhotos}</div>
+          <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 18, color: TEXT, marginTop: 1 }}>The latest six</div>
         </div>
       </div>
 
@@ -538,17 +555,17 @@ function PhotoCarousel({ eventId }: { eventId: string }) {
       ) : !supabase ? (
         <p style={{ fontSize: 13, color: MUTED, fontFamily: FB }}>{ui.common.configuringSupabase}</p>
       ) : urls.length === 0 ? (
-        <div style={{ ...glass, borderRadius: 18, padding: '24px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+        <div style={{ ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 18, padding: '24px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
           <p style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 13, color: MUTED, textAlign: 'center', lineHeight: 1.6, margin: 0 }}>
             {ui.overview.noPhotosHint}
           </p>
-          <Link href="?tab=gallery" style={{ background: 'rgba(255,255,255,0.9)', border: `1px solid ${BORDER}`, color: INK, padding: '9px 18px', borderRadius: 10, fontFamily: FB, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+          <Link href="?tab=gallery" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.9)', border: `1px solid ${BORDER}`, color: TEXT, padding: '9px 18px', borderRadius: 10, fontFamily: FB, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
             {ui.overview.openGalleryBtn}
           </Link>
         </div>
       ) : (
         <>
-          <div style={{ ...glass, borderRadius: 18, padding: 10 }}>
+          <div style={{ ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 18, padding: 10 }}>
             {/* Spotlight */}
             {spotlight && (
               <Link href="?tab=gallery" style={{ display: 'block', borderRadius: 12, overflow: 'hidden', marginBottom: 6, position: 'relative', textDecoration: 'none' }}>
@@ -588,7 +605,7 @@ function PhotoCarousel({ eventId }: { eventId: string }) {
             href="?tab=gallery"
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-              marginTop: 10, background: 'transparent', border: `1px solid ${BORDER}`,
+              marginTop: 10, background: 'transparent', border: `1px solid var(--app-border)`,
               color: PURPLE, padding: '11px 12px', borderRadius: 12,
               fontFamily: FB, fontSize: 13, fontWeight: 600, textDecoration: 'none',
               boxSizing: 'border-box' as const,
@@ -616,22 +633,34 @@ export function OverviewTab({
   adminRoleLabel,
 }: OverviewTabProps) {
   const planId = normalizePlanId(plan);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    const obs = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
 
   return (
-    <div
-      className="welcome-reveal"
-      style={{
-        padding: '18px 16px 40px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 16,
-      }}
-    >
-      <StatusRibbon eventDate={eventDate} planId={planId} adminRoleLabel={adminRoleLabel} />
-      <CountdownGauges eventDate={eventDate} planId={planId} scheduledDeletionAt={scheduledDeletionAt} />
-      <StatsTiles eventId={eventId} planId={planId} />
-      <AccessCard accessCode={accessCode} publicOrigin={publicOrigin} />
-      <PhotoCarousel eventId={eventId} />
-    </div>
+    <DarkCtx.Provider value={isDark}>
+      <div
+        className="welcome-reveal"
+        style={{
+          padding: '18px 16px 40px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+        }}
+      >
+        <StatusRibbon eventDate={eventDate} planId={planId} adminRoleLabel={adminRoleLabel} />
+        <CountdownGauges eventDate={eventDate} planId={planId} scheduledDeletionAt={scheduledDeletionAt} />
+        <StatsTiles eventId={eventId} planId={planId} />
+        <AccessCard accessCode={accessCode} publicOrigin={publicOrigin} />
+        <PhotoCarousel eventId={eventId} />
+      </div>
+    </DarkCtx.Provider>
   );
 }
