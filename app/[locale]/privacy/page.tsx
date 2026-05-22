@@ -24,6 +24,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PrivacyPage({ params }: Props) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+  const copy = getLandingCopy(locale);
 
-  return <LegalDocPage locale={locale} title="Privacy Policy" sections={PRIVACY_SECTIONS} />;
+  return (
+    <LegalDocPage
+      locale={locale}
+      title={copy.footerPrivacy}
+      englishNotice={copy.legalEnglishNotice || undefined}
+      sections={PRIVACY_SECTIONS}
+    />
+  );
 }

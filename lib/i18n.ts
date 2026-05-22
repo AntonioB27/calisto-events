@@ -138,6 +138,7 @@ export type LandingCopy = {
   footerText: string;
   footerPrivacy: string;
   footerTerms: string;
+  legalEnglishNotice: string;
   footerRightsLine: string;
   brandIconAlt: string;
   pageTitle: string;
@@ -430,6 +431,7 @@ const copy: Record<Locale, LandingCopy> = {
     footerText: "Event media for weddings and celebrations. Questions? Join the waitlist—we'll reach out.",
     footerPrivacy: "Privacy",
     footerTerms: "Terms",
+    legalEnglishNotice: "",
     pageTitle: "Calisto — shared event photos & videos",
     pageDescription:
       "Calisto lets wedding and event guests upload and browse photos and videos together. Share a join code or QR; plan tiers set limits inside the web app — integrated payments are roadmap.",
@@ -716,6 +718,7 @@ const copy: Record<Locale, LandingCopy> = {
     footerText: "Calisto za vjenčanja i proslave. Imaš pitanje? Pridruži se listi čekanja.",
     footerPrivacy: "Privatnost",
     footerTerms: "Uvjeti",
+    legalEnglishNotice: "Pravni tekst na ovoj stranici dostupan je na engleskom jeziku.",
     pageTitle: "Calisto — zajedničke fotografije i videa događaja",
     pageDescription:
       "Calisto gostima omogućuje učitavanje i pregled fotografija i videa na jednom mjestu. Podijeli kod ili QR; paketi određuju limite u web aplikaciji — integrirana plaćanja su na roadmapu.",
@@ -1005,6 +1008,7 @@ const copy: Record<Locale, LandingCopy> = {
     footerText: "Event-Medien für Hochzeiten und Feiern. Fragen? Trag dich in die Warteliste ein.",
     footerPrivacy: "Datenschutz",
     footerTerms: "AGB",
+    legalEnglishNotice: "Der Rechtstext auf dieser Seite liegt auf Englisch vor.",
     pageTitle: "Calisto — gemeinsame Event-Fotos & Videos",
     pageDescription:
       "Calisto lässt Hochzeits- und Eventgäste Fotos und Videos gemeinsam hochladen und ansehen. Code oder QR teilen; Tarifgrenzen gelten in der Web-App — integrierte Zahlungen stehen auf der Roadmap.",

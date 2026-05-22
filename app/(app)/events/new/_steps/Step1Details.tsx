@@ -1,15 +1,55 @@
 "use client";
 
 import { useAppUi } from "@/components/AppUiProvider";
-import { AppBtn } from "@/components/app-ui/AppBtn";
-import { AppCard } from "@/components/app-ui/AppCard";
-import { AppFormRow } from "@/components/app-ui/AppFormRow";
-import { AppInput } from "@/components/app-ui/AppInput";
-import { AppPageHeader } from "@/components/app-ui/AppPageHeader";
 import { readCreateEventDraftFromStorage, writeCreateEventDraftToStorage } from "@/lib/create-event-draft";
 import type { PlanId } from "@/lib/plan-limits";
-import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
+import EmojiPicker, { type EmojiClickData, Theme } from "emoji-picker-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+
+// ── Palette ───────────────────────────────────────────────────────────────────
+const INK    = '#221509';
+const INK_S  = '#5A4A36';
+const MUTED  = '#9A8570';
+const GOLD   = '#C5922A';
+const GOLD_DK = '#A37118';
+const PURPLE = '#5B2D8E';
+const BORDER = '#DDD4C5';
+const FB = "'DM Sans', sans-serif";
+const FS = "'DM Serif Display', serif";
+
+const warmGlass: React.CSSProperties = {
+  background: 'rgba(244,240,234,0.9)',
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)',
+  border: `1px solid ${BORDER}`,
+  boxShadow: '0 8px 24px -6px rgba(40,25,15,0.14), inset 0 1px 0 rgba(255,255,255,0.8)',
+  borderRadius: 14,
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  background: 'rgba(255,255,255,0.75)',
+  border: `1.5px solid ${BORDER}`,
+  borderRadius: 9,
+  padding: '11px 13px',
+  fontFamily: FB,
+  fontSize: 15,
+  color: INK,
+  outline: 'none',
+  boxSizing: 'border-box',
+  colorScheme: 'light',
+};
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: 9.5,
+  fontWeight: 700,
+  letterSpacing: '0.22em',
+  textTransform: 'uppercase',
+  color: MUTED,
+  fontFamily: FB,
+  marginBottom: 7,
+};
 
 type Step1DetailsProps = {
   defaultName: string;
@@ -29,9 +69,7 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
   const [pickerOpen, setPickerOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    setEmoji(initialEmoji);
-  }, [initialEmoji]);
+  useEffect(() => { setEmoji(initialEmoji); }, [initialEmoji]);
 
   useEffect(() => {
     if (!pickerOpen) return;
@@ -46,32 +84,30 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
   }, [pickerOpen]);
 
   const writeStep1Draft = (name: string, date: string) => {
-    writeCreateEventDraftToStorage({
-      step: "1",
-      name,
-      emoji,
-      date,
-      planId: getPlanIdForDraft(),
-    });
+    writeCreateEventDraftToStorage({ step: "1", name, emoji, date, planId: getPlanIdForDraft() });
   };
 
   const writeStep2Draft = (name: string, date: string) => {
-    writeCreateEventDraftToStorage({
-      step: "2",
-      name,
-      emoji,
-      date,
-      planId: getPlanIdForDraft(),
-    });
+    writeCreateEventDraftToStorage({ step: "2", name, emoji, date, planId: getPlanIdForDraft() });
   };
 
   return (
     <div className="welcome-reveal welcome-reveal--d1">
-      <AppPageHeader
-        eyebrow={ui.createStep1.eyebrow}
-        title={ui.createStep1.title}
-        description={ui.createStep1.description}
-      />
+      {/* Heading */}
+      <div style={{ marginBottom: 22 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <span style={{ width: 18, height: 2, background: GOLD, borderRadius: 1, flexShrink: 0 }} />
+          <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: GOLD_DK, fontFamily: FB }}>
+            {ui.createStep1.eyebrow}
+          </span>
+        </div>
+        <h2 style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 26, color: INK, lineHeight: 1.1, letterSpacing: '-0.02em', margin: 0 }}>
+          {ui.createStep1.title}
+        </h2>
+        <p style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 14, color: INK_S, lineHeight: 1.5, marginTop: 6, marginBottom: 0 }}>
+          {ui.createStep1.description}
+        </p>
+      </div>
 
       <form
         action="/events/new"
@@ -86,148 +122,119 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
         <input type="hidden" name="step" value="2" />
         <input type="hidden" name="emoji" value={emoji} />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_260px]">
-          <AppCard pad="md" style={{ marginBottom: 0 }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            <AppFormRow label={ui.createStep1.eventTitleLabel}>
-              <AppInput
-                id="name"
-                name="name"
-                type="text"
-                defaultValue={defaultName}
-                placeholder={ui.createStep1.namePlaceholder}
-                onChange={(value) => {
-                  const dateEl = document.getElementById("date");
-                  const currentDate = dateEl instanceof HTMLInputElement ? dateEl.value : defaultDate;
-                  writeStep1Draft(value, currentDate);
-                }}
-              />
-            </AppFormRow>
-            <AppFormRow label={ui.createStep1.eventDateLabel}>
-              <AppInput
-                id="date"
-                name="date"
-                type="date"
-                defaultValue={defaultDate}
-                onChange={(value) => {
-                  const nameEl = document.getElementById("name");
-                  const currentName = nameEl instanceof HTMLInputElement ? nameEl.value : defaultName;
-                  writeStep1Draft(currentName, value);
-                }}
-              />
-            </AppFormRow>
+        {/* Name + Date card */}
+        <div style={{ ...warmGlass, padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div>
+            <label htmlFor="name" style={labelStyle}>{ui.createStep1.eventTitleLabel}</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              defaultValue={defaultName}
+              placeholder={ui.createStep1.namePlaceholder}
+              onChange={(e) => {
+                const dateEl = document.getElementById("date");
+                const currentDate = dateEl instanceof HTMLInputElement ? dateEl.value : defaultDate;
+                writeStep1Draft(e.target.value, currentDate);
+              }}
+              style={inputStyle}
+            />
           </div>
-          </AppCard>
 
-          <div ref={boxRef} style={{ position: "relative" }}>
-            <AppCard pad="md" style={{ borderRadius: 18 }}>
-              <p className="app-form-row__label" style={{ margin: 0 }}>
+          <div>
+            <label htmlFor="date" style={labelStyle}>{ui.createStep1.eventDateLabel}</label>
+            <input
+              id="date"
+              name="date"
+              type="date"
+              defaultValue={defaultDate}
+              onChange={(e) => {
+                const nameEl = document.getElementById("name");
+                const currentName = nameEl instanceof HTMLInputElement ? nameEl.value : defaultName;
+                writeStep1Draft(currentName, e.target.value);
+              }}
+              style={inputStyle}
+            />
+          </div>
+        </div>
+
+        {/* Emoji card */}
+        <div ref={boxRef} style={{ position: 'relative', marginTop: 12 }}>
+          <div style={{ ...warmGlass, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div
+              aria-label={ui.createStep1.defaultEmojiAria}
+              style={{ width: 52, height: 52, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, background: 'rgba(255,255,255,0.7)', border: `1.5px solid ${BORDER}`, flexShrink: 0 }}
+            >
+              {emoji || '📅'}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: MUTED, fontFamily: FB, margin: '0 0 8px' }}>
                 {ui.createStep1.eventIconEyebrow}
               </p>
-              <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-                <div
-                  aria-label={ui.createStep1.defaultEmojiAria}
-                  style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: 16,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 28,
-                    background: "var(--app-surface-2)",
-                    border: "1.5px solid var(--app-border)",
-                  }}
+              <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setPickerOpen(v => !v)}
+                  style={{ background: 'rgba(255,255,255,0.7)', border: `1.5px solid ${BORDER}`, color: INK_S, padding: '6px 12px', borderRadius: 8, fontFamily: FB, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
                 >
-                  {emoji || "📅"}
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
-                  <AppBtn
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPickerOpen((v) => !v)}
-                    className="w-full"
-                  >
-                    {pickerOpen ? ui.settingsTab.closePicker : ui.settingsTab.chooseEmoji}
-                  </AppBtn>
-                  <AppBtn
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setEmoji("");
-                      const nameEl = document.getElementById("name");
-                      const dateEl = document.getElementById("date");
-                      const currentName = nameEl instanceof HTMLInputElement ? nameEl.value : defaultName;
-                      const currentDate = dateEl instanceof HTMLInputElement ? dateEl.value : defaultDate;
-                      writeCreateEventDraftToStorage({
-                        step: "1",
-                        name: currentName,
-                        emoji: "",
-                        date: currentDate,
-                        planId: getPlanIdForDraft(),
-                      });
-                    }}
-                    className="w-full"
-                  >
-                    {ui.createStep1.noEmojiBtn}
-                  </AppBtn>
-                </div>
-              </div>
-
-              <p style={{ margin: "12px 0 0", fontSize: 12, color: "var(--app-subtle)", lineHeight: 1.45 }}>
-                {ui.createStep1.searchEmojiHint}
-              </p>
-            </AppCard>
-
-            {pickerOpen ? (
-              <div
-                role="dialog"
-                aria-label={ui.settingsTab.emojiPickerAria}
-                style={{
-                  position: "absolute",
-                  right: 0,
-                  top: "calc(100% + 10px)",
-                  zIndex: 20,
-                  borderRadius: 16,
-                  overflow: "hidden",
-                  border: "1.5px solid var(--app-border)",
-                  boxShadow: "var(--app-shadow-lg)",
-                  background: "var(--app-surface)",
-                }}
-              >
-                <EmojiPicker
-                  width={340}
-                  height={420}
-                  lazyLoadEmojis
-                  searchDisabled={false}
-                  skinTonesDisabled
-                  onEmojiClick={(data: EmojiClickData) => {
-                    const next = data.emoji;
-                    setEmoji(next);
-                    setPickerOpen(false);
+                  {pickerOpen ? ui.settingsTab.closePicker : ui.settingsTab.chooseEmoji}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmoji('');
                     const nameEl = document.getElementById("name");
                     const dateEl = document.getElementById("date");
                     const currentName = nameEl instanceof HTMLInputElement ? nameEl.value : defaultName;
                     const currentDate = dateEl instanceof HTMLInputElement ? dateEl.value : defaultDate;
-                    writeCreateEventDraftToStorage({
-                      step: "1",
-                      name: currentName,
-                      emoji: next,
-                      date: currentDate,
-                      planId: getPlanIdForDraft(),
-                    });
+                    writeCreateEventDraftToStorage({ step: '1', name: currentName, emoji: '', date: currentDate, planId: getPlanIdForDraft() });
                   }}
-                />
+                  style={{ background: 'transparent', border: 'none', color: MUTED, padding: '6px 8px', fontFamily: FB, fontSize: 12, cursor: 'pointer' }}
+                >
+                  {ui.createStep1.noEmojiBtn}
+                </button>
               </div>
-            ) : null}
+            </div>
           </div>
+
+          {pickerOpen && (
+            <div
+              role="dialog"
+              aria-label={ui.settingsTab.emojiPickerAria}
+              style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 20, borderRadius: 14, overflow: 'hidden', border: `1.5px solid ${BORDER}`, boxShadow: '0 20px 40px rgba(40,25,15,0.22)' }}
+            >
+              <EmojiPicker
+                width={320}
+                height={400}
+                lazyLoadEmojis
+                searchDisabled={false}
+                skinTonesDisabled
+                theme={Theme.LIGHT}
+                onEmojiClick={(data: EmojiClickData) => {
+                  const next = data.emoji;
+                  setEmoji(next);
+                  setPickerOpen(false);
+                  const nameEl = document.getElementById("name");
+                  const dateEl = document.getElementById("date");
+                  const currentName = nameEl instanceof HTMLInputElement ? nameEl.value : defaultName;
+                  const currentDate = dateEl instanceof HTMLInputElement ? dateEl.value : defaultDate;
+                  writeCreateEventDraftToStorage({ step: '1', name: currentName, emoji: next, date: currentDate, planId: getPlanIdForDraft() });
+                }}
+              />
+            </div>
+          )}
         </div>
 
-        <AppBtn type="submit" variant="primary" style={{ width: "100%", marginTop: 24 }}>
+        <p style={{ marginTop: 10, fontSize: 12, color: MUTED, fontFamily: FB, lineHeight: 1.45 }}>
+          {ui.createStep1.searchEmojiHint}
+        </p>
+
+        <button
+          type="submit"
+          style={{ marginTop: 20, width: '100%', background: `linear-gradient(135deg,#7B3FBE,${PURPLE})`, color: '#fff', border: 'none', borderRadius: 11, padding: '14px 20px', fontFamily: FB, fontSize: 14, fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 12px rgba(91,45,142,0.32)' }}
+        >
           {ui.createStep1.continuePlan}
-        </AppBtn>
+        </button>
       </form>
     </div>
   );

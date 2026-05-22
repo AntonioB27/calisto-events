@@ -34,12 +34,8 @@ const PLAN_OPTION_SET = new Set<string>(PLAN_OPTIONS);
 export function validateCreateEventInput(input: CreateEventInput): CreateEventValidationResult {
   const normalizedName = (input.name ?? "").trim();
   if (!normalizedName) {
-    return {
-      ok: false,
-      error: "NAME_REQUIRED",
-    };
+    return { ok: false, error: "NAME_REQUIRED" };
   }
-
   return {
     ok: true,
     value: {
@@ -55,9 +51,7 @@ type NewEventPageProps = {
 };
 
 function pickQueryValue(value: string | string[] | undefined): string | undefined {
-  if (Array.isArray(value)) {
-    return value[0];
-  }
+  if (Array.isArray(value)) return value[0];
   return value;
 }
 
@@ -80,106 +74,75 @@ export function parseCreateEventQuery(params: CreateEventQueryParams): {
   const date = pickQueryValue(params.date) ?? DEFAULT_DATE;
   const planIdCandidate = pickQueryValue(params.planId);
   const planId = isPlanId(planIdCandidate) ? planIdCandidate : DEFAULT_PLAN;
-
-  return {
-    step,
-    name,
-    emoji,
-    date,
-    planId,
-  };
+  return { step, name, emoji, date, planId };
 }
+
+// ── Palette (matches DashboardClient) ────────────────────────────────────────
+const MUTED   = '#9A8570';
+const GOLD    = '#C5922A';
+const GOLD_DK = '#A37118';
+const BORDER  = '#DDD4C5';
+const INK_S   = '#5A4A36';
+const FB = "'DM Sans', sans-serif";
+const FS = "'DM Serif Display', serif";
+
+const STEP_LABELS = ['Details', 'Plan', 'Review'] as const;
 
 export default async function NewEventPage({ searchParams }: NewEventPageProps) {
   const resolvedParams = (await searchParams) ?? {};
   const { step, name, emoji, date, planId } = parseCreateEventQuery(resolvedParams);
 
-  const validation = validateCreateEventInput({
-    name,
-    date,
-    planId,
-  });
+  const validation = validateCreateEventInput({ name, date, planId });
+  const cur = Number(step);
 
   return (
-    <div className="px-4 py-10" style={{ maxWidth: 640, margin: "0 auto" }}>
+    <div style={{ maxWidth: 640, margin: "0 auto", padding: "18px 16px 64px" }}>
       <ResumeDraftClient />
 
       {/* Step progress header */}
       <div
         className="welcome-reveal"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 16,
-          marginBottom: 24,
-        }}
+        style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 28 }}
       >
         <div>
-          <p
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              fontWeight: 500,
-              letterSpacing: "0.20em",
-              textTransform: "uppercase",
-              color: "var(--app-gold)",
-            }}
-          >
-            New event
-          </p>
-          <div style={{ display: "flex", alignItems: "center", marginTop: 12 }}>
-            {([1, 2, 3] as const).map((n) => {
-              const cur = Number(step);
+          {/* Gold eyebrow */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ width: 18, height: 2, background: GOLD, borderRadius: 1, flexShrink: 0 }} />
+            <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: GOLD_DK, fontFamily: FB }}>
+              New event
+            </span>
+          </div>
+          {/* Step indicators */}
+          <div style={{ display: "flex", alignItems: "center", marginTop: 14 }}>
+            {([1, 2, 3] as const).map((n, i) => {
               const done = n < cur;
               const active = n === cur;
               return (
                 <div key={n} style={{ display: "flex", alignItems: "center" }}>
-                  <div
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 11,
-                      fontFamily: "var(--font-mono)",
-                      fontWeight: 800,
-                      background: active
-                        ? "linear-gradient(135deg, var(--app-purple) 0%, var(--app-purple-2) 100%)"
-                        : done
-                        ? "color-mix(in srgb, var(--app-gold) 18%, var(--app-surface-2))"
-                        : "var(--app-surface-2)",
-                      border: `1.5px solid ${
-                        active
-                          ? "transparent"
-                          : done
-                          ? "color-mix(in srgb, var(--app-gold) 42%, transparent)"
-                          : "var(--app-border)"
-                      }`,
-                      color: active ? "#fff" : done ? "var(--app-gold)" : "var(--app-subtle)",
-                      boxShadow: active
-                        ? "0 3px 12px color-mix(in srgb, var(--app-purple) 30%, transparent)"
-                        : "none",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {done ? "✓" : n}
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 44 }}>
+                    <span style={{
+                      fontFamily: FS, fontStyle: "italic", fontWeight: 700,
+                      fontSize: active ? 22 : 14,
+                      color: done ? MUTED : active ? GOLD : `${MUTED}45`,
+                      lineHeight: 1,
+                    }}>
+                      {done ? "✓" : `0${n}`}
+                    </span>
+                    <span style={{
+                      fontFamily: FB, fontSize: 8.5, fontWeight: 700,
+                      letterSpacing: "0.18em", textTransform: "uppercase",
+                      marginTop: 4,
+                      color: active ? INK_S : `${MUTED}70`,
+                    }}>
+                      {STEP_LABELS[i]}
+                    </span>
                   </div>
                   {n < 3 && (
-                    <div
-                      style={{
-                        width: 24,
-                        height: 1.5,
-                        background: done
-                          ? "color-mix(in srgb, var(--app-gold) 45%, var(--app-border))"
-                          : "var(--app-border)",
-                        borderRadius: 1,
-                        margin: "0 6px",
-                      }}
-                    />
+                    <div style={{
+                      width: 14, height: 1,
+                      background: done ? `${GOLD}50` : BORDER,
+                      flexShrink: 0, marginBottom: 14,
+                    }} />
                   )}
                 </div>
               );
