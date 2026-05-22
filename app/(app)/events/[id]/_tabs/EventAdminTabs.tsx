@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowLeft, Camera, Settings, Share2, Users } from "lucide-react";
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
 
@@ -43,12 +43,24 @@ const BORDER_ = '#DDD4C5';
 const FB_ = "'DM Sans', sans-serif";
 const FS_ = "'DM Serif Display', serif";
 
-const glass_: React.CSSProperties = {
+const TEXT_S_  = 'var(--app-text-sub)';
+const MUTED_T_ = 'var(--app-muted)';
+const DIVIDER_ = 'var(--app-border)';
+
+const GLASS_LIGHT_: React.CSSProperties = {
   background: 'rgba(255,255,255,0.62)',
   backdropFilter: 'blur(14px)',
   WebkitBackdropFilter: 'blur(14px)',
   border: '1px solid rgba(255,255,255,0.78)',
   boxShadow: '0 10px 30px -8px rgba(40,25,15,0.18), inset 0 1px 0 rgba(255,255,255,0.7)',
+};
+
+const GLASS_DARK_: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.06)',
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  boxShadow: '0 10px 30px -8px rgba(0,0,0,0.4)',
 };
 
 function parseDateFull(dateStr: string | null | undefined) {
@@ -64,16 +76,6 @@ function parseDateFull(dateStr: string | null | undefined) {
   } catch { return null; }
 }
 
-const GLASS_CHIP: React.CSSProperties = {
-  width: 32, height: 32, borderRadius: 10,
-  background: 'rgba(255,255,255,0.55)',
-  border: `1px solid ${BORDER_}`,
-  backdropFilter: 'blur(8px)',
-  WebkitBackdropFilter: 'blur(8px)',
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-  color: MUTED_, textDecoration: 'none', flexShrink: 0,
-};
-
 function TabsInner({
   eventId,
   selectedTab,
@@ -86,6 +88,16 @@ function TabsInner({
 }: EventAdminTabsProps) {
   const ui = useAppUi();
   const parsedDate = parseDateFull(eventDate);
+
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    const obs = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
 
   const countFor = useCallback((tabId: EventAdminTabId): number | null => {
     if (tabId === "guests")  return guestCount  > 0 ? guestCount  : null;
@@ -113,15 +125,31 @@ function TabsInner({
 
         {/* Top bar: back pill + action chips */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 14 }}>
-          <Link href="/dashboard" style={{ background: 'rgba(255,255,255,0.55)', border: `1px solid ${BORDER_}`, color: PURPLE_, padding: '7px 12px', borderRadius: 9, fontFamily: FB_, fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+          <Link href="/dashboard" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)', border: `1px solid ${DIVIDER_}`, color: 'var(--app-purple)', padding: '7px 12px', borderRadius: 9, fontFamily: FB_, fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
             <ArrowLeft size={11} /> {ui.eventNav.myEvents}
           </Link>
           <div style={{ display: 'flex', gap: 6 }}>
-            <Link href={`/events/${eventId}?tab=share`} style={GLASS_CHIP} title={ui.eventNav.tabShare}>
+            <Link href={`/events/${eventId}?tab=share`} style={{
+              width: 32, height: 32, borderRadius: 10,
+              background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)',
+              border: `1px solid ${DIVIDER_}`,
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: MUTED_T_, textDecoration: 'none', flexShrink: 0,
+            }} title={ui.eventNav.tabShare}>
               <Share2 size={15} />
             </Link>
             {showOrganizerOnlyTabs && (
-              <Link href={`/events/${eventId}?tab=settings`} style={GLASS_CHIP} title={ui.eventNav.tabSettings}>
+              <Link href={`/events/${eventId}?tab=settings`} style={{
+                width: 32, height: 32, borderRadius: 10,
+                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)',
+                border: `1px solid ${DIVIDER_}`,
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: MUTED_T_, textDecoration: 'none', flexShrink: 0,
+              }} title={ui.eventNav.tabSettings}>
                 <Settings size={15} />
               </Link>
             )}
@@ -129,7 +157,7 @@ function TabsInner({
         </div>
 
         {/* Glass banner */}
-        <div style={{ ...glass_, borderRadius: 14, overflow: 'hidden', position: 'relative', height: 128 }}>
+        <div style={{ ...(isDark ? GLASS_DARK_ : GLASS_LIGHT_), borderRadius: 14, overflow: 'hidden', position: 'relative', height: 128 }}>
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg,rgba(91,45,142,0.22),rgba(123,63,190,0.18))' }} />
           <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,0.12) 0 2px,transparent 2px 12px)' }} />
           {/* Big emoji */}
@@ -147,19 +175,19 @@ function TabsInner({
         {/* Date + stats row */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginTop: 14, marginBottom: 4 }}>
           {parsedDate && (
-            <div style={{ width: 52, flexShrink: 0, textAlign: 'center', fontFamily: FB_, borderRight: `1px dashed ${BORDER_}`, paddingRight: 12 }}>
-              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: MUTED_ }}>{parsedDate.mon}</div>
+            <div style={{ width: 52, flexShrink: 0, textAlign: 'center', fontFamily: FB_, borderRight: `1px dashed ${DIVIDER_}`, paddingRight: 12 }}>
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: MUTED_T_ }}>{parsedDate.mon}</div>
               <div style={{ fontFamily: FS_, fontStyle: 'italic', fontWeight: 700, fontSize: 36, lineHeight: 0.9, color: GOLD_, letterSpacing: '-0.03em', marginTop: 1 }}>{parsedDate.day}</div>
-              <div style={{ fontFamily: FS_, fontStyle: 'italic', fontSize: 10.5, color: MUTED_, marginTop: 1 }}>{parsedDate.year}</div>
+              <div style={{ fontFamily: FS_, fontStyle: 'italic', fontSize: 10.5, color: MUTED_T_, marginTop: 1 }}>{parsedDate.year}</div>
             </div>
           )}
           {(mediaCount > 0 || guestCount > 0) && (
             <div style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'stretch' }}>
               {mediaCount > 0 && (
-                <div style={{ flex: 1, background: 'rgba(255,255,255,0.55)', border: `1px solid ${BORDER_}`, borderRadius: 10, padding: '8px 10px', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                <div style={{ flex: 1, background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)', border: `1px solid ${DIVIDER_}`, borderRadius: 10, padding: '8px 10px', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3 }}>
-                    <Camera size={11} color={MUTED_} />
-                    <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED_, fontFamily: FB_ }}>
+                    <Camera size={11} color={MUTED_T_} />
+                    <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED_T_, fontFamily: FB_ }}>
                       {memoriesLabel}
                     </span>
                   </div>
@@ -169,10 +197,10 @@ function TabsInner({
                 </div>
               )}
               {guestCount > 0 && (
-                <div style={{ flex: 1, background: 'rgba(255,255,255,0.55)', border: `1px solid ${BORDER_}`, borderRadius: 10, padding: '8px 10px', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                <div style={{ flex: 1, background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)', border: `1px solid ${DIVIDER_}`, borderRadius: 10, padding: '8px 10px', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3 }}>
-                    <Users size={11} color={MUTED_} />
-                    <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED_, fontFamily: FB_ }}>
+                    <Users size={11} color={MUTED_T_} />
+                    <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED_T_, fontFamily: FB_ }}>
                       {guestsLabel}
                     </span>
                   </div>
