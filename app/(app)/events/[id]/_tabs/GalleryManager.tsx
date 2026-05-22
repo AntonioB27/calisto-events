@@ -152,6 +152,7 @@ export function GalleryManager({
   const [zipIncludeVideos, setZipIncludeVideos] = useState(false);
   const [zipBusy, setZipBusy] = useState(false);
   const [zipPanelError, setZipPanelError] = useState<string | null>(null);
+  const [columns, setColumns] = useState(3);
 
   const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
 
@@ -1098,7 +1099,7 @@ export function GalleryManager({
         };
 
         return (
-          <div style={{ columnCount: 3, columnGap: 4 }}>
+          <div style={{ columnCount: columns, columnGap: 4 }}>
             {filtered.map((item) => {
               const isVideo = isVideoMime(item.mime_type);
               return (
@@ -1132,6 +1133,153 @@ export function GalleryManager({
           </AppBtn>
         </div>
       ) : null}
+
+      {/* ── COLUMN SLIDER ── */}
+      <div
+        style={{
+          marginTop: 28,
+          padding: "16px 18px",
+          borderRadius: 14,
+          background: "var(--app-surface)",
+          border: "1px solid var(--app-border)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "var(--app-muted)",
+            }}
+          >
+            Columns
+          </span>
+          <span
+            style={{
+              fontFamily: "var(--font-display)",
+              fontStyle: "italic",
+              fontWeight: 700,
+              fontSize: 20,
+              color: "var(--app-gold)",
+              lineHeight: 1,
+            }}
+          >
+            {columns}
+          </span>
+        </div>
+
+        <div style={{ position: "relative" }}>
+          <style>{`
+            .gallery-col-slider {
+              -webkit-appearance: none;
+              appearance: none;
+              width: 100%;
+              height: 3px;
+              border-radius: 99px;
+              background: linear-gradient(
+                to right,
+                var(--app-gold) 0%,
+                var(--app-gold) ${((columns - 1) / 4) * 100}%,
+                var(--app-border) ${((columns - 1) / 4) * 100}%,
+                var(--app-border) 100%
+              );
+              outline: none;
+              cursor: pointer;
+            }
+            .gallery-col-slider::-webkit-slider-thumb {
+              -webkit-appearance: none;
+              appearance: none;
+              width: 18px;
+              height: 18px;
+              border-radius: 50%;
+              background: var(--app-gold);
+              box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-gold) 22%, transparent), 0 2px 8px rgba(0,0,0,0.35);
+              cursor: pointer;
+              transition: box-shadow 0.15s;
+            }
+            .gallery-col-slider::-moz-range-thumb {
+              width: 18px;
+              height: 18px;
+              border-radius: 50%;
+              background: var(--app-gold);
+              border: none;
+              box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-gold) 22%, transparent), 0 2px 8px rgba(0,0,0,0.35);
+              cursor: pointer;
+              transition: box-shadow 0.15s;
+            }
+            .gallery-col-slider:focus::-webkit-slider-thumb {
+              box-shadow: 0 0 0 4px color-mix(in srgb, var(--app-gold) 32%, transparent), 0 2px 8px rgba(0,0,0,0.35);
+            }
+          `}</style>
+          <input
+            type="range"
+            className="gallery-col-slider"
+            min={1}
+            max={5}
+            step={1}
+            value={columns}
+            aria-label="Columns"
+            onChange={(e) => setColumns(Number(e.target.value))}
+          />
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 2 }}>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => setColumns(n)}
+              style={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${n}, 1fr)`,
+                  gap: 1.5,
+                  width: 22,
+                  height: 16,
+                }}
+              >
+                {Array.from({ length: n }).map((_, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      borderRadius: 1.5,
+                      background: columns === n ? "var(--app-gold)" : "var(--app-border)",
+                      transition: "background 0.15s",
+                    }}
+                  />
+                ))}
+              </div>
+              <span
+                style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  letterSpacing: "0.06em",
+                  color: columns === n ? "var(--app-gold)" : "var(--app-muted)",
+                  transition: "color 0.15s",
+                }}
+              >
+                {n}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* ── LIGHTBOX ── */}
       {lightbox ? (

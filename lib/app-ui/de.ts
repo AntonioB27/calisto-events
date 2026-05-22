@@ -108,7 +108,7 @@ export const APP_UI_DE: AppUiDict = {
     subtitle: "Gib den Zugangscode ein, den dein Organisator teilt.",
     accessCodeLabel: "Zugangscode",
     hintFormats: "Hinweis: Codes sehen etwa so aus ",
-    joinCta: "Mitmachen →",
+    joinCta: "Mitmachen",
     codeTooShort: "Bitte den Code aus der Einladung eingeben (mindestens 4 Zeichen).",
     notFound:
       "Für diesen Code konnten wir keine Veranstaltung finden. Bitte prüfen und erneut versuchen.",

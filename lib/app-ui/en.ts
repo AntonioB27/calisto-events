@@ -106,7 +106,7 @@ export const APP_UI_EN = {
     subtitle: "Enter the access code shared by your event organizer.",
     accessCodeLabel: "Access Code",
     hintFormats: 'Hint: codes look like ',
-    joinCta: "Join Event →",
+    joinCta: "Join Event",
     codeTooShort: "Enter the code from your invite (at least 4 characters).",
     notFound: "We could not find an event for that code. Please check and try again.",
     genericError: "Something went wrong while checking your code. Please try again.",
