@@ -160,13 +160,13 @@ export function JoinCodeForm({ isLoggedIn }: { isLoggedIn: boolean }) {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/brand/mascot/aurora_key.png"
+              src="/brand/mascot/aurora_qr.png"
               alt=""
               style={{
                 width: 140,
                 height: 140,
-                objectFit: 'cover',
-                objectPosition: 'center top',
+                objectFit: 'contain',
+                objectPosition: 'center',
                 display: 'block',
                 borderRadius: 1,
               }}

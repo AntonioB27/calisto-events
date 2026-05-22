@@ -83,7 +83,7 @@ export default async function WelcomePage() {
               <img
                 src="/brand/mascot/aurora_waving.jpeg"
                 alt=""
-                style={{ width: 140, height: 140, objectFit: "cover", display: "block", borderRadius: 1 }}
+                style={{ width: 140, height: 140, objectFit: "contain", objectPosition: 'center', display: "block", borderRadius: 1 }}
               />
             </div>
           </div>

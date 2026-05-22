@@ -107,7 +107,7 @@ export const APP_UI_HR: AppUiDict = {
     subtitle: "Unesite pristupni kod koji je podijelio organizator.",
     accessCodeLabel: "Pristupni kod",
     hintFormats: "Savjet: kodovi izgledaju kao ",
-    joinCta: "Pridruži se događaju →",
+    joinCta: "Pridruži se događaju",
     codeTooShort: "Unesite kod s pozivnice (najmanje 4 znaka).",
     notFound: "Nismo pronašli događaj za taj kod. Provjerite i pokušajte ponovo.",
     genericError: "Nešto je pošlo po zlu pri provjeri koda. Pokušajte ponovo.",
