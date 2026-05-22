@@ -247,7 +247,8 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
 
       {/* ── Masthead ─────────────────────────────────────────────── */}
       <div style={{ padding: '8px 0 4px', position: 'relative' }}>
-        <video src="/brand/mascot/aurora_waving.mp4" autoPlay loop muted playsInline style={{ position: 'absolute', top: 0, right: -8, width: 110, height: 110, objectFit: 'contain', objectPosition: 'top right', pointerEvents: 'none' }} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/mascot/aurora.png" alt="" style={{ position: 'absolute', top: 0, right: -8, width: 110, height: 110, objectFit: 'contain', objectPosition: 'top right', pointerEvents: 'none' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ width: 18, height: 2, background: GOLD, borderRadius: 1, flexShrink: 0 }} />
           <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: GOLD_DK, fontFamily: FB }}>{ui.dashboard.eyebrow}</span>
