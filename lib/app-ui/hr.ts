@@ -260,6 +260,9 @@ export const APP_UI_HR: AppUiDict = {
     tabSettings: "Postavke",
     subtitle: "Podijelite s gostima da se mogu pridružiti.",
     tabsAria: "Odjeljci događaja",
+    myEvents: "Moji događaji",
+    memoriesCount: "{count} uspomena",
+    guestsCount: "{count} gostiju",
   },
 
   overview: {

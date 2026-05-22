@@ -266,6 +266,9 @@ export const APP_UI_DE: AppUiDict = {
     tabSettings: "Einstellungen",
     subtitle: "Teilen mit Gästen, damit diese beitreten können.",
     tabsAria: "Bereiche der Veranstaltung",
+    myEvents: "Meine Veranstaltungen",
+    memoriesCount: "{count} Erinnerungen",
+    guestsCount: "{count} Gäste",
   },
 
   overview: {

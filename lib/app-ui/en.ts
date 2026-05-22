@@ -85,7 +85,7 @@ export const APP_UI_EN = {
     fallbackName: "friend",
     subtitle: "Events you organise, co‑organise, or joined as a guest.",
     joinWithCode: "Join with code",
-    createEvent: "+ Create event",
+    createEvent: "Create event",
     yourEvents: "Your events",
     memberOne: "member",
     membersMany: "members",
@@ -257,6 +257,9 @@ export const APP_UI_EN = {
     tabSettings: "Settings",
     subtitle: "Share with guests to let them join.",
     tabsAria: "Event sections",
+    myEvents: "My events",
+    memoriesCount: "{count} memories",
+    guestsCount: "{count} guests",
   },
 
   overview: {

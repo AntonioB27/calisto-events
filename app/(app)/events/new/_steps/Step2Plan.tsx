@@ -4,10 +4,46 @@ import type { PlanId } from "@/lib/plan-limits";
 import { getPlanLimits, PLAN_DB_INT_MAX } from "@/lib/plan-limits";
 import { interpolate } from "@/lib/app-ui";
 import { useAppUi } from "@/components/AppUiProvider";
-import { AppBtn } from "@/components/app-ui/AppBtn";
-import { AppPageHeader } from "@/components/app-ui/AppPageHeader";
 import { writeCreateEventDraftToStorage } from "@/lib/create-event-draft";
 import { useMemo, useState } from "react";
+
+// ── Palette ───────────────────────────────────────────────────────────────────
+const INK    = '#221509';
+const INK_S  = '#5A4A36';
+const MUTED  = '#9A8570';
+const GOLD   = '#C5922A';
+const GOLD_DK = '#A37118';
+const PURPLE = '#5B2D8E';
+const BORDER = '#DDD4C5';
+const RUST   = '#B5461B';
+const FB = "'DM Sans', sans-serif";
+const FS = "'DM Serif Display', serif";
+const GOLD_FOIL = 'linear-gradient(135deg,#E6BF66 0%,#C5922A 45%,#F4D88F 70%,#946C18 100%)';
+
+const PLAN_ACCENT: Record<PlanId, string> = {
+  free:     '#9A8570',
+  standard: '#2D7AAE',
+  plus:     '#B87333',
+  premium:  '#C5922A',
+  max:      '#5B2D8E',
+};
+
+const PLAN_STRIPE: Record<PlanId, string> = {
+  free:     `linear-gradient(90deg,${MUTED}60,${MUTED}20)`,
+  standard: 'linear-gradient(90deg,#4A8CB8,#2D6A9640)',
+  plus:     'linear-gradient(90deg,#D4956B,#B8733340)',
+  premium:  GOLD_FOIL,
+  max:      'linear-gradient(90deg,#8B5FCC,#5B2D8E40)',
+};
+
+// NOTE: prices are business-facing; adjust to match mobile pricing.
+const PLAN_PRICE: Record<PlanId, string> = {
+  free: "0€", standard: "15€", plus: "35€", premium: "65€", max: "90€",
+};
+
+const PLAN_ORIGINAL_PRICE: Partial<Record<PlanId, string>> = {
+  premium: "70€", max: "100€",
+};
 
 type Step2PlanProps = {
   name: string;
@@ -16,28 +52,6 @@ type Step2PlanProps = {
   selectedPlanId: PlanId;
   planOptions: readonly PlanId[];
   validationError: "NAME_REQUIRED" | null;
-};
-
-// NOTE: prices are business-facing; adjust to match mobile pricing.
-const PLAN_PRICE: Record<PlanId, string> = {
-  free: "0€",
-  standard: "15€",
-  plus: "35€",
-  premium: "65€",
-  max: "90€",
-};
-
-const PLAN_ORIGINAL_PRICE: Partial<Record<PlanId, string>> = {
-  premium: "70€",
-  max: "100€",
-};
-
-const PLAN_STYLE: Record<PlanId, { accent: string; tint: string }> = {
-  free: { accent: "rgba(140, 120, 95, 0.9)", tint: "rgba(140, 120, 95, 0.10)" },
-  standard: { accent: "color-mix(in srgb, var(--app-purple) 78%, #2b6cb0)", tint: "color-mix(in srgb, var(--app-purple) 10%, transparent)" },
-  plus: { accent: "color-mix(in srgb, var(--app-gold) 78%, var(--app-purple))", tint: "color-mix(in srgb, var(--app-gold) 12%, transparent)" },
-  premium: { accent: "var(--app-gold)", tint: "color-mix(in srgb, var(--app-gold) 14%, transparent)" },
-  max: { accent: "color-mix(in srgb, var(--app-purple) 55%, var(--app-gold))", tint: "color-mix(in srgb, var(--app-purple) 10%, transparent)" },
 };
 
 export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, validationError }: Step2PlanProps) {
@@ -50,37 +64,42 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
   }
 
   const writeStep2Draft = (planId: PlanId) => {
-    writeCreateEventDraftToStorage({
-      step: "2",
-      name,
-      emoji,
-      date,
-      planId,
-    });
+    writeCreateEventDraftToStorage({ step: "2", name, emoji, date, planId });
   };
 
   const toggleExpanded = (planId: PlanId) => {
-    setExpanded((current) => (current === planId ? null : planId));
+    setExpanded(current => current === planId ? null : planId);
   };
 
   const cards = useMemo(
-    () =>
-      planOptions.map((planId) => {
-        const limits = getPlanLimits(planId);
-        return {
-          planId,
-          limits,
-          price: PLAN_PRICE[planId],
-          originalPrice: PLAN_ORIGINAL_PRICE[planId],
-          style: PLAN_STYLE[planId],
-        };
-      }),
+    () => planOptions.map(planId => ({
+      planId,
+      limits: getPlanLimits(planId),
+      price: PLAN_PRICE[planId],
+      originalPrice: PLAN_ORIGINAL_PRICE[planId],
+      accent: PLAN_ACCENT[planId],
+      stripe: PLAN_STRIPE[planId],
+    })),
     [planOptions, ui.createStep2.unlimited],
   );
 
   return (
     <div className="welcome-reveal welcome-reveal--d1">
-      <AppPageHeader eyebrow={ui.createStep2.eyebrow} title={ui.createStep2.heading} description={ui.createStep2.description} />
+      {/* Heading */}
+      <div style={{ marginBottom: 22 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <span style={{ width: 18, height: 2, background: GOLD, borderRadius: 1, flexShrink: 0 }} />
+          <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: GOLD_DK, fontFamily: FB }}>
+            {ui.createStep2.eyebrow}
+          </span>
+        </div>
+        <h2 style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 26, color: INK, lineHeight: 1.1, letterSpacing: '-0.02em', margin: 0 }}>
+          {ui.createStep2.heading}
+        </h2>
+        <p style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 14, color: INK_S, lineHeight: 1.5, marginTop: 6, marginBottom: 0 }}>
+          {ui.createStep2.description}
+        </p>
+      </div>
 
       <form action="/events/new" method="get">
         <input type="hidden" name="name" value={name} />
@@ -88,28 +107,15 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
         <input type="hidden" name="date" value={date} />
         <input type="hidden" name="planId" value={selected} />
 
-        {validationError ? (
-          <p
-            role="alert"
-            style={{
-              marginBottom: 16,
-              fontSize: 13,
-              color: "var(--app-danger)",
-              background: "color-mix(in srgb, var(--app-danger) 10%, transparent)",
-              padding: "10px 14px",
-              borderRadius: "var(--app-radius-md)",
-              border: "1px solid color-mix(in srgb, var(--app-danger) 35%, transparent)",
-            }}
-          >
+        {validationError && (
+          <p role="alert" style={{ marginBottom: 16, fontSize: 13, color: RUST, background: `${RUST}15`, padding: '10px 14px', borderRadius: 10, border: `1px solid ${RUST}40`, fontFamily: FB }}>
             {ui.validateCreate.nameRequired}
           </p>
-        ) : null}
+        )}
 
-        <div style={{ display: "grid", gap: 12, marginBottom: 24 }}>
-          {cards.map(({ planId, limits, price, originalPrice, style }) => {
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+          {cards.map(({ planId, limits, price, originalPrice, accent, stripe }) => {
             const on = selected === planId;
-            const border = on ? `1.5px solid ${style.accent}` : "1.5px solid var(--app-border)";
-            const bg = on ? style.tint : "var(--app-surface)";
             const isExpanded = expanded === planId;
             const detailsId = `plan-details-${planId}`;
 
@@ -117,89 +123,59 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
               <button
                 key={planId}
                 type="button"
-                onClick={() => {
-                  setSelected(planId);
-                  writeStep2Draft(planId);
-                }}
-                className="app-card app-card--pad-lg"
+                onClick={() => { setSelected(planId); writeStep2Draft(planId); }}
                 style={{
-                  textAlign: "left",
-                  border,
-                  background: bg,
-                  boxShadow: on ? "var(--app-shadow-md)" : "var(--app-shadow-sm)",
-                  transform: on ? "translateY(-1px)" : "translateY(0px)",
-                  transition: "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease",
-                  cursor: "pointer",
-                  position: "relative",
-                  overflow: "hidden",
+                  textAlign: 'left', cursor: 'pointer',
+                  background: on ? 'rgba(244,240,234,0.95)' : 'rgba(255,255,255,0.55)',
+                  backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                  border: on ? `2px solid ${accent}` : `1px solid ${BORDER}`,
+                  borderRadius: 14,
+                  padding: '14px 14px 14px 14px',
+                  boxShadow: on ? `0 6px 20px -4px ${accent}30, inset 0 1px 0 rgba(255,255,255,0.7)` : '0 2px 8px -2px rgba(40,25,15,0.1), inset 0 1px 0 rgba(255,255,255,0.6)',
+                  transform: on ? 'translateY(-1px)' : 'translateY(0)',
+                  transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease',
+                  position: 'relative', overflow: 'hidden',
                 }}
               >
-                <div
-                  aria-hidden
-                  style={{
-                    position: "absolute",
-                    inset: "0 0 auto 0",
-                    height: 3,
-                    background: `linear-gradient(90deg, ${style.accent}, color-mix(in srgb, ${style.accent} 35%, transparent))`,
-                  }}
-                />
+                {/* Top accent stripe */}
+                <div aria-hidden style={{ position: 'absolute', inset: '0 0 auto 0', height: 3, background: stripe }} />
 
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
-                      <h3
-                        style={{
-                          margin: 0,
-                          fontSize: 18,
-                          fontWeight: 800,
-                          color: "var(--app-text)",
-                          letterSpacing: "-0.01em",
-                        }}
-                      >
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginTop: 4 }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <h3 style={{ margin: 0, fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 19, color: INK, letterSpacing: '-0.01em', lineHeight: 1 }}>
                         {ui.plans[planId]}
                       </h3>
-                      {planId === "premium" ? (
-                        <span
-                          className="app-badge app-badge--accent"
-                          style={{ borderColor: style.accent, color: style.accent }}
-                        >
+                      {planId === 'premium' && (
+                        <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: accent, background: `${accent}18`, border: `1px solid ${accent}40`, borderRadius: 4, padding: '2px 6px', fontFamily: FB }}>
                           {ui.createStep2.popularBadge}
                         </span>
-                      ) : null}
+                      )}
                     </div>
-                    <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--app-muted)", lineHeight: 1.45 }}>
+                    <p style={{ margin: '5px 0 0', fontSize: 12.5, color: INK_S, lineHeight: 1.4, fontFamily: FB }}>
                       {interpolate(ui.createStep2.guestsPhotosVideos, {
                         guests: formatCap(limits.guests),
                         photos: formatCap(limits.photos),
                         videos: formatCap(limits.videos),
                       })}
                     </p>
-                    <p style={{ margin: "8px 0 0", fontSize: 12, color: "var(--app-subtle)" }}>
+                    <p style={{ margin: '4px 0 0', fontSize: 11.5, color: MUTED, fontFamily: FB }}>
                       {interpolate(ui.createStep2.uploadsOpenAfterDays, { n: limits.uploadDaysAfterEvent })}
                     </p>
                   </div>
 
-                  <div style={{ textAlign: "right", flexShrink: 0 }}>
-                    <div style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--app-subtle)" }}>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <div style={{ fontSize: 9.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: MUTED, fontFamily: FB }}>
                       {ui.createStep2.priceEyebrow}
                     </div>
-                    <div style={{ marginTop: 6, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10 }}>
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.05 }}>
-                        {originalPrice ? (
-                          <div
-                            style={{
-                              fontSize: 12,
-                              fontWeight: 700,
-                              color: "var(--app-subtle)",
-                              textDecoration: "line-through",
-                              textDecorationThickness: "1.5px",
-                              opacity: 0.85,
-                            }}
-                          >
+                    <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.05 }}>
+                        {originalPrice && (
+                          <div style={{ fontSize: 11, fontWeight: 700, color: MUTED, textDecoration: 'line-through', textDecorationThickness: '1.5px', opacity: 0.85, fontFamily: FB }}>
                             {originalPrice}
                           </div>
-                        ) : null}
-                        <div style={{ marginTop: originalPrice ? 3 : 0, fontSize: 16, fontWeight: 800, color: style.accent }}>
+                        )}
+                        <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 18, color: accent, marginTop: originalPrice ? 1 : 0, lineHeight: 1 }}>
                           {price}
                         </div>
                       </div>
@@ -208,90 +184,40 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
                         aria-label={interpolate(ui.createStep2.moreDetailsAria, { plan: ui.plans[planId] })}
                         aria-expanded={isExpanded}
                         aria-controls={detailsId}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleExpanded(planId);
-                        }}
-                        style={{
-                          width: 28,
-                          height: 28,
-                          borderRadius: 999,
-                          border: "1.5px solid color-mix(in srgb, var(--app-border) 90%, transparent)",
-                          background: "color-mix(in srgb, var(--app-surface) 70%, transparent)",
-                          color: "var(--app-text)",
-                          display: "grid",
-                          placeItems: "center",
-                          cursor: "pointer",
-                          boxShadow: "var(--app-shadow-sm)",
-                        }}
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleExpanded(planId); }}
+                        style={{ width: 26, height: 26, borderRadius: '50%', border: `1.5px solid ${BORDER}`, background: 'rgba(255,255,255,0.6)', color: INK_S, display: 'grid', placeItems: 'center', cursor: 'pointer', fontFamily: FB, fontSize: 12, fontWeight: 700, flexShrink: 0 }}
                       >
                         ?
                       </button>
                     </div>
-                    <div
-                      aria-hidden
-                      style={{
-                        marginTop: 10,
-                        width: 14,
-                        height: 14,
-                        borderRadius: 999,
-                        border: on ? `6px solid ${style.accent}` : "6px solid color-mix(in srgb, var(--app-border) 90%, transparent)",
-                        boxShadow: on ? `0 0 0 4px color-mix(in srgb, ${style.accent} 18%, transparent)` : "none",
-                        marginLeft: "auto",
-                      }}
-                    />
+                    {/* Radio dot */}
+                    <div aria-hidden style={{ marginTop: 8, width: 14, height: 14, borderRadius: '50%', border: on ? `5px solid ${accent}` : `2px solid ${BORDER}`, boxShadow: on ? `0 0 0 3px ${accent}22` : 'none', marginLeft: 'auto' }} />
                   </div>
                 </div>
 
+                {/* Expandable detail rows */}
                 <div
                   id={detailsId}
                   role="region"
                   aria-label={interpolate(ui.createStep2.detailRegionAria, { plan: ui.plans[planId] })}
-                  style={{
-                    marginTop: 14,
-                    borderTop: "1px solid color-mix(in srgb, var(--app-border) 80%, transparent)",
-                    paddingTop: 12,
-                    display: "grid",
-                    gap: 10,
-                    maxHeight: isExpanded ? 220 : 0,
-                    opacity: isExpanded ? 1 : 0,
-                    overflow: "hidden",
-                    transition: "max-height 0.22s ease, opacity 0.18s ease",
-                  }}
+                  style={{ overflow: 'hidden', maxHeight: isExpanded ? 240 : 0, opacity: isExpanded ? 1 : 0, transition: 'max-height 0.22s ease, opacity 0.18s ease' }}
                 >
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
+                  <div style={{ borderTop: `1px dashed ${BORDER}`, marginTop: 12, paddingTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                     {(
                       [
                         { label: ui.createStep2.rowGuests, value: formatCap(limits.guests) },
                         { label: ui.createStep2.rowPhotos, value: formatCap(limits.photos) },
                         { label: ui.createStep2.rowVideos, value: formatCap(limits.videos) },
-                        {
-                          label: ui.createStep2.rowUploadWindow,
-                          value: interpolate(ui.createStep2.uploadWindowDays, { n: limits.uploadDaysAfterEvent }),
-                        },
+                        { label: ui.createStep2.rowUploadWindow, value: interpolate(ui.createStep2.uploadWindowDays, { n: limits.uploadDaysAfterEvent }) },
                       ] as const
-                    ).map((row) => (
-                      <div
-                        key={row.label}
-                        style={{
-                          background: "color-mix(in srgb, var(--app-surface-2) 70%, transparent)",
-                          border: "1.5px solid color-mix(in srgb, var(--app-border) 80%, transparent)",
-                          borderRadius: 12,
-                          padding: 12,
-                        }}
-                      >
-                        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--app-subtle)" }}>
-                          {row.label}
-                        </div>
-                        <div style={{ marginTop: 6, fontSize: 16, fontWeight: 800, color: "var(--app-text)" }}>
-                          {row.value}
-                        </div>
+                    ).map(row => (
+                      <div key={row.label} style={{ background: 'rgba(255,255,255,0.6)', border: `1px solid ${BORDER}`, borderRadius: 10, padding: '10px 12px' }}>
+                        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED, fontFamily: FB }}>{row.label}</div>
+                        <div style={{ marginTop: 5, fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 16, color: accent, lineHeight: 1 }}>{row.value}</div>
                       </div>
                     ))}
                   </div>
-
-                  <p style={{ margin: 0, fontSize: 12, color: "var(--app-muted)", lineHeight: 1.5 }}>
+                  <p style={{ margin: '10px 0 0', fontSize: 12, color: MUTED, lineHeight: 1.5, fontFamily: FB }}>
                     {ui.createStep2.tipChangePlanLater}
                   </p>
                 </div>
@@ -300,16 +226,21 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
           })}
         </div>
 
-        <div style={{ display: "flex", gap: 12 }}>
-          <AppBtn type="submit" variant="ghost" formAction="/events/new" formMethod="get" name="step" value="1">
-            {ui.common.back}
-          </AppBtn>
-          <AppBtn
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
             type="submit"
-            variant="primary"
+            formAction="/events/new"
+            formMethod="get"
+            name="step"
+            value="1"
+            style={{ background: 'transparent', color: PURPLE, border: `1px solid ${PURPLE}55`, borderRadius: 11, padding: '13px 18px', fontFamily: FB, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+          >
+            {ui.common.back}
+          </button>
+          <button
+            type="submit"
             name="step"
             value="3"
-            style={{ flex: 1 }}
             onClick={(event) => {
               const form = event.currentTarget.form;
               if (!form) return;
@@ -317,9 +248,10 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
               const current = planInput instanceof HTMLInputElement ? (planInput.value as PlanId) : selected;
               writeStep2Draft(current);
             }}
+            style={{ flex: 1, background: `linear-gradient(135deg,#7B3FBE,${PURPLE})`, color: '#fff', border: 'none', borderRadius: 11, padding: '13px 18px', fontFamily: FB, fontSize: 13, fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 12px rgba(91,45,142,0.32)' }}
           >
             {ui.createStep2.continuePayment}
-          </AppBtn>
+          </button>
         </div>
       </form>
     </div>
