@@ -10,12 +10,7 @@ import { AuthModeRail } from "@/components/app-ui/AuthModeRail";
 import { AppCard } from "@/components/app-ui/AppCard";
 import { AppFormRow } from "@/components/app-ui/AppFormRow";
 import { AppInput } from "@/components/app-ui/AppInput";
-import {
-  MascotSpot,
-  WELCOME_HERO_COLUMN_MAX_WIDTH_PX,
-  WELCOME_HERO_KEY_MASCOT_FRAME_HEIGHT_PX,
-  WELCOME_HERO_MASCOT_PX,
-} from "@/components/MascotSpot";
+import { WELCOME_HERO_COLUMN_MAX_WIDTH_PX } from "@/components/MascotSpot";
 import { getBrowserPublicOrigin } from "@/lib/browser-public-origin";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { getPostAuthRedirectPath } from "@/lib/safe-return-path";
@@ -203,13 +198,43 @@ export function AuthCombinedForm() {
       <div style={{ width: "100%", maxWidth: WELCOME_HERO_COLUMN_MAX_WIDTH_PX }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
-            <MascotSpot
-              src="/brand/mascot/aurora_key.png"
-              size={WELCOME_HERO_MASCOT_PX}
-              frameHeight={WELCOME_HERO_KEY_MASCOT_FRAME_HEIGHT_PX}
-              variant="stack"
-              className="welcome-mascot"
-            />
+            <div style={{ position: "relative", display: "inline-block" }}>
+              {/* Washi tape */}
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  top: -10,
+                  left: "50%",
+                  transform: "translateX(-50%) rotate(2deg)",
+                  width: 52,
+                  height: 14,
+                  background: "rgba(212,168,67,0.48)",
+                  border: "0.5px solid rgba(212,168,67,0.6)",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.22)",
+                  zIndex: 2,
+                  borderRadius: 2,
+                  pointerEvents: "none",
+                }}
+              />
+              {/* Polaroid card */}
+              <div
+                style={{
+                  background: "#f9f6f1",
+                  padding: "10px 10px 32px 10px",
+                  borderRadius: 2,
+                  boxShadow: "0 8px 28px rgba(0,0,0,0.28), 0 2px 6px rgba(0,0,0,0.16)",
+                  transform: "rotate(2deg)",
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/brand/mascot/aurora_key.png"
+                  alt=""
+                  style={{ width: 140, height: 140, objectFit: "cover", objectPosition: "center top", display: "block", borderRadius: 1 }}
+                />
+              </div>
+            </div>
           </div>
           <div style={{ width: 32, height: 3, background: "var(--app-gold)", borderRadius: 2, margin: "0 auto 16px" }} />
           <p
