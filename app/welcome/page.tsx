@@ -1,10 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  MascotSpot,
-  WELCOME_HERO_COLUMN_MAX_WIDTH_PX,
-  WELCOME_HERO_MASCOT_PX,
-} from "@/components/MascotSpot";
+import { WELCOME_HERO_COLUMN_MAX_WIDTH_PX } from "@/components/MascotSpot";
 import { getLandingCopy } from "@/lib/i18n";
 import { getUiLocale } from "@/lib/ui-locale";
 import { getWelcomePageCopy } from "@/lib/welcome-page-copy";
@@ -52,14 +48,45 @@ export default async function WelcomePage() {
       >
         <div
           className="welcome-reveal welcome-mascot-float"
-          style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}
+          style={{ display: "flex", justifyContent: "center", marginBottom: 28 }}
         >
-          <MascotSpot
-            src="/brand/mascot/aurora_present.png"
-            size={WELCOME_HERO_MASCOT_PX}
-            variant="stack"
-            className="welcome-mascot"
-          />
+          <div style={{ position: "relative", display: "inline-block" }}>
+            {/* Washi tape */}
+            <div
+              aria-hidden
+              style={{
+                position: "absolute",
+                top: -10,
+                left: "50%",
+                transform: "translateX(-50%) rotate(-3deg)",
+                width: 52,
+                height: 14,
+                background: "rgba(212,168,67,0.48)",
+                border: "0.5px solid rgba(212,168,67,0.6)",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.22)",
+                zIndex: 2,
+                borderRadius: 2,
+                pointerEvents: "none",
+              }}
+            />
+            {/* Polaroid card */}
+            <div
+              style={{
+                background: "#f9f6f1",
+                padding: "10px 10px 32px 10px",
+                borderRadius: 2,
+                boxShadow: "0 8px 28px rgba(0,0,0,0.28), 0 2px 6px rgba(0,0,0,0.16)",
+                transform: "rotate(-2deg)",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/mascot/aurora_waving.jpeg"
+                alt=""
+                style={{ width: 140, height: 140, objectFit: "cover", display: "block", borderRadius: 1 }}
+              />
+            </div>
+          </div>
         </div>
 
         <div
