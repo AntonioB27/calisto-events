@@ -1099,7 +1099,7 @@ export function GalleryManager({
         };
 
         return (
-          <div style={{ columnCount: columns, columnGap: 4 }}>
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(${columns}, 1fr)`, gap: 4, alignItems: "start" }}>
             {filtered.map((item) => {
               const isVideo = isVideoMime(item.mime_type);
               return (
@@ -1108,8 +1108,6 @@ export function GalleryManager({
                   onClick={() => !isVideo && setLightbox(item)}
                   style={{
                     position: "relative",
-                    breakInside: "avoid",
-                    marginBottom: 4,
                     borderRadius: 8,
                     overflow: "hidden",
                     cursor: isVideo ? "default" : "pointer",
