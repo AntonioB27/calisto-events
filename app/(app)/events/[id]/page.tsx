@@ -89,7 +89,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   const navEmoji = displayNavEmoji(storedEmoji);
 
   return (
-    <div style={{ padding: '0 0 60px' }}>
+    <div style={{ padding: '0 0 100px' }}>
       <EventAdminTabs
         eventId={id}
         selectedTab={selectedTab}

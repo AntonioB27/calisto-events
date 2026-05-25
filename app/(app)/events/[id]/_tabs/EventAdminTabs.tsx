@@ -1,16 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Camera, Settings, Share2, Users } from "lucide-react";
+import { ArrowLeft, Camera, Home, Images, Settings, Share2, Users } from "lucide-react";
 import { Suspense, useCallback, useEffect, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
 
 import { type EventAdminTabId } from "./event-admin-tabs";
 
-// Only these 3 appear in the editorial TOC strip.
-// Share + Settings are glass icon chips in the hero.
-const TOC_TAB_IDS: EventAdminTabId[] = ["overview", "guests", "gallery"];
+const BOTTOM_NAV_TABS: EventAdminTabId[] = ["overview", "guests", "gallery"];
+
+const ICON_MAP: Record<string, React.ComponentType<{ size: number; color: string; strokeWidth: number }>> = {
+  overview: Home,
+  guests:   Users,
+  gallery:  Images,
+};
+
+const GOLD_DK  = '#946C18';
+const INK_SUB  = '#5A4A36';
+const INK      = '#221509';
+const NAV_MUTED = '#9A8570';
+const FS_NAV   = "'DM Serif Display', serif";
 
 function labelForTab(tab: EventAdminTabId, t: ReturnType<typeof useAppUi>): string {
   switch (tab) {
@@ -119,6 +129,7 @@ function TabsInner({
   const guestsLabel   = ui.eventNav.guestsCount?.replace("{count}", "").trim() || "guests";
 
   return (
+    <>
     <div className="welcome-reveal">
       {/* ── Event hero ── */}
       <div style={{ padding: '12px 16px 0' }}>
@@ -215,34 +226,100 @@ function TabsInner({
 
       </div>
 
-      {/* ── Editorial TOC nav — Overview / Guests / Gallery only ── */}
-      <nav
-        className="event-toc"
-        role="tablist"
+    </div>
+
+    {/* ── Liquid glass bottom nav — outside welcome-reveal to avoid transform containment ── */}
+    <nav
         aria-label={ui.eventNav.tabsAria}
         onKeyDown={handleKeyDown}
+        style={{
+          position: 'fixed',
+          left: 18,
+          right: 18,
+          bottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+          background: 'rgba(255,252,248,0.38)',
+          backdropFilter: 'blur(48px) saturate(180%) brightness(1.04)',
+          WebkitBackdropFilter: 'blur(48px) saturate(180%) brightness(1.04)',
+          borderRadius: 28,
+          padding: 5,
+          border: '1px solid rgba(255,255,255,0.38)',
+          boxShadow: [
+            '0 16px 40px rgba(0,0,0,0.28)',
+            '0 4px 12px rgba(0,0,0,0.14)',
+            'inset 0 1.5px 0 rgba(255,255,255,0.72)',
+            'inset 0 -1px 0 rgba(255,255,255,0.10)',
+          ].join(', '),
+          display: 'flex',
+          gap: 4,
+          zIndex: 100,
+        }}
       >
-        {TOC_TAB_IDS.map((tabId) => {
-          const on = tabId === selectedTab;
+        {BOTTOM_NAV_TABS.map((tabId) => {
+          const active = tabId === selectedTab;
           const count = countFor(tabId);
+          const Icon = ICON_MAP[tabId];
           return (
             <Link
               key={tabId}
               href={`/events/${eventId}?tab=${tabId}`}
               role="tab"
-              aria-selected={on}
-              aria-current={on ? "page" : undefined}
-              className="event-toc__tab"
+              aria-selected={active}
+              aria-current={active ? 'page' : undefined}
+              style={{
+                flex: active ? 1.4 : 1,
+                background: active ? 'rgba(255,252,248,0.52)' : 'transparent',
+                borderRadius: 22,
+                padding: '9px 6px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                boxShadow: active ? [
+                  '0 2px 10px rgba(0,0,0,0.18)',
+                  'inset 0 1.5px 0 rgba(255,255,255,0.95)',
+                  'inset 0 -0.5px 0 rgba(0,0,0,0.06)',
+                ].join(', ') : 'none',
+                transition: 'flex 200ms ease',
+                textDecoration: 'none',
+                outline: 'none',
+              }}
             >
-              {labelForTab(tabId, ui)}
-              {count !== null && (
-                <span className="event-toc__count">{count}</span>
+              {Icon && (
+                <Icon
+                  size={18}
+                  color={active ? GOLD_DK : INK_SUB}
+                  strokeWidth={active ? 2.2 : 1.7}
+                />
+              )}
+              {active && (
+                <span style={{
+                  fontFamily: FS_NAV,
+                  fontStyle: 'italic',
+                  fontWeight: 400,
+                  fontSize: 14.7,
+                  letterSpacing: '-0.005em',
+                  color: INK,
+                  whiteSpace: 'nowrap',
+                }}>
+                  {labelForTab(tabId, ui)}
+                </span>
+              )}
+              {!active && count !== null && (
+                <span style={{
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontWeight: 700,
+                  fontSize: 9.5,
+                  color: NAV_MUTED,
+                  marginLeft: -2,
+                }}>
+                  {count}
+                </span>
               )}
             </Link>
           );
         })}
       </nav>
-    </div>
+    </>
   );
 }
 

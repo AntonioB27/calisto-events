@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import QRCode from "react-qr-code";
-import { Camera, Clapperboard, Users } from "lucide-react";
 
 import { useAppUi } from "@/components/AppUiProvider";
 import { getWebJoinUrl } from "@/lib/join-link";
@@ -319,31 +318,72 @@ function StatTile({
   label,
   cap,
   accent,
-  isMuted,
-  aside,
+  mascot,
+  rotation,
+  tape,
 }: {
   n: number;
   label: string;
   cap: string;
   accent: string;
-  isMuted?: boolean;
-  aside: React.ReactNode;
+  mascot: string;
+  rotation: number;
+  tape?: { left: string; deg: number };
 }) {
-  const isDark = React.useContext(DarkCtx);
   return (
-    <div style={{
-      ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 16,
-      padding: '12px 10px 12px 12px',
-      display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-      minHeight: 116, position: 'relative', overflow: 'hidden',
-    }}>
-      <div style={{ position: 'absolute', top: -30, right: -30, width: 80, height: 80, borderRadius: '50%', background: accent, opacity: isMuted ? 0.04 : 0.1, filter: 'blur(20px)', pointerEvents: 'none' }} />
-      <div>
-        <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 44, color: accent, letterSpacing: '-0.04em', lineHeight: 0.85 }}>{n}</div>
-        <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 14, fontWeight: 400, color: TEXT, marginTop: 4 }}>{label}</div>
-        <div style={{ fontSize: 8.5, color: MUTED, fontWeight: 600, marginTop: 1, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: FB }}>{cap}</div>
+    <div style={{ position: 'relative' }}>
+      {tape && (
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute',
+            top: -7,
+            left: tape.left,
+            width: 52,
+            height: 12,
+            background: 'rgba(212,168,67,0.45)',
+            border: '0.5px solid rgba(212,168,67,0.55)',
+            transform: `rotate(${tape.deg}deg)`,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.18)',
+            zIndex: 2,
+            borderRadius: 2,
+            pointerEvents: 'none',
+          }}
+        />
+      )}
+      <div
+        style={{
+          background: '#f4f0ea',
+          borderRadius: 3,
+          boxShadow: '0 8px 28px rgba(0,0,0,0.38), 0 2px 8px rgba(0,0,0,0.18)',
+          transform: `rotate(${rotation}deg)`,
+          padding: '9px 9px 14px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 0,
+        }}
+      >
+        <div
+          style={{
+            borderRadius: 2,
+            overflow: 'hidden',
+            background: 'rgba(0,0,0,0.04)',
+            aspectRatio: '1 / 1',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 9,
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={mascot} alt="" aria-hidden style={{ width: '82%', height: '82%', objectFit: 'contain' }} />
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 34, color: accent, letterSpacing: '-0.04em', lineHeight: 0.9 }}>{n}</div>
+          <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 12, color: '#2a1d0f', marginTop: 3 }}>{label}</div>
+          <div style={{ fontSize: 7.5, color: '#9A8570', fontWeight: 600, marginTop: 2, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: FB }}>{cap}</div>
+        </div>
       </div>
-      <div style={{ alignSelf: 'flex-end' }}>{aside}</div>
     </div>
   );
 }
@@ -381,14 +421,14 @@ function StatsTiles({ eventId, planId }: { eventId: string; planId: ReturnType<t
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
         <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: TEXT_S, fontFamily: FB }}>Statistics</div>
         {!supabase && <div style={{ fontSize: 10.5, color: MUTED, fontFamily: FB }}>{ui.common.loadCountsHint}</div>}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 8 }}>
-        <StatTile n={photos ?? 0} label={ui.overview.statsPhotos} cap={subFor(limits.photos)} accent={PURPLE} aside={<Camera size={32} color={PURPLE} opacity={0.35} aria-hidden />} />
-        <StatTile n={videos ?? 0} label={ui.overview.statsVideos} cap={videoCap} accent={MUTED} isMuted aside={<Clapperboard size={32} color={MUTED} opacity={0.35} aria-hidden />} />
-        <StatTile n={guestCount}  label={ui.overview.statsGuests} cap={subFor(limits.guests)} accent={GOLD} aside={<Users size={32} color={GOLD} opacity={0.35} aria-hidden />} />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, padding: '8px 4px 4px' }}>
+        <StatTile n={photos ?? 0} label={ui.overview.statsPhotos} cap={subFor(limits.photos)} accent={PURPLE} mascot="/brand/mascot/aurora_camera.png" rotation={-1.5} tape={{ left: '22%', deg: -3 }} />
+        <StatTile n={videos ?? 0} label={ui.overview.statsVideos} cap={videoCap}               accent="#7A6A5A" mascot="/brand/mascot/aurora_photo.png"  rotation={1}    tape={{ left: '28%', deg: 2 }} />
+        <StatTile n={guestCount}  label={ui.overview.statsGuests} cap={subFor(limits.guests)}  accent={GOLD}   mascot="/brand/mascot/aurora.png"         rotation={-0.5} tape={{ left: '24%', deg: -1.5 }} />
       </div>
     </div>
   );

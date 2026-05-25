@@ -66,7 +66,7 @@ export function DemoGuestView() {
           <h2 style={{ marginBottom: 16, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--app-muted)" }}>
             Gallery · {DEMO_PHOTOS.length} memories
           </h2>
-          <DemoMediaGrid canManage={false} />
+          <DemoMediaGrid canManage={false} columns={3} photos={DEMO_PHOTOS} />
         </section>
       </div>
     </main>
