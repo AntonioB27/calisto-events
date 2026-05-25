@@ -171,7 +171,7 @@ const copy: Record<Locale, LandingCopy> = {
     joinWaitlistShort: "Try the demo",
     heroBadge: "Meet Aurora",
     heroIntro: "Hi, I'm Aurora, I'll guide you through Calisto.",
-    heroTitle: "Your day. Every angle.",
+    heroTitle: "Your celebration, captured from every angle.",
     heroDescription:
       "Browse photos and videos in one place. No app download. Just scan the QR code and view gallery or upload. Try it for FREE!",
     heroAuroraCardBlurb:
@@ -462,7 +462,7 @@ const copy: Record<Locale, LandingCopy> = {
     joinWaitlistShort: "Isprobaj demo",
     heroBadge: "Upoznaj Auroru",
     heroIntro: "Bok, ja sam Aurora, predstavljam ti Calisto.",
-    heroTitle: "Tvoj dan. Svaki kut.",
+    heroTitle: "Tvoja proslava, uhvaćena iz svakog kuta.",
     heroDescription:
       "Pregledavaj fotografije i videozapise na jednom mjestu. Bez preuzimanja aplikacije. Skeniraj QR kod i otvori galeriju ili učitaj. Probaj besplatno!",
     heroAuroraCardBlurb:
@@ -750,7 +750,7 @@ const copy: Record<Locale, LandingCopy> = {
     joinWaitlistShort: "Demo ausprobieren",
     heroBadge: "Lerne Aurora kennen",
     heroIntro: "Hi, ich bin Aurora, ich stelle dir Calisto vor.",
-    heroTitle: "Dein Tag. Jede Perspektive.",
+    heroTitle: "Deine Feier, aus jedem Blickwinkel festgehalten.",
     heroDescription:
       "Fotos und Videos an einem Ort durchstöbern. Kein App-Download. QR-Code scannen, Galerie ansehen oder hochladen. Kostenlos ausprobieren!",
     heroAuroraCardBlurb:
