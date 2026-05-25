@@ -149,11 +149,11 @@ export function Hero({ copy }: HeroProps) {
                 border: "1px solid var(--hair-2)",
                 background: "linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%)",
                 boxShadow: "0 28px 64px -22px rgba(0,0,0,0.28)",
-                padding: "24px 22px",
+                padding: "16px 22px",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: 16,
+                gap: 8,
               }}
             >
               <div
