@@ -14,12 +14,7 @@ export function DemoMediaGrid({ canManage = false }: Props) {
 
   return (
     <>
-      <div
-        style={{
-          columns: "2 160px",
-          gap: 8,
-        }}
-      >
+      <div style={{ columns: "2 160px", gap: 8 }}>
         {DEMO_PHOTOS.map((photo) => (
           <div
             key={photo.src}

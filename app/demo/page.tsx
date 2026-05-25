@@ -8,14 +8,13 @@ const PURPLE = '#5B2D8E';
 export default function DemoLandingPage() {
   return (
     <main
+      className="app-shell"
       style={{
-        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         padding: "40px 24px",
-        background: "var(--app-bg)",
       }}
     >
       <div style={{ maxWidth: 480, width: "100%", textAlign: "center" }}>
@@ -78,7 +77,7 @@ export default function DemoLandingPage() {
 
         {/* Footer note */}
         <p style={{ marginTop: 32, fontSize: 12, color: "var(--app-muted)", fontFamily: FB, fontStyle: "italic" }}>
-          A wedding by Ana & Marco · 12 photos · 9 guests
+          A wedding by Ana & Marco · 33 photos · 17 guests
         </p>
       </div>
     </main>

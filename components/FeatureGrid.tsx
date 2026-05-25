@@ -29,7 +29,7 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
       className="features-section relative scroll-mt-20"
       style={{
         borderTop: "1px solid var(--hair)",
-        padding: "clamp(72px, 11vw, 120px) 0",
+        padding: "clamp(24px, 4vw, 40px) 0",
         zIndex: 2,
       }}
     >

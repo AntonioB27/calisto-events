@@ -22,7 +22,7 @@ export function DemoGalleryTab() {
       </div>
 
       {/* Polaroid-style upload affordance — disabled, triggers toast */}
-      <div style={{ position: "relative" }}>
+      <div className="welcome-reveal welcome-reveal--d1" style={{ position: "relative" }}>
         <div
           aria-hidden
           style={{ position: "absolute", top: -8, left: "33%", width: 64, height: 14, background: "rgba(212,168,67,0.48)", border: "0.5px solid rgba(212,168,67,0.6)", transform: "rotate(-3deg)", boxShadow: "0 2px 6px rgba(0,0,0,0.22)", zIndex: 2, borderRadius: 2, pointerEvents: "none" }}
@@ -46,7 +46,9 @@ export function DemoGalleryTab() {
         </button>
       </div>
 
-      <DemoMediaGrid canManage />
+      <div className="welcome-reveal welcome-reveal--d2">
+        <DemoMediaGrid canManage />
+      </div>
     </section>
   );
 }

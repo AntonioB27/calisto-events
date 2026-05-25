@@ -54,7 +54,7 @@ function ThemeSwatch({ variant }: { variant: "light" | "dark" }) {
 }
 
 export function LanguageSelectorPopup({ copy, locale }: LanguageSelectorPopupProps) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("light");
   const titleId = useId();
   const subtitleId = useId();
@@ -64,22 +64,7 @@ export function LanguageSelectorPopup({ copy, locale }: LanguageSelectorPopupPro
     setOpen(false);
   }, []);
 
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("calisto-theme");
-      if (stored === "light" || stored === "dark") {
-        // Avoid sync setState-in-effect lint; defers initialization to the next task.
-        setTimeout(() => setTheme(stored), 0);
-        return;
-      }
-    } catch {
-      /* ignore */
-    }
-    const attr = document.documentElement.getAttribute("data-theme");
-    if (attr === "light") setTimeout(() => setTheme("light"), 0);
-  }, []);
-
-  const applyTheme = (t: "dark" | "light") => {
+  const applyTheme = useCallback((t: "dark" | "light") => {
     setTheme(t);
     document.documentElement.setAttribute("data-theme", t);
     try {
@@ -87,7 +72,22 @@ export function LanguageSelectorPopup({ copy, locale }: LanguageSelectorPopupPro
     } catch {
       /* ignore */
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("calisto-theme");
+      if (stored === "light" || stored === "dark") {
+        applyTheme(stored);
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
+    // No stored preference — auto-apply system preference
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    applyTheme(prefersDark ? "dark" : "light");
+  }, [applyTheme]);
 
   useEffect(() => {
     if (!open) return;
