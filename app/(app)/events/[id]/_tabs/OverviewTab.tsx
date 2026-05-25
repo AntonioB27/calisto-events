@@ -15,6 +15,7 @@ import {
   normalizePlanId,
 } from "@/lib/plan-limits";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { usePolaroidScroll } from "@/lib/use-polaroid-scroll";
 
 // ── Aurora Theater palette ────────────────────────────────────────────────────
 const GOLD   = '#C5922A';
@@ -321,6 +322,8 @@ function StatTile({
   mascot,
   rotation,
   tape,
+  imgPadding = 0,
+  swayDelay = '0s',
 }: {
   n: number;
   label: string;
@@ -329,9 +332,11 @@ function StatTile({
   mascot: string;
   rotation: number;
   tape?: { left: string; deg: number };
+  imgPadding?: number;
+  swayDelay?: string;
 }) {
   return (
-    <div style={{ position: 'relative' }}>
+    <div className="polaroid-sway" style={{ position: 'relative', animationDelay: swayDelay }}>
       {tape && (
         <div
           aria-hidden
@@ -365,18 +370,16 @@ function StatTile({
       >
         <div
           style={{
+            position: 'relative',
             borderRadius: 2,
             overflow: 'hidden',
             background: 'rgba(0,0,0,0.04)',
             aspectRatio: '1 / 1',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             marginBottom: 9,
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={mascot} alt="" aria-hidden style={{ width: '82%', height: '82%', objectFit: 'contain' }} />
+          <img src={mascot} alt="" aria-hidden style={{ position: 'absolute', inset: `${imgPadding}%`, width: `${100 - imgPadding * 2}%`, height: `${100 - imgPadding * 2}%`, objectFit: 'contain' }} />
         </div>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 34, color: accent, letterSpacing: '-0.04em', lineHeight: 0.9 }}>{n}</div>
@@ -389,6 +392,7 @@ function StatTile({
 }
 
 function StatsTiles({ eventId, planId }: { eventId: string; planId: ReturnType<typeof normalizePlanId> }) {
+  usePolaroidScroll();
   const ui = useAppUi();
   const limits = useMemo(() => getPlanLimits(planId), [planId]);
   const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
@@ -426,9 +430,9 @@ function StatsTiles({ eventId, planId }: { eventId: string; planId: ReturnType<t
         {!supabase && <div style={{ fontSize: 10.5, color: MUTED, fontFamily: FB }}>{ui.common.loadCountsHint}</div>}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, padding: '8px 4px 4px' }}>
-        <StatTile n={photos ?? 0} label={ui.overview.statsPhotos} cap={subFor(limits.photos)} accent={PURPLE} mascot="/brand/mascot/aurora_camera.png" rotation={-1.5} tape={{ left: '22%', deg: -3 }} />
-        <StatTile n={videos ?? 0} label={ui.overview.statsVideos} cap={videoCap}               accent="#7A6A5A" mascot="/brand/mascot/aurora_photo.png"  rotation={1}    tape={{ left: '28%', deg: 2 }} />
-        <StatTile n={guestCount}  label={ui.overview.statsGuests} cap={subFor(limits.guests)}  accent={GOLD}   mascot="/brand/mascot/aurora.png"         rotation={-0.5} tape={{ left: '24%', deg: -1.5 }} />
+        <StatTile n={photos ?? 0} label={ui.overview.statsPhotos} cap={subFor(limits.photos)} accent={PURPLE} mascot="/brand/mascot/aurora_camera.png"    rotation={-1.5} tape={{ left: '22%', deg: -3 }} imgPadding={0}  swayDelay="0s" />
+        <StatTile n={videos ?? 0} label={ui.overview.statsVideos} cap={videoCap}               accent="#7A6A5A" mascot="/brand/mascot/aurora_recording.png" rotation={1}    tape={{ left: '28%', deg: 2 }} imgPadding={20} swayDelay="-1.3s" />
+        <StatTile n={guestCount}  label={ui.overview.statsGuests} cap={subFor(limits.guests)}  accent={GOLD}   mascot="/brand/mascot/aurora_guests.png"     rotation={-0.5} tape={{ left: '24%', deg: -1.5 }} imgPadding={14} swayDelay="-2.6s" />
       </div>
     </div>
   );

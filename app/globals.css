@@ -2142,3 +2142,16 @@ html[data-theme="dark"] .auth-oauth-google-btn.app-btn--outline {
 }
 .event-date-dot--upcoming { background: var(--app-success); }
 .event-date-dot--past     { background: var(--app-subtle); }
+
+/* Polaroid wind sway — applied to the outer wrapper; inner card keeps its own tilt */
+@keyframes polaroid-sway {
+  0%   { transform: rotate(0deg)    translateY(0px); }
+  20%  { transform: rotate(1.3deg)  translateY(-3px); }
+  50%  { transform: rotate(-1deg)   translateY(2px); }
+  75%  { transform: rotate(0.6deg)  translateY(-1px); }
+  100% { transform: rotate(0deg)    translateY(0px); }
+}
+.polaroid-sway {
+  animation: polaroid-sway var(--sway-dur, 4s) ease-in-out infinite;
+  transform-origin: 50% 0%;
+}

@@ -1034,6 +1034,7 @@ export function GalleryManager({
                 gap: 4,
                 padding: "40px 10px 10px",
                 background: "linear-gradient(transparent, rgba(0,0,0,0.72))",
+                pointerEvents: "none",
               }}
             >
               <MediaUploaderChip
@@ -1059,6 +1060,7 @@ export function GalleryManager({
                   letterSpacing: "0.04em",
                   textTransform: "uppercase",
                   fontFamily: "inherit",
+                  pointerEvents: "auto",
                 }}
               >
                 {busy ? ui.gallery.deleteBusy : ui.common.delete}
@@ -1083,7 +1085,16 @@ export function GalleryManager({
         const renderMedia = (item: MediaItem) => {
           const isVideo = isVideoMime(item.mime_type);
           if (!item.signedUrl) return <div style={{ width: "100%", minHeight: 80, background: "var(--app-surface-2)" }} />;
-          if (isVideo) return <video src={item.signedUrl} style={{ display: "block", width: "100%", height: "auto" }} controls playsInline muted />;
+          if (isVideo) return (
+            <div style={{ position: "relative", width: "100%", lineHeight: 0 }}>
+              <video src={item.signedUrl} preload="metadata" style={{ display: "block", width: "100%", height: "auto" }} />
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" aria-hidden><path d="M8 5v14l11-7z"/></svg>
+                </div>
+              </div>
+            </div>
+          );
           return (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -1105,12 +1116,12 @@ export function GalleryManager({
               return (
                 <div
                   key={item.id}
-                  onClick={() => !isVideo && setLightbox(item)}
+                  onClick={() => setLightbox(item)}
                   style={{
                     position: "relative",
                     borderRadius: 8,
                     overflow: "hidden",
-                    cursor: isVideo ? "default" : "pointer",
+                    cursor: "pointer",
                   }}
                 >
                   {renderMedia(item)}
@@ -1283,6 +1294,7 @@ export function GalleryManager({
       {lightbox ? (
         <PhotoLightbox
           signedUrl={lightbox.signedUrl}
+          mimeType={lightbox.mime_type}
           likeCount={likeCounts.get(lightbox.id) ?? 0}
           likedByMe={likedByMe.has(lightbox.id)}
           canViewLikers

@@ -5,6 +5,19 @@ import type { DemoPhoto } from "../_data/demo-event";
 import { useDemoToast } from "./DemoToastProvider";
 import { MediaLikeBadge } from "@/components/app-ui/MediaLikeBadge";
 import { MediaUploaderChip } from "@/components/app-ui/MediaUploaderChip";
+import { PhotoLightbox } from "@/components/app-ui/PhotoLightbox";
+import type { PhotoLightboxCopy } from "@/components/app-ui/PhotoLightbox";
+
+const DEMO_COPY: PhotoLightboxCopy = {
+  lightboxAria: "Photo lightbox",
+  closeLightboxAria: "Close",
+  heartLikeAria: "Like",
+  heartUnlikeAria: "Unlike",
+  likeCount: (count) => `${count}`,
+  likersHeading: "Liked by",
+  likersEmpty: "No likes yet",
+  toggleFail: "Could not toggle like",
+};
 
 type Props = {
   canManage?: boolean;
@@ -14,7 +27,7 @@ type Props = {
 
 export function DemoMediaGrid({ canManage = false, columns, photos }: Props) {
   const { triggerDemoToast } = useDemoToast();
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightboxPhoto, setLightboxPhoto] = useState<DemoPhoto | null>(null);
   const [liked, setLiked] = useState<Set<string>>(() => new Set());
   const [likeCounts, setLikeCounts] = useState<Map<string, number>>(
     () => new Map(photos.map((p) => [p.src, p.likeCount])),
@@ -42,7 +55,7 @@ export function DemoMediaGrid({ canManage = false, columns, photos }: Props) {
         {photos.map((photo) => (
           <div
             key={photo.src}
-            onClick={() => setLightboxSrc(photo.src)}
+            onClick={() => setLightboxPhoto(photo)}
             style={{ position: "relative", borderRadius: 8, overflow: "hidden", cursor: "pointer" }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -67,6 +80,7 @@ export function DemoMediaGrid({ canManage = false, columns, photos }: Props) {
                 gap: 4,
                 padding: "40px 10px 10px",
                 background: "linear-gradient(transparent, rgba(0,0,0,0.72))",
+                pointerEvents: "none",
               }}
             >
               <MediaUploaderChip label={photo.uploadedBy} isMine={false} mineAria="" />
@@ -87,6 +101,7 @@ export function DemoMediaGrid({ canManage = false, columns, photos }: Props) {
                     letterSpacing: "0.04em",
                     textTransform: "uppercase",
                     fontFamily: "inherit",
+                    pointerEvents: "auto",
                   }}
                 >
                   Delete
@@ -109,31 +124,22 @@ export function DemoMediaGrid({ canManage = false, columns, photos }: Props) {
         ))}
       </div>
 
-      {lightboxSrc && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 9998,
-            background: "rgba(0,0,0,0.88)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 20,
-          }}
-          onClick={() => setLightboxSrc(null)}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={lightboxSrc}
-            alt="Full size"
-            style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 12, objectFit: "contain" }}
-          />
-        </div>
-      )}
+      {lightboxPhoto ? (
+        <PhotoLightbox
+          signedUrl={lightboxPhoto.src}
+          likeCount={likeCounts.get(lightboxPhoto.src) ?? lightboxPhoto.likeCount}
+          likedByMe={liked.has(lightboxPhoto.src)}
+          canViewLikers={false}
+          likers={[]}
+          likersLoading={false}
+          togglePending={false}
+          toggleError={null}
+          copy={DEMO_COPY}
+          uploaderLabel={lightboxPhoto.uploadedBy}
+          onClose={() => setLightboxPhoto(null)}
+          onToggleLike={() => handleToggleLike(lightboxPhoto.src)}
+        />
+      ) : null}
     </>
   );
 }

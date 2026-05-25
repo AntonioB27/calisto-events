@@ -38,6 +38,13 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
+  experimental: {
+    // Middleware clones every POST body for re-reading; the default cap is 10 MB.
+    // Without this, multipart bodies > 10 MB (any typical MP4) get truncated,
+    // causing request.formData() to throw → "Invalid form data." on the client.
+    // Set to 300 MB to match the 280 MB server-side video limit.
+    proxyClientMaxBodySize: 300 * 1024 * 1024,
+  },
   async headers() {
     return [
       { source: "/", headers: [{ key: "Link", value: AGENT_DISCOVERY_LINK }] },

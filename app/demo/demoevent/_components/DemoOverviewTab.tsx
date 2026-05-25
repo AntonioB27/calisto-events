@@ -8,6 +8,7 @@ import { DEMO_EVENT, DEMO_GUESTS, DEMO_PHOTOS } from "../_data/demo-event";
 import { useDemoToast } from "./DemoToastProvider";
 import { formatQuotaSublabelLocalized, getPlanLimits, isUnlimitedQuota } from "@/lib/plan-limits";
 import { getWebJoinUrl } from "@/lib/join-link";
+import { usePolaroidScroll } from "@/lib/use-polaroid-scroll";
 
 const GOLD       = '#C5922A';
 const PURPLE     = '#5B2D8E';
@@ -112,6 +113,7 @@ function CountdownCards() {
 }
 
 function StatsTiles() {
+  usePolaroidScroll();
   const ui = useAppUi();
   const photos = DEMO_PHOTOS.length;
   const guests = DEMO_GUESTS.length;
@@ -124,9 +126,9 @@ function StatsTiles() {
   const videoMax = limits.videos;
   const videoCap = !isUnlimitedQuota(videoMax) && videoMax <= 0 ? ui.quotas.notOnPlan : subFor(videoMax);
 
-  function Tile({ n, label, cap, accent, mascot, rotation, tape }: { n: number; label: string; cap: string; accent: string; mascot: string; rotation: number; tape?: { left: string; deg: number } }) {
+  function Tile({ n, label, cap, accent, mascot, rotation, tape, imgPadding = 0, swayDelay = "0s" }: { n: number; label: string; cap: string; accent: string; mascot: string; rotation: number; tape?: { left: string; deg: number }; imgPadding?: number; swayDelay?: string }) {
     return (
-      <div style={{ position: "relative" }}>
+      <div className="polaroid-sway" style={{ position: "relative", animationDelay: swayDelay }}>
         {tape && (
           <div
             aria-hidden
@@ -161,18 +163,16 @@ function StatsTiles() {
           {/* Photo area */}
           <div
             style={{
+              position: "relative",
               borderRadius: 2,
               overflow: "hidden",
               background: "rgba(0,0,0,0.04)",
               aspectRatio: "1 / 1",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
               marginBottom: 9,
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={mascot} alt="" aria-hidden style={{ width: "82%", height: "82%", objectFit: "contain" }} />
+            <img src={mascot} alt="" aria-hidden style={{ position: "absolute", inset: `${imgPadding}%`, width: `${100 - imgPadding * 2}%`, height: `${100 - imgPadding * 2}%`, objectFit: "contain" }} />
           </div>
           {/* Bottom strip */}
           <div style={{ textAlign: "center" }}>
@@ -191,9 +191,9 @@ function StatsTiles() {
         <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: TEXT_S, fontFamily: FB }}>Statistics</div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, padding: "8px 4px 4px" }}>
-        <Tile n={photos} label={ui.overview.statsPhotos} cap={subFor(limits.photos)} accent={PURPLE} mascot="/brand/mascot/aurora_camera.png" rotation={-1.5} tape={{ left: "22%", deg: -3 }} />
-        <Tile n={0}      label={ui.overview.statsVideos} cap={videoCap}               accent="#7A6A5A" mascot="/brand/mascot/aurora_photo.png"  rotation={1}    tape={{ left: "28%", deg: 2 }} />
-        <Tile n={guests} label={ui.overview.statsGuests} cap={subFor(limits.guests)}  accent={GOLD}   mascot="/brand/mascot/aurora.png"         rotation={-0.5} tape={{ left: "24%", deg: -1.5 }} />
+        <Tile n={photos} label={ui.overview.statsPhotos} cap={subFor(limits.photos)} accent={PURPLE} mascot="/brand/mascot/aurora_camera.png"    rotation={-1.5} tape={{ left: "22%", deg: -3 }} imgPadding={0}  swayDelay="0s" />
+        <Tile n={0}      label={ui.overview.statsVideos} cap={videoCap}               accent="#7A6A5A" mascot="/brand/mascot/aurora_recording.png" rotation={1}    tape={{ left: "28%", deg: 2 }} imgPadding={20} swayDelay="-1.3s" />
+        <Tile n={guests} label={ui.overview.statsGuests} cap={subFor(limits.guests)}  accent={GOLD}   mascot="/brand/mascot/aurora_guests.png"     rotation={-0.5} tape={{ left: "24%", deg: -1.5 }} imgPadding={14} swayDelay="-2.6s" />
       </div>
     </div>
   );
