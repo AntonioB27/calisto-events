@@ -20,12 +20,14 @@ export default async function DemoEventPage({ searchParams }: Props) {
 
   return (
     <DemoToastProvider>
-      <DemoRoleToggle currentRole={role} currentTab={tab} />
-      {role === "organizer" ? (
-        <DemoOrganizerView selectedTab={tab} publicOrigin={publicOrigin} />
-      ) : (
-        <DemoGuestView />
-      )}
+      <div className="app-shell">
+        <DemoRoleToggle currentRole={role} currentTab={tab} />
+        {role === "organizer" ? (
+          <DemoOrganizerView selectedTab={tab} publicOrigin={publicOrigin} />
+        ) : (
+          <DemoGuestView />
+        )}
+      </div>
     </DemoToastProvider>
   );
 }

@@ -73,7 +73,7 @@ export function FAQ({ copy }: FAQProps) {
     <section
       id="faq"
       className="relative scroll-mt-20"
-      style={{ borderTop: "1px solid var(--hair)", padding: "120px 0", zIndex: 2 }}
+      style={{ borderTop: "1px solid var(--hair)", padding: "40px 0", zIndex: 2 }}
     >
       <div className="mx-auto" style={{ maxWidth: 1280, padding: "0 32px" }}>
         {/* Section head */}

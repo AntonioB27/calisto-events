@@ -231,7 +231,7 @@ export function HowItWorks({ copy }: HowItWorksProps) {
       className="how-section relative scroll-mt-20 overflow-x-clip"
       style={{
         borderTop: "1px solid var(--hair)",
-        padding: "clamp(72px, 12vw, 120px) 0",
+        padding: "clamp(24px, 4vw, 40px) 0",
         zIndex: 2,
       }}
     >

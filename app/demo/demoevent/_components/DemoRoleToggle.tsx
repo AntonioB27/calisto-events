@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import type { DemoRole, DemoTabId } from "../demo-role";
@@ -35,6 +36,29 @@ export function DemoRoleToggle({ currentRole, currentTab }: Props) {
         transition: "opacity 0.15s",
       }}
     >
+      <Link
+        href="/dashboard"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 5,
+          padding: "6px 12px 6px 9px",
+          borderRadius: 9,
+          background: "rgba(255,255,255,0.55)",
+          border: "1px solid var(--app-border)",
+          color: "#5B2D8E",
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 12,
+          fontWeight: 600,
+          textDecoration: "none",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          flexShrink: 0,
+        }}
+      >
+        Home
+      </Link>
+      <span style={{ flex: 1 }} />
       <span
         style={{
           fontSize: 11,
@@ -49,6 +73,8 @@ export function DemoRoleToggle({ currentRole, currentTab }: Props) {
         Viewing as:
       </span>
       <div
+        role="radiogroup"
+        aria-label="View as role"
         style={{
           display: "flex",
           background: "var(--app-surface)",
@@ -87,16 +113,6 @@ export function DemoRoleToggle({ currentRole, currentTab }: Props) {
           );
         })}
       </div>
-      <span
-        style={{
-          fontSize: 11,
-          color: "var(--app-muted)",
-          fontFamily: "'DM Sans', sans-serif",
-          fontStyle: "italic",
-        }}
-      >
-        Demo mode
-      </span>
     </div>
   );
 }

@@ -1,13 +1,6 @@
-"use client";
-
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import Link from "next/link";
 import type { LandingCopy, Locale } from "@/lib/i18n";
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-function isValidEmail(v: string) {
-  return v.trim().length > 0 && EMAIL_RE.test(v.trim());
-}
 
 type WaitlistFormProps = {
   copy: LandingCopy["waitlist"];
@@ -15,48 +8,19 @@ type WaitlistFormProps = {
   locale: Locale;
 };
 
-export function WaitlistForm({ copy, mascotAlt, locale }: WaitlistFormProps) {
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
-  const [busy, setBusy] = useState(false);
-
-  const onSubmit = useCallback(
-    async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      setError(null);
-      const trimmed = email.trim();
-      if (!isValidEmail(trimmed)) { setError(copy.invalidEmail); return; }
-      setBusy(true);
-      try {
-        const res = await fetch("/api/waitlist", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: trimmed, locale }),
-        });
-        if (!res.ok) { setError(copy.submitFailed); return; }
-        setSubmitted(true);
-      } catch {
-        setError(copy.submitFailed);
-      } finally {
-        setBusy(false);
-      }
-    },
-    [copy.invalidEmail, copy.submitFailed, email, locale],
-  );
-
+export function WaitlistForm({ copy, mascotAlt }: WaitlistFormProps) {
   return (
     <section
-      id="waitlist"
+      id="demo"
       className="relative scroll-mt-20 overflow-hidden"
       style={{
         borderTop: "1px solid var(--hair)",
-        padding: "140px 0 120px",
+        padding: "48px 0 40px",
         textAlign: "center",
         zIndex: 2,
       }}
     >
-      {/* Plum radial glow */}
+      {/* Plum + amber radial glow */}
       <div
         aria-hidden
         style={{
@@ -70,7 +34,6 @@ export function WaitlistForm({ copy, mascotAlt, locale }: WaitlistFormProps) {
       />
 
       <div className="mx-auto" style={{ maxWidth: 1280, padding: "0 32px", position: "relative", zIndex: 2 }}>
-        {/* Big title */}
         <h2
           style={{
             fontFamily: "var(--font-display)",
@@ -108,107 +71,30 @@ export function WaitlistForm({ copy, mascotAlt, locale }: WaitlistFormProps) {
           />
         </div>
 
-        {submitted ? (
-          <p
-            role="status"
+        <div style={{ margin: "36px auto 0", display: "flex", justifyContent: "center" }}>
+          <Link
+            href="/demo"
             style={{
-              margin: "40px auto 0",
-              maxWidth: 440,
-              padding: "16px 20px",
-              borderRadius: 14,
-              border: "1px solid rgba(165,132,166,0.35)",
-              background: "rgba(139,106,140,0.12)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "15px 32px",
+              borderRadius: 999,
+              background: "linear-gradient(135deg, var(--gold) 0%, var(--amber) 45%, var(--gold-deep) 100%)",
+              color: "#1b1208",
               fontFamily: "var(--font-sans)",
               fontSize: 15,
-              color: "var(--cream)",
+              fontWeight: 500,
+              letterSpacing: "0.01em",
+              textDecoration: "none",
+              boxShadow: "0 0 0 1px rgba(255,255,255,0.28) inset, 0 16px 48px -12px rgba(240,179,75,0.55)",
+              transition: "all 250ms ease",
             }}
           >
-            {copy.submitted}
-          </p>
-        ) : (
-          <form
-            onSubmit={onSubmit}
-            noValidate
-            style={{
-              margin: "40px auto 0",
-              maxWidth: 440,
-              display: "flex",
-              gap: 8,
-              padding: 6,
-              borderRadius: 999,
-              border: "1px solid var(--hair-strong)",
-              background: "color-mix(in srgb, var(--glass-bg-2) 86%, rgba(240,179,75,0.08))",
-              backdropFilter: "blur(12px)",
-            }}
-          >
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <label htmlFor="waitlist-email" className="sr-only">{copy.inputLabel}</label>
-              <input
-                id="waitlist-email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                inputMode="email"
-                placeholder={copy.inputPlaceholder}
-                value={email}
-                onChange={(ev) => { setEmail(ev.target.value); if (error) setError(null); }}
-                aria-invalid={error !== null ? true : false}
-                aria-describedby={error ? "wl-err" : undefined}
-                style={{
-                  width: "100%",
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  color: "var(--cream)",
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 14,
-                  padding: "10px 18px",
-                  caretColor: "var(--plum-2, #A584A6)",
-                }}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={busy}
-              style={{
-                flexShrink: 0,
-                padding: "11px 22px",
-                borderRadius: 999,
-                border: "none",
-                background: "linear-gradient(135deg, var(--gold) 0%, var(--amber) 45%, var(--gold-deep) 100%)",
-                color: "#1b1208",
-                fontFamily: "var(--font-sans)",
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: busy ? "not-allowed" : "pointer",
-                opacity: busy ? 0.7 : 1,
-                transition: "all 250ms ease",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              {busy ? copy.buttonBusy : copy.buttonIdle}
-              {!busy && <span aria-hidden>→</span>}
-            </button>
-          </form>
-        )}
-
-        {error && (
-          <p
-            id="wl-err"
-            role="alert"
-            style={{
-              marginTop: 10,
-              fontFamily: "var(--font-sans)",
-              fontSize: 13,
-              color: "rgba(248,113,113,0.9)",
-            }}
-          >
-            {error}
-          </p>
-        )}
-
+            {copy.buttonIdle}
+            <span aria-hidden>→</span>
+          </Link>
+        </div>
       </div>
     </section>
   );

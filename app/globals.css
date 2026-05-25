@@ -1469,6 +1469,68 @@ html[data-theme="dark"] .app-form-row__error {
   border-radius: 4px;
 }
 
+/* ── Demo event nav — floating pill bar ─────────────────────────────────── */
+@keyframes demo-tab-pop {
+  0%   { transform: scale(0.93); opacity: 0.5; }
+  60%  { transform: scale(1.03); opacity: 1;   }
+  100% { transform: scale(1);    opacity: 1;   }
+}
+
+.event-toc.demo-event-nav {
+  margin: 10px 16px 0;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-bottom: none;
+  border-radius: 14px;
+  box-shadow:
+    0 6px 20px -4px rgba(40, 25, 15, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  gap: 3px;
+}
+
+.event-toc.demo-event-nav .event-toc__tab {
+  flex: 1;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 10px 6px;
+  font-size: 15px;
+  margin-right: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+  color: var(--app-muted);
+  transition: background 0.18s ease, color 0.18s ease, transform 0.12s ease;
+}
+
+.event-toc.demo-event-nav .event-toc__tab:hover {
+  background: rgba(40, 25, 15, 0.05);
+  color: var(--app-text-sub);
+}
+
+.event-toc.demo-event-nav .event-toc__tab:active {
+  transform: scale(0.95);
+}
+
+.event-toc.demo-event-nav .event-toc__tab[aria-current="page"],
+.event-toc.demo-event-nav .event-toc__tab.is-active {
+  background: linear-gradient(135deg, #E6BF66 0%, #C5922A 45%, #F4D88F 70%, #946C18 100%);
+  color: #fff;
+  border-bottom-color: transparent;
+  box-shadow:
+    0 2px 10px -2px rgba(148, 108, 24, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  animation: demo-tab-pop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.event-toc.demo-event-nav .event-toc__tab[aria-current="page"] .event-toc__count,
+.event-toc.demo-event-nav .event-toc__tab.is-active .event-toc__count {
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
 /* App shell: account avatar popover */
 .app-account-menu__trigger {
   width: 34px;

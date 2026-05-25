@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import React from "react";
-import { DEMO_EVENT, DEMO_PHOTOS } from "../_data/demo-event";
+import { DEMO_PHOTOS } from "../_data/demo-event";
 import { DemoMediaGrid } from "./DemoMediaGrid";
+import { DemoEventHero } from "./DemoEventHero";
 import { useDemoToast } from "./DemoToastProvider";
 
 const TEXT_S = 'var(--app-text-sub)';
@@ -13,50 +13,15 @@ const BORDER = 'var(--app-border)';
 const FB = "'DM Sans', sans-serif";
 const FS = "'DM Serif Display', serif";
 
-const GLASS_LIGHT: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.62)',
-  backdropFilter: 'blur(14px)',
-  WebkitBackdropFilter: 'blur(14px)',
-  border: '1px solid rgba(255,255,255,0.78)',
-  boxShadow: '0 10px 30px -8px rgba(40,25,15,0.18), inset 0 1px 0 rgba(255,255,255,0.7)',
-};
-const GLASS_DARK: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.06)',
-  backdropFilter: 'blur(14px)',
-  WebkitBackdropFilter: 'blur(14px)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  boxShadow: '0 10px 30px -8px rgba(0,0,0,0.4)',
-};
-
 export function DemoGuestView() {
   const { triggerDemoToast } = useDemoToast();
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const update = () => setIsDark(document.documentElement.getAttribute("data-theme") === "dark");
-    update();
-    const obs = new MutationObserver(update);
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => obs.disconnect();
-  }, []);
 
   return (
     <main className="join-shell min-h-screen px-4 pb-16 pt-10 sm:px-6">
       <div className="mx-auto max-w-3xl">
 
         {/* Event hero banner */}
-        <div style={{ ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 14, overflow: "hidden", position: "relative", height: 128, marginBottom: 0 }}>
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,rgba(197,146,42,0.22),rgba(91,45,142,0.14))" }} />
-          <div style={{ position: "absolute", inset: 0, backgroundImage: "repeating-linear-gradient(45deg,rgba(255,255,255,0.12) 0 2px,transparent 2px 12px)" }} />
-          <div style={{ position: "absolute", right: -8, bottom: -14, fontSize: 120, lineHeight: 1, opacity: 0.9, transform: "rotate(-8deg)", filter: "drop-shadow(0 4px 12px rgba(40,25,15,0.18))", pointerEvents: "none" }}>
-            {DEMO_EVENT.emoji}
-          </div>
-          <div style={{ position: "absolute", bottom: 10, left: 10, right: 48, background: "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", borderRadius: 100, padding: "5px 14px", border: "1px solid rgba(255,255,255,0.38)", overflow: "hidden" }}>
-            <span style={{ fontFamily: FS, fontStyle: "italic", fontWeight: 700, fontSize: 14, color: "rgba(255,255,255,0.95)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", textShadow: "0 1px 4px rgba(40,25,15,0.5)", display: "block" }}>
-              {DEMO_EVENT.name}
-            </span>
-          </div>
-        </div>
+        <DemoEventHero />
 
         {/* Date + tagline row */}
         <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginTop: 14, marginBottom: 24 }}>

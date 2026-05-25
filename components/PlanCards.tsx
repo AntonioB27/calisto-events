@@ -1,6 +1,6 @@
  "use client";
 
-import { useEffect, useRef, useState, type MutableRefObject } from "react";
+import { useState } from "react";
 import type React from "react";
 import type { LandingCopy } from "@/lib/i18n";
 import Image from "next/image";
@@ -104,61 +104,16 @@ const PLAN_CONFIG: Record<string, PlanConfig> = {
 };
 
 export function PlanCards({ copy }: PlanCardsProps) {
-  const [mobileActivePlan, setMobileActivePlan] = useState<string>("free");
-  const planRefs: MutableRefObject<Record<string, HTMLElement | null>> = useRef({});
-  const activePlanRef = useRef<string | null>(mobileActivePlan);
+  const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    let raf = 0;
-    const updateMobileActivePlan = () => {
-      if (window.innerWidth > 640) return;
-      const centerY = window.innerHeight / 2;
-      let closestId: string | null = null;
-      let closestDistance = Number.POSITIVE_INFINITY;
-
-      for (const [planId, el] of Object.entries(planRefs.current)) {
-        if (!el) continue;
-        const rect = el.getBoundingClientRect();
-        const cardCenter = rect.top + rect.height / 2;
-        const distance = Math.abs(cardCenter - centerY);
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestId = planId;
-        }
-      }
-
-      if (closestId && closestId !== activePlanRef.current) {
-        activePlanRef.current = closestId;
-        setMobileActivePlan(closestId);
-      }
-    };
-
-    const onScrollOrResize = () => {
-      if (raf) return;
-      raf = window.requestAnimationFrame(() => {
-        raf = 0;
-        updateMobileActivePlan();
-      });
-    };
-
-    updateMobileActivePlan();
-    window.addEventListener("scroll", onScrollOrResize, { passive: true });
-    window.addEventListener("resize", onScrollOrResize);
-
-    return () => {
-      if (raf) window.cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScrollOrResize);
-      window.removeEventListener("resize", onScrollOrResize);
-    };
-  }, []);
+  const toggle = (id: string) =>
+    setExpandedPlan((prev) => (prev === id ? null : id));
 
   return (
     <section
       id="plans"
       className="relative scroll-mt-20"
-      style={{ borderTop: "1px solid var(--hair)", padding: "120px 0", zIndex: 2 }}
+      style={{ borderTop: "1px solid var(--hair)", padding: "40px 0", zIndex: 2 }}
     >
       <div className="mx-auto" style={{ maxWidth: 1280, padding: "0 32px" }}>
         {/* Header */}
@@ -228,16 +183,17 @@ export function PlanCards({ copy }: PlanCardsProps) {
             const [priceRow, ...restRows] = plan.rows;
             const config = PLAN_CONFIG[plan.id] ?? PLAN_CONFIG.free!;
             const Icon = config.icon;
+            const isExpanded = expandedPlan === plan.id;
             return (
               <article
                 key={plan.id}
                 className={`plan-card plan-card-${plan.id}`}
                 tabIndex={0}
                 aria-labelledby={`plan-${plan.id}`}
-                data-mobile-active={mobileActivePlan === plan.id ? "true" : "false"}
-                ref={(el) => {
-                  planRefs.current[plan.id] = el;
-                }}
+                aria-expanded={isExpanded}
+                data-expanded={isExpanded ? "true" : "false"}
+                onClick={() => toggle(plan.id)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(plan.id); } }}
                 style={{
                   background: "var(--ink)",
                   border: `1px solid ${config.borderColor}`,
@@ -245,6 +201,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
                   overflow: "hidden",
                   position: "relative",
                   outline: "none",
+                  cursor: "pointer",
                   boxShadow: `0 20px 56px -40px ${config.glow}`,
                   animation: "planCardReveal 520ms cubic-bezier(0.16, 1, 0.3, 1) both",
                   animationDelay: `${idx * 80}ms`,
@@ -253,10 +210,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
                 <div className="plan-card-shell">
                   <div
                     className="plan-card-summary"
-                    style={{
-                      borderRight: `1px solid ${config.borderColor}`,
-                      background: config.panelBackground,
-                    }}
+                    style={{ background: config.panelBackground }}
                   >
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                       <span
@@ -275,6 +229,9 @@ export function PlanCards({ copy }: PlanCardsProps) {
                       >
                         <Icon />
                       </span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ width: 16, height: 16, color: "var(--cream-4,#6E6758)", flexShrink: 0, transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 280ms ease" }}>
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
                     </div>
                     <h3
                       id={`plan-${plan.id}`}
@@ -327,56 +284,58 @@ export function PlanCards({ copy }: PlanCardsProps) {
                   </div>
 
                   <div className="plan-card-details">
-                    <div
-                      aria-hidden
-                      style={{
-                        height: 4,
-                        borderRadius: 999,
-                        background: config.detailStripe,
-                        marginBottom: 10,
-                      }}
-                    />
-                    <dl style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                      {restRows.map((row) => (
-                        <div
-                          key={row.label}
-                          className="plan-detail-row"
-                          style={{
-                            display: "grid",
-                            gridTemplateColumns: "minmax(130px, auto) 1fr",
-                            alignItems: "center",
-                            gap: 14,
-                            padding: "13px 0",
-                            borderBottom: "1px dashed rgba(181,171,153,0.2)",
-                            background: `linear-gradient(90deg, ${config.accentColor}10 0%, rgba(0,0,0,0) 30%)`,
-                          }}
-                        >
-                          <dt
+                    <div className="plan-card-details-inner">
+                      <div
+                        aria-hidden
+                        style={{
+                          height: 4,
+                          borderRadius: 999,
+                          background: config.detailStripe,
+                          marginBottom: 10,
+                        }}
+                      />
+                      <dl style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                        {restRows.map((row) => (
+                          <div
+                            key={row.label}
+                            className="plan-detail-row"
                             style={{
-                              fontFamily: "var(--font-mono)",
-                              fontSize: 10,
-                              color: "var(--cream-4, #6E6758)",
-                              letterSpacing: "0.09em",
-                              textTransform: "uppercase",
+                              display: "grid",
+                              gridTemplateColumns: "minmax(130px, auto) 1fr",
+                              alignItems: "center",
+                              gap: 14,
+                              padding: "13px 0",
+                              borderBottom: "1px dashed rgba(181,171,153,0.2)",
+                              background: `linear-gradient(90deg, ${config.accentColor}10 0%, rgba(0,0,0,0) 30%)`,
                             }}
                           >
-                            {row.label}
-                          </dt>
-                          <dd
-                            style={{
-                              fontFamily: "var(--font-sans)",
-                              color: "var(--cream)",
-                              fontWeight: 600,
-                              margin: 0,
-                              textAlign: "right",
-                              lineHeight: 1.35,
-                            }}
-                          >
-                            {row.value}
-                          </dd>
-                        </div>
-                      ))}
-                    </dl>
+                            <dt
+                              style={{
+                                fontFamily: "var(--font-mono)",
+                                fontSize: 10,
+                                color: "var(--cream-4, #6E6758)",
+                                letterSpacing: "0.09em",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {row.label}
+                            </dt>
+                            <dd
+                              style={{
+                                fontFamily: "var(--font-sans)",
+                                color: "var(--cream)",
+                                fontWeight: 600,
+                                margin: 0,
+                                textAlign: "right",
+                                lineHeight: 1.35,
+                              }}
+                            >
+                              {row.value}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -404,100 +363,58 @@ export function PlanCards({ copy }: PlanCardsProps) {
 
       <style>{`
         @keyframes planCardReveal {
-          0% {
-            opacity: 0;
-            transform: translateY(14px) scale(0.985);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        .plan-cards-grid {
-          align-items: stretch;
+          0%   { opacity: 0; transform: translateY(14px) scale(0.985); }
+          100% { opacity: 1; transform: translateY(0)    scale(1); }
         }
         .plan-card-shell {
           display: grid;
-          grid-template-columns: minmax(230px, 280px) 1fr;
+          grid-template-columns: 1fr;
         }
         .plan-card-summary {
           padding: 22px 20px 20px;
         }
+        /* collapsed: details animate to 0 height */
         .plan-card-details {
+          display: grid;
+          grid-template-rows: 0fr;
+          transition: grid-template-rows 280ms ease;
+        }
+        .plan-card[data-expanded="true"] .plan-card-details {
+          grid-template-rows: 1fr;
+        }
+        .plan-card-details-inner {
+          overflow: hidden;
+          padding: 0 20px;
+          border-top: 0px solid transparent;
+          transition: padding 280ms ease, border-color 280ms ease;
+        }
+        .plan-card[data-expanded="true"] .plan-card-details-inner {
           padding: 16px 20px;
+          border-top-width: 1px;
+          border-top-color: rgba(181,171,153,0.2);
         }
         .plan-card {
-          transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, filter 220ms ease;
+          transition: transform 220ms ease, box-shadow 220ms ease, filter 220ms ease;
         }
-        .plan-card:hover,
-        .plan-card:focus-within {
-          transform: translateY(-5px);
-          filter: saturate(1.12);
-        }
-        .plan-card-free:hover,
-        .plan-card-free:focus-within { box-shadow: 0 30px 74px -38px rgba(159,197,141,0.35); }
-        .plan-card-standard:hover,
-        .plan-card-standard:focus-within { box-shadow: 0 30px 74px -38px rgba(134,169,249,0.35); }
-        .plan-card-plus:hover,
-        .plan-card-plus:focus-within { box-shadow: 0 30px 74px -38px rgba(184,155,196,0.38); }
-        .plan-card-premium:hover,
-        .plan-card-premium:focus-within { box-shadow: 0 30px 74px -38px rgba(230,167,96,0.4); }
-        .plan-card-max:hover,
-        .plan-card-max:focus-within { box-shadow: 0 30px 74px -38px rgba(233,122,164,0.38); }
-        .plan-card:hover .plan-card-summary,
-        .plan-card:focus-within .plan-card-summary {
-          filter: brightness(1.08);
-        }
-        .plan-card:hover .plan-card-details,
-        .plan-card:focus-within .plan-card-details {
-          background: rgba(0,0,0,0.08);
-        }
-        .plan-card:hover .plan-detail-row,
-        .plan-card:focus-within .plan-detail-row {
-          transform: translateX(2px);
-        }
-        .plan-detail-row {
-          transition: transform 200ms ease, background 200ms ease;
-        }
-        .plan-card .plan-card-details > div[aria-hidden] {
-          transition: transform 220ms ease, filter 220ms ease;
-        }
-        .plan-card:hover .plan-card-details > div[aria-hidden],
-        .plan-card:focus-within .plan-card-details > div[aria-hidden] {
-          transform: scaleX(1.02);
-          filter: brightness(1.2);
-        }
-        .plan-card[data-mobile-active="true"] {
-          transform: translateY(-3px);
-          filter: saturate(1.12);
-        }
-        .plan-card .plan-detail-row:last-child {
-          border-bottom: none !important;
-        }
+        .plan-card:hover { transform: translateY(-3px); filter: saturate(1.1); }
+        .plan-card-free:hover     { box-shadow: 0 20px 56px -32px rgba(159,197,141,0.35); }
+        .plan-card-standard:hover { box-shadow: 0 20px 56px -32px rgba(134,169,249,0.35); }
+        .plan-card-plus:hover     { box-shadow: 0 20px 56px -32px rgba(184,155,196,0.38); }
+        .plan-card-premium:hover  { box-shadow: 0 20px 56px -32px rgba(230,167,96,0.4);  }
+        .plan-card-max:hover      { box-shadow: 0 20px 56px -32px rgba(233,122,164,0.38); }
+        .plan-detail-row { transition: transform 200ms ease; }
+        .plan-card[data-expanded="true"] .plan-detail-row:hover { transform: translateX(2px); }
+        .plan-card .plan-detail-row:last-child { border-bottom: none !important; }
         @media (max-width: 780px) {
-          .plan-card-shell {
-            grid-template-columns: 1fr;
-          }
-          .plan-card-summary {
-            border-right: none !important;
-            border-bottom: 1px solid rgba(181,171,153,0.22);
-          }
-          .plan-card-details {
-            padding-top: 8px;
-          }
           .plan-detail-row {
             grid-template-columns: 1fr !important;
             gap: 6px !important;
             padding: 11px 0 !important;
           }
-          .plan-detail-row dd {
-            text-align: left !important;
-          }
+          .plan-detail-row dd { text-align: left !important; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .plan-card,
-          .plan-detail-row,
-          .plan-card .plan-card-details > div[aria-hidden] {
+          .plan-card, .plan-card-details, .plan-card-details-inner, .plan-detail-row {
             animation: none !important;
             transition: none !important;
             transform: none !important;

@@ -168,15 +168,15 @@ const copy: Record<Locale, LandingCopy> = {
       { href: "#plans", label: "Plans" },
       { href: "#faq", label: "FAQ" },
     ],
-    joinWaitlistShort: "Join waitlist",
+    joinWaitlistShort: "Try the demo",
     heroBadge: "Meet Aurora",
     heroIntro: "Hi, I'm Aurora, I'll guide you through Calisto.",
-    heroTitle: "One album. Every guest.",
+    heroTitle: "Your celebration, captured from every angle.",
     heroDescription:
       "Browse photos and videos in one place. No app download. Just scan the QR code and view gallery or upload. Try it for FREE!",
     heroAuroraCardBlurb:
       "I'd rather you be in the moment than digging through camera rolls on Monday. I'm here so the messy, wonderful parts of your day—the toasts, the candid grins, the kid with cake on his face—stay in one story you can reopen without a scavenger hunt.",
-    heroPrimaryCta: "Join the waitlist",
+    heroPrimaryCta: "Try the demo",
     heroSecondaryCta: "Compare plans",
     heroSignals: [
       "No app to download — guests scan and upload from the browser.",
@@ -212,36 +212,36 @@ const copy: Record<Locale, LandingCopy> = {
       "Every guest upload lands in one gallery—I'll help you keep it tidy.",
     features: [
       {
-        title: "Unique access code",
-        description: "Each event has its own code (for example WEDDING2026).",
+        title: "One code for your event",
+        description: "Each event gets its own code — like WEDDING2026. Share it and guests are in instantly.",
         mascotBubble: "Your event, your code—simple.",
       },
       {
-        title: "Invite links & QR",
-        description: "Share a link or show a QR code so guests can join the album quickly from their phones.",
+        title: "Share by link, QR, or code",
+        description: "Send a link, display a QR code, or just text the code. Guests join from their phone in seconds — no app needed.",
         mascotBubble: "Scan or tap—they're in!",
       },
       {
-        title: "Shared gallery",
+        title: "Everyone sees it live",
         description:
-          "Everyone sees the same collection in real time as photos and videos arrive—built for weddings and celebrations.",
+          "Every photo and video shows up for all guests the moment it's uploaded — like a shared camera roll for your whole event.",
         mascotBubble: "One gallery, all the magic.",
       },
       {
-        title: "Roles",
-        description: "Guests upload and browse, and organizers manage access.",
-        mascotBubble: "Right people, right permissions.",
+        title: "You stay in control",
+        description: "You manage the event while guests just upload and browse. No complicated setup for anyone.",
+        mascotBubble: "Right people, right access.",
       },
       {
-        title: "Photos & videos by plan",
+        title: "Start free, add more when you need",
         description:
-          "Photos are included in every plan, and paid plans unlock videos, higher limits, and longer retention.",
+          "Photos are free for every event. Upgrade to add videos, more guests, and a longer window to upload after the day.",
         mascotBubble: "I'll match the plan to your story.",
       },
       {
-        title: "ZIP export",
+        title: "Download everything at once",
         description:
-          "Primary organizers can queue a full gallery ZIP from the Gallery tab. We prepare it in the background, email you when it is ready, and keep the download link valid for 24 hours.",
+          "When the celebration's over, grab every photo and video in a single download. We'll email you when it's ready.",
         mascotBubble: "Whole album, one download.",
       },
     ],
@@ -415,16 +415,16 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     waitlist: {
-      title: "Join the waitlist",
+      title: "Try the demo.",
       description:
-        "Be first to know when Calisto opens up more broadly. Leave your email—we'll only use it for launch updates.",
+        "See Calisto in action — no sign-up needed. Explore the event view as an organizer or guest.",
       discount: "The first 10 people on the waiting list get 20% off any paid plan (Standard, Plus, Premium, or Max).",
       submitted: "You're on the list—we'll be in touch.",
       submitFailed: "Could not join the waitlist right now. Please try again in a moment.",
       inputLabel: "Email",
       inputPlaceholder: "you@example.com",
       invalidEmail: "Enter a valid email address.",
-      buttonIdle: "Join the waitlist",
+      buttonIdle: "Try the demo",
       buttonBusy: "Joining...",
       note: "Discount details and eligibility may be updated before launch. No spam—unsubscribe anytime once we send real emails.",
     },
@@ -459,15 +459,15 @@ const copy: Record<Locale, LandingCopy> = {
       { href: "#plans", label: "Paketi" },
       { href: "#faq", label: "Pitanja" },
     ],
-    joinWaitlistShort: "Pridruži se listi",
+    joinWaitlistShort: "Isprobaj demo",
     heroBadge: "Upoznaj Auroru",
     heroIntro: "Bok, ja sam Aurora, predstavljam ti Calisto.",
-    heroTitle: "Jedan album. Svi gosti.",
+    heroTitle: "Tvoja proslava, uhvaćena iz svakog kuta.",
     heroDescription:
       "Pregledavaj fotografije i videozapise na jednom mjestu. Bez preuzimanja aplikacije. Skeniraj QR kod i otvori galeriju ili učitaj. Probaj besplatno!",
     heroAuroraCardBlurb:
       "Želim da budeš na plesu, a ne da u ponedjeljak pretražuješ deset mapi s fotkama. Tu sam da taj neuredno lijepi dan — toaste, prvi ples, taj tren s kolačem — ostane jedna priča koju možeš otvoriti bez detektivskog posla.",
-    heroPrimaryCta: "Pridruži se listi čekanja",
+    heroPrimaryCta: "Isprobaj demo",
     heroSecondaryCta: "Usporedi pakete",
     heroSignals: [
       "Nema preuzimanja aplikacije — gosti skeniraju i učitavaju u pregledniku.",
@@ -502,34 +502,36 @@ const copy: Record<Locale, LandingCopy> = {
       "Svaki gost učitava u jednu galeriju — pomažem da sve ostane uredno.",
     features: [
       {
-        title: "Jedinstveni pristupni kod",
-        description: "Svaki događaj ima svoj kod (npr. WEDDING2026).",
+        title: "Jedan kod za tvoj događaj",
+        description: "Svaki događaj dobiva vlastiti kod — poput WEDDING2026. Podijeli ga i gosti su odmah unutra.",
         mascotBubble: "Tvoj događaj, tvoj kod—lako.",
       },
       {
-        title: "Pozivni linkovi i QR",
-        description: "Podijeli link ili QR i gosti se brzo pridružuju s mobitela.",
+        title: "Podijeli linkom, QR-om ili kodom",
+        description: "Pošalji link, prikaži QR kod ili samo pošalji kod porukom. Gosti se pridružuju s mobitela za nekoliko sekundi — bez aplikacije.",
         mascotBubble: "Skeniraj ili dodirni—ulaze odmah!",
       },
       {
-        title: "Zajednička galerija",
-        description: "Svi vide istu galeriju u stvarnom vremenu dok stižu fotografije i videa.",
+        title: "Svi vide uživo",
+        description:
+          "Svaka fotografija i video pojavljuju se svim gostima čim se učitaju — kao zajednički foto-album za cijeli događaj.",
         mascotBubble: "Jedna galerija, svi u istom trenu.",
       },
       {
-        title: "Uloge",
-        description: "Gosti učitavaju i gledaju, a organizatori vode pristup.",
-        mascotBubble: "Uloge koje drže red.",
+        title: "Ti si uvijek u kontroli",
+        description: "Ti upravljaš događajem, a gosti samo učitavaju i pregledavaju. Bez kompliciranog postavljanja ni za koga.",
+        mascotBubble: "Pravi ljudi, pravi pristup.",
       },
       {
-        title: "Fotografije i videa po paketu",
-        description: "Fotografije su uključene u svaki paket, a plaćeni otključavaju videa, veće limite i duže čuvanje.",
+        title: "Počni besplatno, dodaj više kad zatreba",
+        description:
+          "Fotografije su besplatne za svaki događaj. Nadogradi za videa, više gostiju i dulje razdoblje učitavanja nakon dana.",
         mascotBubble: "Paket uskladim s pričom.",
       },
       {
-        title: "ZIP izvoz",
+        title: "Preuzmi sve odjednom",
         description:
-          "Primarni organizator može u redu pripreme pokrenuti ZIP cijele galerije iz kartice Galerija. ZIP se radi u pozadini, šaljemo e‑mail kad bude spreman, a poveznica za preuzimanje vrijedi 24 sata.",
+          "Kad proslava završi, preuzmi sve fotografije i videozapise u jednom preuzimanju. Javit ćemo ti se emailom kad bude spreman.",
         mascotBubble: "Cijeli album u jednom preuzimanju.",
       },
     ],
@@ -703,15 +705,16 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     waitlist: {
-      title: "Pridruži se listi čekanja",
-      description: "Ostavi email i saznaj među prvima kad Calisto krene šire.",
+      title: "Isprobaj demo.",
+      description:
+        "Vidi Calisto u akciji — bez registracije. Istraži prikaz događaja kao organizator ili gost.",
       discount: "Prvih 10 na listi dobiva 20% popusta na bilo koji plaćeni paket (Standard, Plus, Premium ili Max).",
       submitted: "Na listi si — javimo ti se uskoro.",
       submitFailed: "Trenutno se ne možeš prijaviti na listu čekanja. Pokušaj ponovno za trenutak.",
       inputLabel: "Email",
       inputPlaceholder: "ti@primjer.com",
       invalidEmail: "Unesi valjanu email adresu.",
-      buttonIdle: "Pridruži se listi čekanja",
+      buttonIdle: "Isprobaj demo",
       buttonBusy: "Prijava...",
       note: "Detalji popusta i uvjeti mogu se promijeniti prije lansiranja. Bez spama — odjava je uvijek moguća.",
     },
@@ -746,15 +749,15 @@ const copy: Record<Locale, LandingCopy> = {
       { href: "#plans", label: "Tarife" },
       { href: "#faq", label: "Fragen" },
     ],
-    joinWaitlistShort: "Zur Warteliste",
+    joinWaitlistShort: "Demo ausprobieren",
     heroBadge: "Lerne Aurora kennen",
     heroIntro: "Hi, ich bin Aurora, ich stelle dir Calisto vor.",
-    heroTitle: "Ein Album. Jeder Gast.",
+    heroTitle: "Deine Feier, aus jedem Blickwinkel festgehalten.",
     heroDescription:
       "Fotos und Videos an einem Ort durchstöbern. Kein App-Download. QR-Code scannen, Galerie ansehen oder hochladen. Kostenlos ausprobieren!",
     heroAuroraCardBlurb:
       "Lieber tanzt du auf der Feier, als dass du am Montag hundert Chatverläufe durchsuchst. Ich will, dass der Tag als eine lebendige Geschichte bleibt — Reden, Umarmungen, das schiefe Gruppenfoto — die man wiederfindet, ohne Schatzsuche.",
-    heroPrimaryCta: "Zur Warteliste",
+    heroPrimaryCta: "Demo ausprobieren",
     heroSecondaryCta: "Tarife vergleichen",
     heroSignals: [
       "Keine App zum Herunterladen — Gäste scannen und laden im Browser.",
@@ -790,35 +793,36 @@ const copy: Record<Locale, LandingCopy> = {
       "Alle Uploads landen in einer Galerie – ich helfe, alles ordentlich zu halten.",
     features: [
       {
-        title: "Einzigartiger Zugangscode",
-        description: "Jedes Event hat seinen eigenen Code (z. B. WEDDING2026). Gäste treten ohne kompliziertes Setup bei.",
+        title: "Ein Code für dein Event",
+        description: "Jedes Event bekommt seinen eigenen Code — z. B. WEDDING2026. Teile ihn und Gäste sind sofort dabei.",
         mascotBubble: "Dein Event, dein Code—so einfach.",
       },
       {
-        title: "Einladungslinks & QR",
-        description: "Teile einen Link oder zeige einen QR-Code, damit Gäste dem Album schnell vom Handy beitreten.",
+        title: "Per Link, QR-Code oder Code teilen",
+        description: "Schicke einen Link, zeige einen QR-Code oder sende einfach den Code. Gäste treten vom Handy bei — keine App nötig.",
         mascotBubble: "Scannen oder tippen—fertig!",
       },
       {
-        title: "Gemeinsame Galerie",
-        description: "Alle sehen dieselbe Sammlung in Echtzeit, sobald Fotos und Videos eintreffen – ideal für Feiern.",
+        title: "Alle sehen es live",
+        description:
+          "Jedes Foto und Video erscheint bei allen Gästen sofort nach dem Hochladen — wie ein gemeinsamer Fotoordner für dein ganzes Event.",
         mascotBubble: "Eine Galerie, alle im gleichen Takt.",
       },
       {
-        title: "Rollen",
-        description: "Gäste laden hoch und stöbern, Organisator:innen verwalten den Zugang.",
-        mascotBubble: "Die passenden Berechtigungen.",
+        title: "Du behältst die Kontrolle",
+        description: "Du verwaltest das Event, während Gäste einfach hochladen und stöbern. Kein kompliziertes Setup für niemanden.",
+        mascotBubble: "Die richtigen Leute, der richtige Zugang.",
       },
       {
-        title: "Fotos & Videos nach Tarif",
+        title: "Kostenlos starten, bei Bedarf erweitern",
         description:
-          "Fotos sind in jedem Tarif enthalten; kostenpflichtige Tarife schalten Videos, höhere Limits und längere Upload-Fenster frei.",
+          "Fotos sind bei jedem Event kostenlos. Upgrade für Videos, mehr Gäste und ein längeres Upload-Fenster nach dem Event.",
         mascotBubble: "Ich passe den Tarif an eure Geschichte an.",
       },
       {
-        title: "ZIP-Export",
+        title: "Alles auf einmal herunterladen",
         description:
-          "Primär-Organisator:innen können in der Galerie einen ZIP der gesamten Sammlung anstoßen. Wir bereiten ihn im Hintergrund vor, senden eine E-Mail, sobald er fertig ist, und der Download-Link bleibt 24 Stunden gültig.",
+          "Wenn die Feier vorbei ist, lade alle Fotos und Videos in einem Rutsch herunter. Wir schicken dir eine E-Mail, sobald alles bereit ist.",
         mascotBubble: "Ganzes Album, ein Download.",
       },
     ],
@@ -993,15 +997,16 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     waitlist: {
-      title: "Zur Warteliste",
-      description: "Erfahre als Erste oder Erster alle Neuigkeiten von Calisto. Hinterlasse deine E-Mail für Launch-Updates.",
+      title: "Demo ausprobieren.",
+      description:
+        "Erlebe Calisto in Aktion — keine Anmeldung nötig. Erkunde die Eventansicht als Organisator oder Gast.",
       discount: "Die ersten 10 Personen auf der Warteliste erhalten 20% Rabatt auf jeden bezahlten Tarif (Standard, Plus, Premium oder Max).",
       submitted: "Du bist auf der Liste – wir melden uns bald.",
       submitFailed: "Ein Eintrag in die Warteliste ist gerade nicht möglich. Bitte versuche es gleich noch einmal.",
       inputLabel: "E-Mail",
       inputPlaceholder: "du@beispiel.de",
       invalidEmail: "Bitte gib eine gültige E-Mail-Adresse ein.",
-      buttonIdle: "Zur Warteliste",
+      buttonIdle: "Demo ausprobieren",
       buttonBusy: "Wird eingetragen...",
       note: "Rabattdetails und Teilnahmebedingungen können vor dem Launch angepasst werden. Kein Spam.",
     },

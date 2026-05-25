@@ -8,7 +8,7 @@ export function Hero({ copy }: HeroProps) {
     <section
       id="top"
       className="relative overflow-hidden"
-      style={{ padding: "72px 0 140px", zIndex: 2 }}
+      style={{ padding: "32px 0 48px", zIndex: 2 }}
     >
       <div className="mx-auto" style={{ maxWidth: 1280, padding: "0 32px" }}>
         <div
@@ -49,7 +49,7 @@ export function Hero({ copy }: HeroProps) {
             {/* CTAs */}
             <div className="flex items-center flex-wrap" style={{ marginTop: 40, gap: 14 }}>
               <a
-                href="#waitlist"
+                href="/demo"
                 className="inline-flex items-center gap-2.5"
                 style={{
                   fontFamily: "var(--font-sans)",
@@ -149,11 +149,11 @@ export function Hero({ copy }: HeroProps) {
                 border: "1px solid var(--hair-2)",
                 background: "linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%)",
                 boxShadow: "0 28px 64px -22px rgba(0,0,0,0.28)",
-                padding: "24px 22px",
+                padding: "16px 22px",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: 16,
+                gap: 8,
               }}
             >
               <div

@@ -38,8 +38,8 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
           gridTemplateColumns: "1fr 320px",
           alignItems: "flex-end",
           gap: 0,
-          paddingTop: 80,
-          paddingBottom: 80,
+          paddingTop: 32,
+          paddingBottom: 32,
           overflow: "visible",
         }}
       >
@@ -179,8 +179,8 @@ export function AuroraQuote({ copy }: AuroraQuoteProps) {
           }
           section[aria-label="${copy.auroraQuoteSectionAria}"] > div:last-of-type {
             grid-template-columns: 1fr !important;
-            padding-top: 56px !important;
-            padding-bottom: 56px !important;
+            padding-top: 24px !important;
+            padding-bottom: 24px !important;
             padding-right: 40px !important;
           }
           .aurora-quote-copy {
