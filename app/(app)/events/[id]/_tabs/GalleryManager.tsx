@@ -3,7 +3,6 @@
 import { UploadZone } from "@/app/join/[accessCode]/_components/UploadZone";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { toThumbnailUrl } from "@/lib/supabase-storage-transform";
 
 import { interpolate } from "@/lib/app-ui";
 import { useAppUi } from "@/components/AppUiProvider";
@@ -25,6 +24,7 @@ import { getCachedUrls, invalidateCachedUrl, storeCachedUrls, warmCache } from "
 type MediaRow = {
   id: string;
   storage_path: string;
+  thumbnail_path: string | null;
   mime_type: string | null;
   created_at: string;
   uploaded_by: string;
@@ -332,7 +332,7 @@ export function GalleryManager({
         supabase.from("events").select("organizer_id, plan, event_date").eq("id", eventId).maybeSingle(),
         supabase
           .from("media_items")
-          .select("id, storage_path, mime_type, created_at, uploaded_by")
+          .select("id, storage_path, thumbnail_path, mime_type, created_at, uploaded_by")
           .eq("event_id", eventId)
           .order("created_at", { ascending: false })
           .range(from, to),
@@ -358,7 +358,13 @@ export function GalleryManager({
       const photoIds = typed.filter((r) => !isVideoMime(r.mime_type)).map((r) => r.id);
 
       // Split paths into already-cached signed URLs and those that still need signing.
-      const allPaths = typed.map((r) => r.storage_path);
+      const thumbnailPaths = typed
+        .map((r) => r.thumbnail_path)
+        .filter((p): p is string => Boolean(p));
+      const allPaths = Array.from(new Set([
+        ...typed.map((r) => r.storage_path),
+        ...thumbnailPaths,
+      ]));
       const { cached: cachedUrls, missing: missingPaths } = getCachedUrls(allPaths);
 
       // Parallelise: uploader label lookups ∥ signing only the uncached paths (RT2)
@@ -402,7 +408,7 @@ export function GalleryManager({
       const mapped: MediaItem[] = typed.map((r) => ({
         ...r,
         signedUrl: urlMap[r.storage_path],
-        thumbnailUrl: urlMap[r.storage_path] ? toThumbnailUrl(urlMap[r.storage_path]) : undefined,
+        thumbnailUrl: r.thumbnail_path ? urlMap[r.thumbnail_path] : undefined,
         uploaderLabel:
           labelMap.get(r.uploaded_by) ??
           (organizerId !== null && r.uploaded_by === organizerId
@@ -455,10 +461,13 @@ export function GalleryManager({
         .eq("event_id", eventId);
       if (dbError) throw dbError;
 
-      const { error: storageError } = await supabase.storage.from("event-media").remove([item.storage_path]);
+      const pathsToDelete = [item.storage_path, item.thumbnail_path].filter(
+        (p): p is string => Boolean(p),
+      );
+      const { error: storageError } = await supabase.storage.from("event-media").remove(pathsToDelete);
       if (storageError) throw storageError;
 
-      invalidateCachedUrl(item.storage_path);
+      pathsToDelete.forEach(invalidateCachedUrl);
       setItems((prev) => prev.filter((x) => x.id !== item.id));
       setLikeCounts((prev) => {
         const next = new Map(prev);
