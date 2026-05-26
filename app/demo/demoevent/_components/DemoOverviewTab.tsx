@@ -8,7 +8,6 @@ import { DEMO_EVENT, DEMO_GUESTS, DEMO_PHOTOS } from "../_data/demo-event";
 import { useDemoToast } from "./DemoToastProvider";
 import { formatQuotaSublabelLocalized, getPlanLimits, isUnlimitedQuota } from "@/lib/plan-limits";
 import { getWebJoinUrl } from "@/lib/join-link";
-import { usePolaroidScroll } from "@/lib/use-polaroid-scroll";
 
 const GOLD       = '#C5922A';
 const PURPLE     = '#5B2D8E';
@@ -113,7 +112,6 @@ function CountdownCards() {
 }
 
 function StatsTiles() {
-  usePolaroidScroll();
   const ui = useAppUi();
   const photos = DEMO_PHOTOS.length;
   const guests = DEMO_GUESTS.length;

@@ -15,7 +15,6 @@ import {
   normalizePlanId,
 } from "@/lib/plan-limits";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { usePolaroidScroll } from "@/lib/use-polaroid-scroll";
 
 // ── Aurora Theater palette ────────────────────────────────────────────────────
 const GOLD   = '#C5922A';
@@ -392,7 +391,6 @@ function StatTile({
 }
 
 function StatsTiles({ eventId, planId }: { eventId: string; planId: ReturnType<typeof normalizePlanId> }) {
-  usePolaroidScroll();
   const ui = useAppUi();
   const limits = useMemo(() => getPlanLimits(planId), [planId]);
   const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);

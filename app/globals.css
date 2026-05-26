@@ -2152,6 +2152,6 @@ html[data-theme="dark"] .auth-oauth-google-btn.app-btn--outline {
   100% { transform: rotate(0deg)    translateY(0px); }
 }
 .polaroid-sway {
-  animation: polaroid-sway var(--sway-dur, 4s) ease-in-out infinite;
+  animation: polaroid-sway 4s ease-in-out infinite;
   transform-origin: 50% 0%;
 }
