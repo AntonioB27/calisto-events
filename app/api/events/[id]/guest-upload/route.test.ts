@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { maxGuestUploadBytesForMime } from "@/lib/guest-upload-limits";
+import { generateImageThumbnail } from "@/lib/image-thumbnail";
 
 import { __test, POST } from "./route";
 
@@ -35,6 +36,7 @@ const insertMediaItemMock = vi.fn<
     filePath: string;
     mimeType: string;
     sizeBytes: number;
+    thumbnailPath: string | null;
   }) => Promise<{ id: string; storage_path: string }>
 >();
 
@@ -80,25 +82,30 @@ describe("guest-upload route", () => {
   });
 
   it("returns 200 when within quota and upload window", async () => {
-    getEventUploadContextMock.mockResolvedValue({
-      planId: "standard",
-      eventDate: "2026-05-06T00:00:00.000Z",
-    });
-    countMediaForQuotaMock.mockResolvedValue(10);
-    insertMediaItemMock.mockResolvedValue({ id: "m1", storage_path: "events/evt_2/x.jpg" });
+    vi.useFakeTimers({ now: new Date("2026-05-07T12:00:00.000Z") });
+    try {
+      getEventUploadContextMock.mockResolvedValue({
+        planId: "standard",
+        eventDate: "2026-05-06T00:00:00.000Z",
+      });
+      countMediaForQuotaMock.mockResolvedValue(10);
+      insertMediaItemMock.mockResolvedValue({ id: "m1", storage_path: "events/evt_2/x.jpg" });
 
-    const form = new FormData();
-    form.append("file", new File(["hello"], "photo.jpg", { type: "image/jpeg" }));
-    const request = new Request("http://localhost/api/events/evt_2/guest-upload", {
-      method: "POST",
-      body: form,
-    });
+      const form = new FormData();
+      form.append("file", new File(["hello"], "photo.jpg", { type: "image/jpeg" }));
+      const request = new Request("http://localhost/api/events/evt_2/guest-upload", {
+        method: "POST",
+        body: form,
+      });
 
-    const response = await POST(request, { params: Promise.resolve({ id: "evt_2" }) });
+      const response = await POST(request, { params: Promise.resolve({ id: "evt_2" }) });
 
-    expect(response.status).toBe(201);
-    await expect(response.json()).resolves.toEqual({ id: "m1", file_path: "events/evt_2/x.jpg" });
-    expect(insertMediaItemMock).toHaveBeenCalledTimes(1);
+      expect(response.status).toBe(201);
+      await expect(response.json()).resolves.toEqual({ id: "m1", file_path: "events/evt_2/x.jpg" });
+      expect(insertMediaItemMock).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("returns 413 FILE_TOO_LARGE when file exceeds cap", async () => {
@@ -121,6 +128,65 @@ describe("guest-upload route", () => {
     expect(response.status).toBe(413);
     await expect(response.json()).resolves.toEqual({ error: "FILE_TOO_LARGE" });
     expect(insertMediaItemMock).not.toHaveBeenCalled();
+  });
+
+  it("passes thumbnail_path to insertMediaItem for image uploads", async () => {
+    vi.useFakeTimers({ now: new Date("2026-05-07T12:00:00.000Z") });
+    try {
+      getEventUploadContextMock.mockResolvedValue({
+        planId: "free",
+        eventDate: "2026-05-06T00:00:00.000Z",
+      });
+      countMediaForQuotaMock.mockResolvedValue(0);
+      insertMediaItemMock.mockResolvedValue({ id: "m1", storage_path: "events/evt_1/x.jpg" });
+      __test.generateThumbnail = async (_buf: ArrayBuffer, _mime: string) =>
+        Buffer.from("fake-thumbnail");
+
+      const form = new FormData();
+      form.append("file", new File(["hello"], "photo.jpg", { type: "image/jpeg" }));
+      const request = new Request("http://localhost/api/events/evt_1/guest-upload", {
+        method: "POST",
+        body: form,
+      });
+
+      const response = await POST(request, { params: Promise.resolve({ id: "evt_1" }) });
+
+      expect(response.status).toBe(201);
+      const call = insertMediaItemMock.mock.calls[0]?.[0];
+      expect(call?.thumbnailPath).toMatch(/^events\/evt_1\/thumbnails\//);
+    } finally {
+      vi.useRealTimers();
+      __test.generateThumbnail = generateImageThumbnail as (buf: ArrayBuffer, mime: string) => Promise<Buffer | null>;
+    }
+  });
+
+  it("still succeeds when thumbnail generation returns null", async () => {
+    vi.useFakeTimers({ now: new Date("2026-05-07T12:00:00.000Z") });
+    try {
+      getEventUploadContextMock.mockResolvedValue({
+        planId: "standard",
+        eventDate: "2026-05-06T00:00:00.000Z",
+      });
+      countMediaForQuotaMock.mockResolvedValue(0);
+      insertMediaItemMock.mockResolvedValue({ id: "m2", storage_path: "events/evt_1/x.mp4" });
+      __test.generateThumbnail = async (_buf: ArrayBuffer, _mime: string) => null;
+
+      const form = new FormData();
+      form.append("file", new File(["hello"], "video.mp4", { type: "video/mp4" }));
+      const request = new Request("http://localhost/api/events/evt_1/guest-upload", {
+        method: "POST",
+        body: form,
+      });
+
+      const response = await POST(request, { params: Promise.resolve({ id: "evt_1" }) });
+
+      expect(response.status).toBe(201);
+      const call = insertMediaItemMock.mock.calls[0]?.[0];
+      expect(call?.thumbnailPath).toBeNull();
+    } finally {
+      vi.useRealTimers();
+      __test.generateThumbnail = generateImageThumbnail as (buf: ArrayBuffer, mime: string) => Promise<Buffer | null>;
+    }
   });
 });
 

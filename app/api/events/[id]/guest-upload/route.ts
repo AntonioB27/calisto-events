@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { generateImageThumbnail } from "@/lib/image-thumbnail";
 import { maxGuestUploadBytesForMime } from "@/lib/guest-upload-limits";
 import { canGuestUpload } from "@/lib/plan-limits";
 import { getPlanLimits, type PlanId } from "@/lib/plan-limits";
@@ -87,6 +88,7 @@ async function insertMediaItem(params: {
   filePath: string;
   mimeType: string;
   sizeBytes: number;
+  thumbnailPath: string | null;
 }) {
   const db = getSupabaseServerClient();
   const { data, error } = await db
@@ -97,6 +99,7 @@ async function insertMediaItem(params: {
       storage_path: params.filePath,
       mime_type: params.mimeType,
       size_bytes: params.sizeBytes,
+      thumbnail_path: params.thumbnailPath,
     })
     .select("id, storage_path")
     .single();
@@ -113,6 +116,7 @@ export const __test = {
   countMediaForQuota,
   insertMediaItem,
   maxGuestUploadBytesForMime,
+  generateThumbnail: generateImageThumbnail as (buf: ArrayBuffer, mime: string) => Promise<Buffer | null>,
 };
 
 export async function POST(request: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -171,9 +175,10 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     return NextResponse.json({ error: "QUOTA_REACHED" }, { status: 403 });
   }
 
-  // 5) Upload to Storage
+  // 5) Upload original to Storage
   const ext = MIME_TO_EXT[file.type] ?? "bin";
-  const filePath = `events/${eventId}/${crypto.randomUUID()}.${ext}`;
+  const fileUuid = crypto.randomUUID();
+  const filePath = `events/${eventId}/${fileUuid}.${ext}`;
   const arrayBuffer = await file.arrayBuffer();
 
   const db = getSupabaseServerClient();
@@ -185,7 +190,21 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     return NextResponse.json({ error: "Upload failed." }, { status: 500 });
   }
 
-  // 6) Insert media row
+  // 6) Generate thumbnail (best-effort — failure does not block the upload)
+  let thumbnailPath: string | null = null;
+  const thumbBuffer = await __test.generateThumbnail(arrayBuffer, file.type);
+  if (thumbBuffer) {
+    const thumbPath = `events/${eventId}/thumbnails/${fileUuid}.jpg`;
+    const { error: thumbErr } = await db.storage.from("event-media").upload(thumbPath, thumbBuffer, {
+      contentType: "image/jpeg",
+      upsert: false,
+    });
+    if (!thumbErr) {
+      thumbnailPath = thumbPath;
+    }
+  }
+
+  // 7) Insert media row
   try {
     const inserted = await __test.insertMediaItem({
       eventId,
@@ -193,6 +212,7 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
       filePath,
       mimeType: file.type,
       sizeBytes: file.size,
+      thumbnailPath,
     });
     return NextResponse.json({ id: inserted.id, file_path: inserted.storage_path }, { status: 201 });
   } catch {
