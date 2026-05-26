@@ -18,7 +18,6 @@ import {
 } from "@/lib/media-likes";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { getCachedUrls, storeCachedUrls, warmCache } from "@/lib/signed-url-cache";
-import { toThumbnailUrl } from "@/lib/supabase-storage-transform";
 
 type MediaItem = {
   id: string;
@@ -33,6 +32,7 @@ type MediaItem = {
 type MediaRow = {
   id: string;
   storage_path: string;
+  thumbnail_path: string | null;
   mime_type: string | null;
   uploaded_by: string;
 };
@@ -104,7 +104,7 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
 
         const { data: rows, error: fetchErr } = await supabase
           .from("media_items")
-          .select("id, storage_path, mime_type, uploaded_by")
+          .select("id, storage_path, thumbnail_path, mime_type, uploaded_by")
           .eq("event_id", eventId)
           .order("created_at", { ascending: false })
           .range(from, to);
@@ -121,7 +121,13 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
         const photoIds = typedRows.filter((r) => !isVideoMime(r.mime_type)).map((r) => r.id);
         const uploaderIds = Array.from(new Set(typedRows.map((r) => r.uploaded_by).filter(Boolean)));
 
-        const allPaths = typedRows.map((r) => r.storage_path);
+        const thumbnailPaths = typedRows
+          .map((r) => r.thumbnail_path)
+          .filter((p): p is string => Boolean(p));
+        const allPaths = Array.from(new Set([
+          ...typedRows.map((r) => r.storage_path),
+          ...thumbnailPaths,
+        ]));
         const { cached: cachedUrls, missing: missingPaths } = getCachedUrls(allPaths);
 
         const [likeSummary, labelResult, signedData] = await Promise.all([
@@ -167,7 +173,7 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
           mime_type: r.mime_type,
           uploaded_by: r.uploaded_by,
           signedUrl: urlMap[r.storage_path],
-          thumbnailUrl: urlMap[r.storage_path] ? toThumbnailUrl(urlMap[r.storage_path]) : undefined,
+          thumbnailUrl: r.thumbnail_path ? urlMap[r.thumbnail_path] : undefined,
           uploaderLabel:
             labelMap.get(r.uploaded_by) ??
             (r.uploaded_by === organizerUserId
