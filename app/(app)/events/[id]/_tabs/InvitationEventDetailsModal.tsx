@@ -12,6 +12,7 @@ import {
 } from "@/lib/event-print/invitation-field-visibility";
 import { invitationVisibilityToggleLabel } from "@/lib/event-print/invitation-visibility-ui-labels";
 import { InviteFieldVisibilityToggle } from "./InviteFieldVisibilityToggle";
+import { InvitePhotoUpload } from "./InvitePhotoUpload";
 
 import "./prints-form.css";
 
@@ -27,6 +28,15 @@ export type InvitationEventDetailsModalProps = Readonly<{
   saveError: string | null;
   saveHint: string | null;
   onSave: () => void;
+  showPhotoUpload: boolean;
+  eventId: string;
+  couplePhotoPath: string;
+  couplePhotoCropX: string;
+  couplePhotoCropY: string;
+  couplePhotoCropScale: string;
+  onPathChange: (path: string) => void;
+  onCropChange: (x: string, y: string, scale: string) => void;
+  onPreviewUrlChange: (url: string | null) => void;
 }>;
 
 export function InvitationEventDetailsModal({
@@ -41,6 +51,15 @@ export function InvitationEventDetailsModal({
   saveError,
   saveHint,
   onSave,
+  showPhotoUpload,
+  eventId,
+  couplePhotoPath,
+  couplePhotoCropX,
+  couplePhotoCropY,
+  couplePhotoCropScale,
+  onPathChange,
+  onCropChange,
+  onPreviewUrlChange,
 }: InvitationEventDetailsModalProps) {
   const ui = useAppUi();
   const fieldVisibility = parseInvitationFieldVisibility(sharedFields);
@@ -93,6 +112,31 @@ export function InvitationEventDetailsModal({
         </header>
         <div className="pf-details-modal__body">
           <div className="pf-card pf-card--in-modal">
+      {showPhotoUpload ? (
+        <div className="pf-section">
+          <div className="pf-section-header">
+            <span className="pf-section-num">00</span>
+            <span className="pf-section-title">{ui.print.inviteGoldCirclesUploadPhoto}</span>
+            <span className="pf-section-rule" />
+          </div>
+          <div style={{ display: "flex", justifyContent: "center", padding: "16px 0" }}>
+            <InvitePhotoUpload
+              eventId={eventId}
+              savedPhotoPath={couplePhotoPath}
+              savedCropX={couplePhotoCropX}
+              savedCropY={couplePhotoCropY}
+              savedCropScale={couplePhotoCropScale}
+              uploadLabel={ui.print.inviteGoldCirclesUploadPhoto}
+              changeLabel={ui.print.inviteGoldCirclesChangePhoto}
+              uploadingLabel={ui.print.inviteGoldCirclesUploading}
+              uploadErrorLabel={ui.print.inviteGoldCirclesUploadError}
+              onPathChange={onPathChange}
+              onCropChange={onCropChange}
+              onPreviewUrlChange={onPreviewUrlChange}
+            />
+          </div>
+        </div>
+      ) : null}
       {/* 01 — Show on invitation */}
       <div className="pf-section">
         <div
