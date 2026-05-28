@@ -41,9 +41,15 @@ export function InvitePhotoUpload({
   const [cropScale, setCropScale] = useState(parseFloat(savedCropScale) || 1);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const blobUrlRef = useRef<string | null>(null);
   const dragRef = useRef<{ startX: number; startY: number; baseCropX: number; baseCropY: number } | null>(null);
-  const isDragging = dragRef.current !== null;
+  const circleRef = useRef<HTMLDivElement>(null);
+  const cropXRef = useRef(cropX);
+  const cropYRef = useRef(cropY);
+  cropXRef.current = cropX;
+  cropYRef.current = cropY;
 
   useEffect(() => {
     if (!savedPhotoPath) return;
@@ -66,9 +72,33 @@ export function InvitePhotoUpload({
     setCropScale(parseFloat(savedCropScale) || 1);
   }, [savedCropX, savedCropY, savedCropScale]);
 
+  useEffect(() => {
+    return () => {
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const el = circleRef.current;
+    if (!el) return;
+    function handleWheel(e: WheelEvent) {
+      e.preventDefault();
+      setCropScale((prev) => {
+        const next = Math.max(0.5, Math.min(5, prev - e.deltaY * 0.002));
+        onCropChange(String(cropXRef.current), String(cropYRef.current), String(next));
+        return next;
+      });
+    }
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function handleFile(file: File) {
     setUploadError(null);
-    const blob = URL.createObjectURL(file);
+    if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    blobUrlRef.current = URL.createObjectURL(file);
+    const blob = blobUrlRef.current;
     setPreviewUrl(blob);
     onPreviewUrlChange(blob);
     setCropX(0);
@@ -97,6 +127,7 @@ export function InvitePhotoUpload({
   function onMouseDown(e: React.MouseEvent) {
     e.preventDefault();
     dragRef.current = { startX: e.clientX, startY: e.clientY, baseCropX: cropX, baseCropY: cropY };
+    setIsDragging(true);
   }
 
   function onMouseMove(e: React.MouseEvent) {
@@ -110,13 +141,7 @@ export function InvitePhotoUpload({
 
   function onMouseUp() {
     dragRef.current = null;
-  }
-
-  function onWheel(e: React.WheelEvent) {
-    e.preventDefault();
-    const next = Math.max(0.5, Math.min(5, cropScale - e.deltaY * 0.002));
-    setCropScale(next);
-    onCropChange(String(cropX), String(cropY), String(next));
+    setIsDragging(false);
   }
 
   const fileInput = (
@@ -169,6 +194,7 @@ export function InvitePhotoUpload({
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
       <div
+        ref={circleRef}
         style={{
           width: CIRCLE_PX,
           height: CIRCLE_PX,
@@ -183,7 +209,6 @@ export function InvitePhotoUpload({
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseUp}
-        onWheel={onWheel}
       >
         <img
           src={previewUrl}
