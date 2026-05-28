@@ -35,6 +35,7 @@ export const INVITATION_PRINT_TEMPLATE_IDS = [
   "wedding-invite-gold-arch-floral",
   "wedding-invite-cherry-blossom",
   "wedding-invite-olive-gold-frame",
+  "wedding-invite-gold-circles-photo",
 ] as const;
 export type InvitationPrintTemplateId = (typeof INVITATION_PRINT_TEMPLATE_IDS)[number];
 
@@ -293,6 +294,22 @@ export const PRINT_TEMPLATE_DEFINITIONS: readonly PrintTemplateDef[] = [
       { key: "venue", maxLength: 200, required: false },
       { key: "venue_line_2", maxLength: 200, required: false },
       { key: "extra_line", maxLength: 120, required: false },
+    ],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "wedding-invite-gold-circles-photo",
+    category: "invitation",
+    eventKinds: ["wedding"],
+    fields: [
+      { key: "partner_a", maxLength: 80, required: true },
+      { key: "partner_b", maxLength: 80, required: true },
+      { key: "venue", maxLength: 200, required: false },
+      { key: "extra_line", maxLength: 120, required: false },
+      { key: "couple_photo_path", maxLength: 500, required: false },
+      { key: "couple_photo_crop_x", maxLength: 30, required: false },
+      { key: "couple_photo_crop_y", maxLength: 30, required: false },
+      { key: "couple_photo_crop_scale", maxLength: 30, required: false },
     ],
     stripePriceEnvKey: null,
   },

@@ -26,6 +26,15 @@ describe("template-catalog", () => {
     expect(isTableQrTemplateId("table-bold")).toBe(true);
     expect(isTableQrTemplateId("wedding-invite-blue-floral")).toBe(false);
   });
+
+  it("lists gold-circles-photo template for wedding events", () => {
+    const ids = listPrintTemplatesForEventKind("wedding").map((t) => t.id);
+    expect(ids).toContain("wedding-invite-gold-circles-photo");
+  });
+
+  it("classifies gold-circles-photo as invitation", () => {
+    expect(isInvitationPrintTemplateId("wedding-invite-gold-circles-photo")).toBe(true);
+  });
 });
 
 describe("validatePrintTemplateFieldValues", () => {
@@ -58,5 +67,24 @@ describe("validatePrintTemplateFieldValues", () => {
         venue: "x".repeat(300),
       }).ok,
     ).toBe(false);
+  });
+
+  it("validates gold-circles-photo with partner names and photo path", () => {
+    const result = validatePrintTemplateFieldValues("wedding-invite-gold-circles-photo", {
+      partner_a: "Sofia",
+      partner_b: "Tarun",
+      couple_photo_path: "abc123/invite-photo/img.jpg",
+      couple_photo_crop_x: "0",
+      couple_photo_crop_y: "0",
+      couple_photo_crop_scale: "1",
+    });
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects gold-circles-photo missing required partner_b", () => {
+    const result = validatePrintTemplateFieldValues("wedding-invite-gold-circles-photo", {
+      partner_a: "Sofia",
+    });
+    expect(result.ok).toBe(false);
   });
 });
