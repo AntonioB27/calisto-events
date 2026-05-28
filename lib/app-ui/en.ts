@@ -791,7 +791,7 @@ export const APP_UI_EN = {
     templateWeddingInviteGoldArchFloral: "Wedding · gold arch floral",
     templateWeddingInviteCherryBlossom: "Wedding · cherry blossom",
     templateWeddingInviteOliveGoldFrame: "Wedding · olive & gold frame",
-    templateWeddingInviteGoldCirclesPhoto: "Wedding · gold circles",
+    templateWeddingInviteGoldCirclesPhoto: "Wedding · gold circles & photo",
     inviteTogetherWithOurFamilies: "TOGETHER WITH OUR FAMILIES",
     inviteHonorUniteMarriage: "we request the honor of your presence as we unite our lives in marriage",
     inviteGlitterCordiallyLine: "you are cordially invited to",

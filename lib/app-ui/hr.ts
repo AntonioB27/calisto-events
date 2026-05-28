@@ -804,7 +804,7 @@ export const APP_UI_HR: AppUiDict = {
     templateWeddingInviteGoldArchFloral: "Vjenčanje · zlatni luk",
     templateWeddingInviteCherryBlossom: "Vjenčanje · trešnjev cvijet",
     templateWeddingInviteOliveGoldFrame: "Vjenčanje · maslina i zlato",
-    templateWeddingInviteGoldCirclesPhoto: "Vjenčanje · zlatni krugovi",
+    templateWeddingInviteGoldCirclesPhoto: "Vjenčanje · zlatni krugovi i foto",
     inviteGoldCirclesYoureInvited: "Pozivamo vas na vjenčanje",
     inviteGoldCirclesUploadPhoto: "Dodaj fotografiju",
     inviteGoldCirclesChangePhoto: "Promijeni fotografiju",
