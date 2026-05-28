@@ -35,6 +35,8 @@ import { WeddingInviteTerracottaPillPrintSheet } from "../print/WeddingInviteTer
 import { WeddingInviteGoldArchFloralPrintSheet } from "../print/WeddingInviteGoldArchFloralPrintSheet";
 import { WeddingInviteCherryBlossomPrintSheet } from "../print/WeddingInviteCherryBlossomPrintSheet";
 import { WeddingInviteOliveGoldPrintSheet } from "../print/WeddingInviteOliveGoldPrintSheet";
+import { WeddingInviteGoldCirclesPhotoPrintSheet } from "../print/WeddingInviteGoldCirclesPhotoPrintSheet";
+import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { InvitationDesignCarousel } from "./InvitationDesignCarousel";
 
 import "../print/print-sheet.css";
@@ -72,6 +74,7 @@ function initSharedFields(
     drafts["wedding-invite-navy-botanical"] ??
     drafts["wedding-invite-blue-floral"] ??
     drafts["wedding-invite-geometric"] ??
+    drafts["wedding-invite-gold-circles-photo"] ??
     {};
   return { ...defaults, ...defaultVisibilityFieldValues(), venue_line_2: "", ...draft };
 }
@@ -90,6 +93,7 @@ function templateCardTitle(id: string, tab: AppUiDict["printsTab"]): string {
     case "wedding-invite-gold-arch-floral": return tab.templateWeddingInviteGoldArchFloral;
     case "wedding-invite-cherry-blossom": return tab.templateWeddingInviteCherryBlossom;
     case "wedding-invite-olive-gold-frame": return tab.templateWeddingInviteOliveGoldFrame;
+    case "wedding-invite-gold-circles-photo": return tab.templateWeddingInviteGoldCirclesPhoto;
     default: return id;
   }
 }
@@ -184,6 +188,16 @@ export function PrintsTab({
     setContentRevision((prev) => prev + 1);
   }
 
+  function setCropFields(x: string, y: string, scale: string) {
+    setSaveHint(null);
+    setSharedFields((prev) => ({
+      ...prev,
+      couple_photo_crop_x: x,
+      couple_photo_crop_y: y,
+      couple_photo_crop_scale: scale,
+    }));
+  }
+
   const fieldVisibility = useMemo(
     () => parseInvitationFieldVisibility(sharedFields),
     [sharedFields],
@@ -192,6 +206,23 @@ export function PrintsTab({
   function setVisibility(key: InvitationVisibilityKey, on: boolean) {
     setField(visibilityStorageKey(key), on ? "1" : "0");
   }
+
+  const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
+  const [couplePhotoPreviewUrl, setCouplePhotoPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const path = sharedFields.couple_photo_path;
+    if (!path || !supabase) {
+      setCouplePhotoPreviewUrl(null);
+      return;
+    }
+    void supabase.storage
+      .from("event-media")
+      .createSignedUrl(path, 3600)
+      .then(({ data }: { data: { signedUrl: string } | null; error: unknown }) => {
+        if (data?.signedUrl) setCouplePhotoPreviewUrl(data.signedUrl);
+      });
+  }, [sharedFields.couple_photo_path, supabase]);
 
   const [collapsedSections, setCollapsedSections] = useState<ReadonlySet<string>>(new Set<string>());
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -395,6 +426,29 @@ export function PrintsTab({
         <WeddingInviteBlueFloraPrintSheet {...commonProps} strings={blueFlorealStrings} />
       );
     }
+    if (t.id === "wedding-invite-gold-circles-photo") {
+      return (
+        <WeddingInviteGoldCirclesPhotoPrintSheet
+          paper="a4"
+          partnerA={sharedFields.partner_a ?? ""}
+          partnerB={sharedFields.partner_b ?? ""}
+          venue={sharedFields.venue ?? ""}
+          extraLine={sharedFields.extra_line ?? ""}
+          eventDateIso={eventDateIso}
+          locale={uiLocale}
+          photoUrl={couplePhotoPreviewUrl}
+          cropX={parseFloat(sharedFields.couple_photo_crop_x ?? "") || 0}
+          cropY={parseFloat(sharedFields.couple_photo_crop_y ?? "") || 0}
+          cropScale={parseFloat(sharedFields.couple_photo_crop_scale ?? "") || 1}
+          strings={{
+            youreInvited: ui.print.inviteGoldCirclesYoureInvited,
+            and: ui.print.inviteAnd,
+            receptionToFollow: ui.print.inviteReceptionFollow,
+          }}
+          visibility={fieldVisibility}
+        />
+      );
+    }
     return null;
   }
 
@@ -515,6 +569,15 @@ export function PrintsTab({
                   saveError={saveError}
                   saveHint={saveHint}
                   onSave={() => void saveAllDrafts()}
+                  showPhotoUpload={invitationTemplates.some((t) => t.id === "wedding-invite-gold-circles-photo")}
+                  eventId={eventId}
+                  couplePhotoPath={sharedFields.couple_photo_path ?? ""}
+                  couplePhotoCropX={sharedFields.couple_photo_crop_x ?? ""}
+                  couplePhotoCropY={sharedFields.couple_photo_crop_y ?? ""}
+                  couplePhotoCropScale={sharedFields.couple_photo_crop_scale ?? ""}
+                  onPathChange={(path) => setField("couple_photo_path", path)}
+                  onCropChange={setCropFields}
+                  onPreviewUrlChange={setCouplePhotoPreviewUrl}
                 />
               </>
             );
