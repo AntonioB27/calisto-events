@@ -8,9 +8,11 @@ import { useAppUi } from "@/components/AppUiProvider";
 
 import { type EventAdminTabId } from "./event-admin-tabs";
 
-// Only these 3 appear in the editorial TOC strip.
+// These always appear in the editorial TOC strip.
 // Share + Settings are glass icon chips in the hero.
+// Prints is appended when the viewer has organizer access.
 const TOC_TAB_IDS: EventAdminTabId[] = ["overview", "guests", "gallery"];
+const ORGANIZER_TOC_TAB_IDS: EventAdminTabId[] = ["prints"];
 
 function labelForTab(tab: EventAdminTabId, t: ReturnType<typeof useAppUi>): string {
   switch (tab) {
@@ -193,14 +195,14 @@ function TabsInner({
 
       </div>
 
-      {/* ── Editorial TOC nav — Overview / Guests / Gallery only ── */}
+      {/* ── Editorial TOC nav — Overview / Guests / Gallery (+ Prints for organizer) ── */}
       <nav
         className="event-toc"
         role="tablist"
         aria-label={ui.eventNav.tabsAria}
         onKeyDown={handleKeyDown}
       >
-        {TOC_TAB_IDS.map((tabId) => {
+        {[...TOC_TAB_IDS, ...(showOrganizerOnlyTabs ? ORGANIZER_TOC_TAB_IDS : [])].map((tabId) => {
           const on = tabId === selectedTab;
           const count = countFor(tabId);
           return (

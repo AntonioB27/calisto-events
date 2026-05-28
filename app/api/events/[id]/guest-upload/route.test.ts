@@ -80,25 +80,30 @@ describe("guest-upload route", () => {
   });
 
   it("returns 200 when within quota and upload window", async () => {
-    getEventUploadContextMock.mockResolvedValue({
-      planId: "standard",
-      eventDate: "2026-05-06T00:00:00.000Z",
-    });
-    countMediaForQuotaMock.mockResolvedValue(10);
-    insertMediaItemMock.mockResolvedValue({ id: "m1", storage_path: "events/evt_2/x.jpg" });
+    vi.useFakeTimers({ now: new Date("2026-05-10T12:00:00.000Z") });
+    try {
+      getEventUploadContextMock.mockResolvedValue({
+        planId: "standard",
+        eventDate: "2026-05-06T00:00:00.000Z",
+      });
+      countMediaForQuotaMock.mockResolvedValue(10);
+      insertMediaItemMock.mockResolvedValue({ id: "m1", storage_path: "events/evt_2/x.jpg" });
 
-    const form = new FormData();
-    form.append("file", new File(["hello"], "photo.jpg", { type: "image/jpeg" }));
-    const request = new Request("http://localhost/api/events/evt_2/guest-upload", {
-      method: "POST",
-      body: form,
-    });
+      const form = new FormData();
+      form.append("file", new File(["hello"], "photo.jpg", { type: "image/jpeg" }));
+      const request = new Request("http://localhost/api/events/evt_2/guest-upload", {
+        method: "POST",
+        body: form,
+      });
 
-    const response = await POST(request, { params: Promise.resolve({ id: "evt_2" }) });
+      const response = await POST(request, { params: Promise.resolve({ id: "evt_2" }) });
 
-    expect(response.status).toBe(201);
-    await expect(response.json()).resolves.toEqual({ id: "m1", file_path: "events/evt_2/x.jpg" });
-    expect(insertMediaItemMock).toHaveBeenCalledTimes(1);
+      expect(response.status).toBe(201);
+      await expect(response.json()).resolves.toEqual({ id: "m1", file_path: "events/evt_2/x.jpg" });
+      expect(insertMediaItemMock).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("returns 413 FILE_TOO_LARGE when file exceeds cap", async () => {
