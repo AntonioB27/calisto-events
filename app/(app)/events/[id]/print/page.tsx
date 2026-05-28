@@ -11,6 +11,7 @@ import { WeddingInviteGrayscaleGlitterPrintSheet } from "./WeddingInviteGrayscal
 import { WeddingInviteNavyBotanicalPrintSheet } from "./WeddingInviteNavyBotanicalPrintSheet";
 import { WeddingInviteOliveGoldPrintSheet } from "./WeddingInviteOliveGoldPrintSheet";
 import { WeddingInviteTerracottaPillPrintSheet } from "./WeddingInviteTerracottaPillPrintSheet";
+import { WeddingInviteGoldCirclesPhotoPrintSheet } from "./WeddingInviteGoldCirclesPhotoPrintSheet";
 import { parseInvitationFieldVisibility } from "@/lib/event-print/invitation-field-visibility";
 import type { WeddingInviteDetails, WeddingInviteDetailsStrings } from "@/lib/event-print/wedding-invite-details";
 import { getAppStrings } from "@/lib/app-ui";
@@ -188,6 +189,17 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
   };
 
   const eventDateIso = typeof event.event_date === "string" ? event.event_date : "";
+
+  let goldCirclesPhotoUrl: string | null = null;
+  if (isInvitationPrint && mergedInvitation && routeTemplate === "wedding-invite-gold-circles-photo") {
+    const photoPath = mergedInvitation.couple_photo_path ?? "";
+    if (photoPath) {
+      const { data: urlData } = await supabase.storage
+        .from("event-media")
+        .createSignedUrl(photoPath, 3600);
+      goldCirclesPhotoUrl = urlData?.signedUrl ?? null;
+    }
+  }
 
   return (
     <main
@@ -376,6 +388,26 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
               details={inviteDetails}
               detailStrings={detailStrings}
               visibility={inviteVisibility}
+            />
+          ) : isInvitationPrint && mergedInvitation && routeTemplate === "wedding-invite-gold-circles-photo" ? (
+            <WeddingInviteGoldCirclesPhotoPrintSheet
+              paper={paper}
+              partnerA={mergedInvitation.partner_a ?? ""}
+              partnerB={mergedInvitation.partner_b ?? ""}
+              venue={mergedInvitation.venue ?? ""}
+              extraLine={mergedInvitation.extra_line ?? ""}
+              eventDateIso={eventDateIso}
+              locale={posterLocale}
+              photoUrl={goldCirclesPhotoUrl}
+              cropX={parseFloat(mergedInvitation.couple_photo_crop_x ?? "") || 0}
+              cropY={parseFloat(mergedInvitation.couple_photo_crop_y ?? "") || 0}
+              cropScale={parseFloat(mergedInvitation.couple_photo_crop_scale ?? "") || 1}
+              strings={{
+                youreInvited: posterPrint.inviteGoldCirclesYoureInvited,
+                and: posterPrint.inviteAnd,
+                receptionToFollow: posterPrint.inviteReceptionFollow,
+              }}
+              visibility={inviteVisibility!}
             />
           ) : (
             <EventPrintSheet
