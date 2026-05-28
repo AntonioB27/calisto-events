@@ -1,9 +1,12 @@
-export const EVENT_KINDS = ["wedding", "birthday", "corporate", "other"] as const;
+export const EVENT_KINDS = ["generic", "wedding"] as const;
+
 export type EventKind = (typeof EVENT_KINDS)[number];
 
-export function parseEventKind(raw: string | null | undefined): EventKind {
+export const DEFAULT_EVENT_KIND: EventKind = "generic";
+
+export function normalizeEventKind(raw: string | null | undefined): EventKind {
   if (raw && (EVENT_KINDS as readonly string[]).includes(raw)) {
     return raw as EventKind;
   }
-  return "other";
+  return DEFAULT_EVENT_KIND;
 }

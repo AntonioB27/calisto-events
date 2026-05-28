@@ -328,6 +328,13 @@ export function GalleryManager({
       const from = pageIndex * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
 
+      // ── Round-trip 1 ────────────────────────────────────────────────────────
+      // Two Postgres queries run in parallel (~50–150 ms on a good connection).
+      //
+      // SLOW POINT — minor: the `events` row is fetched on every page load,
+      // including page 2, 3, … even though organizer_id/plan/event_date never
+      // change during a session. Caching this in a ref after the first fetch
+      // would save one Postgres query per "Load more" click.
       const [{ data: evRow }, { data: rows, error: fetchErr }] = await Promise.all([
         supabase.from("events").select("organizer_id, plan, event_date").eq("id", eventId).maybeSingle(),
         supabase
@@ -367,7 +374,6 @@ export function GalleryManager({
       ]));
       const { cached: cachedUrls, missing: missingPaths } = getCachedUrls(allPaths);
 
-      // Parallelise: uploader label lookups ∥ signing only the uncached paths (RT2)
       const [labelResult, signedResult, likeSummary] = await Promise.all([
         uploaderIds.length > 0
           ? Promise.all([

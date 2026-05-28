@@ -1,0 +1,439 @@
+/* ─── Prints tab column (centered in app shell) ─────────────────────────── */
+.prints-tab {
+  width: 100%;
+  max-width: 820px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+.prints-tab--narrow {
+  max-width: 560px;
+}
+
+/* ─── Event details modal ─────────────────────────────────────────────────── */
+.pf-details-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.pf-details-modal__panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 820px;
+  max-height: min(92vh, 900px);
+  border-radius: 20px;
+  border: 1.5px solid var(--app-border);
+  background: var(--app-surface);
+  box-shadow: var(--app-shadow-lg);
+  overflow: hidden;
+}
+
+.pf-details-modal__header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.pf-details-modal__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--app-text);
+}
+
+.pf-details-modal__close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--app-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pf-details-modal__close:hover:not(:disabled) {
+  background: var(--app-surface-2);
+  color: var(--app-text);
+}
+
+.pf-details-modal__close:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pf-details-modal__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pf-card--in-modal {
+  margin-bottom: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.pf-details-modal__footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 22px 20px;
+  border-top: 1px solid var(--app-border);
+  background: color-mix(in srgb, var(--app-surface-2) 55%, transparent);
+}
+
+.pf-details-modal__footerMessages {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.pf-details-modal__footerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ─── Form card shell ────────────────────────────────────────────────────── */
+.pf-card {
+  border-radius: 20px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  overflow: hidden;
+  margin-bottom: 28px;
+  box-shadow: var(--app-shadow-sm);
+}
+
+/* ─── Section ────────────────────────────────────────────────────────────── */
+.pf-section {
+  padding: 22px 24px;
+  border-bottom: 1px solid color-mix(in srgb, var(--app-border) 70%, transparent);
+}
+.pf-section:last-child {
+  border-bottom: none;
+}
+
+.pf-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.pf-section-header--clickable {
+  cursor: pointer;
+  user-select: none;
+  border-radius: 6px;
+  margin: -4px;
+  padding: 4px;
+  transition: background 0.14s;
+}
+.pf-section-header--clickable:hover {
+  background: color-mix(in srgb, var(--app-border) 40%, transparent);
+}
+.pf-section-header--collapsed {
+  margin-bottom: 0;
+}
+
+.pf-section-chevron {
+  flex-shrink: 0;
+  color: var(--app-muted);
+  transition: transform 0.2s ease, color 0.14s;
+  margin-left: 2px;
+}
+.pf-section-header--clickable:hover .pf-section-chevron {
+  color: var(--app-text);
+}
+.pf-section-chevron--collapsed {
+  transform: rotate(-90deg);
+}
+
+.pf-section-num {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--app-gold);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.pf-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--app-text);
+  flex-shrink: 0;
+}
+
+.pf-section-rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--app-border), transparent);
+}
+
+.pf-section-hint {
+  margin: -8px 0 14px;
+  font-size: 12.5px;
+  color: var(--app-muted);
+  line-height: 1.55;
+}
+
+/* ─── Field ──────────────────────────────────────────────────────────────── */
+.pf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pf-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+
+.pf-input {
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: 10px;
+  border: 1.5px solid var(--app-border);
+  background: var(--app-surface-2);
+  color: var(--app-text);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.4;
+  transition: border-color 0.16s, box-shadow 0.16s, background 0.16s;
+  box-sizing: border-box;
+}
+
+.pf-input:focus {
+  outline: none;
+  border-color: var(--app-gold);
+  background: var(--app-surface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-gold) 13%, transparent);
+}
+
+.pf-input::placeholder {
+  color: color-mix(in srgb, var(--app-muted) 50%, transparent);
+}
+
+.pf-textarea {
+  resize: vertical;
+  min-height: 84px;
+  line-height: 1.6;
+}
+
+/* ─── Layout helpers ─────────────────────────────────────────────────────── */
+.pf-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 500px) {
+  .pf-grid-2 { grid-template-columns: 1fr; }
+}
+
+.pf-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─── Connector picker ───────────────────────────────────────────────────── */
+.pf-connector-row {
+  display: flex;
+  gap: 10px;
+}
+
+.pf-connector-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 70px;
+  border-radius: 14px;
+  border: 1.5px solid var(--app-border);
+  background: var(--app-surface-2);
+  cursor: pointer;
+  transition: border-color 0.16s, background 0.16s, box-shadow 0.16s, transform 0.1s;
+}
+
+.pf-connector-btn:hover {
+  border-color: color-mix(in srgb, var(--app-gold) 55%, transparent);
+  transform: translateY(-1px);
+}
+
+.pf-connector-btn--active {
+  border-color: var(--app-gold);
+  background: color-mix(in srgb, var(--app-gold) 9%, var(--app-surface));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-gold) 12%, transparent);
+}
+
+.pf-connector-glyph {
+  font-size: 24px;
+  line-height: 1;
+  color: var(--app-muted);
+  transition: color 0.16s;
+}
+
+.pf-connector-btn--active .pf-connector-glyph {
+  color: var(--app-gold);
+}
+
+.pf-connector-name {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+
+/* ─── Segmented control ──────────────────────────────────────────────────── */
+.pf-segment {
+  display: flex;
+  background: var(--app-surface-2);
+  border: 1.5px solid var(--app-border);
+  border-radius: 12px;
+  padding: 3px;
+}
+
+.pf-segment-btn {
+  flex: 1;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--app-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s, color 0.16s, box-shadow 0.16s;
+  text-align: center;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.pf-segment-btn--active {
+  background: var(--app-surface);
+  color: var(--app-text);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1), 0 0 0 1px color-mix(in srgb, var(--app-border) 80%, transparent);
+}
+
+/* ─── Split partner columns ──────────────────────────────────────────────── */
+.pf-split-col {
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
+  border-radius: 13px;
+  padding: 14px 15px;
+}
+
+.pf-partner-header {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--app-text);
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-style: italic;
+}
+
+/* ─── Quote section ──────────────────────────────────────────────────────── */
+.pf-quote-wrap {
+  position: relative;
+}
+
+.pf-quote-deco {
+  position: absolute;
+  top: 24px;
+  right: 10px;
+  font-size: 52px;
+  line-height: 1;
+  color: color-mix(in srgb, var(--app-gold) 13%, transparent);
+  font-family: var(--font-display);
+  font-style: italic;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ─── Visibility grid ────────────────────────────────────────────────────── */
+.pf-visibility-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+@media (max-width: 500px) {
+  .pf-visibility-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── Save footer ────────────────────────────────────────────────────────── */
+.pf-save-footer {
+  padding: 18px 24px 22px;
+  background: color-mix(in srgb, var(--app-surface-2) 55%, transparent);
+  border-top: 1px solid var(--app-border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.pf-save-hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--app-success);
+}
+
+.pf-save-error {
+  font-size: 13px;
+  color: var(--app-danger);
+}
+
+/* ─── Edit details button (above form card) ──────────────────────────────── */
+.pf-edit-details-btn {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--app-muted);
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.pf-edit-details-btn:hover {
+  color: var(--app-text);
+  background: var(--app-surface-2);
+  border-color: color-mix(in srgb, var(--app-border) 130%, transparent);
+}

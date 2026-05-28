@@ -13,7 +13,9 @@ import { GalleryTab } from "./_tabs/GalleryTab";
 import { GuestsTab } from "./_tabs/GuestsTab";
 import { OverviewTab } from "./_tabs/OverviewTab";
 import { SettingsTab } from "./_tabs/SettingsTab";
+import { PrintsTab } from "./_tabs/PrintsTab";
 import { ShareTab } from "./_tabs/ShareTab";
+import { normalizeEventKind } from "@/lib/event-kind";
 
 type EventPageProps = Readonly<{
   params: Promise<{
@@ -42,7 +44,8 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   const { id } = await params;
   const resolvedSearchParams = (await searchParams) ?? {};
   const publicOrigin = await getPublicOrigin();
-  const uiCopy = getAppStrings(await getUiLocale());
+  const uiLocale = await getUiLocale();
+  const uiCopy = getAppStrings(uiLocale);
 
   const supabase = await createSupabaseAuthServerClient();
   const {
@@ -51,7 +54,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
 
   const { data: event } = await supabase
     .from("events")
-    .select("id, title, event_date, plan, access_code, organizer_id, scheduled_deletion_at")
+    .select("id, title, event_date, plan, access_code, organizer_id, scheduled_deletion_at, event_kind, prints_event_kind_set_at")
     .eq("id", id)
     .maybeSingle();
 
@@ -66,8 +69,35 @@ export default async function EventPage({ params, searchParams }: EventPageProps
   const isPrimaryOrganizer = access.isPrimaryOrganizer;
 
   let selectedTab = resolveEventTab(pickQueryValue(resolvedSearchParams.tab));
-  if (selectedTab === "settings" && !isPrimaryOrganizer) {
+  if ((selectedTab === "settings" || selectedTab === "prints") && !isPrimaryOrganizer) {
     selectedTab = "overview";
+  }
+
+  let printDraftByTemplateId: Readonly<Record<string, Readonly<Record<string, string>>>> = {};
+  if (isPrimaryOrganizer && selectedTab === "prints") {
+    const { data: draftRows, error: draftErr } = await supabase
+      .from("event_print_template_instances")
+      .select("template_id, field_values")
+      .eq("event_id", id);
+
+    if (!draftErr && Array.isArray(draftRows)) {
+      const acc: Record<string, Record<string, string>> = {};
+      for (const row of draftRows) {
+        const tid = (row as { template_id?: unknown }).template_id;
+        const fv = (row as { field_values?: unknown }).field_values;
+        if (typeof tid !== "string" || !tid) continue;
+        if (!fv || typeof fv !== "object" || Array.isArray(fv)) {
+          acc[tid] = {};
+          continue;
+        }
+        const out: Record<string, string> = {};
+        for (const [k, v] of Object.entries(fv as Record<string, unknown>)) {
+          if (typeof v === "string") out[k] = v;
+        }
+        acc[tid] = out;
+      }
+      printDraftByTemplateId = acc;
+    }
   }
 
   if (!event || !access.canAccess) {
@@ -87,6 +117,14 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     String(event.title ?? uiCopy.defaults.eventTitle),
   );
   const navEmoji = displayNavEmoji(storedEmoji);
+  const storedEventKind = normalizeEventKind(
+    typeof (event as { event_kind?: unknown }).event_kind === "string"
+      ? (event as { event_kind: string }).event_kind
+      : undefined,
+  );
+  const printsEventKindSetAtRaw = (event as { prints_event_kind_set_at?: unknown }).prints_event_kind_set_at;
+  const printsEventKindSetAt =
+    typeof printsEventKindSetAtRaw === "string" && printsEventKindSetAtRaw.length > 0 ? printsEventKindSetAtRaw : null;
 
   return (
     <div style={{ padding: '0 0 100px' }}>
@@ -133,6 +171,18 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             eventTitle={eventName}
             accessCode={event.access_code}
             publicOrigin={publicOrigin}
+          />
+        )}
+        {selectedTab === "prints" && isPrimaryOrganizer && (
+          <PrintsTab
+            key={`prints-${eventName}-${String(event.event_date ?? "")}`}
+            eventId={id}
+            eventKind={storedEventKind}
+            printsEventKindSetAt={printsEventKindSetAt}
+            eventDisplayName={eventName}
+            eventDateIso={typeof event.event_date === "string" ? event.event_date : ""}
+            uiLocale={uiLocale}
+            printDraftByTemplateId={printDraftByTemplateId}
           />
         )}
         {selectedTab === "settings" && isPrimaryOrganizer && (

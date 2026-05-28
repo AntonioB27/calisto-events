@@ -9,11 +9,13 @@ import { useAppUi } from "@/components/AppUiProvider";
 import { type EventAdminTabId } from "./event-admin-tabs";
 
 const BOTTOM_NAV_TABS: EventAdminTabId[] = ["overview", "guests", "gallery"];
+const ORGANIZER_NAV_TABS: EventAdminTabId[] = ["prints"];
 
 const ICON_MAP: Record<string, React.ComponentType<{ size: number; color: string; strokeWidth: number }>> = {
   overview: Home,
   guests:   Users,
   gallery:  Images,
+  prints:   Camera,
 };
 
 const GOLD_DK  = '#946C18';
@@ -24,14 +26,20 @@ const FS_NAV   = "'DM Serif Display', serif";
 
 function labelForTab(tab: EventAdminTabId, t: ReturnType<typeof useAppUi>): string {
   switch (tab) {
-    case "overview":  return t.eventNav.tabOverview;
-    case "guests":    return t.eventNav.tabGuests;
-    case "gallery":   return t.eventNav.tabGallery;
-    case "share":     return t.eventNav.tabShare;
-    case "settings":  return t.eventNav.tabSettings;
+    case "overview":
+      return t.eventNav.tabOverview;
+    case "guests":
+      return t.eventNav.tabGuests;
+    case "gallery":
+      return t.eventNav.tabGallery;
+    case "share":
+      return t.eventNav.tabShare;
+    case "prints":
+      return t.eventNav.tabPrints;
+    case "settings":
+      return t.eventNav.tabSettings;
   }
 }
-
 
 
 type EventAdminTabsProps = Readonly<{
@@ -254,7 +262,7 @@ function TabsInner({
           zIndex: 100,
         }}
       >
-        {BOTTOM_NAV_TABS.map((tabId) => {
+        {[...BOTTOM_NAV_TABS, ...(showOrganizerOnlyTabs ? ORGANIZER_NAV_TABS : [])].map((tabId) => {
           const active = tabId === selectedTab;
           const count = countFor(tabId);
           const Icon = ICON_MAP[tabId];
@@ -265,6 +273,7 @@ function TabsInner({
               role="tab"
               aria-selected={active}
               aria-current={active ? 'page' : undefined}
+              aria-label={labelForTab(tabId, ui)}
               style={{
                 flex: active ? 1.4 : 1,
                 background: active ? 'rgba(255,252,248,0.52)' : 'transparent',

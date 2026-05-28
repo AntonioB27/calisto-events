@@ -42,7 +42,7 @@ type SignedUrlEntry = {
   signedUrl: string;
 };
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 24;
 
 function isVideoMime(mime: string | null | undefined) {
   return Boolean(mime && mime.startsWith("video/"));
@@ -102,6 +102,9 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
         const from = pageIndex * PAGE_SIZE;
         const to = from + PAGE_SIZE - 1;
 
+        // ── Round-trip 1 ──────────────────────────────────────────────────────
+        // Fetches 24 rows of metadata from Postgres (~50–150 ms).
+        // Fast and cheap — only paths and mime types, no heavy columns.
         const { data: rows, error: fetchErr } = await supabase
           .from("media_items")
           .select("id, storage_path, thumbnail_path, mime_type, uploaded_by")
