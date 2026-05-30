@@ -334,6 +334,7 @@ function StatTile({
   imgPadding?: number;
   swayDelay?: string;
 }) {
+  const isDark = React.useContext(DarkCtx);
   return (
     <div className="polaroid-sway" style={{ position: 'relative', animationDelay: swayDelay }}>
       {tape && (
@@ -357,9 +358,11 @@ function StatTile({
       )}
       <div
         style={{
-          background: '#f4f0ea',
+          background: isDark ? '#1e1a17' : '#f4f0ea',
           borderRadius: 3,
-          boxShadow: '0 8px 28px rgba(0,0,0,0.38), 0 2px 8px rgba(0,0,0,0.18)',
+          boxShadow: isDark
+            ? '0 8px 28px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)'
+            : '0 8px 28px rgba(0,0,0,0.38), 0 2px 8px rgba(0,0,0,0.18)',
           transform: `rotate(${rotation}deg)`,
           padding: '9px 9px 14px',
           display: 'flex',
@@ -372,7 +375,7 @@ function StatTile({
             position: 'relative',
             borderRadius: 2,
             overflow: 'hidden',
-            background: 'rgba(0,0,0,0.04)',
+            background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
             aspectRatio: '1 / 1',
             marginBottom: 9,
           }}
@@ -382,8 +385,8 @@ function StatTile({
         </div>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 34, color: accent, letterSpacing: '-0.04em', lineHeight: 0.9 }}>{n}</div>
-          <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 12, color: '#2a1d0f', marginTop: 3 }}>{label}</div>
-          <div style={{ fontSize: 7.5, color: '#9A8570', fontWeight: 600, marginTop: 2, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: FB }}>{cap}</div>
+          <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 12, color: isDark ? '#d4c4a8' : '#2a1d0f', marginTop: 3 }}>{label}</div>
+          <div style={{ fontSize: 7.5, color: isDark ? '#7a6a5a' : '#9A8570', fontWeight: 600, marginTop: 2, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: FB }}>{cap}</div>
         </div>
       </div>
     </div>
