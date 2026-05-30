@@ -243,7 +243,7 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
               }}
               details={inviteDetails}
               detailStrings={detailStrings}
-              visibility={inviteVisibility}
+              visibility={inviteVisibility!}
             />
           ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-cherry-blossom" ? (
             <WeddingInviteCherryBlossomPrintSheet
@@ -262,7 +262,7 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
               }}
               details={inviteDetails}
               detailStrings={detailStrings}
-              visibility={inviteVisibility}
+              visibility={inviteVisibility!}
             />
           ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-gold-arch-floral" ? (
             <WeddingInviteGoldArchFloralPrintSheet
@@ -278,7 +278,7 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
               }}
               details={inviteDetails}
               detailStrings={detailStrings}
-              visibility={inviteVisibility}
+              visibility={inviteVisibility!}
             />
           ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-terra-pill" ? (
             <WeddingInviteTerracottaPillPrintSheet
@@ -295,7 +295,7 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
               }}
               details={inviteDetails}
               detailStrings={detailStrings}
-              visibility={inviteVisibility}
+              visibility={inviteVisibility!}
             />
           ) : isInvitationPrint && mergedInvitation && routeTemplate === "wedding-invite-grayscale-glitter" ? (
             <WeddingInviteGrayscaleGlitterPrintSheet
@@ -313,7 +313,7 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
                 on: posterPrint.inviteGlitterOn,
                 and: posterPrint.inviteAnd,
               }}
-              visibility={inviteVisibility}
+              visibility={inviteVisibility!}
             />
           ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-navy-botanical" ? (
             <WeddingInviteNavyBotanicalPrintSheet
@@ -330,7 +330,7 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
               }}
               details={inviteDetails}
               detailStrings={detailStrings}
-              visibility={inviteVisibility}
+              visibility={inviteVisibility!}
             />
           ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-watercolor-coast" ? (
             <WeddingInviteWatercolorCoastPrintSheet
@@ -350,7 +350,7 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
               }}
               details={inviteDetails}
               detailStrings={detailStrings}
-              visibility={inviteVisibility}
+              visibility={inviteVisibility!}
             />
           ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-geometric" ? (
             <WeddingInviteGeometricPrintSheet
@@ -370,7 +370,7 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
               }}
               details={inviteDetails}
               detailStrings={detailStrings}
-              visibility={inviteVisibility}
+              visibility={inviteVisibility!}
             />
           ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-blue-floral" ? (
             <WeddingInviteBlueFloraPrintSheet
@@ -387,7 +387,7 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
               }}
               details={inviteDetails}
               detailStrings={detailStrings}
-              visibility={inviteVisibility}
+              visibility={inviteVisibility!}
             />
           ) : isInvitationPrint && mergedInvitation && routeTemplate === "wedding-invite-gold-circles-photo" ? (
             <WeddingInviteGoldCirclesPhotoPrintSheet
