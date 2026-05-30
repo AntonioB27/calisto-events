@@ -113,17 +113,20 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
           </p>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+        <div role="radiogroup" style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
           {cards.map(({ planId, limits, price, originalPrice, accent, stripe }) => {
             const on = selected === planId;
             const isExpanded = expanded === planId;
             const detailsId = `plan-details-${planId}`;
 
             return (
-              <button
+              <div
                 key={planId}
-                type="button"
+                role="radio"
+                aria-checked={on}
+                tabIndex={0}
                 onClick={() => { setSelected(planId); writeStep2Draft(planId); }}
+                onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setSelected(planId); writeStep2Draft(planId); } }}
                 style={{
                   textAlign: 'left', cursor: 'pointer',
                   background: on ? 'rgba(244,240,234,0.95)' : 'rgba(255,255,255,0.55)',
@@ -132,7 +135,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
                   borderRadius: 14,
                   padding: '14px 14px 14px 14px',
                   boxShadow: on ? `0 6px 20px -4px ${accent}30, inset 0 1px 0 rgba(255,255,255,0.7)` : '0 2px 8px -2px rgba(40,25,15,0.1), inset 0 1px 0 rgba(255,255,255,0.6)',
-                  transform: on ? 'translateY(-1px)' : 'translateY(0)',
+                  transform: on ? 'translateY(-1px)' : 'none',
                   transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease',
                   position: 'relative', overflow: 'hidden',
                 }}
@@ -221,7 +224,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
                     {ui.createStep2.tipChangePlanLater}
                   </p>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>

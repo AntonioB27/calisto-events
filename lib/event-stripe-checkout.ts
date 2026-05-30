@@ -104,7 +104,8 @@ export async function fulfillPaidEventFromCheckoutSession(
   if (error) {
     const code = (error as { code?: string }).code;
     if (code === "23505") {
-      const { data: row } = await db
+      // Idempotent: another request (webhook or retry) already created the event.
+      const { data: row, error: lookupError } = await db
         .from("events")
         .select("id")
         .eq("stripe_checkout_session_id", sessionId)
@@ -113,12 +114,27 @@ export async function fulfillPaidEventFromCheckoutSession(
       if (row && typeof (row as { id?: unknown }).id === "string") {
         return { ok: true, eventId: (row as { id: string }).id, alreadyExisted: true };
       }
+
+      console.error("[fulfill] 23505 conflict but lookup returned nothing", {
+        sessionId,
+        lookupError,
+        insertError: error,
+      });
+      return { ok: false, error: "Event creation conflict. Please try again in a moment." };
     }
-    const message =
-      typeof (error as { message?: unknown }).message === "string"
-        ? (error as { message: string }).message
-        : "Could not create event.";
-    return { ok: false, error: message };
+
+    const rawMessage = typeof (error as { message?: unknown }).message === "string"
+      ? (error as { message: string }).message
+      : "";
+    const isSchemaCache = rawMessage.includes("schema cache");
+    console.error("[fulfill] event insert failed", { sessionId, code, isSchemaCache, error });
+    return {
+      ok: false,
+      error: isSchemaCache
+        ? "Service temporarily unavailable. Please try again in a moment."
+        : "Could not create event. Please try again.",
+      ...(isSchemaCache ? { status: 503 } : {}),
+    };
   }
 
   if (!inserted || typeof (inserted as { id?: unknown }).id !== "string") {
@@ -150,7 +166,9 @@ export async function fulfillPaidEventForAuthenticatedUser(args: Readonly<{
 
   const result = await fulfillPaidEventFromCheckoutSession(args.stripe, args.sessionId);
   if (!result.ok) {
-    return { ...result, status: result.error.includes("yet") ? 409 : 400 };
+    const explicitStatus = "status" in result && typeof result.status === "number" ? result.status : null;
+    const derivedStatus = result.error.includes("yet") ? 409 : 400;
+    return { ...result, status: explicitStatus ?? derivedStatus };
   }
   return result;
 }

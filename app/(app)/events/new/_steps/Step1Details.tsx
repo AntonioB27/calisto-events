@@ -122,9 +122,43 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
         <input type="hidden" name="step" value="2" />
         <input type="hidden" name="emoji" value={emoji} />
 
-        {/* Name + Date card */}
-        <div style={{ ...warmGlass, padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <div>
+        {/* Unified card */}
+        <div style={{ ...warmGlass, borderRadius: 16 }}>
+
+          {/* ── Emoji header — warm tinted, clickable ── */}
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label={ui.createStep1.defaultEmojiAria}
+            onClick={() => setPickerOpen(v => !v)}
+            onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setPickerOpen(v => !v); } }}
+            style={{
+              cursor: 'pointer',
+              position: 'relative',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              gap: 6,
+              padding: '24px 16px 20px',
+              background: 'linear-gradient(160deg, rgba(197,146,42,0.13) 0%, rgba(197,146,42,0.04) 100%)',
+              borderBottom: `1px solid rgba(197,146,42,0.18)`,
+              borderRadius: '15px 15px 0 0',
+              userSelect: 'none',
+            }}
+          >
+            {/* Gold corner mark top-left */}
+            <span aria-hidden style={{ position: 'absolute', top: 14, left: 16, width: 18, height: 18, borderTop: `2px solid ${GOLD}60`, borderLeft: `2px solid ${GOLD}60`, borderRadius: '3px 0 0 0', pointerEvents: 'none' }} />
+            {/* Gold corner mark top-right */}
+            <span aria-hidden style={{ position: 'absolute', top: 14, right: 16, width: 18, height: 18, borderTop: `2px solid ${GOLD}60`, borderRight: `2px solid ${GOLD}60`, borderRadius: '0 3px 0 0', pointerEvents: 'none' }} />
+
+            <span style={{ fontSize: 64, lineHeight: 1, filter: 'drop-shadow(0 4px 12px rgba(40,25,15,0.18))' }}>
+              {emoji || '📅'}
+            </span>
+            <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: `${GOLD_DK}`, opacity: 0.6, fontFamily: FB }}>
+              {ui.createStep1.eventIconEyebrow}
+            </span>
+          </div>
+
+          {/* ── Title ── */}
+          <div style={{ padding: '18px 18px 16px' }}>
             <label htmlFor="name" style={labelStyle}>{ui.createStep1.eventTitleLabel}</label>
             <input
               id="name"
@@ -137,17 +171,19 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
                 const currentDate = dateEl instanceof HTMLInputElement ? dateEl.value : defaultDate;
                 writeStep1Draft(e.target.value, currentDate);
               }}
-              style={inputStyle}
+              style={{ ...inputStyle, fontFamily: FS, fontStyle: 'italic', fontSize: 20, letterSpacing: '-0.02em', padding: '10px 14px' }}
             />
           </div>
 
-          <div>
+          {/* ── Date ── */}
+          <div style={{ borderTop: `1px dashed ${BORDER}`, padding: '14px 18px 16px' }}>
             <label htmlFor="date" style={labelStyle}>{ui.createStep1.eventDateLabel}</label>
             <input
               id="date"
               name="date"
               type="date"
               defaultValue={defaultDate}
+              min={new Date().toISOString().split("T")[0]}
               onChange={(e) => {
                 const nameEl = document.getElementById("name");
                 const currentName = nameEl instanceof HTMLInputElement ? nameEl.value : defaultName;
@@ -156,78 +192,48 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
               style={inputStyle}
             />
           </div>
-        </div>
 
-        {/* Emoji card */}
-        <div ref={boxRef} style={{ position: 'relative', marginTop: 12 }}>
-          <div style={{ ...warmGlass, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div
-              aria-label={ui.createStep1.defaultEmojiAria}
-              style={{ width: 52, height: 52, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, background: 'rgba(255,255,255,0.7)', border: `1.5px solid ${BORDER}`, flexShrink: 0 }}
+          {/* ── Choose emoji (text row) ── */}
+          <div ref={boxRef} style={{ position: 'relative', borderTop: `1px dashed ${BORDER}`, padding: '10px 18px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+            <p style={{ margin: 0, fontSize: 11, color: MUTED, fontFamily: FB }}>
+              {ui.createStep1.searchEmojiHint}
+            </p>
+            <button
+              type="button"
+              onClick={() => setPickerOpen(v => !v)}
+              style={{ flexShrink: 0, background: 'rgba(255,255,255,0.7)', border: `1.5px solid ${pickerOpen ? GOLD : BORDER}`, color: pickerOpen ? GOLD_DK : INK_S, padding: '5px 12px', borderRadius: 8, fontFamily: FB, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'border-color 0.15s, color 0.15s' }}
             >
-              {emoji || '📅'}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: MUTED, fontFamily: FB, margin: '0 0 8px' }}>
-                {ui.createStep1.eventIconEyebrow}
-              </p>
-              <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  onClick={() => setPickerOpen(v => !v)}
-                  style={{ background: 'rgba(255,255,255,0.7)', border: `1.5px solid ${BORDER}`, color: INK_S, padding: '6px 12px', borderRadius: 8, fontFamily: FB, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
-                >
-                  {pickerOpen ? ui.settingsTab.closePicker : ui.settingsTab.chooseEmoji}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmoji('');
+              {pickerOpen ? ui.settingsTab.closePicker : ui.settingsTab.chooseEmoji}
+            </button>
+
+            {pickerOpen && (
+              <div
+                role="dialog"
+                aria-label={ui.settingsTab.emojiPickerAria}
+                style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 20, borderRadius: 14, overflow: 'hidden', border: `1.5px solid ${BORDER}`, boxShadow: '0 20px 40px rgba(40,25,15,0.22)' }}
+              >
+                <EmojiPicker
+                  width={320}
+                  height={400}
+                  lazyLoadEmojis
+                  searchDisabled={false}
+                  skinTonesDisabled
+                  theme={Theme.LIGHT}
+                  onEmojiClick={(data: EmojiClickData) => {
+                    const next = data.emoji;
+                    setEmoji(next);
+                    setPickerOpen(false);
                     const nameEl = document.getElementById("name");
                     const dateEl = document.getElementById("date");
                     const currentName = nameEl instanceof HTMLInputElement ? nameEl.value : defaultName;
                     const currentDate = dateEl instanceof HTMLInputElement ? dateEl.value : defaultDate;
-                    writeCreateEventDraftToStorage({ step: '1', name: currentName, emoji: '', date: currentDate, planId: getPlanIdForDraft() });
+                    writeCreateEventDraftToStorage({ step: '1', name: currentName, emoji: next, date: currentDate, planId: getPlanIdForDraft() });
                   }}
-                  style={{ background: 'transparent', border: 'none', color: MUTED, padding: '6px 8px', fontFamily: FB, fontSize: 12, cursor: 'pointer' }}
-                >
-                  {ui.createStep1.noEmojiBtn}
-                </button>
+                />
               </div>
-            </div>
+            )}
           </div>
-
-          {pickerOpen && (
-            <div
-              role="dialog"
-              aria-label={ui.settingsTab.emojiPickerAria}
-              style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 20, borderRadius: 14, overflow: 'hidden', border: `1.5px solid ${BORDER}`, boxShadow: '0 20px 40px rgba(40,25,15,0.22)' }}
-            >
-              <EmojiPicker
-                width={320}
-                height={400}
-                lazyLoadEmojis
-                searchDisabled={false}
-                skinTonesDisabled
-                theme={Theme.LIGHT}
-                onEmojiClick={(data: EmojiClickData) => {
-                  const next = data.emoji;
-                  setEmoji(next);
-                  setPickerOpen(false);
-                  const nameEl = document.getElementById("name");
-                  const dateEl = document.getElementById("date");
-                  const currentName = nameEl instanceof HTMLInputElement ? nameEl.value : defaultName;
-                  const currentDate = dateEl instanceof HTMLInputElement ? dateEl.value : defaultDate;
-                  writeCreateEventDraftToStorage({ step: '1', name: currentName, emoji: next, date: currentDate, planId: getPlanIdForDraft() });
-                }}
-              />
-            </div>
-          )}
         </div>
-
-        <p style={{ marginTop: 10, fontSize: 12, color: MUTED, fontFamily: FB, lineHeight: 1.45 }}>
-          {ui.createStep1.searchEmojiHint}
-        </p>
 
         <button
           type="submit"

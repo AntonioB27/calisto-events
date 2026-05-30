@@ -40,7 +40,7 @@ export function CompleteCheckoutClient() {
 
       if (!response.ok) {
         setError(payload?.error ?? ui.stripeComplete.fulfillFailGeneric);
-        if (response.status === 409 || response.status === 404) {
+        if (response.status === 409 || response.status === 404 || response.status === 503) {
           setDetail(ui.stripeComplete.fulfillRetryHint);
         }
         return;

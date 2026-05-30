@@ -29,6 +29,7 @@ export const PRIVACY_SECTIONS: readonly LegalSection[] = [
     paragraphs: [
       "We rely on trusted infrastructure providers, including Supabase (database, authentication, and object storage for media) and Stripe (payments for paid plans). Their processing is governed by their terms and our configuration of the product.",
       "Media you upload is stored in our Supabase project and is accessible to organizers and guests according to the event’s access code and in-app permissions.",
+      "We use Vercel Analytics to collect anonymised, aggregated page-view statistics (no cookies, no cross-site tracking, no personal identifiers). This data is used solely to understand how the service is used and to improve it.",
     ],
   },
   {
@@ -59,6 +60,7 @@ export const PRIVACY_SECTIONS: readonly LegalSection[] = [
   {
     title: "Contact",
     paragraphs: [
+      "The data controller is Andromeda vl. Antonio Bečić, OIB 33927072665, Mosorska 49, 21929, Croatia.",
       "Privacy questions or requests: info@calisto-events.com.",
     ],
   },
@@ -94,8 +96,10 @@ export const TERMS_SECTIONS: readonly LegalSection[] = [
   {
     title: "Plans and payments",
     paragraphs: [
-      "Paid tiers (where available) may be billed through Stripe Checkout. Prices, currencies, taxes, refunds, chargebacks, and invoices follow our checkout presentation and Stripe’s applicable rules.",
+      "Paid tiers (where available) may be billed through Stripe Checkout. Prices, currencies, applicable taxes, and invoices are shown at checkout before payment is confirmed.",
       "Stripe processes card data; Calisto does not store full card numbers on its own systems as part of the standard Checkout integration.",
+      "Right of withdrawal: under EU consumer law you generally have 14 days to withdraw from a distance contract. However, by confirming your purchase you expressly request immediate access to the digital service and acknowledge that your right of withdrawal is waived once the service has been fully performed. Where mandatory consumer protections in your country provide stronger rights, those rights are unaffected.",
+      "If you believe you are entitled to a refund for another reason (e.g. a billing error), contact us at info@calisto-events.com within 30 days of the charge.",
     ],
   },
   {
@@ -119,12 +123,13 @@ export const TERMS_SECTIONS: readonly LegalSection[] = [
   {
     title: "Governing law",
     paragraphs: [
-      "These Terms are governed by the laws applicable to the operating company behind Calisto, without regard to conflict-of-law rules, unless mandatory consumer protections in your country say otherwise.",
+      "These Terms are governed by the laws of the Republic of Croatia, without regard to conflict-of-law rules. If you are a consumer resident in another EU member state, the mandatory consumer-protection provisions of your country of residence also apply and are not displaced by this clause.",
     ],
   },
   {
     title: "Contact",
     paragraphs: [
+      "The operator of this service is Andromeda vl. Antonio Bečić, OIB 33927072665, Mosorska 49, 21929, Croatia.",
       "Questions about these Terms: info@calisto-events.com.",
     ],
   },

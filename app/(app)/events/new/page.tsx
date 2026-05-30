@@ -26,7 +26,7 @@ type CreateEventValidationResult =
       error: "NAME_REQUIRED";
     }>;
 
-const DEFAULT_DATE = "2026-01-01";
+const DEFAULT_DATE = new Date().toISOString().split("T")[0];
 const DEFAULT_PLAN: PlanId = "free";
 export const PLAN_OPTIONS = ["free", "standard", "plus", "premium", "max"] as const;
 const PLAN_OPTION_SET = new Set<string>(PLAN_OPTIONS);
@@ -102,7 +102,7 @@ export default async function NewEventPage({ searchParams }: NewEventPageProps) 
       {/* Step progress header */}
       <div
         className="welcome-reveal"
-        style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 28 }}
+        style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 8 }}
       >
         <div>
           {/* Gold eyebrow */}
@@ -151,7 +151,7 @@ export default async function NewEventPage({ searchParams }: NewEventPageProps) 
         </div>
         <MascotSpot
           src="/brand/mascot/aurora_planning.png"
-          size={72}
+          size={144}
           variant="stack"
           className="welcome-mascot-float"
         />

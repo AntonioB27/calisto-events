@@ -627,7 +627,11 @@ html[data-theme="dark"] {
     radial-gradient(900px  620px at 84% 92%,  rgba(175, 80, 140,  0.14), transparent 58%),
     var(--app-bg);
   color: var(--app-text);
-  min-height: 100vh;
+  /* Fixed to viewport — removes the shell from flow so body/html can never scroll.
+     The dvh approach still allows body to scroll by the address-bar delta on mobile. */
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
 }
 
 /* Dark mode — match landing page intensity */
@@ -647,6 +651,9 @@ html[data-theme="dark"] .app-shell {
   overflow: visible;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  /* Force own compositor layer — prevents backdrop-filter stacking contexts in
+     the scrollable main from rendering above the header on WebKit/Chromium */
+  transform: translateZ(0);
   height: 56px;
   padding: 0 26px;
   gap: 34px;

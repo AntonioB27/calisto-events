@@ -91,7 +91,7 @@ function AppShellInner({ userName, userInitial, children }: AppShellProps) {
   const eventId = isEventScreen ? eventMatch![1] : null;
 
   return (
-    <div className="app-shell flex h-[100dvh] flex-col overflow-hidden">
+    <div className="app-shell flex flex-col">
       <header className="app-shell-header relative flex shrink-0 items-center overflow-visible">
         {/* Design 03 top gold sheen line */}
         <div
