@@ -103,7 +103,7 @@ export function AppShellAccountMenu({ userName, userInitial }: AppShellAccountMe
           className="app-account-menu__panel"
           style={{ position: "absolute", top: "calc(100% + 10px)", right: 0, zIndex: 250 }}
         >
-          <div className="app-account-menu__section" style={{ padding: "10px 14px 8px" }}>
+          <div className="app-account-menu__section" style={{ padding: "12px 14px 10px" }}>
             <p
               style={{
                 margin: 0,

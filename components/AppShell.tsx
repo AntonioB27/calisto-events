@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Home, Calendar, Images, Users, Plus, Camera, QrCode } from "lucide-react";
+import { Suspense } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppShellAccountMenu } from "@/components/AppShellAccountMenu";
-import { AppBtn } from "@/components/app-ui/AppBtn";
 
 type AppShellProps = {
   userName: string;
@@ -22,126 +23,156 @@ export function getActiveNav(pathname: string): string | null {
   return null;
 }
 
-export function AppShell({ userName, userInitial, children }: AppShellProps) {
+const NAV_ICONS: Record<string, React.ComponentType<{ size: number }>> = {
+  home: Home,
+  event: Calendar,
+  gallery: Images,
+  guests: Users,
+  prints: Camera,
+};
+
+function NavLinks({ eventId }: { eventId: string | null }) {
   const ui = useAppUi();
-  const NAV_LINKS = [
-    { id: "home", href: "/dashboard", label: ui.shell.navHome },
-    { id: "settings", href: "/settings", label: ui.shell.navSettings },
-  ];
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get("tab");
   const active = getActiveNav(pathname);
+
+  const isEventScreen = Boolean(eventId);
+
+  const links = [
+    { id: "home", href: "/dashboard", label: ui.shell.navHome },
+    ...(isEventScreen && eventId
+      ? [
+          { id: "event",   href: `/events/${eventId}?tab=overview`, label: ui.shell.navEvent          },
+          { id: "gallery", href: `/events/${eventId}?tab=gallery`,  label: ui.shell.navGallery         },
+          { id: "guests",  href: `/events/${eventId}?tab=guests`,   label: ui.shell.navGuests          },
+          { id: "prints",  href: `/events/${eventId}?tab=prints`,   label: ui.eventNav.tabPrints       },
+        ]
+      : []),
+  ];
+
+  function isActive(linkId: string): boolean {
+    if (linkId === "home")    return active === "home";
+    if (linkId === "event")   return isEventScreen && (!currentTab || currentTab === "overview");
+    if (linkId === "gallery") return isEventScreen && currentTab === "gallery";
+    if (linkId === "guests")  return isEventScreen && currentTab === "guests";
+    if (linkId === "prints")  return isEventScreen && currentTab === "prints";
+    return false;
+  }
+
+  return (
+    <>
+      {links.map((link) => {
+        const on = isActive(link.id);
+        const Icon = NAV_ICONS[link.id];
+        return (
+          <Link
+            key={link.id}
+            href={link.href}
+            aria-current={on ? "page" : undefined}
+            className={`app-nav-link${on ? " app-nav-link--active" : ""}`}
+          >
+            {Icon && <Icon size={16} />}
+            {link.label}
+          </Link>
+        );
+      })}
+    </>
+  );
+}
+
+function AppShellInner({ userName, userInitial, children }: AppShellProps) {
+  const ui = useAppUi();
+  const pathname = usePathname();
 
   const eventMatch = pathname.match(/^\/events\/([^/]+)/);
   const isEventScreen = Boolean(eventMatch && eventMatch[1] !== "new");
+  const eventId = isEventScreen ? eventMatch![1] : null;
 
   return (
     <div className="app-shell flex h-[100dvh] flex-col overflow-hidden">
-      <header
-        className="app-shell-header flex h-16 shrink-0 items-center gap-1 px-4 md:gap-2 md:px-7"
-        style={{
-          borderBottom: "1px solid color-mix(in srgb, var(--app-gold) 18%, var(--app-border))",
-          boxShadow: "0 1px 0 color-mix(in srgb, var(--app-gold) 12%, transparent), 0 4px 20px -8px rgba(0,0,0,0.06)",
-        }}
-      >
+      <header className="app-shell-header relative flex shrink-0 items-center overflow-visible">
+        {/* Design 03 top gold sheen line */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 2,
+            background: "linear-gradient(90deg, transparent, var(--app-gold), transparent)",
+            opacity: 0.75,
+            pointerEvents: "none",
+          }}
+        />
+
+        {/* Wordmark */}
         <Link
           href="/dashboard"
-          className="mr-4 flex min-w-0 shrink items-center gap-1.5 no-underline md:mr-10"
+          className="flex min-w-0 shrink items-center gap-1.5 no-underline"
         >
           <span
             style={{
               fontFamily: "var(--font-display)",
               fontStyle: "italic",
               fontWeight: 700,
-              fontSize: 24,
-              color: "var(--app-text)",
+              fontSize: 26,
               letterSpacing: "-0.02em",
+              background: "linear-gradient(105deg, var(--app-text) 30%, var(--app-gold) 130%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
             }}
           >
             Calisto
           </span>
-          <span style={{
-            width: 6,
-            height: 6,
-            background: "var(--app-gold)",
-            borderRadius: "50%",
-            marginBottom: 8,
-            boxShadow: "0 0 7px color-mix(in srgb, var(--app-gold) 70%, transparent)",
-          }} />
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              background: "var(--app-gold)",
+              borderRadius: "50%",
+              marginBottom: 8,
+              boxShadow: "0 0 7px color-mix(in srgb, var(--app-gold) 70%, transparent)",
+            }}
+          />
         </Link>
 
-        <nav className="hidden min-w-0 flex-1 gap-0.5 md:flex">
-          {NAV_LINKS.map((link) => {
-            const on = active === link.id;
-            return (
-              <Link
-                key={link.id}
-                href={link.href}
-                aria-current={on ? "page" : undefined}
-                className={`app-nav-link${on ? " app-nav-link--active" : ""}`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
+        {/* Desktop nav links — absolutely centred; hidden on mobile */}
+        <nav className="app-shell-nav-center hidden md:flex">
+          <Suspense fallback={null}>
+            <NavLinks eventId={eventId} />
+          </Suspense>
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-2.5">
-          <AppBtn as={Link} href="/join" variant="outline" size="sm" className="inline-flex shrink-0">
-            {ui.shell.joinCta}
-          </AppBtn>
-          <AppBtn
-            as={Link}
-            href="/events/new"
-            variant="gold"
-            size="sm"
-            className="shrink-0"
-            aria-label={ui.shell.newEventAria}
-          >
-            <span className="md:hidden">{ui.shell.newEventShort}</span>
+        {/* Right side: Join + New Event + rule + avatar */}
+        <div className="ml-auto flex shrink-0 items-center gap-4 md:gap-5">
+          <Link href="/join" className="app-shell-text-link app-shell-join-link" aria-label={ui.shell.joinCta}>
+            <QrCode size={16} strokeWidth={1.8} />
+            <span className="hidden md:inline">{ui.shell.joinCta}</span>
+          </Link>
+          <Link href="/events/new" className="app-shell-text-link app-shell-new-event-link" aria-label={ui.shell.newEventAria}>
+            <Plus size={16} strokeWidth={2.5} />
             <span className="hidden md:inline">{ui.shell.newEventLabel}</span>
-          </AppBtn>
+          </Link>
+          <div className="app-shell-rule" aria-hidden />
           <AppShellAccountMenu userName={userName} userInitial={userInitial} />
         </div>
       </header>
 
-      {isEventScreen && (
-        <div
-          className="relative z-10 flex h-11 shrink-0 items-center gap-0 px-4 md:px-7"
-          style={{
-            background: "color-mix(in srgb, var(--app-surface) 60%, transparent)",
-            borderBottom: "1px solid color-mix(in srgb, var(--app-border) 70%, transparent)",
-          }}
-        >
-          <Link
-            href="/dashboard"
-            style={{
-              fontSize: 13,
-              color: "var(--app-muted)",
-              textDecoration: "none",
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-            }}
-          >
-            {ui.shell.eventBreadcrumb}
-          </Link>
-          <span style={{ color: "var(--app-border-strong)", margin: "0 10px" }}>/</span>
-          <span
-            style={{
-              fontFamily: "var(--font-display)",
-              fontStyle: "italic",
-              fontSize: 14,
-              color: "var(--app-text)",
-            }}
-          >
-            {ui.shell.eventContext}
-          </span>
-        </div>
-      )}
-
       <main className="relative z-0 min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
-        <div className="mx-auto max-w-[1040px] px-4 pb-6 pt-0 md:px-7 md:pb-20">{children}</div>
+        <div className="mx-auto max-w-[1040px] px-4 pb-24 pt-0 md:px-7 md:pb-8">{children}</div>
       </main>
     </div>
+  );
+}
+
+export function AppShell(props: AppShellProps) {
+  return (
+    <Suspense fallback={null}>
+      <AppShellInner {...props} />
+    </Suspense>
   );
 }

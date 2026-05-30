@@ -236,10 +236,11 @@ function TabsInner({
 
     </div>
 
-    {/* ── Liquid glass bottom nav — outside welcome-reveal to avoid transform containment ── */}
+    {/* ── Liquid glass bottom nav — mobile only; desktop uses top nav ── */}
     <nav
         aria-label={ui.eventNav.tabsAria}
         onKeyDown={handleKeyDown}
+        className="flex md:hidden"
         style={{
           position: 'fixed',
           left: 18,
@@ -257,7 +258,6 @@ function TabsInner({
             'inset 0 1.5px 0 rgba(255,255,255,0.72)',
             'inset 0 -1px 0 rgba(255,255,255,0.10)',
           ].join(', '),
-          display: 'flex',
           gap: 4,
           zIndex: 100,
         }}
