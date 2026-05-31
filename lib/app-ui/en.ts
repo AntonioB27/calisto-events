@@ -97,6 +97,10 @@ export const APP_UI_EN = {
     roleGuest: "Guest",
     emptyHint: "Create a new event or join an existing one with a code from your organizer.",
     moreHint: "Create another event or join one with a code from your organizer.",
+    mostRecent: "Most recent",
+    earlierSeason: "Earlier this season",
+    addAnother: "Or add another",
+    oneMoreHeading: "One more on the way?",
   },
 
   joinEntryFooter: {
@@ -380,6 +384,10 @@ export const APP_UI_EN = {
     inviteToggleChurch: "Church ceremony",
     inviteToggleDinner: "Dinner reception",
     inviteToggleQuote: "Quote",
+    comingSoonHeading: "Coming soon.",
+    comingSoonDesc: "Custom invitations, programs, and keepsakes — designed right here and ready to print or order.",
+    comingSoonDesc2: "Pick a template, fill in your event details, and we handle the rest.",
+    comingSoonBadge: "We're working on it",
   },
 
   printsSetup: {
@@ -465,6 +473,10 @@ export const APP_UI_EN = {
     noPhotosHint: "No uploads yet. Open the gallery to see guest photos and videos when they arrive.",
     openGalleryBtn: "Go to Gallery",
     viewGalleryFull: "View full gallery →",
+    planLabel: "Plan",
+    carouselLatest: "Latest",
+    carouselMore: "+more",
+    carouselLatestSix: "The latest six",
   },
 
   share: {
@@ -536,6 +548,7 @@ export const APP_UI_EN = {
     zipExportErrorQueue:
       "The export queue could not be read. If you use your own Supabase project, apply the latest migrations (including `media_zip_exports`). Otherwise try again in a moment.",
     zipExportErrorTooMany: "Too many items for one ZIP. Remove some uploads or export without videos.",
+    columnsLabel: "Columns",
   },
 
   guests: {

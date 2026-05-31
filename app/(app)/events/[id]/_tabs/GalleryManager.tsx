@@ -1181,7 +1181,7 @@ export function GalleryManager({
               color: "var(--app-muted)",
             }}
           >
-            Columns
+            {ui.gallery.columnsLabel}
           </span>
           <span
             style={{
@@ -1247,7 +1247,7 @@ export function GalleryManager({
             max={5}
             step={1}
             value={columns}
-            aria-label="Columns"
+            aria-label={ui.gallery.columnsLabel}
             onChange={(e) => setColumns(Number(e.target.value))}
           />
         </div>

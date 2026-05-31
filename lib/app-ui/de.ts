@@ -99,6 +99,10 @@ export const APP_UI_DE: AppUiDict = {
     emptyHint: "Erstelle eine neue Veranstaltung oder tritt mit einem Code eines Organizers bei.",
     moreHint:
       "Erstelle noch eine Veranstaltung oder trete mit einem Code eines Organizers bei.",
+    mostRecent: "Neuestes",
+    earlierSeason: "Früher diese Saison",
+    addAnother: "Oder ein weiteres",
+    oneMoreHeading: "Noch eine auf dem Weg?",
   },
 
   joinEntryFooter: {
@@ -390,6 +394,10 @@ export const APP_UI_DE: AppUiDict = {
     inviteToggleChurch: "Kirche / Zeremonie",
     inviteToggleDinner: "Abendessen / Empfang",
     inviteToggleQuote: "Zitat",
+    comingSoonHeading: "Demnächst.",
+    comingSoonDesc: "Eigene Einladungen, Programme und Erinnerungsstücke — hier gestalten und direkt bestellen.",
+    comingSoonDesc2: "Wähle eine Vorlage, füll deine Eventdetails ein – den Rest übernehmen wir.",
+    comingSoonBadge: "Wir arbeiten daran",
   },
 
   printsSetup: {
@@ -476,6 +484,10 @@ export const APP_UI_DE: AppUiDict = {
       "Noch keine Uploads. Öffne die Galerie, sobald neue Medien eintreffen.",
     openGalleryBtn: "Zur Galerie",
     viewGalleryFull: "Vollständige Galerie →",
+    planLabel: "Tarif",
+    carouselLatest: "Neuestes",
+    carouselMore: "+mehr",
+    carouselLatestSix: "Die letzten sechs",
   },
 
   share: {
@@ -550,6 +562,7 @@ export const APP_UI_DE: AppUiDict = {
     zipExportErrorQueue:
       "Die Export‑Warteschlange konnte nicht gelesen werden. Bei eigenem Supabase‑Projekt die neuesten Migrationen anwenden (inkl. `media_zip_exports`). Sonst kurz warten und erneut versuchen.",
     zipExportErrorTooMany: "Zu viele Elemente für ein ZIP. Uploads reduzieren oder ohne Videos exportieren.",
+    columnsLabel: "Spalten",
   },
 
   guests: {

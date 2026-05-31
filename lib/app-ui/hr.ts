@@ -98,6 +98,10 @@ export const APP_UI_HR: AppUiDict = {
     roleGuest: "Gost",
     emptyHint: "Stvorite novi događaj ili se pridružite postojećem kodom od organizatora.",
     moreHint: "Stvorite još jedan događaj ili se pridružite kodom od organizatora.",
+    mostRecent: "Najnoviji",
+    earlierSeason: "Ranije ove sezone",
+    addAnother: "Ili dodaj još jedan",
+    oneMoreHeading: "Još jedan na putu?",
   },
 
   joinEntryFooter: {
@@ -384,6 +388,10 @@ export const APP_UI_HR: AppUiDict = {
     inviteToggleChurch: "Crkvena ceremonija",
     inviteToggleDinner: "Večera / prijem",
     inviteToggleQuote: "Citat",
+    comingSoonHeading: "Uskoro.",
+    comingSoonDesc: "Vlastite pozivnice, programi i uspomene — kreirajte ovdje i naručite odmah.",
+    comingSoonDesc2: "Odaberi predložak, ispuni detalje o događaju, a ostalo prepusti nama.",
+    comingSoonBadge: "Radimo na tome",
   },
 
   printsSetup: {
@@ -470,6 +478,10 @@ export const APP_UI_HR: AppUiDict = {
       "Još nema uploada. Otvorite galeriju za fotografije i videozapise kada stignu.",
     openGalleryBtn: "Na galeriju",
     viewGalleryFull: "Vidi punu galeriju →",
+    planLabel: "Paket",
+    carouselLatest: "Najnovije",
+    carouselMore: "+više",
+    carouselLatestSix: "Zadnjih šest",
   },
 
   share: {
@@ -543,6 +555,7 @@ export const APP_UI_HR: AppUiDict = {
     zipExportErrorQueue:
       "Nismo mogli pročitati red izvoza. Ako koristiš vlastiti Supabase projekt, primijeni najnovije migracije (uključujući `media_zip_exports`). Inače pokušaj ponovo za trenutak.",
     zipExportErrorTooMany: "Previše stavki za jedan ZIP. Ukloni neke uploadove ili izvezi bez videozapisa.",
+    columnsLabel: "Stupci",
   },
 
   guests: {

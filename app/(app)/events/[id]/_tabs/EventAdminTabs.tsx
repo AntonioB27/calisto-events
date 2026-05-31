@@ -144,8 +144,23 @@ function TabsInner({
 
         {/* Top bar: back pill + action chips */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 14 }}>
-          <Link href="/dashboard" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)', border: `1px solid ${DIVIDER_}`, color: 'var(--app-purple)', padding: '7px 12px', borderRadius: 9, fontFamily: FB_, fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-            <ArrowLeft size={11} /> {ui.eventNav.myEvents}
+          <Link
+            href="/dashboard"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              padding: '6px 2px',
+              background: 'transparent',
+              border: 'none',
+              borderBottom: `2px solid ${GOLD_}`,
+              textDecoration: 'none',
+              color: PURPLE_,
+              fontFamily: FB_,
+              fontSize: 12,
+              fontWeight: 600,
+            }}
+          >
+            <ArrowLeft size={13} strokeWidth={2.2} />
+            {ui.eventNav.myEvents}
           </Link>
           <div style={{ display: 'flex', gap: 6 }}>
             <Link href={`/events/${eventId}?tab=share`} style={{

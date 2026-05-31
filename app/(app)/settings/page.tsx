@@ -1,4 +1,3 @@
-import { AppCard } from "@/components/app-ui/AppCard";
 import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 
 import { SettingsClient } from "./SettingsClient";
@@ -18,13 +17,10 @@ export default async function SettingsPage() {
   }
 
   return (
-    <main className="px-4 py-10">
-      <div className="mx-auto max-w-lg">
+    <main style={{ padding: '0 16px 48px' }}>
+      <div style={{ maxWidth: 520, margin: '0 auto' }}>
         <SettingsPageHeader />
-
-        <AppCard pad="lg" style={{ borderRadius: 18, boxShadow: "var(--app-shadow-sm)" }}>
-          <SettingsClient email={user?.email ?? ""} initialDisplayName={initialDisplayName} />
-        </AppCard>
+        <SettingsClient email={user?.email ?? ""} initialDisplayName={initialDisplayName} />
       </div>
     </main>
   );

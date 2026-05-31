@@ -82,10 +82,13 @@ async function countGuests(supabase: NonNullable<ReturnType<typeof maybeCreateSu
 
 type SignedUrlEntry = { path: string | null; signedUrl: string };
 
-function parseDateParts(dateStr: string) {
-  const parts = dateStr?.split('-').map(Number);
-  if (!parts || parts.length < 3) return null;
-  const [y, m, d] = parts;
+function parseDateParts(dateStr: string | null | undefined) {
+  if (!dateStr) return null;
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return null;
+  const y = Number(match[1]);
+  const m = Number(match[2]);
+  const d = Number(match[3]);
   if (!y || !m || !d) return null;
   const date = new Date(y, m - 1, d);
   return {
@@ -104,93 +107,7 @@ function msToDaysHours(ms: number) {
   };
 }
 
-// ── Countdown card ────────────────────────────────────────────────────────────
-function ArcGaugeCard({
-  label,
-  days,
-  hours,
-  accent,
-  isEnded,
-  endedLabel,
-}: {
-  label: string;
-  days: number;
-  hours: number;
-  accent: string;
-  isEnded?: boolean;
-  endedLabel?: string;
-}) {
-  const isDark = React.useContext(DarkCtx);
-
-  return (
-    <div style={{
-      ...(isDark ? GLASS_DARK : GLASS_LIGHT),
-      borderRadius: 18,
-      padding: '14px 14px 12px',
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* Accent glow */}
-      <div style={{
-        position: 'absolute', top: -24, right: -24,
-        width: 80, height: 80, borderRadius: '50%',
-        background: accent, opacity: 0.13, filter: 'blur(20px)',
-        pointerEvents: 'none',
-      }} />
-
-      {/* Label */}
-      <div style={{
-        fontSize: 8.5, fontWeight: 700, letterSpacing: '0.2em',
-        textTransform: 'uppercase', color: accent, fontFamily: FB,
-        position: 'relative',
-      }}>
-        {label}
-      </div>
-
-      {/* Main display */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingTop: 8, position: 'relative' }}>
-        {isEnded ? (
-          <div style={{
-            fontFamily: FS, fontStyle: 'italic', fontSize: 14,
-            color: accent, lineHeight: 1.3, paddingBottom: 6,
-          }}>
-            {endedLabel}
-          </div>
-        ) : (
-          <>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
-              <span style={{
-                fontFamily: FS, fontStyle: 'italic', fontWeight: 400,
-                fontSize: 48, color: accent, letterSpacing: '-0.03em', lineHeight: 0.9,
-              }} aria-live="polite">
-                {days}
-              </span>
-              <span style={{
-                fontFamily: FB, fontSize: 10, fontWeight: 700,
-                color: accent, opacity: 0.65,
-                letterSpacing: '0.1em', textTransform: 'uppercase',
-                marginBottom: 3,
-              }}>
-                d
-              </span>
-            </div>
-            <div style={{
-              fontSize: 11, color: MUTED, fontWeight: 600,
-              marginTop: 4, fontFamily: FB, letterSpacing: '0.02em',
-            }}>
-              + {hours}h
-            </div>
-          </>
-        )}
-      </div>
-
-    </div>
-  );
-}
-
-// ── Status ribbon ─────────────────────────────────────────────────────────────
+// ── Status ribbon → Broadsheet dateline ──────────────────────────────────────
 function StatusRibbon({
   eventDate,
   planId,
@@ -206,49 +123,152 @@ function StatusRibbon({
   const planName = ui.plans[planId];
 
   return (
-    <div style={{
-      ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 18,
-      padding: '12px 14px',
-      display: 'grid',
-      gridTemplateColumns: '1.4fr 1px 1fr 1px 1fr',
-      gap: 12,
-      alignItems: 'center',
-    }}>
-      {/* Date */}
-      <div>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: MUTED, fontFamily: FB }}>Event date</div>
-        {cal ? (
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
-            <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 30, color: TEXT, letterSpacing: '-0.02em', lineHeight: 1 }}>{cal.day}</span>
+    <div style={{ position: 'relative' }}>
+      {/* Washi tape */}
+      <div aria-hidden style={{ position: 'absolute', top: -9, left: '38%', width: 64, height: 14, background: 'rgba(212,168,67,0.45)', border: '0.5px solid rgba(212,168,67,0.55)', transform: 'rotate(-2deg)', boxShadow: '0 1px 4px rgba(0,0,0,0.18)', zIndex: 2, borderRadius: 2, pointerEvents: 'none' }} />
+
+      {/* Paper card */}
+      <div style={{
+        background: isDark ? '#1e1a17' : '#f4f0ea',
+        borderRadius: 3,
+        boxShadow: isDark
+          ? '0 8px 28px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.35)'
+          : '0 8px 28px rgba(0,0,0,0.32), 0 2px 8px rgba(0,0,0,0.14)',
+        transform: 'rotate(-0.4deg)',
+        overflow: 'hidden',
+      }}>
+        {/* Gold ruled header line */}
+        <div style={{ height: 3, background: 'linear-gradient(90deg, #946C18, #E6BF66 40%, #C5922A 70%, #946C18)', opacity: 0.9 }} />
+
+        <div style={{ padding: '14px 16px 16px', display: 'flex', alignItems: 'stretch', gap: 0 }}>
+
+          {/* Date stamp block */}
+          <div style={{ paddingRight: 16, marginRight: 16, borderRight: `1px dashed ${isDark ? 'rgba(197,146,42,0.3)' : 'rgba(197,146,42,0.4)'}`, display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 72 }}>
+            {cal ? (
+              <>
+                <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: isDark ? '#7a6a5a' : '#9A8570', fontFamily: FB }}>{cal.weekday}</div>
+                <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 52, lineHeight: 0.85, color: GOLD, letterSpacing: '-0.04em', marginTop: 2 }}>{cal.day}</div>
+                <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 13, color: isDark ? '#d4c4a8' : '#2a1d0f', marginTop: 3, lineHeight: 1 }}>{cal.month}</div>
+                <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.1em', color: isDark ? '#7a6a5a' : '#9A8570', fontFamily: FB, marginTop: 2 }}>{cal.year}</div>
+              </>
+            ) : (
+              <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 28, color: GOLD }}>—</div>
+            )}
+          </div>
+
+          {/* Right column: plan seal + role stamp */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 10 }}>
+            {/* Plan — wax seal style */}
             <div>
-              <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 12, color: TEXT, fontWeight: 400, lineHeight: 1 }}>{cal.month}</div>
-              <div style={{ fontSize: 9.5, color: MUTED, fontWeight: 600, marginTop: 2, fontFamily: FB }}>{cal.year} · {cal.weekday}</div>
+              <div style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.26em', textTransform: 'uppercase', color: isDark ? '#7a6a5a' : '#9A8570', fontFamily: FB, marginBottom: 5 }}>{ui.overview.planLabel}</div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: GOLD_FOIL, borderRadius: 4, padding: '4px 12px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px rgba(148,108,24,0.28)' }}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'rgba(255,255,255,0.6)', flexShrink: 0 }} />
+                <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 15, color: '#fff', letterSpacing: '0.04em', textShadow: '0 1px 2px rgba(100,60,0,0.3)' }}>{planName}</span>
+              </div>
+            </div>
+
+            {/* Role — rubber stamp */}
+            <div>
+              <div style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.26em', textTransform: 'uppercase', color: isDark ? '#7a6a5a' : '#9A8570', fontFamily: FB, marginBottom: 4 }}>{ui.overview.yourRole}</div>
+              <div style={{
+                display: 'inline-block',
+                fontFamily: FB, fontSize: 10, fontWeight: 800,
+                letterSpacing: '0.2em', textTransform: 'uppercase',
+                color: PURPLE,
+                border: `1.5px solid ${PURPLE}`,
+                borderRadius: 3,
+                padding: '3px 8px',
+                opacity: 0.85,
+              }}>
+                {adminRoleLabel}
+              </div>
             </div>
           </div>
-        ) : (
-          <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 14, color: MUTED, marginTop: 4 }}>—</div>
-        )}
-      </div>
-      <div style={{ width: 1, height: '70%', background: 'rgba(154,133,112,0.25)', justifySelf: 'center' as const }} />
-      {/* Plan */}
-      <div>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: MUTED, fontFamily: FB }}>Plan</div>
-        <div style={{
-          marginTop: 5, display: 'inline-block',
-          background: GOLD_FOIL, color: '#fff',
-          padding: '3px 10px', borderRadius: 12,
-          fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 15,
-          letterSpacing: '0.04em',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 6px rgba(148,108,24,0.25)',
-        }}>{planName}</div>
-      </div>
-      <div style={{ width: 1, height: '70%', background: 'rgba(154,133,112,0.25)', justifySelf: 'center' as const }} />
-      {/* Role */}
-      <div>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: MUTED, fontFamily: FB }}>Your role</div>
-        <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 15, color: PURPLE, marginTop: 4, letterSpacing: '-0.005em' }}>
-          {adminRoleLabel}
+
         </div>
+
+        {/* Bottom ruled line */}
+        <div style={{ height: 1, background: isDark ? 'rgba(197,146,42,0.15)' : 'rgba(197,146,42,0.25)', margin: '0 16px' }} />
+        <div style={{ padding: '5px 16px 8px', fontSize: 7.5, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: isDark ? '#5a4a3a' : '#c4b49f', fontFamily: FB }}>
+          Calisto · Event Record
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Countdown cards ────────────────────────────────────────────────────────────
+function CountdownCard({
+  label, days, hours, isEnded, endedLabel, accent, daysWord,
+}: {
+  label: string; days: number; hours: number; isEnded: boolean; endedLabel: string; accent: string; daysWord: string;
+}) {
+  const isDark = React.useContext(DarkCtx);
+
+  return (
+    <div style={{
+      ...(isDark ? GLASS_DARK : GLASS_LIGHT),
+      borderRadius: 18,
+      overflow: 'hidden',
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+      {/* Accent top strip */}
+      <div style={{ height: 3, background: accent, flexShrink: 0 }} />
+
+      <div style={{ padding: '14px 16px 16px', position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Ghost watermark number */}
+        {!isEnded && (
+          <div aria-hidden style={{
+            position: 'absolute', right: -8, bottom: -12,
+            fontFamily: FS, fontStyle: 'italic', fontWeight: 700,
+            fontSize: 110, lineHeight: 1,
+            color: accent, opacity: isDark ? 0.06 : 0.07,
+            letterSpacing: '-0.04em',
+            pointerEvents: 'none', userSelect: 'none',
+          }}>
+            {days}
+          </div>
+        )}
+
+        {isEnded ? (
+          <>
+            <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: accent, fontFamily: FB, marginBottom: 8 }}>
+              {label}
+            </div>
+            <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 15, color: accent, lineHeight: 1.35 }}>
+              {endedLabel}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Main number */}
+            <div style={{ position: 'relative', flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                <span style={{
+                  fontFamily: FS, fontStyle: 'italic', fontWeight: 400,
+                  fontSize: 52, color: accent, letterSpacing: '-0.03em', lineHeight: 0.88,
+                }} aria-live="polite">
+                  {days}
+                </span>
+                <span style={{ fontFamily: FB, fontSize: 9.5, fontWeight: 700, color: accent, opacity: 0.6, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 4 }}>
+                  {daysWord}
+                </span>
+              </div>
+              <div style={{ marginTop: 5, fontFamily: FB, fontSize: 11, fontWeight: 600, color: MUTED, letterSpacing: '0.04em' }}>
+                +{hours}h
+              </div>
+            </div>
+
+            {/* Label at bottom */}
+            <div style={{ marginTop: 14, paddingTop: 10, borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
+              <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: accent, fontFamily: FB, opacity: 0.75 }}>
+                {label}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -291,21 +311,17 @@ function CountdownGauges({
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-      <ArcGaugeCard
+      <CountdownCard
         label={ui.overview.uploadCloseLabel}
-        days={uploadParts.days}
-        hours={uploadParts.hours}
-        accent={RUST}
-        isEnded={uploadEnded}
-        endedLabel={ui.overview.uploadWindowEnded}
+        days={uploadParts.days} hours={uploadParts.hours}
+        accent={RUST} isEnded={uploadEnded} endedLabel={ui.overview.uploadWindowEnded}
+        daysWord={ui.createStep2.daysWord}
       />
-      <ArcGaugeCard
+      <CountdownCard
         label={ui.overview.autoDeletionLabel}
-        days={deletionParts.days}
-        hours={deletionParts.hours}
-        accent={PURPLE}
-        isEnded={deletionEnded}
-        endedLabel={ui.overview.autoDeletionOverdue}
+        days={deletionParts.days} hours={deletionParts.hours}
+        accent={PURPLE} isEnded={deletionEnded} endedLabel={ui.overview.autoDeletionOverdue}
+        daysWord={ui.createStep2.daysWord}
       />
     </div>
   );
@@ -427,7 +443,7 @@ function StatsTiles({ eventId, planId }: { eventId: string; planId: ReturnType<t
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
-        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: TEXT_S, fontFamily: FB }}>Statistics</div>
+        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: TEXT_S, fontFamily: FB }}>{ui.overview.statsTitle}</div>
         {!supabase && <div style={{ fontSize: 10.5, color: MUTED, fontFamily: FB }}>{ui.common.loadCountsHint}</div>}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, padding: '8px 4px 4px' }}>
@@ -591,7 +607,7 @@ function PhotoCarousel({ eventId }: { eventId: string }) {
         </div>
         <div>
           <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: TEXT_S, fontFamily: FB }}>{ui.overview.recentPhotos}</div>
-          <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 18, color: TEXT, marginTop: 1 }}>The latest six</div>
+          <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 18, color: TEXT, marginTop: 1 }}>{ui.overview.carouselLatestSix}</div>
         </div>
       </div>
 
@@ -621,7 +637,7 @@ function PhotoCarousel({ eventId }: { eventId: string }) {
                   <div style={{ width: '100%', aspectRatio: '16/9', background: BORDER }} />
                 )}
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px 12px 10px', background: 'linear-gradient(transparent, rgba(0,0,0,0.55))', pointerEvents: 'none' }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', fontFamily: FB }}>Latest</div>
+                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', fontFamily: FB }}>{ui.overview.carouselLatest}</div>
                 </div>
               </Link>
             )}
@@ -638,7 +654,7 @@ function PhotoCarousel({ eventId }: { eventId: string }) {
                     )}
                     {i === 4 && hasMore && (
                       <div style={{ position: 'absolute', inset: 0, background: 'rgba(34,21,9,0.58)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FB, fontSize: 11, fontWeight: 700 }}>
-                        +more
+                        {ui.overview.carouselMore}
                       </div>
                     )}
                   </Link>

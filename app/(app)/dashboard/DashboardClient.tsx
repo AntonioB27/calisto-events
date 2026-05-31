@@ -153,7 +153,7 @@ function ArrowIcon({ size = 13, color = '#fff' }: { size?: number; color?: strin
 
 
 // ── Featured event card ────────────────────────────────────────────────────────
-function FeaturedEvent({ event, onOpen, roleLabel, glassStyle }: { event: DashboardEventRow; onOpen: () => void; roleLabel: string; glassStyle: React.CSSProperties }) {
+function FeaturedEvent({ event, onOpen, roleLabel, glassStyle, mostRecentLabel }: { event: DashboardEventRow; onOpen: () => void; roleLabel: string; glassStyle: React.CSSProperties; mostRecentLabel: string }) {
   const { emoji: storedEmoji, name } = splitEventTitleStored(String(event.title));
   const emoji = displayNavEmoji(storedEmoji);
   const date = parseDateDisplay(event.event_date);
@@ -183,7 +183,7 @@ function FeaturedEvent({ event, onOpen, roleLabel, glassStyle }: { event: Dashbo
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginTop: 12 }}>
         {date && <DateStamp mon={date.mon} day={date.day} year={date.year} accent={accent} />}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: MUTED, fontFamily: FB }}>Most recent</div>
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: MUTED, fontFamily: FB }}>{mostRecentLabel}</div>
           <h2 style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 24, lineHeight: 1.05, color: TEXT, letterSpacing: '-0.015em', marginTop: 4 }}>{name}</h2>
         </div>
       </div>
@@ -325,11 +325,11 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
               </span>
             }
           />
-          <FeaturedEvent event={featured} onOpen={() => handleOpen(featured)} roleLabel={getRoleLabel(featured.membershipRole)} glassStyle={isDark ? GLASS_DARK : GLASS_LIGHT} />
+          <FeaturedEvent event={featured} onOpen={() => handleOpen(featured)} roleLabel={getRoleLabel(featured.membershipRole)} glassStyle={isDark ? GLASS_DARK : GLASS_LIGHT} mostRecentLabel={ui.dashboard.mostRecent} />
           {rest.length > 0 && (
             <div style={{ marginTop: 18 }}>
               <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: MUTED_T, fontFamily: FB, marginBottom: 8 }}>
-                Earlier this season
+                {ui.dashboard.earlierSeason}
               </div>
               {rest.map((ev, i) => (
                 <CompactEventRow key={ev.id} event={ev} onOpen={() => handleOpen(ev)} roleLabel={getRoleLabel(ev.membershipRole)} last={i === rest.length - 1} isDark={isDark} />
@@ -361,7 +361,7 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
       {/* ── Add-another nudge ────────────────────────────────────── */}
       {!isEmpty && (
         <div>
-          <SectionMark n="02" label="Or add another" />
+          <SectionMark n="02" label={ui.dashboard.addAnother} />
           <div style={{ marginTop: 22, position: 'relative' }}>
             {/* Washi tape */}
             <div aria-hidden style={{ position: 'absolute', top: -8, left: '33%', width: 64, height: 14, background: 'rgba(212,168,67,0.48)', border: '0.5px solid rgba(212,168,67,0.6)', transform: 'rotate(-3deg)', boxShadow: '0 2px 6px rgba(0,0,0,0.22)', zIndex: 2, borderRadius: 2, pointerEvents: 'none' }} />
@@ -371,7 +371,7 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/brand/mascot/aurora_camera.png" alt="" style={{ position: 'absolute', top: '50%', right: 0, width: 112, height: 112, objectFit: 'contain', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
               <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 17, color: '#2a1d0f', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
-                One more on the way?
+                {ui.dashboard.oneMoreHeading}
               </div>
               <p style={{ marginTop: 6, fontSize: 11, color: 'rgba(60,40,20,0.55)', fontFamily: FB, lineHeight: 1.45, margin: '6px 0 0' }}>
                 {ui.dashboard.moreHint}
