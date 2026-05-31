@@ -73,7 +73,7 @@ export function WaitlistForm({ copy, mascotAlt }: WaitlistFormProps) {
 
         <div style={{ margin: "36px auto 0", display: "flex", justifyContent: "center" }}>
           <Link
-            href="/demo"
+            href="/events/new"
             style={{
               display: "inline-flex",
               alignItems: "center",
