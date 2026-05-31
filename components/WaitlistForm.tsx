@@ -11,7 +11,7 @@ type WaitlistFormProps = {
 export function WaitlistForm({ copy, mascotAlt }: WaitlistFormProps) {
   return (
     <section
-      id="demo"
+      id="try"
       className="relative scroll-mt-20 overflow-hidden"
       style={{
         borderTop: "1px solid var(--hair)",

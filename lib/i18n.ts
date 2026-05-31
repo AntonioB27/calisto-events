@@ -415,7 +415,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     waitlist: {
-      title: "Try the demo.",
+      title: "Try for free.",
       description:
         "See Calisto in action — no sign-up needed. Explore the event view as an organizer or guest.",
       discount: "The first 10 people on the waiting list get 20% off any paid plan (Standard, Plus, Premium, or Max).",
@@ -705,7 +705,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     waitlist: {
-      title: "Isprobaj demo.",
+      title: "Isprobaj besplatno.",
       description:
         "Vidi Calisto u akciji — bez registracije. Istraži prikaz događaja kao organizator ili gost.",
       discount: "Prvih 10 na listi dobiva 20% popusta na bilo koji plaćeni paket (Standard, Plus, Premium ili Max).",
@@ -997,7 +997,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
     ],
     waitlist: {
-      title: "Demo ausprobieren.",
+      title: "Kostenlos ausprobieren.",
       description:
         "Erlebe Calisto in Aktion — keine Anmeldung nötig. Erkunde die Eventansicht als Organisator oder Gast.",
       discount: "Die ersten 10 Personen auf der Warteliste erhalten 20% Rabatt auf jeden bezahlten Tarif (Standard, Plus, Premium oder Max).",
