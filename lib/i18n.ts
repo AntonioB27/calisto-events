@@ -417,7 +417,7 @@ const copy: Record<Locale, LandingCopy> = {
     waitlist: {
       title: "Try for free.",
       description:
-        "See Calisto in action — no sign-up needed. Explore the event view as an organizer or guest.",
+        "Create your event in minutes. Enter the details, choose a plan — free or paid — and you're ready to go. Sign up only when you're ready to confirm.",
       discount: "The first 10 people on the waiting list get 20% off any paid plan (Standard, Plus, Premium, or Max).",
       submitted: "You're on the list—we'll be in touch.",
       submitFailed: "Could not join the waitlist right now. Please try again in a moment.",
@@ -707,7 +707,7 @@ const copy: Record<Locale, LandingCopy> = {
     waitlist: {
       title: "Isprobaj besplatno.",
       description:
-        "Vidi Calisto u akciji — bez registracije. Istraži prikaz događaja kao organizator ili gost.",
+        "Kreirajte događaj za nekoliko minuta. Unesite detalje, odaberite paket — besplatni ili plaćeni — i krenite. Prijava samo kad ste spremni potvrditi.",
       discount: "Prvih 10 na listi dobiva 20% popusta na bilo koji plaćeni paket (Standard, Plus, Premium ili Max).",
       submitted: "Na listi si — javimo ti se uskoro.",
       submitFailed: "Trenutno se ne možeš prijaviti na listu čekanja. Pokušaj ponovno za trenutak.",
@@ -999,7 +999,7 @@ const copy: Record<Locale, LandingCopy> = {
     waitlist: {
       title: "Kostenlos ausprobieren.",
       description:
-        "Erlebe Calisto in Aktion — keine Anmeldung nötig. Erkunde die Eventansicht als Organisator oder Gast.",
+        "Erstelle dein Event in wenigen Minuten. Gib die Details ein, wähle einen Tarif — kostenlos oder kostenpflichtig — und du kannst loslegen. Anmeldung erst beim Bestätigen.",
       discount: "Die ersten 10 Personen auf der Warteliste erhalten 20% Rabatt auf jeden bezahlten Tarif (Standard, Plus, Premium oder Max).",
       submitted: "Du bist auf der Liste – wir melden uns bald.",
       submitFailed: "Ein Eintrag in die Warteliste ist gerade nicht möglich. Bitte versuche es gleich noch einmal.",
