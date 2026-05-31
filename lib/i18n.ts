@@ -176,7 +176,7 @@ const copy: Record<Locale, LandingCopy> = {
       "Browse photos and videos in one place. No app download. Just scan the QR code and view gallery or upload. Try it for FREE!",
     heroAuroraCardBlurb:
       "I'd rather you be in the moment than digging through camera rolls on Monday. I'm here so the messy, wonderful parts of your day—the toasts, the candid grins, the kid with cake on his face—stay in one story you can reopen without a scavenger hunt.",
-    heroPrimaryCta: "Try the demo",
+    heroPrimaryCta: "Try for free",
     heroSecondaryCta: "Compare plans",
     heroSignals: [
       "No app to download — guests scan and upload from the browser.",
@@ -467,7 +467,7 @@ const copy: Record<Locale, LandingCopy> = {
       "Pregledavaj fotografije i videozapise na jednom mjestu. Bez preuzimanja aplikacije. Skeniraj QR kod i otvori galeriju ili učitaj. Probaj besplatno!",
     heroAuroraCardBlurb:
       "Želim da budeš na plesu, a ne da u ponedjeljak pretražuješ deset mapi s fotkama. Tu sam da taj neuredno lijepi dan — toaste, prvi ples, taj tren s kolačem — ostane jedna priča koju možeš otvoriti bez detektivskog posla.",
-    heroPrimaryCta: "Isprobaj demo",
+    heroPrimaryCta: "Isprobaj besplatno",
     heroSecondaryCta: "Usporedi pakete",
     heroSignals: [
       "Nema preuzimanja aplikacije — gosti skeniraju i učitavaju u pregledniku.",
@@ -757,7 +757,7 @@ const copy: Record<Locale, LandingCopy> = {
       "Fotos und Videos an einem Ort durchstöbern. Kein App-Download. QR-Code scannen, Galerie ansehen oder hochladen. Kostenlos ausprobieren!",
     heroAuroraCardBlurb:
       "Lieber tanzt du auf der Feier, als dass du am Montag hundert Chatverläufe durchsuchst. Ich will, dass der Tag als eine lebendige Geschichte bleibt — Reden, Umarmungen, das schiefe Gruppenfoto — die man wiederfindet, ohne Schatzsuche.",
-    heroPrimaryCta: "Demo ausprobieren",
+    heroPrimaryCta: "Kostenlos ausprobieren",
     heroSecondaryCta: "Tarife vergleichen",
     heroSignals: [
       "Keine App zum Herunterladen — Gäste scannen und laden im Browser.",
