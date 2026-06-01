@@ -49,13 +49,15 @@ export function EventPrintSheet({
   return (
     <>
       <PrintPageRules paper={paper} />
-      <div className={outerClass}>
-        <div className="print-two-up print-two-up-vfill">
-          <PosterHalfCard {...halfProps} />
-          <div className="print-cut-row" aria-hidden>
-            <span className="print-cut-label">{cutHere}</span>
+      <div className="print-sheet-desk">
+        <div className={outerClass}>
+          <div className="print-two-up print-two-up-vfill">
+            <PosterHalfCard {...halfProps} />
+            <div className="print-cut-row" aria-hidden>
+              <span className="print-cut-label">{cutHere}</span>
+            </div>
+            <PosterHalfCard {...halfProps} />
           </div>
-          <PosterHalfCard {...halfProps} />
         </div>
       </div>
     </>

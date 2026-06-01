@@ -297,6 +297,7 @@ export const APP_UI_EN = {
     myEvents: "My events",
     memoriesCount: "{count} memories",
     guestsCount: "{count} guests",
+    bannerHint: "Change your banner style and emoji in Settings.",
   },
 
   printsTab: {
@@ -458,6 +459,9 @@ export const APP_UI_EN = {
     countdownMinuteOne: "{n} minute",
     countdownMinuteMany: "{n} minutes",
     countdownSubMinute: "Less than a minute",
+    countdownMonthOne: "{n} month",
+    countdownMonthMany: "{n} months",
+    eventStartsIn: "Event starts in",
     uploadWindowEnded: "Upload window ended — uploads are closed.",
     statsTitle: "Statistics",
     statsPhotos: "Photos",
@@ -649,6 +653,7 @@ export const APP_UI_EN = {
     genericSaveFail: "Could not save changes.",
     validDateNeeded: "Choose a valid event date.",
     scheduleSaveFail: "Could not update date or plan.",
+    dateLockNotice: "The event has already started — the date is locked to prevent extending upload or deletion windows.",
     deleteTitleForever: "Delete event forever?",
     deleteDialogBody:
       "Everyone loses access immediately. Guests, gallery files, uploads, invite codes — all removed.",
@@ -790,12 +795,17 @@ export const APP_UI_EN = {
     sheetHelper:
       "Two identical table cards per sheet. Cut along the dashed line to place one card on each table.",
     cutHere: "Cut here",
+    downloadPdf: "Download PDF",
+    previewPdf: "Preview",
     paperSectionLabel: "Paper size",
     paperA4: "A4",
     paperLetter: "US Letter",
     templateSectionLabel: "Layout",
     templateTableMinimal: "Minimal",
     templateTableBold: "Bold",
+    templateQrClean: "Clean",
+    templateQrGold: "Gold",
+    templateQrDark: "Dark",
     templateWeddingInviteSimple: "Wedding · simple",
     templateWeddingInviteFloral: "Wedding · floral",
     templateWeddingInviteBlueFloral: "Wedding · blue floral",

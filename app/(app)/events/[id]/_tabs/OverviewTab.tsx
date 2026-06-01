@@ -274,6 +274,217 @@ function CountdownCard({
   );
 }
 
+// ── Pre-event countdown: Art Deco analog clock + time remaining ───────────────
+function AnalogClock({ nowMs, isDark }: { nowMs: number; isDark: boolean }) {
+  const now = new Date(nowMs);
+  const h = now.getHours() % 12;
+  const m = now.getMinutes();
+  const s = now.getSeconds();
+  const CX = 50, CY = 50;
+
+  function toXY(angleDeg: number, r: number) {
+    const rad = ((angleDeg - 90) * Math.PI) / 180;
+    return { x: CX + Math.cos(rad) * r, y: CY + Math.sin(rad) * r };
+  }
+
+  const hourAngle   = (h / 12) * 360 + (m / 60) * 30;
+  const minuteAngle = (m / 60) * 360 + (s / 60) * 6;
+  const secondAngle = (s / 60) * 360;
+
+  // 60 minute-tick marks, varying height by type
+  const minuteTicks = Array.from({ length: 60 }, (_, i) => {
+    const isHour    = i % 5  === 0;
+    const isQuarter = i % 15 === 0;
+    const innerR = isQuarter ? 36 : isHour ? 38 : 40;
+    const pt1 = toXY((i / 60) * 360, innerR);
+    const pt2 = toXY((i / 60) * 360, 43);
+    return { pt1, pt2, isHour, isQuarter };
+  });
+
+  // Roman numerals at 12 / 3 / 6 / 9, radius 29
+  const romans = [
+    { label: 'XII', deg: 0   },
+    { label: 'III', deg: 90  },
+    { label: 'VI',  deg: 180 },
+    { label: 'IX',  deg: 270 },
+  ].map(({ label, deg }) => ({ label, ...toXY(deg, 29) }));
+
+  // Guilloché: 72 faint radial lines
+  const guillo = Array.from({ length: 72 }, (_, i) => toXY((i / 72) * 360, 26));
+
+  const face = isDark ? '#1e1a17' : '#f4f0ea';
+
+  return (
+    <svg viewBox="0 0 100 100" width="100%" height="100%">
+      <defs>
+        <radialGradient id="adFaceGrad" cx="45%" cy="38%" r="65%">
+          <stop offset="0%"   stopColor={isDark ? '#2e2822' : '#fefcf8'} />
+          <stop offset="100%" stopColor={face} />
+        </radialGradient>
+        <radialGradient id="adGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stopColor={PURPLE} stopOpacity="0.13" />
+          <stop offset="100%" stopColor={PURPLE} stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="adBezel" x1="20%" y1="0%" x2="80%" y2="100%">
+          <stop offset="0%"   stopColor="#F4D88F" />
+          <stop offset="30%"  stopColor="#C5922A" />
+          <stop offset="65%"  stopColor="#E6BF66" />
+          <stop offset="100%" stopColor="#7A5010" />
+        </linearGradient>
+        <linearGradient id="adHrHand" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"   stopColor="#E6BF66" />
+          <stop offset="50%"  stopColor={GOLD} />
+          <stop offset="100%" stopColor="#946C18" />
+        </linearGradient>
+      </defs>
+
+      {/* Outer bezel ring */}
+      <circle cx={CX} cy={CY} r={48} fill="url(#adBezel)" />
+      {/* Bezel inner edge — thin dark line */}
+      <circle cx={CX} cy={CY} r={44.2} fill="none" stroke={isDark ? 'rgba(0,0,0,0.5)' : 'rgba(60,35,5,0.3)'} strokeWidth="0.6" />
+      {/* Face */}
+      <circle cx={CX} cy={CY} r={44} fill="url(#adFaceGrad)" />
+      {/* Ambient aurora glow */}
+      <circle cx={CX} cy={CY} r={38} fill="url(#adGlow)" />
+
+      {/* Guilloché etching */}
+      {guillo.map((pt, i) => (
+        <line key={i} x1={CX} y1={CY} x2={pt.x} y2={pt.y}
+          stroke={GOLD} strokeWidth="0.15"
+          opacity={isDark ? 0.07 : 0.09} />
+      ))}
+
+      {/* Inner track ring */}
+      <circle cx={CX} cy={CY} r={43.5} fill="none" stroke={GOLD} strokeWidth="0.25" opacity="0.45" />
+      <circle cx={CX} cy={CY} r={35.5} fill="none" stroke={GOLD} strokeWidth="0.2"  opacity="0.18" />
+
+      {/* Minute ticks */}
+      {minuteTicks.map((t, i) => (
+        <line key={i}
+          x1={t.pt1.x} y1={t.pt1.y} x2={t.pt2.x} y2={t.pt2.y}
+          stroke={GOLD}
+          strokeWidth={t.isQuarter ? 1.0 : t.isHour ? 0.65 : 0.3}
+          opacity={t.isQuarter ? 0.8 : t.isHour ? 0.55 : 0.28}
+          strokeLinecap="square"
+        />
+      ))}
+
+      {/* Roman numerals */}
+      {romans.map(({ label, x, y }) => (
+        <text key={label} x={x} y={y}
+          textAnchor="middle" dominantBaseline="central"
+          fontFamily="'DM Serif Display', serif" fontStyle="italic"
+          fontSize="5.8" fill={GOLD} opacity="0.82"
+        >{label}</text>
+      ))}
+
+      {/* Hour hand — wide tapered Art Deco blade */}
+      <g transform={`translate(${CX} ${CY}) rotate(${hourAngle})`}>
+        <path
+          d="M 0 7 L -1.8 1 L -2 -4 L -0.7 -20 L 0 -25 L 0.7 -20 L 2 -4 L 1.8 1 Z"
+          fill="url(#adHrHand)"
+        />
+        {/* Lozenge at pivot */}
+        <polygon points="0,-6 2.4,0 0,6 -2.4,0" fill="url(#adHrHand)" />
+      </g>
+
+      {/* Minute hand — slender tapered blade */}
+      <g transform={`translate(${CX} ${CY}) rotate(${minuteAngle})`}>
+        <path
+          d="M 0 7 L -1.3 1 L -1.5 -4 L -0.4 -28 L 0 -33 L 0.4 -28 L 1.5 -4 L 1.3 1 Z"
+          fill={RUST} opacity="0.88"
+        />
+        <polygon points="0,-5 2,0 0,5 -2,0" fill={RUST} opacity="0.88" />
+      </g>
+
+      {/* Second hand — needle with counterbalance and accent circle */}
+      <g transform={`translate(${CX} ${CY}) rotate(${secondAngle})`} opacity="0.65">
+        <line x1="0" y1="9" x2="0" y2="-37" stroke={PURPLE} strokeWidth="0.65" strokeLinecap="round" />
+        <circle cx="0" cy="-27" r="1.4" fill={PURPLE} />
+        <circle cx="0" cy="6" r="2.2" fill="none" stroke={PURPLE} strokeWidth="0.65" />
+      </g>
+
+      {/* Center jewel — three layers */}
+      <circle cx={CX} cy={CY} r="4"   fill="url(#adBezel)" />
+      <circle cx={CX} cy={CY} r="2.4" fill={face} />
+      <circle cx={CX} cy={CY} r="1"   fill={GOLD} opacity="0.75" />
+    </svg>
+  );
+}
+
+function EventStartCountdown({ eventDate }: { eventDate: string }) {
+  const ui = useAppUi();
+  const isDark = React.useContext(DarkCtx);
+  const [nowMs, setNowMs] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNowMs(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const eventStartMs = useMemo(() => {
+    const m = eventDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return null;
+    return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).getTime();
+  }, [eventDate]);
+
+  const remainingMs = eventStartMs ? Math.max(0, eventStartMs - nowMs) : 0;
+  const totalDays = Math.floor(remainingMs / (24 * 3600 * 1000));
+  const months = Math.floor(totalDays / 30);
+  const showMonths = months >= 1;
+  const days = showMonths ? totalDays % 30 : totalDays;
+  const hours = Math.floor((remainingMs % (24 * 3600 * 1000)) / (3600 * 1000));
+
+  const monthLabel = (months === 1 ? ui.overview.countdownMonthOne : ui.overview.countdownMonthMany).replace('{n}', '').trim();
+  const dayLabel   = (days   === 1 ? ui.overview.countdownDayOne   : ui.overview.countdownDayMany  ).replace('{n}', '').trim();
+  const hourLabel  = (hours  === 1 ? ui.overview.countdownHourOne  : ui.overview.countdownHourMany ).replace('{n}', '').trim();
+
+  const units = [
+    ...(showMonths ? [{ value: months, label: monthLabel, accent: GOLD   }] : []),
+    { value: days,  label: dayLabel,  accent: RUST   },
+    { value: hours, label: hourLabel, accent: PURPLE },
+  ];
+
+  return (
+    <div style={{ ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 18, overflow: 'hidden', position: 'relative' }}>
+      {/* Gold ruled top strip */}
+      <div style={{ height: 3, background: 'linear-gradient(90deg, #946C18, #E6BF66 40%, #C5922A 70%, #946C18)', opacity: 0.9 }} />
+
+      <div style={{ display: 'flex', alignItems: 'stretch' }}>
+        {/* Clock */}
+        <div style={{ width: '44%', flexShrink: 0, padding: '16px 12px 16px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '100%', maxWidth: 130, aspectRatio: '1 / 1' }}>
+            <AnalogClock nowMs={nowMs} isDark={isDark} />
+          </div>
+        </div>
+
+        {/* Dashed gold separator */}
+        <div style={{
+          width: 1, alignSelf: 'stretch', margin: '16px 0',
+          background: `repeating-linear-gradient(to bottom, ${GOLD}55 0px, ${GOLD}55 5px, transparent 5px, transparent 9px)`,
+        }} />
+
+        {/* Countdown units */}
+        <div style={{ flex: 1, padding: '20px 16px 20px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.26em', textTransform: 'uppercase', color: TEXT_S, fontFamily: FB, marginBottom: 14 }}>
+            {ui.overview.eventStartsIn}
+          </div>
+          {units.map((unit, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: i < units.length - 1 ? 8 : 0 }}>
+              <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 400, fontSize: 46, color: unit.accent, letterSpacing: '-0.03em', lineHeight: 0.88 }}>
+                {unit.value}
+              </span>
+              <span style={{ fontFamily: FB, fontSize: 10, fontWeight: 700, color: unit.accent, opacity: 0.65, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+                {unit.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Countdown arc gauges ──────────────────────────────────────────────────────
 function CountdownGauges({
   eventDate,
@@ -696,6 +907,12 @@ export function OverviewTab({
   const planId = normalizePlanId(plan);
   const [isDark, setIsDark] = useState(false);
 
+  const isEventUpcoming = useMemo(() => {
+    const m = eventDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return false;
+    return Date.now() < new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).getTime();
+  }, [eventDate]);
+
   useEffect(() => {
     setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
     const obs = new MutationObserver(() => {
@@ -717,7 +934,11 @@ export function OverviewTab({
         }}
       >
         <StatusRibbon eventDate={eventDate} planId={planId} adminRoleLabel={adminRoleLabel} />
-        <CountdownGauges eventDate={eventDate} planId={planId} scheduledDeletionAt={scheduledDeletionAt} />
+        {isEventUpcoming ? (
+          <EventStartCountdown eventDate={eventDate} />
+        ) : (
+          <CountdownGauges eventDate={eventDate} planId={planId} scheduledDeletionAt={scheduledDeletionAt} />
+        )}
         <StatsTiles eventId={eventId} planId={planId} />
         <AccessCard accessCode={accessCode} publicOrigin={publicOrigin} />
         <PhotoCarousel eventId={eventId} />

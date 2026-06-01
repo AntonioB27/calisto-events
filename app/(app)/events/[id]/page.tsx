@@ -100,6 +100,24 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     }
   }
 
+  // Fetch banner_theme separately — safe before migration is applied
+  let bannerTheme: string | undefined;
+  if (event) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: themeRow, error: themeErr } = await (supabase as any)
+        .from("events")
+        .select("banner_theme")
+        .eq("id", id)
+        .maybeSingle();
+      if (!themeErr && typeof (themeRow as Record<string, unknown> | null)?.banner_theme === "string") {
+        bannerTheme = (themeRow as Record<string, string>).banner_theme;
+      }
+    } catch {
+      // column not yet added — use default
+    }
+  }
+
   if (!event || !access.canAccess) {
     return (
       <div style={{ padding: '40px 0' }}>
@@ -137,6 +155,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
         guestCount={guestCountResult.count ?? 0}
         mediaCount={mediaCountResult.count ?? 0}
         eventDate={event.event_date ?? null}
+        bannerTheme={bannerTheme}
       />
 
       {!isPrimaryOrganizer ? (
@@ -194,6 +213,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             eventDate={event.event_date}
             plan={event.plan}
             accessCode={event.access_code}
+            bannerTheme={bannerTheme}
           />
         )}
       </div>

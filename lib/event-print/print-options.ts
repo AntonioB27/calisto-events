@@ -13,7 +13,7 @@ export const POSTER_LANG_QUERY = "posterLang";
 /** @deprecated Use TABLE_QR_PRINT_TEMPLATE_IDS from template-catalog for new code. */
 export const POSTER_TEMPLATES = TABLE_QR_PRINT_TEMPLATE_IDS;
 export type PosterTemplateId = TableQrPrintTemplateId;
-export const DEFAULT_POSTER_TEMPLATE: PosterTemplateId = "table-minimal";
+export const DEFAULT_POSTER_TEMPLATE: PosterTemplateId = "qr-clean";
 
 /** All templates selectable on `/events/[id]/print` (table cards + invitations). */
 export const PRINT_ROUTE_TEMPLATE_IDS = [...TABLE_QR_PRINT_TEMPLATE_IDS, ...INVITATION_PRINT_TEMPLATE_IDS] as const;

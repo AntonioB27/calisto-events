@@ -105,6 +105,7 @@ export type LandingCopy = {
   howModerationApproved: string;
   howModerationNewTemplate: string;
   howDescription: string;
+  howDemoCta: string;
   howItems: HowItWorksItem[];
   plansTitle: string;
   plansSectionLabel: string;
@@ -116,6 +117,10 @@ export type LandingCopy = {
   popularBadge: string;
   plans: Plan[];
   planFootnote: string;
+  plansFormNamePlaceholder: string;
+  plansFormDateLabel: string;
+  plansFormEmojiPlaceholder: string;
+  plansFormChooseBtn: string;
   lifecycleTitle: string;
   lifecycleDescription: string;
   lifecycleRules: string[];
@@ -173,7 +178,7 @@ const copy: Record<Locale, LandingCopy> = {
     heroIntro: "Hi, I'm Aurora, I'll guide you through Calisto.",
     heroTitle: "Every memory matters. Make sure you capture them all.",
     heroDescription:
-      "Browse photos and videos in one place. No app download. Just scan the QR code and view gallery or upload. Try it for FREE!",
+      "With Calisto, browse photos and videos in one place. No app download. Just scan the QR code and view gallery or upload. Try it for FREE!",
     heroAuroraCardBlurb:
       "I'd rather you be in the moment than digging through camera rolls on Monday. I'm here so the messy, wonderful parts of your day—the toasts, the candid grins, the kid with cake on his face—stay in one story you can reopen without a scavenger hunt.",
     heroPrimaryCta: "Try for free",
@@ -255,6 +260,7 @@ const copy: Record<Locale, LandingCopy> = {
     howModerationApproved: "approved",
     howModerationNewTemplate: "+{count} new",
     howDescription: "Three steps from empty album to shared memories.",
+    howDemoCta: "Try the demo",
     howItems: [
       {
         step: "1",
@@ -355,6 +361,10 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     planFootnote:
       "Fair-use policy applies: a reasonable maximum file size per video is enforced to prevent abuse. Uploads that exceed the per-file size limit will be rejected with a clear error message.",
+    plansFormNamePlaceholder: "Event name",
+    plansFormDateLabel: "Date",
+    plansFormEmojiPlaceholder: "Emoji",
+    plansFormChooseBtn: "Choose",
     lifecycleTitle: "Event lifecycle",
     lifecycleDescription: "What the Calisto web app does today vs what ships next — including scheduled event teardown.",
     lifecycleRules: [
@@ -462,9 +472,9 @@ const copy: Record<Locale, LandingCopy> = {
     joinWaitlistShort: "Isprobaj besplatno",
     heroBadge: "Upoznaj Auroru",
     heroIntro: "Bok, ja sam Aurora, predstavljam ti Calisto.",
-    heroTitle: "Svaki uspomen je važna. Pobrinite se da ih sve zabilježite.",
+    heroTitle: "Svaka uspomena je važna. Pobrinite se da ne propustite nijednu.",
     heroDescription:
-      "Pregledavaj fotografije i videozapise na jednom mjestu. Bez preuzimanja aplikacije. Skeniraj QR kod i otvori galeriju ili učitaj. Probaj besplatno!",
+      "Uz Calisto, pregledavaj fotografije i videozapise na jednom mjestu. Bez preuzimanja aplikacije. Skeniraj QR kod i otvori galeriju ili učitaj. Probaj besplatno!",
     heroAuroraCardBlurb:
       "Želim da budeš na plesu, a ne da u ponedjeljak pretražuješ deset mapi s fotkama. Tu sam da taj neuredno lijepi dan — toaste, prvi ples, taj tren s kolačem — ostane jedna priča koju možeš otvoriti bez detektivskog posla.",
     heroPrimaryCta: "Isprobaj besplatno",
@@ -545,6 +555,7 @@ const copy: Record<Locale, LandingCopy> = {
     howModerationApproved: "odobreno",
     howModerationNewTemplate: "+{count} novo",
     howDescription: "Tri koraka do zajedničkog albuma.",
+    howDemoCta: "Isprobaj demo",
     howItems: [
       {
         step: "1",
@@ -645,6 +656,10 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     planFootnote:
       "Primjenjuje se fair-use politika: postoji razuman maksimalan limit veličine videodatoteke radi sprječavanja zloupotrebe. Datoteke koje prelaze limit bit će odbijene uz jasnu poruku.",
+    plansFormNamePlaceholder: "Naziv događaja",
+    plansFormDateLabel: "Datum",
+    plansFormEmojiPlaceholder: "Emoji",
+    plansFormChooseBtn: "Odaberi",
     lifecycleTitle: "Životni ciklus događaja",
     lifecycleDescription: "Što radi web aplikacija danas naspram što slijedi — uključujući zakazano uklanjanje događaja.",
     lifecycleRules: [
@@ -754,7 +769,7 @@ const copy: Record<Locale, LandingCopy> = {
     heroIntro: "Hi, ich bin Aurora, ich stelle dir Calisto vor.",
     heroTitle: "Jede Erinnerung zählt. Stell sicher, dass du sie alle festhältst.",
     heroDescription:
-      "Fotos und Videos an einem Ort durchstöbern. Kein App-Download. QR-Code scannen, Galerie ansehen oder hochladen. Kostenlos ausprobieren!",
+      "Mit Calisto, Fotos und Videos an einem Ort durchstöbern. Kein App-Download. QR-Code scannen, Galerie ansehen oder hochladen. Kostenlos ausprobieren!",
     heroAuroraCardBlurb:
       "Lieber tanzt du auf der Feier, als dass du am Montag hundert Chatverläufe durchsuchst. Ich will, dass der Tag als eine lebendige Geschichte bleibt — Reden, Umarmungen, das schiefe Gruppenfoto — die man wiederfindet, ohne Schatzsuche.",
     heroPrimaryCta: "Kostenlos ausprobieren",
@@ -836,6 +851,7 @@ const copy: Record<Locale, LandingCopy> = {
     howModerationApproved: "freigegeben",
     howModerationNewTemplate: "+{count} neu",
     howDescription: "Drei Schritte vom leeren Album zu gemeinsamen Erinnerungen.",
+    howDemoCta: "Demo ausprobieren",
     howItems: [
       {
         step: "1",
@@ -937,6 +953,10 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     planFootnote:
       "Fair-Use gilt: zur Missbrauchsprävention wird eine angemessene maximale Dateigröße pro Video durchgesetzt. Uploads über dem Limit werden mit einer klaren Fehlermeldung abgewiesen.",
+    plansFormNamePlaceholder: "Veranstaltungsname",
+    plansFormDateLabel: "Datum",
+    plansFormEmojiPlaceholder: "Emoji",
+    plansFormChooseBtn: "Auswählen",
     lifecycleTitle: "Event-Lebenszyklus",
     lifecycleDescription: "Was die Calisto-Web-App heute schon tut und was später kommt — inklusive geplanter Event-Bereinigung.",
     lifecycleRules: [

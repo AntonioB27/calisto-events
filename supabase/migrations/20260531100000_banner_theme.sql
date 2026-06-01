@@ -1,0 +1,2 @@
+ALTER TABLE events
+  ADD COLUMN IF NOT EXISTS banner_theme TEXT NOT NULL DEFAULT 'aurora';

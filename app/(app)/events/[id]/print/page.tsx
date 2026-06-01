@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { EventPrintSheet } from "./EventPrintSheet";
 import { EventPrintToolbar } from "./EventPrintToolbar";
 import { WeddingInviteBlueFloraPrintSheet } from "./WeddingInviteBlueFloraPrintSheet";
 import { WeddingInviteCherryBlossomPrintSheet } from "./WeddingInviteCherryBlossomPrintSheet";
@@ -121,18 +120,6 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
       </main>
     );
   }
-
-  const tablePosterTemplate = isTableQrTemplateId(routeTemplate) ? routeTemplate : DEFAULT_POSTER_TEMPLATE;
-
-  const publicOrigin = await getPublicOrigin();
-  const joinUrl = getWebJoinUrl(publicOrigin, event.access_code);
-  const publicHostDisplay = publicOrigin.replace(/^https?:\/\//, "");
-
-  const halfStrings = {
-    heroEyebrow: posterPrint.heroEyebrow,
-    footerGoToLead: posterPrint.footerGoToLead,
-    footerGoToTrail: posterPrint.footerGoToTrail,
-  };
 
   let mergedInvitation: Record<string, string> | null = null;
   if (isInvitationPrint && invitationAllowed) {
@@ -409,18 +396,7 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
               }}
               visibility={inviteVisibility!}
             />
-          ) : (
-            <EventPrintSheet
-              paper={paper}
-              template={tablePosterTemplate}
-              eventTitle={event.title}
-              accessCode={event.access_code}
-              joinUrl={joinUrl}
-              publicHostDisplay={publicHostDisplay}
-              halfStrings={halfStrings}
-              cutHere={posterPrint.cutHere}
-            />
-          )}
+          ) : null}
         </div>
       </div>
     </main>

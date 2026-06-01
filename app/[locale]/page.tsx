@@ -30,14 +30,18 @@ export default async function LocalePage({ params }: LocalePageProps) {
 
   const copy = getLandingCopy(locale);
 
+  const supabase = await createSupabaseAuthServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isLoggedIn = !!user;
+
   return (
     <div className="vibrant-page-bg flex min-h-0 flex-1 flex-col overflow-x-clip">
       <WebMcpTools />
       <div className="page-vignette" aria-hidden />
       <LanguageSelectorPopup copy={copy} locale={locale as Locale} />
-      <SiteHeader copy={copy} locale={locale as Locale} />
+      <SiteHeader copy={copy} locale={locale as Locale} isLoggedIn={isLoggedIn} />
       <main className="flex-1">
-        <Hero copy={copy} />
+        <Hero copy={copy} isLoggedIn={isLoggedIn} />
         <AppPreviewWindow copy={copy} />
         <FeatureGrid copy={copy} />
         <HowItWorks copy={copy} />

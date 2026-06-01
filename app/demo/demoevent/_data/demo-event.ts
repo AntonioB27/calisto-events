@@ -11,7 +11,7 @@ export const DEMO_EVENT: {
   id: "demo",
   name: "Ana & Marco's Wedding",
   emoji: "💍",
-  date: "2025-06-14",
+  date: "2026-09-12",
   accessCode: "DEMO00",
   plan: "premium",
 };

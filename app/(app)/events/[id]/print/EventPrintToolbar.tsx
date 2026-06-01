@@ -93,9 +93,33 @@ export function EventPrintToolbar({
         <AppBtn variant="ghost" size="sm" href={backHref} as={Link}>
           {backLabel}
         </AppBtn>
-        <AppBtn variant="gold" size="sm" type="button" onClick={() => window.print()}>
-          {p.print}
-        </AppBtn>
+        {!isInvitationView ? (
+          <div style={{ display: "flex", gap: 8 }}>
+            <AppBtn
+              variant="outline"
+              size="sm"
+              as="a"
+              href={`/api/events/${eventId}/qr-pdf?preview=1`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {p.previewPdf}
+            </AppBtn>
+            <AppBtn
+              variant="gold"
+              size="sm"
+              as="a"
+              href={`/api/events/${eventId}/qr-pdf`}
+              download
+            >
+              {p.downloadPdf}
+            </AppBtn>
+          </div>
+        ) : (
+          <AppBtn variant="gold" size="sm" type="button" onClick={() => window.print()}>
+            {p.print}
+          </AppBtn>
+        )}
       </div>
 
       <p style={{ fontSize: 13, lineHeight: 1.45, color: "var(--app-muted)", maxWidth: 560, marginBottom: 20 }}>
@@ -234,17 +258,26 @@ export function EventPrintToolbar({
           {tableSectionHeading}
         </p>
         <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {POSTER_TEMPLATES.map((tid) => (
-            <Link
-              key={tid}
-              href={buildPrintHref(eventId, { template: tid, paper, posterLang })}
-              scroll={false}
-              style={pickStyle(activeTemplate === tid)}
-              prefetch={false}
-            >
-              {tid === "table-minimal" ? p.templateTableMinimal : p.templateTableBold}
-            </Link>
-          ))}
+          {(() => {
+            const labelMap: Record<string, string> = {
+              "table-minimal": p.templateTableMinimal,
+              "table-bold": p.templateTableBold,
+              "qr-clean": p.templateQrClean,
+              "qr-gold": p.templateQrGold,
+              "qr-dark": p.templateQrDark,
+            };
+            return POSTER_TEMPLATES.map((tid) => (
+              <Link
+                key={tid}
+                href={buildPrintHref(eventId, { template: tid, paper, posterLang })}
+                scroll={false}
+                style={pickStyle(activeTemplate === tid)}
+                prefetch={false}
+              >
+                {labelMap[tid] ?? tid}
+              </Link>
+            ));
+          })()}
         </div>
       </div>
 

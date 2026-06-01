@@ -21,7 +21,13 @@ export type PrintTemplateDef = Readonly<{
 }>;
 
 /** Table/QR layouts shipped today (data still comes from the event row in `PosterHalfCard`). */
-export const TABLE_QR_PRINT_TEMPLATE_IDS = ["table-minimal", "table-bold"] as const;
+export const TABLE_QR_PRINT_TEMPLATE_IDS = [
+  "table-minimal",
+  "table-bold",
+  "qr-clean",
+  "qr-gold",
+  "qr-dark",
+] as const;
 export type TableQrPrintTemplateId = (typeof TABLE_QR_PRINT_TEMPLATE_IDS)[number];
 
 /** Invitation layouts (field values + optional QR block on the print route). */
@@ -49,6 +55,27 @@ export const PRINT_TEMPLATE_DEFINITIONS: readonly PrintTemplateDef[] = [
   },
   {
     id: "table-bold",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-clean",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-gold",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-dark",
     category: "table_qr",
     eventKinds: ["generic", "wedding"],
     fields: [],

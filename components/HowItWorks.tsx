@@ -4,212 +4,209 @@ import type { ReactNode } from "react";
 
 type HowItWorksProps = { copy: LandingCopy };
 
-/** Step 1 — “Create your event” mock: name, date, plan (no QR). */
+/** Step 1 — event banner preview matching the real app card design. */
 function CreateEventStepVisual({ copy }: HowItWorksProps) {
-  const planLabel = copy.plans[1]?.name ?? "Standard";
+  const planLabel = copy.plans[3]?.name ?? "Premium";
   return (
-    <div className="flex h-full w-full flex-col justify-center gap-2.5 sm:gap-3">
+    <div className="flex h-full w-full flex-col justify-center gap-3">
+      {/* Glass banner — mirrors EventAdminTabs */}
       <div
-        className="rounded-xl border p-2.5 sm:p-3"
         style={{
-          borderColor: "var(--hair-strong)",
-          background: "var(--glass-bg-2)",
-          boxShadow: "inset 0 1px 0 color-mix(in srgb, var(--cream) 4%, transparent)",
+          position: "relative",
+          borderRadius: 14,
+          overflow: "hidden",
+          height: 110,
+          background: "rgba(255,255,255,0.07)",
+          backdropFilter: "blur(14px)",
+          border: "1px solid rgba(255,255,255,0.12)",
         }}
       >
-        <div
-          className="mb-0.5 flex items-center justify-between gap-2"
-        >
-          {/* <div
-            className="font-mono text-[7.5px] sm:text-[8px] uppercase"
-            style={{ letterSpacing: "0.12em", color: "var(--plum-2, #A584A6)" }}
-          >
-            {copy.howStepPrefix} 1
-          </div> */}
-          {/* <div
-            className="font-mono text-[7.5px] sm:text-[8px]"
-            style={{ color: "var(--cream-4, #6E6758)" }}
-          >
-            {copy.howSetupHint}
-          </div> */}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,rgba(91,45,142,0.35),rgba(123,63,190,0.25))" }} />
+        <div style={{ position: "absolute", inset: 0, backgroundImage: "repeating-linear-gradient(45deg,rgba(255,255,255,0.09) 0 2px,transparent 2px 12px)" }} />
+        {/* Emoji */}
+        <div aria-hidden style={{ position: "absolute", right: -6, bottom: -10, fontSize: 96, lineHeight: 1, opacity: 0.9, transform: "rotate(-8deg)", filter: "drop-shadow(0 4px 10px rgba(40,25,15,0.3))", pointerEvents: "none" }}>
+          💍
         </div>
-        <p
-          className="m-0"
+        {/* Name pill */}
+        <div style={{ position: "absolute", bottom: 9, left: 10, right: 44, background: "rgba(255,255,255,0.18)", backdropFilter: "blur(8px)", borderRadius: 100, padding: "4px 12px", border: "1px solid rgba(255,255,255,0.3)" }}>
+          <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontWeight: 700, fontSize: 13, color: "rgba(255,255,255,0.95)", display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", textShadow: "0 1px 3px rgba(40,25,15,0.4)" }}>
+            Ana &amp; Marco&#39;s Wedding
+          </span>
+        </div>
+      </div>
+
+      {/* Date + plan row */}
+      <div className="flex items-center gap-2.5">
+        <div
           style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 15,
-            fontStyle: "italic",
-            lineHeight: 1.2,
-            color: "var(--cream)",
-            letterSpacing: "-0.01em",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            paddingRight: 10,
+            borderRight: "1px dashed rgba(197,146,42,0.35)",
+            minWidth: 44,
           }}
         >
-          {"Maja & Luka"}
-        </p>
-        <div
-          className="mt-2.5 flex flex-wrap items-center justify-between gap-2"
-        >
-          <div className="flex items-center gap-1.5">
-            <span className="text-[var(--plum-2)]" aria-hidden>
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6">
-                <rect x="3" y="5" width="18" height="16" rx="2" />
-                <path d="M3 10h18M8 3v4M16 3v4" />
-              </svg>
-            </span>
-            <span
-              className="font-mono text-[8px] sm:text-[9px]"
-              style={{ color: "var(--cream-3, #B5AB99)" }}
-            >
-              19 July 2026
-            </span>
-          </div>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: 7.5, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--cream-4, #6E6758)" }}>Sep</span>
+          <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontWeight: 700, fontSize: 28, lineHeight: 0.9, color: "var(--gold, #C5922A)", letterSpacing: "-0.03em", marginTop: 2 }}>12</span>
+          <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 9.5, color: "var(--cream-4, #6E6758)", marginTop: 2 }}>2026</span>
+        </div>
+        <div className="flex flex-col gap-1.5">
           <span
-            className="rounded font-mono text-[7.5px] uppercase sm:text-[8px]"
             style={{
-              letterSpacing: "0.1em",
-              padding: "3px 7px 3px 8px",
-              background: "color-mix(in srgb, var(--plum-2) 18%, var(--ink))",
-              color: "var(--cream-2, #E8DCC6)",
-              border: "1px solid color-mix(in srgb, var(--plum-2) 35%, var(--hair-2))",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              background: "linear-gradient(135deg, #E6BF66 0%, #C5922A 45%, #F4D88F 70%, #946C18 100%)",
+              borderRadius: 4,
+              padding: "3px 10px",
+              fontFamily: "var(--font-display)",
+              fontStyle: "italic",
+              fontWeight: 700,
+              fontSize: 13,
+              color: "#fff",
+              letterSpacing: "0.04em",
             }}
           >
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.55)", flexShrink: 0 }} />
             {planLabel}
           </span>
-        </div>
-      </div>
-      {/* <p
-        className="m-0 flex items-center gap-1.5 font-mono text-[8.5px] sm:text-[9px]"
-        style={{ color: "var(--plum-2, #A584A6)", letterSpacing: "0.08em" }}
-      >
-        <span
-          className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
-          style={{
-            background: "var(--amber, #E6A760)",
-            boxShadow: "0 0 6px color-mix(in srgb, var(--amber) 50%, transparent)",
-          }}
-          aria-hidden
-        />
-        {copy.howVisualLive}
-        <span className="text-[var(--cream-4)]" aria-hidden>
-          ·
-        </span>
-        {copy.howVisualGuests}
-      </p> */}
-    </div>
-  );
-}
-
-function UploadStepVisual({ copy }: HowItWorksProps) {
-  return (
-    <div className="flex h-full w-full items-center justify-center">
-      <div
-        className="relative flex h-[150px] w-[92px] flex-col overflow-hidden rounded-[18px] border p-2"
-        style={{
-          borderColor: "color-mix(in srgb, var(--plum-2) 45%, var(--hair))",
-          background: "linear-gradient(160deg, var(--ink-2) 0%, var(--ink) 100%)",
-          boxShadow: "0 12px 28px -18px rgba(0,0,0,0.55)",
-        }}
-      >
-        <span
-          className="mx-auto mb-2 h-1.5 w-8 rounded-full"
-          style={{ background: "color-mix(in srgb, var(--cream) 10%, transparent)" }}
-          aria-hidden
-        />
-        <div className="rounded-[12px] border px-2 pb-2 pt-2.5" style={{ borderColor: "var(--hair)" }}>
-          <p className="m-0 text-center text-[9px]" style={{ color: "var(--cream-3, #B5AB99)" }}>
-            {copy.heroMockJoinAlbum}
-          </p>
-          <p
-            className="m-0 mt-1 text-center font-mono text-[9px] uppercase"
-            style={{ letterSpacing: "0.12em", color: "var(--cream)" }}
-          >
-            WEDDING2026
-          </p>
-        </div>
-        <div className="mt-2 flex flex-1 flex-col items-center justify-center rounded-[12px] border p-1.5" style={{ borderColor: "var(--hair)" }}>
-          <svg viewBox="0 0 33 33" width="44" height="44" role="presentation">
-            <rect width="33" height="33" fill="var(--ink-2)" />
-            <rect x="2" y="2" width="9" height="9" fill="var(--cream)" />
-            <rect x="4" y="4" width="5" height="5" fill="var(--ink-2)" />
-            <rect x="22" y="2" width="9" height="9" fill="var(--cream)" />
-            <rect x="24" y="4" width="5" height="5" fill="var(--ink-2)" />
-            <rect x="2" y="22" width="9" height="9" fill="var(--cream)" />
-            <rect x="4" y="24" width="5" height="5" fill="var(--ink-2)" />
-            <rect x="14" y="2" width="3" height="3" fill="var(--cream)" />
-            <rect x="12" y="8" width="3" height="3" fill="var(--cream)" />
-            <rect x="16" y="8" width="3" height="3" fill="var(--cream)" />
-            <rect x="12" y="12" width="3" height="3" fill="var(--cream)" />
-            <rect x="16" y="12" width="3" height="3" fill="var(--cream)" />
-            <rect x="20" y="12" width="3" height="3" fill="var(--cream)" />
-            <rect x="12" y="16" width="3" height="3" fill="var(--cream)" />
-            <rect x="18" y="16" width="3" height="3" fill="var(--cream)" />
-            <rect x="14" y="20" width="3" height="3" fill="var(--cream)" />
-            <rect x="18" y="20" width="3" height="3" fill="var(--cream)" />
-            <rect x="22" y="18" width="3" height="3" fill="var(--cream)" />
-            <rect x="26" y="16" width="3" height="3" fill="var(--cream)" />
-            <rect x="24" y="22" width="3" height="3" fill="var(--cream)" />
-            <rect x="18" y="24" width="3" height="3" fill="var(--cream)" />
-            <rect x="14" y="26" width="3" height="3" fill="var(--cream)" />
-            <rect x="22" y="28" width="3" height="3" fill="var(--cream)" />
-          </svg>
-          <p className="m-0 mt-1 text-center text-[8px]" style={{ color: "var(--cream-4)" }}>
-            {copy.heroMockScanToUpload}
-          </p>
-        </div>
-      </div>
-      <div className="ml-3 flex flex-col gap-1.5 text-[9px]" style={{ color: "var(--cream-3, #B5AB99)" }}>
-        <div className="rounded-full border px-2 py-0.5 font-mono text-[8px] uppercase" style={{ letterSpacing: "0.12em", borderColor: "var(--hair)" }}>
-          {copy.heroMockNoAppNoAccount}
-        </div>
-        <div className="h-1 w-10 rounded-full" style={{ background: "color-mix(in srgb, var(--plum-2) 40%, transparent)" }} />
-        <div className="h-1 w-6 rounded-full" style={{ background: "color-mix(in srgb, var(--cream) 20%, transparent)" }} />
-      </div>
-    </div>
-  );
-}
-
-function OrgStepVisual({ copy }: HowItWorksProps) {
-  const plus12 = copy.howModerationNewTemplate.replace("{count}", "12");
-  const plus8 = copy.howModerationNewTemplate.replace("{count}", "8");
-  const rows = [
-    { name: "Ana K.", color: "#E6A760", tag: plus12, muted: false },
-    { name: "Toni M.", color: "#A584A6", tag: plus8, muted: false },
-    { name: "Lena P.", color: "#E6A760", tag: copy.howModerationApproved, muted: true },
-    { name: "Marko D.", color: "#A584A6", tag: copy.howModerationApproved, muted: true },
-  ];
-  return (
-    <div className="flex h-full w-full flex-col justify-center gap-1.5">
-      {rows.map((r) => (
-        <div
-          key={r.name}
-          className="flex items-center justify-between gap-2 rounded-lg px-2.5 py-1.5"
-          style={{
-            background: "color-mix(in srgb, var(--ink) 88%, var(--plum) 2%)",
-            border: "1px solid var(--hair)",
-            fontSize: 11,
-            color: "var(--cream-2, #E8DCC6)",
-          }}
-        >
-          <div className="flex min-w-0 items-center gap-2">
-            <div
-              className="h-5 w-5 shrink-0 rounded-full"
-              style={{ background: `linear-gradient(135deg, ${r.color}, var(--ink-3, #1C1724))` }}
-            />
-            <span className="truncate" style={{ fontFamily: "var(--font-sans)", fontSize: 11 }}>
-              {r.name}
-            </span>
-          </div>
           <span
-            className="shrink-0 font-mono text-[8px] uppercase"
             style={{
-              letterSpacing: "0.08em",
-              color: r.muted ? "var(--cream-4, #6E6758)" : "var(--plum-2, #A584A6)",
+              display: "inline-block",
+              fontFamily: "var(--font-sans)",
+              fontSize: 9,
+              fontWeight: 800,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "var(--plum-2, #A584A6)",
+              border: "1.5px solid var(--plum-2, #A584A6)",
+              borderRadius: 3,
+              padding: "2px 7px",
+              opacity: 0.85,
             }}
           >
-            {r.tag}
+            Organizer
           </span>
         </div>
-      ))}
+      </div>
+    </div>
+  );
+}
+
+/** Step 2 — access code + QR, centered and prominent. */
+function UploadStepVisual() {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-3">
+      {/* Access code card */}
+      <div
+        style={{
+          width: "100%",
+          background: "rgba(255,255,255,0.07)",
+          border: "1px solid rgba(255,255,255,0.12)",
+          borderRadius: 14,
+          padding: "12px 14px 14px",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Aurora glow */}
+        <div aria-hidden style={{ position: "absolute", bottom: -30, right: -20, width: 100, height: 100, borderRadius: "50%", background: "radial-gradient(circle, rgba(139,79,216,0.45), transparent 65%)", filter: "blur(10px)", pointerEvents: "none" }} />
+
+        <p style={{ margin: "0 0 8px", fontFamily: "var(--font-sans)", fontSize: 8, fontWeight: 700, letterSpacing: "0.26em", textTransform: "uppercase", color: "var(--cream-4, #6E6758)", position: "relative" }}>
+          Access code
+        </p>
+
+        {/* Code block */}
+        <div
+          style={{
+            background: "rgba(255,255,255,0.08)",
+            border: "1px dashed rgba(255,255,255,0.18)",
+            borderRadius: 8,
+            padding: "8px 12px",
+            fontFamily: "var(--font-mono, ui-monospace)",
+            fontSize: 18,
+            fontWeight: 700,
+            color: "var(--cream)",
+            letterSpacing: "0.14em",
+            textAlign: "center",
+            marginBottom: 10,
+            position: "relative",
+          }}
+        >
+          DEMO00
+        </div>
+
+        {/* QR code */}
+        <div style={{ display: "flex", justifyContent: "center", position: "relative" }}>
+          <svg viewBox="0 0 33 33" width="96" height="96" role="presentation" style={{ borderRadius: 6, background: "rgba(255,255,255,0.92)", padding: 6 }}>
+            <rect width="33" height="33" fill="white"/>
+            <rect x="2" y="2" width="9" height="9" fill="#221509"/><rect x="4" y="4" width="5" height="5" fill="white"/>
+            <rect x="22" y="2" width="9" height="9" fill="#221509"/><rect x="24" y="4" width="5" height="5" fill="white"/>
+            <rect x="2" y="22" width="9" height="9" fill="#221509"/><rect x="4" y="24" width="5" height="5" fill="white"/>
+            <rect x="14" y="2" width="3" height="3" fill="#221509"/><rect x="12" y="8" width="3" height="3" fill="#221509"/>
+            <rect x="16" y="8" width="3" height="3" fill="#221509"/><rect x="12" y="12" width="3" height="3" fill="#221509"/>
+            <rect x="16" y="12" width="3" height="3" fill="#221509"/><rect x="20" y="12" width="3" height="3" fill="#221509"/>
+            <rect x="12" y="16" width="3" height="3" fill="#221509"/><rect x="18" y="16" width="3" height="3" fill="#221509"/>
+            <rect x="14" y="20" width="3" height="3" fill="#221509"/><rect x="18" y="20" width="3" height="3" fill="#221509"/>
+            <rect x="22" y="18" width="3" height="3" fill="#221509"/><rect x="26" y="16" width="3" height="3" fill="#221509"/>
+            <rect x="24" y="22" width="3" height="3" fill="#221509"/><rect x="18" y="24" width="3" height="3" fill="#221509"/>
+            <rect x="14" y="26" width="3" height="3" fill="#221509"/><rect x="22" y="28" width="3" height="3" fill="#221509"/>
+          </svg>
+        </div>
+        <p style={{ margin: "8px 0 0", fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 10, color: "var(--cream-4, #6E6758)", textAlign: "center", lineHeight: 1.5, position: "relative" }}>
+          Scan to join · no app needed
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/** Step 3 — photo grid showing the gallery browsing experience. */
+const PREVIEW_PHOTOS = [
+  "/demo/photo-01.png", "/demo/photo-02.png", "/demo/photo-03.png",
+  "/demo/photo-04.png", "/demo/photo-05.png", "/demo/photo-06.png",
+];
+
+function OrgStepVisual() {
+  return (
+    <div className="flex h-full w-full flex-col gap-2.5">
+      {/* Gallery header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p style={{ margin: 0, fontFamily: "var(--font-sans)", fontSize: 8, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: "var(--cream-4, #6E6758)" }}>
+            Gallery
+          </p>
+          <p style={{ margin: "2px 0 0", fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 15, color: "var(--cream)", lineHeight: 1.1 }}>
+            All memories
+          </p>
+        </div>
+        <div className="flex items-center gap-1">
+          {["#E6A760", "#A584A6", "#C5922A"].map((c, i) => (
+            <div key={i} style={{ width: 18, height: 18, borderRadius: "50%", background: `linear-gradient(135deg, ${c}, var(--ink-3, #1C1724))`, border: "1.5px solid var(--ink)", marginLeft: i > 0 ? -6 : 0 }} />
+          ))}
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: 8, color: "var(--cream-4, #6E6758)", marginLeft: 6 }}>33</span>
+        </div>
+      </div>
+
+      {/* Photo grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 4, flex: 1 }}>
+        {PREVIEW_PHOTOS.map((src, i) => (
+          <div key={src} style={{ position: "relative", aspectRatio: "1/1", borderRadius: 8, overflow: "hidden" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            {/* Like badge on first photo */}
+            {i === 0 && (
+              <div style={{ position: "absolute", top: 5, right: 5, background: "rgba(20,10,5,0.6)", backdropFilter: "blur(4px)", borderRadius: 20, padding: "2px 6px", display: "flex", alignItems: "center", gap: 3 }}>
+                <svg width="9" height="9" viewBox="0 0 16 16" fill="none" aria-hidden>
+                  <path d="M8 13.5C8 13.5 2 9.5 2 5.5a3.5 3.5 0 017-0.35A3.5 3.5 0 0114 5.5c0 4-6 8-6 8z" fill="#E6A760" />
+                </svg>
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: 7, fontWeight: 700, color: "rgba(255,255,255,0.9)" }}>12</span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -217,8 +214,8 @@ function OrgStepVisual({ copy }: HowItWorksProps) {
 function stepVisuals(copy: LandingCopy): ReactNode[] {
   return [
     <CreateEventStepVisual key="create" copy={copy} />,
-    <UploadStepVisual key="up" copy={copy} />,
-    <OrgStepVisual key="org" copy={copy} />,
+    <UploadStepVisual key="up" />,
+    <OrgStepVisual key="org" />,
   ];
 }
 
@@ -312,12 +309,30 @@ export function HowItWorks({ copy }: HowItWorksProps) {
                   className="how-section__card reveal h-full"
                   style={{ animationDelay: `${0.05 + idx * 0.09}s` }}
                 >
-                  <p
-                    className="m-0 px-4 pb-3 pt-5 font-mono text-[10.5px] tracking-[0.2em] sm:px-6 sm:pb-4 sm:pt-6"
-                    style={{ textTransform: "uppercase", color: "var(--plum-2, #A584A6)" }}
-                  >
-                    {copy.howStepPrefix} {item.step}
-                  </p>
+                  <div className="how-section__card-header px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 flex items-center justify-between">
+                    <span
+                      className="font-mono text-[10.5px] tracking-[0.2em] uppercase"
+                      style={{ color: "var(--plum-2, #A584A6)" }}
+                    >
+                      {copy.howStepPrefix} {item.step}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontStyle: "italic",
+                        fontWeight: 700,
+                        fontSize: 52,
+                        lineHeight: 1,
+                        letterSpacing: "-0.04em",
+                        color: "var(--gold, #C5922A)",
+                        opacity: 0.18,
+                        userSelect: "none",
+                      }}
+                      aria-hidden
+                    >
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
+                  </div>
                   <div className="how-section__frame relative overflow-hidden">
                     <div className="how-section__frame-glow" aria-hidden />
                     <div className="relative h-full w-full" style={{ minHeight: 124 }}>
@@ -357,6 +372,31 @@ export function HowItWorks({ copy }: HowItWorksProps) {
             );
           })}
         </ol>
+
+        {/* Demo CTA */}
+        <div className="mt-12 flex justify-center sm:mt-14">
+          <a
+            href="/demo"
+            className="inline-flex items-center gap-2"
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: 13,
+              fontWeight: 500,
+              padding: "10px 22px",
+              borderRadius: 999,
+              background: "transparent",
+              color: "var(--cream)",
+              border: "1px solid var(--hair-strong)",
+              boxShadow: "0 0 0 1px rgba(240,179,75,0.12) inset",
+              transition: "all 250ms ease",
+              textDecoration: "none",
+              letterSpacing: "0.01em",
+            }}
+          >
+            {copy.howDemoCta}
+            <span aria-hidden>→</span>
+          </a>
+        </div>
       </div>
 
       <style>{`
@@ -374,8 +414,8 @@ export function HowItWorks({ copy }: HowItWorksProps) {
         .how-section__frame {
           border-top-left-radius: 18px;
           border-top-right-radius: 18px;
-          min-height: 160px;
-          padding: 18px;
+          min-height: 220px;
+          padding: 20px 18px;
           border-bottom: 1px solid var(--hair);
           background: linear-gradient(180deg, var(--ink-3) 0%, var(--ink) 100%);
         }
@@ -416,9 +456,10 @@ export function HowItWorks({ copy }: HowItWorksProps) {
           border: 1px solid var(--hair-2);
           background: linear-gradient(160deg, var(--ink-2) 0%, var(--ink) 100%);
           box-shadow:
-            0 0 0 1px color-mix(in srgb, var(--plum) 5%, transparent),
-            0 28px 64px -28px rgba(0, 0, 0, 0.55);
-          transition: box-shadow 0.35s ease, border-color 0.35s ease, background 0.2s ease;
+            0 0 0 1px color-mix(in srgb, var(--plum) 6%, transparent),
+            0 24px 56px -16px rgba(0, 0, 0, 0.5),
+            0 8px 24px -8px rgba(0, 0, 0, 0.3);
+          transition: box-shadow 0.35s ease, border-color 0.35s ease, transform 0.35s ease;
         }
         html[data-theme="light"] .how-section__card {
           box-shadow:
@@ -427,10 +468,12 @@ export function HowItWorks({ copy }: HowItWorksProps) {
         }
         @media (hover: hover) and (pointer: fine) {
           .how-section__card:hover {
-            border-color: color-mix(in srgb, var(--plum-2) 28%, var(--hair-2));
+            border-color: color-mix(in srgb, var(--plum-2) 32%, var(--hair-2));
+            transform: translateY(-3px);
             box-shadow:
-              0 0 0 1px color-mix(in srgb, var(--plum-2) 12%, transparent),
-              0 32px 72px -24px rgba(0, 0, 0, 0.6);
+              0 0 0 1px color-mix(in srgb, var(--plum-2) 14%, transparent),
+              0 32px 72px -20px rgba(0, 0, 0, 0.6),
+              0 12px 32px -10px rgba(0, 0, 0, 0.35);
           }
           html[data-theme="light"] .how-section__card:hover {
             border-color: color-mix(in srgb, var(--plum) 20%, var(--hair-2));

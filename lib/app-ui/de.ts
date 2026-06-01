@@ -306,6 +306,7 @@ export const APP_UI_DE: AppUiDict = {
     myEvents: "Meine Veranstaltungen",
     memoriesCount: "{count} Erinnerungen",
     guestsCount: "{count} Gäste",
+    bannerHint: "Ändere Banner-Stil und Emoji in den Einstellungen.",
   },
 
   printsTab: {
@@ -468,6 +469,9 @@ export const APP_UI_DE: AppUiDict = {
     countdownMinuteOne: "{n} Minute",
     countdownMinuteMany: "{n} Minuten",
     countdownSubMinute: "Weniger als eine Minute",
+    countdownMonthOne: "{n} Monat",
+    countdownMonthMany: "{n} Monate",
+    eventStartsIn: "Event startet in",
     uploadWindowEnded: "Upload‑Fenster beendet — Uploads sind geschlossen.",
     statsTitle: "Statistik",
     statsPhotos: "Fotos",
@@ -668,6 +672,7 @@ export const APP_UI_DE: AppUiDict = {
     genericSaveFail: "Speichern nicht möglich.",
     validDateNeeded: "Bitte ein gültiges Datum wählen.",
     scheduleSaveFail: "Datum oder Tarif konnte nicht aktualisiert werden.",
+    dateLockNotice: "Das Event hat bereits begonnen — das Datum ist gesperrt, um eine Verlängerung der Upload- oder Löschfenster zu verhindern.",
     deleteTitleForever: "Veranstaltung dauerhaft löschen?",
     deleteDialogBody:
       "Allen entfällt sofort der Zugang. Gäste, Galerie, Uploads und Codes verschwinden.",
@@ -817,12 +822,17 @@ export const APP_UI_DE: AppUiDict = {
     sheetHelper:
       "Zwei identische Tischkarten pro Blatt. Entlang der gestrichelten Linie schneiden und je eine Karte auf einen Tisch legen.",
     cutHere: "Hier schneiden",
+    downloadPdf: "PDF herunterladen",
+    previewPdf: "Vorschau",
     paperSectionLabel: "Papierformat",
     paperA4: "A4",
     paperLetter: "US Letter",
     templateSectionLabel: "Layout",
     templateTableMinimal: "Reduziert",
     templateTableBold: "Kräftig",
+    templateQrClean: "Schlicht",
+    templateQrGold: "Gold",
+    templateQrDark: "Dunkel",
     templateWeddingInviteSimple: "Hochzeit · schlicht",
     templateWeddingInviteFloral: "Hochzeit · floral",
     templateWeddingInviteBlueFloral: "Hochzeit · blaues Blumendesign",

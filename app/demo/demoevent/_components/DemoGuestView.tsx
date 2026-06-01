@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
-import { DEMO_PHOTOS } from "../_data/demo-event";
+import React, { useEffect, useState } from "react";
+import { DEMO_EVENT, DEMO_PHOTOS } from "../_data/demo-event";
 import { DemoMediaGrid } from "./DemoMediaGrid";
-import { DemoEventHero } from "./DemoEventHero";
 import { useDemoToast } from "./DemoToastProvider";
 
 const TEXT_S = 'var(--app-text-sub)';
@@ -13,29 +12,77 @@ const BORDER = 'var(--app-border)';
 const FB = "'DM Sans', sans-serif";
 const FS = "'DM Serif Display', serif";
 
+const GLASS_LIGHT_: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.62)',
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)',
+  border: '1px solid rgba(255,255,255,0.78)',
+  boxShadow: '0 10px 30px -8px rgba(40,25,15,0.18), inset 0 1px 0 rgba(255,255,255,0.7)',
+};
+
+const GLASS_DARK_: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.06)',
+  backdropFilter: 'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  boxShadow: '0 10px 30px -8px rgba(0,0,0,0.4)',
+};
+
+function parseDateFull(dateStr: string) {
+  try {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    if (!y || !m || !d) return null;
+    return { mon: new Date(y, m - 1, d).toLocaleDateString("en", { month: "short" }), day: d, year: y };
+  } catch { return null; }
+}
+
 export function DemoGuestView() {
   const { triggerDemoToast } = useDemoToast();
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    const obs = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
+
+  const parsedDate = parseDateFull(DEMO_EVENT.date);
 
   return (
     <main className="join-shell min-h-screen px-4 pb-16 pt-10 sm:px-6">
       <div className="mx-auto max-w-3xl">
 
-        {/* Event hero banner */}
-        <DemoEventHero />
-
-        {/* Date + tagline row */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginTop: 14, marginBottom: 24 }}>
-          <div style={{ width: 52, flexShrink: 0, textAlign: "center", fontFamily: FB, borderRight: `1px dashed ${BORDER}`, paddingRight: 12 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: MUTED }}>Jun</div>
-            <div style={{ fontFamily: FS, fontStyle: "italic", fontWeight: 700, fontSize: 36, lineHeight: 0.9, color: GOLD, letterSpacing: "-0.03em", marginTop: 1 }}>14</div>
-            <div style={{ fontFamily: FS, fontStyle: "italic", fontSize: 10.5, color: MUTED, marginTop: 1 }}>2025</div>
+        {/* Glass banner */}
+        <div style={{ ...(isDark ? GLASS_DARK_ : GLASS_LIGHT_), borderRadius: 14, overflow: 'hidden', position: 'relative', height: 128 }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg,rgba(91,45,142,0.22),rgba(123,63,190,0.18))' }} />
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,0.12) 0 2px,transparent 2px 12px)' }} />
+          <div style={{ position: 'absolute', right: -8, bottom: -14, fontSize: 120, lineHeight: 1, opacity: 0.9, transform: 'rotate(-8deg)', filter: 'drop-shadow(0 4px 12px rgba(40,25,15,0.18))', pointerEvents: 'none', fontStyle: 'normal' }}>
+            <span className="calisto-emoji-upright">{DEMO_EVENT.emoji}</span>
           </div>
-          <div style={{ flex: 1, paddingTop: 4 }}>
-            <p style={{ margin: 0, fontFamily: FS, fontStyle: "italic", fontSize: 14, color: TEXT_S, lineHeight: 1.5 }}>
-              Share your favourite memories from the celebration.
-            </p>
+          <div style={{ position: 'absolute', bottom: 10, left: 10, right: 48, background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: 100, padding: '5px 14px', border: '1px solid rgba(255,255,255,0.38)', overflow: 'hidden' }}>
+            <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 14, color: 'rgba(255,255,255,0.95)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: '0 1px 4px rgba(40,25,15,0.5)', display: 'block' }}>
+              {DEMO_EVENT.name}
+            </span>
           </div>
         </div>
+
+        {/* Date + tagline row */}
+        {parsedDate && (
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginTop: 14, marginBottom: 24 }}>
+            <div style={{ width: 52, flexShrink: 0, textAlign: "center", fontFamily: FB, borderRight: `1px dashed ${BORDER}`, paddingRight: 12 }}>
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: MUTED }}>{parsedDate.mon}</div>
+              <div style={{ fontFamily: FS, fontStyle: "italic", fontWeight: 700, fontSize: 36, lineHeight: 0.9, color: GOLD, letterSpacing: "-0.03em", marginTop: 1 }}>{parsedDate.day}</div>
+              <div style={{ fontFamily: FS, fontStyle: "italic", fontSize: 10.5, color: MUTED, marginTop: 1 }}>{parsedDate.year}</div>
+            </div>
+            <div style={{ flex: 1, paddingTop: 4 }}>
+              <p style={{ margin: 0, fontFamily: FS, fontStyle: "italic", fontSize: 14, color: TEXT_S, lineHeight: 1.5 }}>
+                Share your favourite memories from the celebration.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Upload zone — disabled, triggers toast */}
         <section style={{ marginBottom: 40 }}>

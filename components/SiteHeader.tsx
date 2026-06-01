@@ -5,9 +5,12 @@ import type { LandingCopy, Locale } from "@/lib/i18n";
 type SiteHeaderProps = {
   copy: LandingCopy;
   locale: Locale;
+  isLoggedIn: boolean;
 };
 
-export function SiteHeader({ copy, locale }: SiteHeaderProps) {
+export function SiteHeader({ copy, locale, isLoggedIn }: SiteHeaderProps) {
+  const ctaHref = isLoggedIn ? "/dashboard" : "/welcome";
+
   return (
     <header className="site-header sticky top-0 z-50">
       <div
@@ -38,7 +41,7 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
         <div className="flex items-center justify-self-end gap-3 shrink-0 md:order-3">
           <LanguageSelectorBar copy={copy} locale={locale} variant="header" />
           <a
-            href="/events/new"
+            href={ctaHref}
             className="hidden sm:inline-flex items-center gap-2"
             style={{
               fontFamily: "var(--font-sans)",
@@ -58,7 +61,7 @@ export function SiteHeader({ copy, locale }: SiteHeaderProps) {
             <span aria-hidden style={{ transition: "transform 300ms" }}>→</span>
           </a>
           <a
-            href="/events/new"
+            href={ctaHref}
             className="sm:hidden"
             style={{
               fontFamily: "var(--font-sans)",

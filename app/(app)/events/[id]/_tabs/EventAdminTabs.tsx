@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Camera, Home, Images, Settings, Share2, Users } from "lucide-react";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { ArrowLeft, Camera, Home, Images, Palette, Settings, Share2, Users } from "lucide-react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
+import { BANNER_THEMES, getBannerTheme, normalizeBannerTheme, type BannerThemeId } from "@/lib/banner-theme";
+import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 import { type EventAdminTabId } from "./event-admin-tabs";
 
@@ -51,6 +53,7 @@ type EventAdminTabsProps = Readonly<{
   guestCount?: number;
   mediaCount?: number;
   eventDate?: string | null;
+  bannerTheme?: string;
 }>;
 
 // ── Editorial Almanac palette ─────────────────────────────────────────────────
@@ -103,9 +106,11 @@ function TabsInner({
   guestCount = 0,
   mediaCount = 0,
   eventDate,
+  bannerTheme,
 }: EventAdminTabsProps) {
   const ui = useAppUi();
   const parsedDate = parseDateFull(eventDate);
+  const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
 
   const [isDark, setIsDark] = useState(false);
   useEffect(() => {
@@ -116,6 +121,28 @@ function TabsInner({
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     return () => obs.disconnect();
   }, []);
+
+  const [activeThemeId, setActiveThemeId] = useState<BannerThemeId>(() => normalizeBannerTheme(bannerTheme));
+  useEffect(() => { setActiveThemeId(normalizeBannerTheme(bannerTheme)); }, [bannerTheme]);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const HINT_KEY = 'calisto_banner_hint_v1';
+  const [hintVisible, setHintVisible] = useState(false);
+  useEffect(() => {
+    try { setHintVisible(!window.localStorage.getItem(HINT_KEY)); } catch { /* ignore */ }
+  }, []);
+  function dismissHint() {
+    setHintVisible(false);
+    try { window.localStorage.setItem(HINT_KEY, '1'); } catch { /* ignore */ }
+  }
+
+  const activeTheme = getBannerTheme(activeThemeId);
+
+  async function applyTheme(id: BannerThemeId) {
+    setActiveThemeId(id);
+    setSheetOpen(false);
+    if (!supabase) return;
+    await supabase.from('events').update({ banner_theme: id }).eq('id', eventId);
+  }
 
   const countFor = useCallback((tabId: EventAdminTabId): number | null => {
     if (tabId === "guests")  return guestCount  > 0 ? guestCount  : null;
@@ -192,19 +219,34 @@ function TabsInner({
 
         {/* Glass banner */}
         <div style={{ ...(isDark ? GLASS_DARK_ : GLASS_LIGHT_), borderRadius: 14, overflow: 'hidden', position: 'relative', height: 128 }}>
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg,rgba(91,45,142,0.22),rgba(123,63,190,0.18))' }} />
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,0.12) 0 2px,transparent 2px 12px)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: activeTheme.gradient, transition: 'background 0.4s ease' }} />
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: activeTheme.pattern, backgroundSize: activeTheme.patternSize, transition: 'background-image 0.4s ease' }} />
           {/* Big emoji */}
           <div style={{ position: 'absolute', right: -8, bottom: -14, fontSize: 120, lineHeight: 1, opacity: 0.9, transform: 'rotate(-8deg)', filter: 'drop-shadow(0 4px 12px rgba(40,25,15,0.18))', pointerEvents: 'none', fontStyle: 'normal' }}>
             <span className="calisto-emoji-upright">{eventEmoji}</span>
           </div>
           {/* Name pill */}
-          <div style={{ position: 'absolute', bottom: 10, left: 10, right: 48, background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: 100, padding: '5px 14px', border: '1px solid rgba(255,255,255,0.38)', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', bottom: 10, left: 10, right: 86, background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: 100, padding: '5px 14px', border: '1px solid rgba(255,255,255,0.38)', overflow: 'hidden' }}>
             <span style={{ fontFamily: FS_, fontStyle: 'italic', fontWeight: 700, fontSize: 14, color: 'rgba(255,255,255,0.95)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: '0 1px 4px rgba(40,25,15,0.5)', display: 'block' }}>
               {eventTitle}
             </span>
           </div>
         </div>
+
+        {/* Dismissible customise hint — organizer only, shown once */}
+        {showOrganizerOnlyTabs && hintVisible && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10, padding: '9px 12px', borderRadius: 12, background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.6)', border: `1px solid ${DIVIDER_}`, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+            <Palette size={13} color={MUTED_T_} style={{ flexShrink: 0 }} />
+            <span style={{ flex: 1, fontFamily: FB_, fontSize: 12, color: MUTED_T_, lineHeight: 1.4 }}>
+              {ui.eventNav.bannerHint}
+            </span>
+            <button type="button" onClick={dismissHint} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: MUTED_T_, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-label="Dismiss">
+                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+        )}
 
         {/* Date + stats row */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginTop: 14, marginBottom: 4 }}>
@@ -215,34 +257,19 @@ function TabsInner({
               <div style={{ fontFamily: FS_, fontStyle: 'italic', fontSize: 10.5, color: MUTED_T_, marginTop: 1 }}>{parsedDate.year}</div>
             </div>
           )}
-          {(mediaCount > 0 || guestCount > 0) && (
+          {mediaCount > 0 && (
             <div style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'stretch' }}>
-              {mediaCount > 0 && (
-                <div style={{ flex: 1, background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)', border: `1px solid ${DIVIDER_}`, borderRadius: 10, padding: '8px 10px', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3 }}>
-                    <Camera size={11} color={MUTED_T_} />
-                    <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED_T_, fontFamily: FB_ }}>
-                      {memoriesLabel}
-                    </span>
-                  </div>
-                  <div style={{ fontFamily: FS_, fontStyle: 'italic', fontWeight: 700, fontSize: 22, lineHeight: 1, color: GOLD_, letterSpacing: '-0.02em' }}>
-                    {mediaCount}
-                  </div>
+              <div style={{ flex: 1, background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)', border: `1px solid ${DIVIDER_}`, borderRadius: 10, padding: '8px 10px', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3 }}>
+                  <Camera size={11} color={MUTED_T_} />
+                  <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED_T_, fontFamily: FB_ }}>
+                    {memoriesLabel}
+                  </span>
                 </div>
-              )}
-              {guestCount > 0 && (
-                <div style={{ flex: 1, background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)', border: `1px solid ${DIVIDER_}`, borderRadius: 10, padding: '8px 10px', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3 }}>
-                    <Users size={11} color={MUTED_T_} />
-                    <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED_T_, fontFamily: FB_ }}>
-                      {guestsLabel}
-                    </span>
-                  </div>
-                  <div style={{ fontFamily: FS_, fontStyle: 'italic', fontWeight: 700, fontSize: 22, lineHeight: 1, color: PURPLE_, letterSpacing: '-0.02em' }}>
-                    {guestCount}
-                  </div>
+                <div style={{ fontFamily: FS_, fontStyle: 'italic', fontWeight: 700, fontSize: 22, lineHeight: 1, color: GOLD_, letterSpacing: '-0.02em' }}>
+                  {mediaCount}
                 </div>
-              )}
+              </div>
             </div>
           )}
         </div>
@@ -343,6 +370,98 @@ function TabsInner({
           );
         })}
       </nav>
+
+    {/* ── Banner theme sheet ── */}
+    {sheetOpen && (
+      <>
+        {/* Backdrop */}
+        <div
+          onClick={() => setSheetOpen(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200 }}
+        />
+        {/* Sheet */}
+        <div
+          style={{
+            position: 'fixed', left: 0, right: 0, bottom: 0,
+            background: isDark ? '#1a1714' : '#f9f6f1',
+            borderRadius: '24px 24px 0 0',
+            boxShadow: '0 -8px 40px rgba(0,0,0,0.32)',
+            zIndex: 201,
+            padding: '12px 20px calc(32px + env(safe-area-inset-bottom, 0px))',
+          }}
+        >
+          {/* Drag handle */}
+          <div style={{ width: 40, height: 4, borderRadius: 2, background: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)', margin: '0 auto 18px' }} />
+
+          {/* Heading */}
+          <p style={{ margin: '0 0 16px', fontFamily: FS_, fontStyle: 'italic', fontWeight: 700, fontSize: 18, color: isDark ? 'rgba(255,255,255,0.9)' : '#221509' }}>
+            Banner style
+          </p>
+
+          {/* Theme tiles */}
+          <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 4 }}>
+            {BANNER_THEMES.map(theme => {
+              const isActive = theme.id === activeThemeId;
+              return (
+                <button
+                  key={theme.id}
+                  type="button"
+                  onClick={() => void applyTheme(theme.id)}
+                  style={{
+                    flexShrink: 0,
+                    width: 110,
+                    padding: 0,
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 7,
+                    outline: 'none',
+                  }}
+                >
+                  {/* Preview tile */}
+                  <div style={{
+                    width: 110, height: 62,
+                    borderRadius: 10,
+                    overflow: 'hidden',
+                    position: 'relative',
+                    background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.65)',
+                    backdropFilter: 'blur(10px)',
+                    border: isActive
+                      ? `2px solid ${GOLD_}`
+                      : `1.5px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
+                    boxShadow: isActive ? `0 0 0 3px rgba(197,146,42,0.22)` : 'none',
+                    transition: 'border-color 0.2s, box-shadow 0.2s',
+                  }}>
+                    <div style={{ position: 'absolute', inset: 0, background: theme.gradient }} />
+                    <div style={{ position: 'absolute', inset: 0, backgroundImage: theme.pattern, backgroundSize: theme.patternSize }} />
+                    {/* Tiny name pill */}
+                    <div style={{ position: 'absolute', bottom: 7, left: 7, right: 7, background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(6px)', borderRadius: 20, padding: '2px 8px', border: '1px solid rgba(255,255,255,0.3)' }}>
+                      <span style={{ fontFamily: FS_, fontStyle: 'italic', fontWeight: 700, fontSize: 9, color: 'rgba(255,255,255,0.9)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {eventTitle}
+                      </span>
+                    </div>
+                    {/* Active checkmark */}
+                    {isActive && (
+                      <div style={{ position: 'absolute', top: 6, right: 6, width: 18, height: 18, borderRadius: '50%', background: GOLD_, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden>
+                          <path d="M3 8l4 4 6-6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  {/* Theme name */}
+                  <span style={{ fontFamily: FB_, fontSize: 11, fontWeight: isActive ? 600 : 400, color: isActive ? GOLD_ : (isDark ? 'rgba(255,255,255,0.55)' : '#9A8570'), textAlign: 'center', display: 'block' }}>
+                    {theme.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </>
+    )}
     </>
   );
 }

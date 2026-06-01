@@ -300,6 +300,7 @@ export const APP_UI_HR: AppUiDict = {
     myEvents: "Moji događaji",
     memoriesCount: "{count} uspomena",
     guestsCount: "{count} gostiju",
+    bannerHint: "Promijeni stil bannera i emoji u Postavkama.",
   },
 
   printsTab: {
@@ -462,6 +463,9 @@ export const APP_UI_HR: AppUiDict = {
     countdownMinuteOne: "{n} minuta",
     countdownMinuteMany: "{n} minuta",
     countdownSubMinute: "Manje od minute",
+    countdownMonthOne: "{n} mjesec",
+    countdownMonthMany: "{n} mjeseci",
+    eventStartsIn: "Događaj počinje za",
     uploadWindowEnded: "Prozor za upload je završen — uploadi su zatvoreni.",
     statsTitle: "Statistika",
     statsPhotos: "Fotografije",
@@ -659,6 +663,7 @@ export const APP_UI_HR: AppUiDict = {
     genericSaveFail: "Nismo mogli spremiti promjene.",
     validDateNeeded: "Odaberite važeći datum događaja.",
     scheduleSaveFail: "Nismo mogli ažurirati datum ili plan.",
+    dateLockNotice: "Događaj je već počeo — datum je zaključan kako bi se spriječilo produljenje prozora za upload ili brisanje.",
     deleteTitleForever: "Trajno obrisati događaj?",
     deleteDialogBody:
       "Svi gube pristup odmah. Gosti, galerija, uploadi, kodovi – sve nestaje.",
@@ -803,12 +808,17 @@ export const APP_UI_HR: AppUiDict = {
     sheetHelper:
       "Dva ista kartica za stol po listu. Zareži duž isprekidane linije i stavi jednu karticu na svaki stol.",
     cutHere: "Zareži ovdje",
+    downloadPdf: "Preuzmi PDF",
+    previewPdf: "Pregled",
     paperSectionLabel: "Veličina papira",
     paperA4: "A4",
     paperLetter: "US Letter",
     templateSectionLabel: "Izgled",
     templateTableMinimal: "Jednostavno",
     templateTableBold: "Naglašeno",
+    templateQrClean: "Čisto",
+    templateQrGold: "Zlatno",
+    templateQrDark: "Tamno",
     templateWeddingInviteSimple: "Vjenčanje · jednostavno",
     templateWeddingInviteFloral: "Vjenčanje · cvijetno",
     templateWeddingInviteBlueFloral: "Vjenčanje · plavo-cvijetno",

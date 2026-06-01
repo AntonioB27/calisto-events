@@ -50,7 +50,7 @@ export default async function WelcomePage() {
           className="welcome-reveal welcome-mascot-float"
           style={{ display: "flex", justifyContent: "center", marginBottom: 28 }}
         >
-          <div style={{ position: "relative", display: "inline-block" }}>
+          <div className="polaroid-sway" style={{ position: "relative", display: "inline-block" }}>
             {/* Washi tape */}
             <div
               aria-hidden
@@ -81,7 +81,7 @@ export default async function WelcomePage() {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/brand/mascot/aurora_waving.jpeg"
+                src="/brand/mascot/aurora_waving.png"
                 alt=""
                 style={{ width: 140, height: 140, objectFit: "contain", objectPosition: 'center', display: "block", borderRadius: 1 }}
               />

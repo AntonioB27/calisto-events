@@ -38,6 +38,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
+  serverExternalPackages: ["@react-pdf/renderer"],
   experimental: {
     // Middleware clones every POST body for re-reading; the default cap is 10 MB.
     // Without this, multipart bodies > 10 MB (any typical MP4) get truncated,

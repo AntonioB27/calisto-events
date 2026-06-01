@@ -14,6 +14,7 @@ import { bcp47FromUiLocale } from "@/lib/locale-bcp47";
 import type { PlanId } from "@/lib/plan-limits";
 import { normalizePlanId } from "@/lib/plan-limits";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { BANNER_THEMES, normalizeBannerTheme, type BannerThemeId } from "@/lib/banner-theme";
 
 const GOLD    = '#C5922A';
 const GOLD_DK = '#A37118';
@@ -67,6 +68,7 @@ type SettingsTabProps = Readonly<{
   eventDate: string;
   plan: string;
   accessCode: string;
+  bannerTheme?: string;
 }>;
 
 function SectionMark({ n, label }: { n: string; label: string }) {
@@ -94,6 +96,7 @@ export function SettingsTab({
   eventDate,
   plan,
   accessCode,
+  bannerTheme,
 }: SettingsTabProps) {
   const ui = useAppUi();
   const router = useRouter();
@@ -110,13 +113,23 @@ export function SettingsTab({
     return () => obs.disconnect();
   }, []);
 
-  const planEditOptions = useMemo(
-    () => (["free", "standard", "plus", "premium", "max"] as const).map((id) => ({ id, label: ui.plans[id] })),
-    [ui.plans],
-  );
-
   const [name, setName] = useState(storedName);
   const [emoji, setEmoji] = useState(storedEmoji);
+  const [activeTheme, setActiveTheme] = useState<BannerThemeId>(() => normalizeBannerTheme(bannerTheme));
+  const [themeSaving, setThemeSaving] = useState(false);
+
+  async function saveTheme(id: BannerThemeId) {
+    if (!supabase || id === activeTheme) return;
+    setActiveTheme(id);
+    setThemeSaving(true);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from('events').update({ banner_theme: id }).eq('id', eventId);
+      router.refresh();
+    } finally {
+      setThemeSaving(false);
+    }
+  }
   const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,7 +137,6 @@ export function SettingsTab({
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [scheduleDate, setScheduleDate] = useState("");
-  const [schedulePlan, setSchedulePlan] = useState<PlanId>("free");
   const [scheduleSaving, setScheduleSaving] = useState(false);
   const titleTrim = fullStoredTitle.trim();
   const phraseTrim = deletePhrase.trim();
@@ -142,10 +154,6 @@ export function SettingsTab({
   }, [eventDate]);
 
   useEffect(() => {
-    setSchedulePlan(normalizePlanId(plan));
-  }, [plan]);
-
-  useEffect(() => {
     if (!pickerOpen) return;
     const onDocDown = (e: MouseEvent) => {
       const target = e.target as Node | null;
@@ -156,6 +164,12 @@ export function SettingsTab({
     document.addEventListener("mousedown", onDocDown);
     return () => document.removeEventListener("mousedown", onDocDown);
   }, [pickerOpen]);
+
+  const isEventStarted = useMemo(() => {
+    const mm = eventDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!mm) return false;
+    return Date.now() >= new Date(Number(mm[1]), Number(mm[2]) - 1, Number(mm[3])).getTime();
+  }, [eventDate]);
 
   const formattedDate = useMemo(() => {
     try {
@@ -219,8 +233,7 @@ export function SettingsTab({
   }
 
   const dirty = name.trim() !== storedName.trim() || emoji.trim() !== storedEmoji.trim();
-  const scheduleDirty =
-    scheduleDate !== toDateInputUtc(eventDate) || schedulePlan !== normalizePlanId(plan);
+  const scheduleDirty = scheduleDate !== toDateInputUtc(eventDate);
 
   async function saveSchedule() {
     if (!supabase || scheduleSaving || !scheduleDirty) return;
@@ -232,7 +245,7 @@ export function SettingsTab({
     setScheduleSaving(true);
     setError(null);
     try {
-      const { error: upErr } = await supabase.from("events").update({ event_date: iso, plan: schedulePlan }).eq("id", eventId);
+      const { error: upErr } = await supabase.from("events").update({ event_date: iso }).eq("id", eventId);
       if (upErr) throw new Error(upErr.message);
       router.refresh();
     } catch (e) {
@@ -339,9 +352,57 @@ export function SettingsTab({
           </div>
         </div>
 
-        {/* ── 02 Schedule ────────────────────────────── */}
+        {/* ── 02 Banner style ────────────────────────── */}
         <div>
-          <SectionMark n="02" label={ui.settingsTab.sectionSchedule} />
+          <SectionMark n="02" label="Banner style" />
+          <div style={{ ...glass, borderRadius: 18, padding: '20px 18px 22px' }}>
+            <FieldLabel>Choose a style for your event banner</FieldLabel>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 4 }}>
+              {BANNER_THEMES.map(theme => {
+                const isActive = theme.id === activeTheme;
+                return (
+                  <button
+                    key={theme.id}
+                    type="button"
+                    disabled={themeSaving}
+                    onClick={() => void saveTheme(theme.id)}
+                    style={{ padding: 0, background: 'none', border: 'none', cursor: themeSaving ? 'wait' : 'pointer', display: 'flex', flexDirection: 'column', gap: 6, outline: 'none' }}
+                  >
+                    <div style={{
+                      width: 96, height: 54, borderRadius: 10, overflow: 'hidden', position: 'relative',
+                      background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.65)',
+                      border: isActive ? `2px solid ${GOLD}` : `1.5px solid ${BORDER}`,
+                      boxShadow: isActive ? `0 0 0 3px rgba(197,146,42,0.2)` : 'none',
+                      transition: 'border-color 0.2s, box-shadow 0.2s',
+                    }}>
+                      <div style={{ position: 'absolute', inset: 0, background: theme.gradient }} />
+                      <div style={{ position: 'absolute', inset: 0, backgroundImage: theme.pattern, backgroundSize: theme.patternSize }} />
+                      <div style={{ position: 'absolute', bottom: 6, left: 6, right: 6, background: 'rgba(255,255,255,0.22)', borderRadius: 20, padding: '2px 7px', border: '1px solid rgba(255,255,255,0.3)' }}>
+                        <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 8, color: 'rgba(255,255,255,0.9)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {storedName || 'My Event'}
+                        </span>
+                      </div>
+                      {isActive && (
+                        <div style={{ position: 'absolute', top: 5, right: 5, width: 16, height: 16, borderRadius: '50%', background: GOLD, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="9" height="9" viewBox="0 0 16 16" fill="none" aria-hidden>
+                            <path d="M3 8l4 4 6-6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <span style={{ fontFamily: FB, fontSize: 10, fontWeight: isActive ? 600 : 400, color: isActive ? GOLD : MUTED, textAlign: 'center', display: 'block' }}>
+                      {theme.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* ── 03 Schedule ────────────────────────────── */}
+        <div>
+          <SectionMark n="03" label={ui.settingsTab.sectionSchedule} />
           <div style={{ ...glass, borderRadius: 18, padding: '20px 18px 24px' }}>
 
             <p style={{ margin: '0 0 18px', fontFamily: FS, fontStyle: 'italic', fontSize: 14, color: MUTED, lineHeight: 1.6 }}>
@@ -353,29 +414,37 @@ export function SettingsTab({
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               <div>
                 <FieldLabel>{ui.settingsTab.eventDateUtc}</FieldLabel>
-                <AppInput id="settings-event-date" type="date" value={scheduleDate} onChange={setScheduleDate} />
+                <AppInput id="settings-event-date" type="date" value={scheduleDate} onChange={setScheduleDate} disabled={isEventStarted} />
               </div>
               <div>
                 <FieldLabel>{ui.settingsTab.planTier}</FieldLabel>
-                <select
-                  id="settings-event-plan"
-                  className="app-input"
-                  style={{ width: '100%', borderRadius: 'var(--app-radius-md, 12px)', padding: '10px 12px' }}
-                  value={schedulePlan}
-                  onChange={(e) => setSchedulePlan(e.target.value as PlanId)}
-                >
-                  {planEditOptions.map((p) => (
-                    <option key={p.id} value={p.id}>{p.label}</option>
-                  ))}
-                </select>
+                <div style={{ padding: '10px 12px', borderRadius: 'var(--app-radius-md, 12px)', border: `1px solid ${BORDER}`, background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', fontSize: 14, color: TEXT, fontFamily: FB }}>
+                  {ui.plans[normalizePlanId(plan)]}
+                </div>
               </div>
             </div>
 
+            {isEventStarted && (
+              <div style={{
+                marginTop: 16,
+                padding: '10px 14px',
+                borderRadius: 10,
+                background: isDark ? 'rgba(197,146,42,0.12)' : 'rgba(197,146,42,0.10)',
+                border: `1px solid ${isDark ? 'rgba(197,146,42,0.25)' : 'rgba(197,146,42,0.35)'}`,
+                display: 'flex', alignItems: 'flex-start', gap: 8,
+              }}>
+                <span aria-hidden style={{ fontSize: 13, lineHeight: 1.5, flexShrink: 0 }}>🔒</span>
+                <span style={{ fontSize: 12, color: isDark ? '#d4b86a' : '#7A5010', fontFamily: FB, lineHeight: 1.5 }}>
+                  {ui.settingsTab.dateLockNotice}
+                </span>
+              </div>
+            )}
+
             <div style={{ marginTop: 20, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
-              <AppBtn type="button" variant="gold" size="sm" disabled={!scheduleDirty || scheduleSaving} loading={scheduleSaving} onClick={() => void saveSchedule()}>
+              <AppBtn type="button" variant="gold" size="sm" disabled={isEventStarted || !scheduleDirty || scheduleSaving} loading={scheduleSaving} onClick={() => void saveSchedule()}>
                 {ui.settingsTab.saveSchedule}
               </AppBtn>
-              <AppBtn type="button" variant="ghost" size="sm" disabled={!scheduleDirty || scheduleSaving} onClick={() => { setScheduleDate(toDateInputUtc(eventDate)); setSchedulePlan(normalizePlanId(plan)); setError(null); }}>
+              <AppBtn type="button" variant="ghost" size="sm" disabled={isEventStarted || !scheduleDirty || scheduleSaving} onClick={() => { setScheduleDate(toDateInputUtc(eventDate)); setError(null); }}>
                 {ui.settingsTab.reset}
               </AppBtn>
             </div>
@@ -395,7 +464,7 @@ export function SettingsTab({
 
         {/* ── 03 Danger zone ─────────────────────────── */}
         <div>
-          <SectionMark n="03" label={ui.settingsTab.dangerEyebrow} />
+          <SectionMark n="04" label={ui.settingsTab.dangerEyebrow} />
           <ConfirmDialog
             open={deleteConfirmOpen}
             title={ui.settingsTab.deleteTitleForever}

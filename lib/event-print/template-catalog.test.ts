@@ -35,6 +35,22 @@ describe("template-catalog", () => {
   it("classifies gold-circles-photo as invitation", () => {
     expect(isInvitationPrintTemplateId("wedding-invite-gold-circles-photo")).toBe(true);
   });
+
+  it("classifies qr-clean/gold/dark as table_qr templates", () => {
+    expect(isTableQrTemplateId("qr-clean")).toBe(true);
+    expect(isTableQrTemplateId("qr-gold")).toBe(true);
+    expect(isTableQrTemplateId("qr-dark")).toBe(true);
+    expect(isInvitationPrintTemplateId("qr-clean")).toBe(false);
+  });
+
+  it("lists qr-clean for both generic and wedding events", () => {
+    const genericIds = listPrintTemplatesForEventKind("generic").map((t) => t.id);
+    const weddingIds = listPrintTemplatesForEventKind("wedding").map((t) => t.id);
+    expect(genericIds).toContain("qr-clean");
+    expect(genericIds).toContain("qr-gold");
+    expect(genericIds).toContain("qr-dark");
+    expect(weddingIds).toContain("qr-clean");
+  });
 });
 
 describe("validatePrintTemplateFieldValues", () => {

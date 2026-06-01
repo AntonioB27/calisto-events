@@ -23,6 +23,11 @@ describe("parsePrintRouteTemplate", () => {
   it("rejects unknown", () => {
     expect(parsePrintRouteTemplate("hacker")).toBe(DEFAULT_POSTER_TEMPLATE);
   });
+  it("accepts qr-clean, qr-gold, qr-dark", () => {
+    expect(parsePrintRouteTemplate("qr-clean")).toBe("qr-clean");
+    expect(parsePrintRouteTemplate("qr-gold")).toBe("qr-gold");
+    expect(parsePrintRouteTemplate("qr-dark")).toBe("qr-dark");
+  });
 });
 
 describe("parsePosterTemplate", () => {
@@ -40,6 +45,9 @@ describe("parsePosterTemplate", () => {
   });
   it("maps invitation route id to default table (table-only parser)", () => {
     expect(parsePosterTemplate("wedding-invite-blue-floral")).toBe(DEFAULT_POSTER_TEMPLATE);
+  });
+  it("accepts qr-clean", () => {
+    expect(parsePosterTemplate("qr-clean")).toBe("qr-clean");
   });
 });
 
