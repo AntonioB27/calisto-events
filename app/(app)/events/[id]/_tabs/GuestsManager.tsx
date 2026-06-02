@@ -5,6 +5,7 @@ import { startTransition, useCallback, useEffect, useMemo, useState } from "reac
 import { interpolate } from "@/lib/app-ui";
 import { useAppUi } from "@/components/AppUiProvider";
 import { GoldBar } from "@/components/app-ui/GoldBar";
+import { AuroraHourglass } from "@/components/app-ui/AuroraHourglass";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { ConfirmDialog } from "@/components/app-ui/ConfirmDialog";
 
@@ -235,7 +236,7 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
       ) : null}
 
       {loading ? (
-        <p style={{ fontSize: 13, color: "var(--app-muted)", marginTop: 24 }}>{ui.guests.loadingGuests}</p>
+        <AuroraHourglass size={72} caption={ui.guests.loadingGuests} style={{ marginTop: 24 }} />
       ) : null}
 
       {!loading && members.length === 0 ? (
@@ -350,9 +351,10 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
                         variant="ghost"
                         small
                         disabled={busyUserId !== null}
+                        loading={busy}
                         onClick={() => void setCoOrganizer(m.user_id, m.role === "guest")}
                       >
-                        {busy ? ui.common.working : m.role === "guest" ? ui.guests.promoteCo : ui.guests.demoteGuest}
+                        {m.role === "guest" ? ui.guests.promoteCo : ui.guests.demoteGuest}
                       </AppBtn>
                     ) : null}
                     {canRemove ? (

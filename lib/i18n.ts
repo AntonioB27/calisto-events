@@ -64,6 +64,7 @@ export type LandingCopy = {
   navAriaLabel: string;
   nav: NavItem[];
   joinWaitlistShort: string;
+  goToApp: string;
   heroBadge: string;
   heroIntro: string;
   heroTitle: string;
@@ -174,6 +175,7 @@ const copy: Record<Locale, LandingCopy> = {
       { href: "#faq", label: "FAQ" },
     ],
     joinWaitlistShort: "Try for free",
+    goToApp: "Go to App",
     heroBadge: "Meet Aurora",
     heroIntro: "Hi, I'm Aurora, I'll guide you through Calisto.",
     heroTitle: "Every memory matters. Make sure you capture them all.",
@@ -470,6 +472,7 @@ const copy: Record<Locale, LandingCopy> = {
       { href: "#faq", label: "Pitanja" },
     ],
     joinWaitlistShort: "Isprobaj besplatno",
+    goToApp: "Idi u aplikaciju",
     heroBadge: "Upoznaj Auroru",
     heroIntro: "Bok, ja sam Aurora, predstavljam ti Calisto.",
     heroTitle: "Svaka uspomena je važna. Pobrinite se da ne propustite nijednu.",
@@ -765,6 +768,7 @@ const copy: Record<Locale, LandingCopy> = {
       { href: "#faq", label: "Fragen" },
     ],
     joinWaitlistShort: "Kostenlos ausprobieren",
+    goToApp: "Zur App",
     heroBadge: "Lerne Aurora kennen",
     heroIntro: "Hi, ich bin Aurora, ich stelle dir Calisto vor.",
     heroTitle: "Jede Erinnerung zählt. Stell sicher, dass du sie alle festhältst.",

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Home, Calendar, Images, Users, Plus, Camera, QrCode } from "lucide-react";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppShellAccountMenu } from "@/components/AppShellAccountMenu";
@@ -37,6 +37,9 @@ function NavLinks({ eventId }: { eventId: string | null }) {
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab");
   const active = getActiveNav(pathname);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  useEffect(() => { setPendingHref(null); }, [pathname, searchParams]);
 
   const isEventScreen = Boolean(eventId);
 
@@ -65,13 +68,15 @@ function NavLinks({ eventId }: { eventId: string | null }) {
     <>
       {links.map((link) => {
         const on = isActive(link.id);
+        const pending = !on && pendingHref === link.href;
         const Icon = NAV_ICONS[link.id];
         return (
           <Link
             key={link.id}
             href={link.href}
             aria-current={on ? "page" : undefined}
-            className={`app-nav-link${on ? " app-nav-link--active" : ""}`}
+            className={`app-nav-link${on ? " app-nav-link--active" : ""}${pending ? " app-nav-link--pending" : ""}`}
+            onClick={() => setPendingHref(link.href)}
           >
             {Icon && <Icon size={16} />}
             {link.label}
@@ -85,6 +90,9 @@ function NavLinks({ eventId }: { eventId: string | null }) {
 function AppShellInner({ userName, userInitial, children }: AppShellProps) {
   const ui = useAppUi();
   const pathname = usePathname();
+  const [pendingActionHref, setPendingActionHref] = useState<string | null>(null);
+
+  useEffect(() => { setPendingActionHref(null); }, [pathname]);
 
   const eventMatch = pathname.match(/^\/events\/([^/]+)/);
   const isEventScreen = Boolean(eventMatch && eventMatch[1] !== "new");
@@ -149,11 +157,21 @@ function AppShellInner({ userName, userInitial, children }: AppShellProps) {
 
         {/* Right side: Join + New Event + rule + avatar */}
         <div className="ml-auto flex shrink-0 items-center gap-4 md:gap-5">
-          <Link href="/join" className="app-shell-text-link app-shell-join-link" aria-label={ui.shell.joinCta}>
+          <Link
+            href="/join"
+            className={`app-shell-text-link app-shell-join-link${pendingActionHref === "/join" ? " app-shell-text-link--pending" : ""}`}
+            aria-label={ui.shell.joinCta}
+            onClick={() => setPendingActionHref("/join")}
+          >
             <QrCode size={16} strokeWidth={1.8} />
             <span className="hidden md:inline">{ui.shell.joinCta}</span>
           </Link>
-          <Link href="/events/new" className="app-shell-text-link app-shell-new-event-link" aria-label={ui.shell.newEventAria}>
+          <Link
+            href="/events/new"
+            className={`app-shell-text-link app-shell-new-event-link${pendingActionHref === "/events/new" ? " app-shell-text-link--pending" : ""}`}
+            aria-label={ui.shell.newEventAria}
+            onClick={() => setPendingActionHref("/events/new")}
+          >
             <Plus size={16} strokeWidth={2.5} />
             <span className="hidden md:inline">{ui.shell.newEventLabel}</span>
           </Link>

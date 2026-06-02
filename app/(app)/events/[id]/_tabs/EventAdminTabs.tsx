@@ -112,6 +112,9 @@ function TabsInner({
   const parsedDate = parseDateFull(eventDate);
   const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
 
+  const [pendingTab, setPendingTab] = useState<EventAdminTabId | null>(null);
+  useEffect(() => { setPendingTab(null); }, [selectedTab]);
+
   const [isDark, setIsDark] = useState(false);
   useEffect(() => {
     setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
@@ -306,6 +309,7 @@ function TabsInner({
       >
         {[...BOTTOM_NAV_TABS, ...(showOrganizerOnlyTabs ? ORGANIZER_NAV_TABS : [])].map((tabId) => {
           const active = tabId === selectedTab;
+          const pending = !active && pendingTab === tabId;
           const count = countFor(tabId);
           const Icon = ICON_MAP[tabId];
           return (
@@ -316,6 +320,7 @@ function TabsInner({
               aria-selected={active}
               aria-current={active ? 'page' : undefined}
               aria-label={labelForTab(tabId, ui)}
+              onClick={() => setPendingTab(tabId)}
               style={{
                 flex: active ? 1.4 : 1,
                 background: active ? 'rgba(255,252,248,0.52)' : 'transparent',
@@ -333,6 +338,9 @@ function TabsInner({
                 transition: 'flex 200ms ease',
                 textDecoration: 'none',
                 outline: 'none',
+                opacity: pending ? 0.45 : 1,
+                cursor: pending ? 'wait' : undefined,
+                animation: pending ? 'appNavPending 1.4s ease-in-out infinite' : undefined,
               }}
             >
               {Icon && (

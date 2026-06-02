@@ -1077,6 +1077,25 @@ html[data-theme="dark"] .app-card.auth-card {
   pointer-events: none;
 }
 
+/* Busy (loading) state: distinct from plain disabled — cursor:wait + pulse */
+.app-btn[aria-busy="true"] {
+  opacity: 0.75;
+  cursor: wait !important;
+  animation: appBtnBusyPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes appBtnBusyPulse {
+  0%, 100% { opacity: 0.75; }
+  50%       { opacity: 0.5;  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-btn[aria-busy="true"] {
+    animation: none;
+    opacity: 0.65;
+  }
+}
+
 .app-btn--sm {
   padding: 8px 14px;
   font-size: 13px;
@@ -1342,6 +1361,31 @@ html[data-theme="dark"] .app-card--hover:hover {
   color: var(--app-text);
   background: color-mix(in srgb, var(--app-gold) 12%, transparent);
   border-bottom-color: var(--app-gold);
+}
+
+/* Pending state — link was clicked, navigation not yet resolved */
+.app-nav-link--pending {
+  opacity: 0.55;
+  cursor: wait;
+  pointer-events: none;
+  animation: appNavPending 1.4s ease-in-out infinite;
+}
+
+@keyframes appNavPending {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 0.3;  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-nav-link--pending { animation: none; opacity: 0.45; }
+}
+
+/* Shell text links (Join, New Event) pending state */
+.app-shell-text-link--pending {
+  opacity: 0.5;
+  cursor: wait;
+  pointer-events: none;
+  animation: appNavPending 1.4s ease-in-out infinite;
 }
 
 /* Shell action buttons — sharp 4px radius for any remaining btn in header */

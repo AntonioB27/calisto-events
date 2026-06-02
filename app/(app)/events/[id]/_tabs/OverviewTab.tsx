@@ -15,6 +15,7 @@ import {
   normalizePlanId,
 } from "@/lib/plan-limits";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { AuroraHourglass } from "@/components/app-ui/AuroraHourglass";
 
 // ── Aurora Theater palette ────────────────────────────────────────────────────
 const GOLD   = '#C5922A';
@@ -823,8 +824,8 @@ function PhotoCarousel({ eventId }: { eventId: string }) {
       </div>
 
       {loading ? (
-        <p style={{ fontSize: 13, color: MUTED, fontFamily: FB }}>{ui.common.loading}</p>
-      ) : !supabase ? (
+        <AuroraHourglass size={72} caption={ui.common.loading} />
+      ) :!supabase ? (
         <p style={{ fontSize: 13, color: MUTED, fontFamily: FB }}>{ui.common.configuringSupabase}</p>
       ) : urls.length === 0 ? (
         <div style={{ ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 18, padding: '24px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>

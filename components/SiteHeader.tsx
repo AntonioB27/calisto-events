@@ -9,7 +9,7 @@ type SiteHeaderProps = {
 };
 
 export function SiteHeader({ copy, locale, isLoggedIn }: SiteHeaderProps) {
-  const ctaHref = isLoggedIn ? "/dashboard" : "/welcome";
+  const ctaHref = "/dashboard";
 
   return (
     <header className="site-header sticky top-0 z-50">
@@ -57,7 +57,7 @@ export function SiteHeader({ copy, locale, isLoggedIn }: SiteHeaderProps) {
               letterSpacing: "0.01em",
             }}
           >
-            {copy.joinWaitlistShort}
+            {copy.goToApp}
             <span aria-hidden style={{ transition: "transform 300ms" }}>→</span>
           </a>
           <a
@@ -74,7 +74,7 @@ export function SiteHeader({ copy, locale, isLoggedIn }: SiteHeaderProps) {
               textDecoration: "none",
             }}
           >
-            {copy.joinWaitlistShort}
+            {copy.goToApp}
           </a>
         </div>
 

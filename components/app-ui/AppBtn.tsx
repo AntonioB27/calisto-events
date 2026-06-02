@@ -68,16 +68,17 @@ export function AppBtn(props: AppBtnProps) {
       <span
         aria-hidden
         style={{
-          width: 16,
-          height: 16,
-          border: "2px solid color-mix(in srgb, currentColor 35%, transparent)",
+          width: 14,
+          height: 14,
+          border: "2px solid color-mix(in srgb, currentColor 30%, transparent)",
           borderTopColor: "currentColor",
           borderRadius: "50%",
           display: "inline-block",
+          flexShrink: 0,
           animation: "appBtnSpin 0.7s linear infinite",
         }}
       />
-      <span className="sr-only">{typeof children === "string" ? children : "Loading"}</span>
+      {children}
     </>
   ) : (
     children

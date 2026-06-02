@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { interpolate } from "@/lib/app-ui";
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
+import { AuroraHourglass } from "@/components/app-ui/AuroraHourglass";
 import { ConfirmDialog } from "@/components/app-ui/ConfirmDialog";
 import { MediaLikeBadge } from "@/components/app-ui/MediaLikeBadge";
 import { MediaUploaderChip } from "@/components/app-ui/MediaUploaderChip";
@@ -969,30 +970,7 @@ export function GalleryManager({
       ) : null}
 
       {loading ? (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0" }}>
-          <span
-            className="animate-pulse"
-            style={{
-              display: "inline-block",
-              width: 7,
-              height: 7,
-              borderRadius: "50%",
-              background: "var(--app-gold)",
-              boxShadow: "0 0 6px var(--app-gold)",
-              flexShrink: 0,
-            }}
-          />
-          <span
-            style={{
-              fontFamily: "var(--font-display)",
-              fontStyle: "italic",
-              fontSize: 15,
-              color: "var(--app-muted)",
-            }}
-          >
-            {ui.gallery.loading}
-          </span>
-        </div>
+        <AuroraHourglass size={80} caption={ui.gallery.loading} style={{ padding: "20px 0" }} />
       ) : null}
 
       {!loading && filtered.length === 0 ? (

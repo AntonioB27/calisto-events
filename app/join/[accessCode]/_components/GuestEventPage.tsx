@@ -4,6 +4,7 @@ import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
+import { AuroraHourglass } from "@/components/app-ui/AuroraHourglass";
 import type { AppUiDict } from "@/lib/app-ui";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { canGuestUpload, type PlanId } from "@/lib/plan-limits";
@@ -210,7 +211,7 @@ export function GuestEventPage({
   if (hasSession === null) {
     return (
       <main className="join-shell mx-auto flex min-h-screen max-w-2xl items-center justify-center px-6 py-12">
-        <p style={{ fontSize: 14, color: "var(--app-muted)" }}>{ui.guestJoin.loading}</p>
+        <AuroraHourglass size={96} caption={ui.guestJoin.loading} />
       </main>
     );
   }
