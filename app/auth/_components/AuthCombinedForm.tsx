@@ -198,7 +198,7 @@ export function AuthCombinedForm() {
       <div style={{ width: "100%", maxWidth: WELCOME_HERO_COLUMN_MAX_WIDTH_PX }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
-            <div style={{ position: "relative", display: "inline-block" }}>
+            <div className="polaroid-sway" style={{ position: "relative", display: "inline-block" }}>
               {/* Washi tape */}
               <div
                 aria-hidden
@@ -221,7 +221,7 @@ export function AuthCombinedForm() {
               <div
                 style={{
                   background: "#f9f6f1",
-                  padding: "10px 10px 32px 10px",
+                  padding: "3px 3px 10px 6px",
                   borderRadius: 2,
                   boxShadow: "0 8px 28px rgba(0,0,0,0.28), 0 2px 6px rgba(0,0,0,0.16)",
                   transform: "rotate(2deg)",
@@ -231,7 +231,7 @@ export function AuthCombinedForm() {
                 <img
                   src="/brand/mascot/aurora_key.png"
                   alt=""
-                  style={{ width: 140, height: 140, objectFit: "cover", objectPosition: "center top", display: "block", borderRadius: 1 }}
+                  style={{ width: 190, height: 190, objectFit: "contain", objectPosition: "center", display: "block", borderRadius: 1 }}
                 />
               </div>
             </div>

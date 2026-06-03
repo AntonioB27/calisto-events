@@ -7,6 +7,7 @@ import { getEventAdminAccess } from "@/lib/event-admin-access";
 import { getWebJoinUrl } from "@/lib/join-link";
 import { getPublicOrigin } from "@/lib/public-origin";
 import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
+import { splitEventTitleStored } from "@/lib/event-title";
 import { QrPdfDocument } from "./QrPdfDocument";
 
 type RouteParams = { params: Promise<{ id: string }> };
@@ -45,9 +46,11 @@ export async function GET(request: Request, { params }: RouteParams) {
     color: { dark: "#000000", light: "#ffffff" },
   });
 
+  const { name: eventTitle } = splitEventTitleStored(event.title);
+
   const pdfBuffer = await renderToBuffer(
     React.createElement(QrPdfDocument, {
-      eventTitle: event.title,
+      eventTitle,
       accessCode: event.access_code,
       joinUrl,
       qrDataUrl,

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Key, Plus } from "lucide-react";
+import { Key, LayoutDashboard, Plus } from "lucide-react";
 
 import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 import { getUiLocale } from "@/lib/ui-locale";
@@ -143,6 +143,43 @@ export default async function OnboardingPage() {
                 style={{ fontFamily: FB, fontSize: 13, color: MUTED, marginTop: 3, lineHeight: 1.4 }}
               >
                 {copy.onboardingJoinSub}
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/dashboard" style={glass}>
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                background: `${INK}10`,
+                border: `1px solid ${INK}25`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <LayoutDashboard size={20} color={INK} />
+            </div>
+            <div>
+              <div
+                style={{
+                  fontFamily: FS,
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  fontSize: 18,
+                  color: INK,
+                  lineHeight: 1.2,
+                }}
+              >
+                {copy.onboardingDashboardTitle}
+              </div>
+              <div
+                style={{ fontFamily: FB, fontSize: 13, color: MUTED, marginTop: 3, lineHeight: 1.4 }}
+              >
+                {copy.onboardingDashboardSub}
               </div>
             </div>
           </Link>

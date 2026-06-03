@@ -4,6 +4,7 @@ import { isLocale } from "@/lib/i18n";
 import {
   INVITATION_PRINT_TEMPLATE_IDS,
   TABLE_QR_PRINT_TEMPLATE_IDS,
+  QR_THEMED_PRINT_TEMPLATE_IDS,
   type TableQrPrintTemplateId,
 } from "./template-catalog";
 
@@ -15,8 +16,8 @@ export const POSTER_TEMPLATES = TABLE_QR_PRINT_TEMPLATE_IDS;
 export type PosterTemplateId = TableQrPrintTemplateId;
 export const DEFAULT_POSTER_TEMPLATE: PosterTemplateId = "qr-clean";
 
-/** All templates selectable on `/events/[id]/print` (table cards + invitations). */
-export const PRINT_ROUTE_TEMPLATE_IDS = [...TABLE_QR_PRINT_TEMPLATE_IDS, ...INVITATION_PRINT_TEMPLATE_IDS] as const;
+/** All templates selectable on `/events/[id]/print` (table cards + themed QR cards + invitations). */
+export const PRINT_ROUTE_TEMPLATE_IDS = [...TABLE_QR_PRINT_TEMPLATE_IDS, ...QR_THEMED_PRINT_TEMPLATE_IDS, ...INVITATION_PRINT_TEMPLATE_IDS] as const;
 export type PrintRouteTemplateId = (typeof PRINT_ROUTE_TEMPLATE_IDS)[number];
 
 export const PRINT_PAPERS = ["a4", "letter"] as const;

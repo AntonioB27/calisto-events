@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { EventPrintToolbar } from "./EventPrintToolbar";
+import { QrThemedPrintSheet } from "./QrThemedPrintSheet";
+import { PrintScreen } from "./PrintScreen";
 import { WeddingInviteBlueFloraPrintSheet } from "./WeddingInviteBlueFloraPrintSheet";
 import { WeddingInviteCherryBlossomPrintSheet } from "./WeddingInviteCherryBlossomPrintSheet";
 import { WeddingInviteGeometricPrintSheet } from "./WeddingInviteGeometricPrintSheet";
@@ -25,11 +27,12 @@ import {
   parsePrintRouteTemplate,
   POSTER_LANG_QUERY,
 } from "@/lib/event-print/print-options";
-import { getPrintTemplateDef, isInvitationPrintTemplateId, isTableQrTemplateId } from "@/lib/event-print/template-catalog";
+import { getPrintTemplateDef, isInvitationPrintTemplateId, isTableQrTemplateId, isQrThemedPrintTemplateId, type QrThemedTemplateId } from "@/lib/event-print/template-catalog";
 import { getWebJoinUrl } from "@/lib/join-link";
 import { getPublicOrigin } from "@/lib/public-origin";
 import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 import { getUiLocale } from "@/lib/ui-locale";
+import { LOCALES } from "@/lib/i18n";
 
 import "./print-sheet.css";
 
@@ -101,6 +104,7 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
 
   const templateDef = getPrintTemplateDef(routeTemplate);
   const isInvitationPrint = isInvitationPrintTemplateId(routeTemplate);
+  const isQrThemed = isQrThemedPrintTemplateId(routeTemplate);
   const invitationAllowed = Boolean(isInvitationPrint && templateDef?.eventKinds.includes(storedEventKind));
 
   if (isInvitationPrint && !invitationAllowed) {
@@ -120,6 +124,31 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
       </main>
     );
   }
+
+  // ── QR-themed templates: render full PrintScreen UI (early return) ──
+  if (isQrThemed) {
+    const publicOrigin = await getPublicOrigin();
+    const joinUrl = getWebJoinUrl(publicOrigin, event.access_code);
+    const { name: eventDisplayName } = splitEventTitleStored(String(event.title ?? ""));
+    return (
+      <div className="join-shell">
+        <PrintScreen
+          eventId={id}
+          eventTitle={eventDisplayName}
+          accessCode={event.access_code}
+          joinUrl={joinUrl}
+          initialTemplate={routeTemplate as QrThemedTemplateId}
+          initialPaper={paper}
+          posterLang={posterLocale}
+          backHref={`/events/${id}?tab=prints`}
+          chromePrint={uiDict.print}
+          posterPrint={posterDict.print}
+        />
+      </div>
+    );
+  }
+
+  let qrThemedJoinUrl: string | null = null;
 
   let mergedInvitation: Record<string, string> | null = null;
   if (isInvitationPrint && invitationAllowed) {
@@ -190,17 +219,10 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
 
   return (
     <main
-      className="join-shell min-h-screen px-4 py-10 print:bg-white print:px-0 print:py-0"
-      style={{ color: "var(--app-text)" }}
+      className="join-shell min-h-screen print:bg-white"
+      style={{ paddingBottom: 48, color: "var(--app-text)" }}
     >
-      <div
-        style={{
-          maxWidth: isInvitationPrint ? "100%" : 960,
-          margin: "0 auto",
-          width: "100%",
-        }}
-        className="print:max-w-none"
-      >
+      <div style={{ width: "100%" }} className="print:max-w-none">
         <EventPrintToolbar
           eventId={id}
           activeTemplate={routeTemplate}
@@ -209,10 +231,44 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
           posterLang={posterLocale}
           chromePrint={uiDict.print}
           localeOptionLabels={uiDict.languagePicker.locales}
-          backHref={isInvitationPrint ? `/events/${id}?tab=prints` : `/events/${id}?tab=share`}
-          backLabel={isInvitationPrint ? uiDict.print.backPrints : uiDict.print.backShare}
+          backHref={(isInvitationPrint || isQrThemed) ? `/events/${id}?tab=prints` : `/events/${id}?tab=share`}
+          backLabel={(isInvitationPrint || isQrThemed) ? uiDict.print.backPrints : uiDict.print.backShare}
           sheetHelperLine={isInvitationPrint ? uiDict.print.sheetHelperInvitation : uiDict.print.sheetHelper}
         />
+
+        {/* Paper size controls (classic QR + invitation templates only; QR-themed uses PrintScreen) */}
+        {!isInvitationPrint && (
+          <div className="print-secondary-controls print:hidden">
+            <div className="print-secondary-controls__group">
+              <span className="print-secondary-controls__label">Paper</span>
+              {(["a4", "letter"] as const).map((sz) => (
+                <Link
+                  key={sz}
+                  href={`/events/${id}/print?template=${routeTemplate}&paper=${sz}&${POSTER_LANG_QUERY}=${posterLocale}`}
+                  scroll={false}
+                  prefetch={false}
+                  className={`print-secondary-controls__pill${paper === sz ? " print-secondary-controls__pill--active" : ""}`}
+                >
+                  {sz === "a4" ? "A4" : "Letter"}
+                </Link>
+              ))}
+            </div>
+            <div className="print-secondary-controls__group">
+              <span className="print-secondary-controls__label">{uiDict.print.posterLanguageLabel}</span>
+              {LOCALES.map((loc) => (
+                <Link
+                  key={loc}
+                  href={`/events/${id}/print?template=${routeTemplate}&paper=${paper}&${POSTER_LANG_QUERY}=${loc}`}
+                  scroll={false}
+                  prefetch={false}
+                  className={`print-secondary-controls__pill${posterLocale === loc ? " print-secondary-controls__pill--active" : ""}`}
+                >
+                  {loc === "en" ? uiDict.languagePicker.locales.en : loc === "hr" ? uiDict.languagePicker.locales.hr : uiDict.languagePicker.locales.de}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div lang={posterLocale} className={isInvitationPrint ? "print-invite-page-root" : undefined}>
           {isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-olive-gold-frame" ? (

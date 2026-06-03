@@ -30,6 +30,31 @@ export const TABLE_QR_PRINT_TEMPLATE_IDS = [
 ] as const;
 export type TableQrPrintTemplateId = (typeof TABLE_QR_PRINT_TEMPLATE_IDS)[number];
 
+/** Themed QR card layouts — richly styled A5 portrait cards, two per A4 sheet, browser-printed. */
+export const QR_THEMED_PRINT_TEMPLATE_IDS = [
+  "qr-simple",
+  "qr-romantic",
+  "qr-luxurious",
+  "qr-botanical",
+  "qr-art-deco",
+  "qr-playful",
+  "qr-celestial",
+  "qr-coastal",
+  "qr-boho",
+  "qr-noir",
+  "qr-watercolor",
+  "qr-retro",
+  "qr-tropical",
+  "qr-scandi",
+  "qr-sunset",
+  "qr-rustic",
+] as const;
+export type QrThemedTemplateId = (typeof QR_THEMED_PRINT_TEMPLATE_IDS)[number];
+
+export function isQrThemedPrintTemplateId(id: string): id is QrThemedTemplateId {
+  return (QR_THEMED_PRINT_TEMPLATE_IDS as readonly string[]).includes(id);
+}
+
 /** Invitation layouts (field values + optional QR block on the print route). */
 export const INVITATION_PRINT_TEMPLATE_IDS = [
   "wedding-invite-blue-floral",
@@ -76,6 +101,118 @@ export const PRINT_TEMPLATE_DEFINITIONS: readonly PrintTemplateDef[] = [
   },
   {
     id: "qr-dark",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-simple",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-romantic",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-luxurious",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-botanical",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-art-deco",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-playful",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-celestial",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-coastal",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-boho",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-noir",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-watercolor",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-retro",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-tropical",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-scandi",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-sunset",
+    category: "table_qr",
+    eventKinds: ["generic", "wedding"],
+    fields: [],
+    stripePriceEnvKey: null,
+  },
+  {
+    id: "qr-rustic",
     category: "table_qr",
     eventKinds: ["generic", "wedding"],
     fields: [],

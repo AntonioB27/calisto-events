@@ -12,6 +12,8 @@ export type WelcomePageCopy = {
   onboardingCreateSub: string;
   onboardingJoinTitle: string;
   onboardingJoinSub: string;
+  onboardingDashboardTitle: string;
+  onboardingDashboardSub: string;
 };
 
 const WELCOME_PAGE_COPY: Record<Locale, WelcomePageCopy> = {
@@ -27,6 +29,8 @@ const WELCOME_PAGE_COPY: Record<Locale, WelcomePageCopy> = {
     onboardingCreateSub: "Set up a new event and invite your guests.",
     onboardingJoinTitle: "Join an event",
     onboardingJoinSub: "Enter an access code from your organizer.",
+    onboardingDashboardTitle: "Go to dashboard",
+    onboardingDashboardSub: "View and manage your existing events.",
   },
   hr: {
     eyebrow: "Dobrodošli u",
@@ -40,6 +44,8 @@ const WELCOME_PAGE_COPY: Record<Locale, WelcomePageCopy> = {
     onboardingCreateSub: "Postavi novi događaj i pozovi goste.",
     onboardingJoinTitle: "Pridruži se događaju",
     onboardingJoinSub: "Unesite pristupni kod od svog organizatora.",
+    onboardingDashboardTitle: "Idi na nadzornu ploču",
+    onboardingDashboardSub: "Pregledaj i upravljaj svojim događajima.",
   },
   de: {
     eyebrow: "Willkommen bei",
@@ -53,6 +59,8 @@ const WELCOME_PAGE_COPY: Record<Locale, WelcomePageCopy> = {
     onboardingCreateSub: "Richte eine neue Veranstaltung ein und lade deine Gäste ein.",
     onboardingJoinTitle: "Veranstaltung beitreten",
     onboardingJoinSub: "Gib den Zugangscode von deinem Organisator ein.",
+    onboardingDashboardTitle: "Zum Dashboard",
+    onboardingDashboardSub: "Zeige und verwalte deine bestehenden Veranstaltungen.",
   },
 };
 

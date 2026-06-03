@@ -285,7 +285,8 @@ function AnalogClock({ nowMs, isDark }: { nowMs: number; isDark: boolean }) {
 
   function toXY(angleDeg: number, r: number) {
     const rad = ((angleDeg - 90) * Math.PI) / 180;
-    return { x: CX + Math.cos(rad) * r, y: CY + Math.sin(rad) * r };
+    const p = 1e4;
+    return { x: Math.round((CX + Math.cos(rad) * r) * p) / p, y: Math.round((CY + Math.sin(rad) * r) * p) / p };
   }
 
   const hourAngle   = (h / 12) * 360 + (m / 60) * 30;
