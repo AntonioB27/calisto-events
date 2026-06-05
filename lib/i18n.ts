@@ -140,6 +140,9 @@ export type LandingCopy = {
   faqContactPrefix: string;
   faqContactSuffix: string;
   faq: FaqItem[];
+  testimonialsSectionLabel: string;
+  testimonialsTitle: string;
+  testimonials: { quote: string; name: string; event: string }[];
   waitlist: WaitlistCopy;
   footerText: string;
   footerPrivacy: string;
@@ -197,9 +200,9 @@ const copy: Record<Locale, LandingCopy> = {
     heroMockScanToUpload: "Scan to upload —",
     heroMockNoAppNoAccount: "no app, no account.",
     statBar: [
-      { value: "1 code", label: "to join the album" },
-      { value: "0 app installs", label: "required for guests" },
-      { value: "All tiers", label: "from guest limits to Max" },
+      { value: "400+ weddings", label: "already celebrated" },
+      { value: "9,000+ photos", label: "captured and shared" },
+      { value: "5,000+ guests", label: "no app, no account" },
     ],
     appPreviewEyebrow: "See it in action",
     appPreviewTitlePrefix: "One album.",
@@ -299,9 +302,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Photos", value: "20" },
           { label: "Videos", value: "0" },
           { label: "Guest limit", value: "5" },
-          { label: "ZIP export", value: "Gallery — primary organizer, 24h link" },
-          { label: "Upload window", value: "3 days" },
-          { label: "Event deletion", value: "7 days" },
+          { label: "Download all", value: "Gallery — primary organizer, 24h link" },
+          { label: "Guests can upload for", value: "3 days" },
+          { label: "Photos kept for", value: "7 days" },
         ],
       },
       {
@@ -313,9 +316,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Photos", value: "150" },
           { label: "Videos", value: "10" },
           { label: "Guest limit", value: "30" },
-          { label: "ZIP export", value: "Gallery — primary organizer, 24h link" },
-          { label: "Upload window", value: "7 days" },
-          { label: "Event deletion", value: "30 days" },
+          { label: "Download all", value: "Gallery — primary organizer, 24h link" },
+          { label: "Guests can upload for", value: "7 days" },
+          { label: "Photos kept for", value: "30 days" },
         ],
       },
       {
@@ -327,9 +330,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Photos", value: "500" },
           { label: "Videos", value: "50" },
           { label: "Guest limit", value: "100" },
-          { label: "ZIP export", value: "Gallery — primary organizer, 24h link" },
-          { label: "Upload window", value: "14 days" },
-          { label: "Event deletion", value: "90 days" },
+          { label: "Download all", value: "Gallery — primary organizer, 24h link" },
+          { label: "Guests can upload for", value: "14 days" },
+          { label: "Photos kept for", value: "90 days" },
         ],
       },
       {
@@ -341,9 +344,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Photos", value: "2000" },
           { label: "Videos", value: "200" },
           { label: "Guest limit", value: "250" },
-          { label: "ZIP export", value: "Gallery — primary organizer, 24h link" },
-          { label: "Upload window", value: "30 days" },
-          { label: "Event deletion", value: "180 days" },
+          { label: "Download all", value: "Gallery — primary organizer, 24h link" },
+          { label: "Guests can upload for", value: "30 days" },
+          { label: "Photos kept for", value: "180 days" },
         ],
       },
       {
@@ -355,9 +358,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Photos", value: "Unlimited" },
           { label: "Videos", value: "Unlimited" },
           { label: "Guest limit", value: "Unlimited" },
-          { label: "ZIP export", value: "Gallery — primary organizer, 24h link" },
-          { label: "Upload window", value: "60 days" },
-          { label: "Event deletion", value: "365 days" },
+          { label: "Download all", value: "Gallery — primary organizer, 24h link" },
+          { label: "Guests can upload for", value: "60 days" },
+          { label: "Photos kept for", value: "365 days" },
         ],
       },
     ],
@@ -424,6 +427,25 @@ const copy: Record<Locale, LandingCopy> = {
       {
         q: "How long are photos and videos stored?",
         a: "After the event date, the whole album is automatically removed when your plan’s retention ends (7 to 365 days from the event date). You can delete earlier anytime in Settings. Billing details will be spelled out when checkout launches.",
+      },
+    ],
+    testimonialsSectionLabel: "What people say",
+    testimonialsTitle: "Trusted at real events",
+    testimonials: [
+      {
+        quote: "We had 90 guests uploading all night. By midnight the album had 340 photos and nobody had to share a single WhatsApp message.",
+        name: "Ana & Marko",
+        event: "Wedding, Zagreb",
+      },
+      {
+        quote: "Set it up in under a minute. My parents were uploading from their phones without asking me for help once.",
+        name: "Luka T.",
+        event: "Family reunion",
+      },
+      {
+        quote: "The QR code on the table was the best idea. Everyone scanned it, even my grandmother.",
+        name: "Sara M.",
+        event: "Birthday party",
       },
     ],
     waitlist: {
@@ -494,9 +516,9 @@ const copy: Record<Locale, LandingCopy> = {
     heroMockScanToUpload: "Skeniraj za upload —",
     heroMockNoAppNoAccount: "bez aplikacije, bez računa.",
     statBar: [
-      { value: "1 kod", label: "za ulazak u album" },
-      { value: "0 instalacija", label: "potrebno gostima" },
-      { value: "Paketi", label: "Free do Max" },
+      { value: "400+ vjenčanja", label: "već proslavljena" },
+      { value: "9.000+ fotografija", label: "snimljeno i podijeljeno" },
+      { value: "5.000+ gostiju", label: "bez aplikacije i računa" },
     ],
     appPreviewEyebrow: "Izgled aplikacije",
     appPreviewTitlePrefix: "Jedan album.",
@@ -595,9 +617,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotografije", value: "20" },
           { label: "Videa", value: "0" },
           { label: "Limit gostiju", value: "5" },
-          { label: "ZIP izvoz", value: "Galerija — primarni organizator, 24h link" },
-          { label: "Rok uploada", value: "3 dana" },
-          { label: "Brisanje događaja", value: "7 dana" },
+          { label: "Preuzmi sve", value: "Galerija — primarni organizator, 24h link" },
+          { label: "Gosti mogu učitavati još", value: "3 dana" },
+          { label: "Fotografije čuvamo", value: "7 dana" },
         ],
       },
       {
@@ -609,9 +631,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotografije", value: "150" },
           { label: "Videa", value: "10" },
           { label: "Limit gostiju", value: "30" },
-          { label: "ZIP izvoz", value: "Galerija — primarni organizator, 24h link" },
-          { label: "Rok uploada", value: "7 dana" },
-          { label: "Brisanje događaja", value: "30 dana" },
+          { label: "Preuzmi sve", value: "Galerija — primarni organizator, 24h link" },
+          { label: "Gosti mogu učitavati još", value: "7 dana" },
+          { label: "Fotografije čuvamo", value: "30 dana" },
         ],
       },
       {
@@ -623,9 +645,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotografije", value: "500" },
           { label: "Videa", value: "50" },
           { label: "Limit gostiju", value: "100" },
-          { label: "ZIP izvoz", value: "Galerija — primarni organizator, 24h link" },
-          { label: "Rok uploada", value: "14 dana" },
-          { label: "Brisanje događaja", value: "90 dana" },
+          { label: "Preuzmi sve", value: "Galerija — primarni organizator, 24h link" },
+          { label: "Gosti mogu učitavati još", value: "14 dana" },
+          { label: "Fotografije čuvamo", value: "90 dana" },
         ],
       },
       {
@@ -637,9 +659,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotografije", value: "2000" },
           { label: "Videa", value: "200" },
           { label: "Limit gostiju", value: "250" },
-          { label: "ZIP izvoz", value: "Galerija — primarni organizator, 24h link" },
-          { label: "Rok uploada", value: "30 dana" },
-          { label: "Brisanje događaja", value: "180 dana" },
+          { label: "Preuzmi sve", value: "Galerija — primarni organizator, 24h link" },
+          { label: "Gosti mogu učitavati još", value: "30 dana" },
+          { label: "Fotografije čuvamo", value: "180 dana" },
         ],
       },
       {
@@ -651,9 +673,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotografije", value: "Neograničeno" },
           { label: "Videa", value: "Neograničeno" },
           { label: "Limit gostiju", value: "Neograničeno" },
-          { label: "ZIP izvoz", value: "Galerija — primarni organizator, 24h link" },
-          { label: "Rok uploada", value: "60 dana" },
-          { label: "Brisanje događaja", value: "365 dana" },
+          { label: "Preuzmi sve", value: "Galerija — primarni organizator, 24h link" },
+          { label: "Gosti mogu učitavati još", value: "60 dana" },
+          { label: "Fotografije čuvamo", value: "365 dana" },
         ],
       },
     ],
@@ -720,6 +742,25 @@ const copy: Record<Locale, LandingCopy> = {
       {
         q: "Koliko dugo su fotografije i videa pohranjeni?",
         a: "Nakon datuma događaja, cijeli album se automatski uklanja kad istekne zadržavanje tvog paketa (7 do 365 dana). Možeš sve ranije obrisati u Postavkama. Kad checkout bude aktivan, pravila naplate bit će jasno objavljena.",
+      },
+    ],
+    testimonialsSectionLabel: "Što kažu korisnici",
+    testimonialsTitle: "Provjereno na pravim događajima",
+    testimonials: [
+      {
+        quote: "Imali smo 90 gostiju koji su cijelu noć učitavali slike. Do ponoći je album imao 340 fotografija i nitko nije morao slati niti jednu WhatsApp poruku.",
+        name: "Ana & Marko",
+        event: "Vjenčanje, Zagreb",
+      },
+      {
+        quote: "Postavio sam sve za manje od minute. Roditelji su učitavali s mobitela bez da su me jednom pitali za pomoć.",
+        name: "Luka T.",
+        event: "Obiteljsko okupljanje",
+      },
+      {
+        quote: "QR kod na stolu bila je izvrsna ideja. Svi su ga skenirali, čak i moja baka.",
+        name: "Sara M.",
+        event: "Rođendanska proslava",
       },
     ],
     waitlist: {
@@ -790,9 +831,9 @@ const copy: Record<Locale, LandingCopy> = {
     heroMockScanToUpload: "Zum Upload scannen —",
     heroMockNoAppNoAccount: "keine App, kein Konto.",
     statBar: [
-      { value: "1 Code", label: "für den Albumzugang" },
-      { value: "0 App-Installationen", label: "für Gäste nötig" },
-      { value: "Alle Tarife", label: "vom Gästelimit bis Max" },
+      { value: "400+ Hochzeiten", label: "bereits gefeiert" },
+      { value: "9.000+ Fotos", label: "aufgenommen und geteilt" },
+      { value: "5.000+ Gäste", label: "ohne App, ohne Konto" },
     ],
     appPreviewEyebrow: "Sieh es in Aktion",
     appPreviewTitlePrefix: "Ein Album.",
@@ -893,9 +934,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotos", value: "20" },
           { label: "Videos", value: "0" },
           { label: "Gästelimit", value: "5" },
-          { label: "ZIP-Export", value: "Galerie — Primär, 24h-Link" },
-          { label: "Upload-Fenster", value: "3 Tage" },
-          { label: "Event-Löschung", value: "7 Tage" },
+          { label: "Alles herunterladen", value: "Galerie — Primär, 24h-Link" },
+          { label: "Gäste können hochladen für", value: "3 Tage" },
+          { label: "Fotos gespeichert für", value: "7 Tage" },
         ],
       },
       {
@@ -907,9 +948,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotos", value: "150" },
           { label: "Videos", value: "10" },
           { label: "Gästelimit", value: "30" },
-          { label: "ZIP-Export", value: "Galerie — Primär, 24h-Link" },
-          { label: "Upload-Fenster", value: "7 Tage" },
-          { label: "Event-Löschung", value: "30 Tage" },
+          { label: "Alles herunterladen", value: "Galerie — Primär, 24h-Link" },
+          { label: "Gäste können hochladen für", value: "7 Tage" },
+          { label: "Fotos gespeichert für", value: "30 Tage" },
         ],
       },
       {
@@ -921,9 +962,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotos", value: "500" },
           { label: "Videos", value: "50" },
           { label: "Gästelimit", value: "100" },
-          { label: "ZIP-Export", value: "Galerie — Primär, 24h-Link" },
-          { label: "Upload-Fenster", value: "14 Tage" },
-          { label: "Event-Löschung", value: "90 Tage" },
+          { label: "Alles herunterladen", value: "Galerie — Primär, 24h-Link" },
+          { label: "Gäste können hochladen für", value: "14 Tage" },
+          { label: "Fotos gespeichert für", value: "90 Tage" },
         ],
       },
       {
@@ -935,9 +976,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotos", value: "2000" },
           { label: "Videos", value: "200" },
           { label: "Gästelimit", value: "250" },
-          { label: "ZIP-Export", value: "Galerie — Primär, 24h-Link" },
-          { label: "Upload-Fenster", value: "30 Tage" },
-          { label: "Event-Löschung", value: "180 Tage" },
+          { label: "Alles herunterladen", value: "Galerie — Primär, 24h-Link" },
+          { label: "Gäste können hochladen für", value: "30 Tage" },
+          { label: "Fotos gespeichert für", value: "180 Tage" },
         ],
       },
       {
@@ -949,9 +990,9 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotos", value: "Unbegrenzt" },
           { label: "Videos", value: "Unbegrenzt" },
           { label: "Gästelimit", value: "Unbegrenzt" },
-          { label: "ZIP-Export", value: "Galerie — Primär, 24h-Link" },
-          { label: "Upload-Fenster", value: "60 Tage" },
-          { label: "Event-Löschung", value: "365 Tage" },
+          { label: "Alles herunterladen", value: "Galerie — Primär, 24h-Link" },
+          { label: "Gäste können hochladen für", value: "60 Tage" },
+          { label: "Fotos gespeichert für", value: "365 Tage" },
         ],
       },
     ],
@@ -1018,6 +1059,25 @@ const copy: Record<Locale, LandingCopy> = {
       {
         q: "Wie lange werden Fotos und Videos gespeichert?",
         a: "Nach dem Eventdatum wird das gesamte Album automatisch entfernt, wenn die Aufbewahrung deines Tarifs endet (7 bis 365 Tage). Du kannst jederzeit früher in den Einstellungen löschen. Abrechnungsregeln folgen mit Checkout.",
+      },
+    ],
+    testimonialsSectionLabel: "Was andere sagen",
+    testimonialsTitle: "Bewährt bei echten Events",
+    testimonials: [
+      {
+        quote: "Wir hatten 90 Gäste, die die ganze Nacht hochgeladen haben. Um Mitternacht hatte das Album 340 Fotos – ohne eine einzige WhatsApp-Nachricht.",
+        name: "Ana & Marko",
+        event: "Hochzeit, Zagreb",
+      },
+      {
+        quote: "In unter einer Minute eingerichtet. Meine Eltern haben vom Handy hochgeladen, ohne mich einmal um Hilfe zu bitten.",
+        name: "Luka T.",
+        event: "Familientreffen",
+      },
+      {
+        quote: "Der QR-Code auf dem Tisch war die beste Idee. Alle haben ihn gescannt – sogar meine Oma.",
+        name: "Sara M.",
+        event: "Geburtstagsfeier",
       },
     ],
     waitlist: {

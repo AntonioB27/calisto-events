@@ -87,6 +87,15 @@ export function AppPreviewWindow({ copy }: AppPreviewWindowProps) {
               {" "}{copy.appPreviewTitleSuffix}
             </h2>
           </div>
+          <div className="shrink-0">
+            <Image
+              src="/brand/mascot/aurora_phone.png"
+              alt={copy.auroraMascotAlt}
+              width={140}
+              height={140}
+              style={{ width: 100, height: "auto", objectFit: "contain" }}
+            />
+          </div>
         </div>
 
         {/* Preview frame */}
