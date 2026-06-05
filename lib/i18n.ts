@@ -286,9 +286,9 @@ const copy: Record<Locale, LandingCopy> = {
     plansTitle: "Plans",
     plansSectionLabel: "4 · Pricing",
     plansPerEventSuffix: "/ event",
-    plansDescriptionStrong: "Plan tiers set limits today",
+    plansDescriptionStrong: "Choose the plan that fits your event",
     plansDescriptionRest:
-      "guest caps, media quotas, and upload windows follow the tier you pick. List prices show where paid checkout will land — integrated billing (e.g. Stripe) is roadmap. Raising or lowering a tier in Settings updates limits in the app.",
+      "guest caps, media quotas, and upload windows follow the tier you pick. Raising or lowering a tier in Settings updates limits in the app.",
     plansAuroraBubble: "Choose what fits your event now — upgrading is always an option.",
     plansMascotAlt: "Aurora choosing a storage plan",
     popularBadge: "Most popular",
@@ -375,7 +375,7 @@ const copy: Record<Locale, LandingCopy> = {
     lifecycleRules: [
       "Guest upload windows are enforced in-app based on plan tier (`uploadDaysAfterEvent`, from 3 days on Free through 60 days on Max).",
       "Each event has a `scheduled_deletion_at` from the event date plus plan retention (7 / 30 / 90 / 180 / 365 days). An hourly job removes due events and their media unless the organizer deletes them first in Settings.",
-      "Integrated checkout is still on the roadmap beyond the current retention job. Primary organizers can export the gallery as a ZIP from the app (async job, 24-hour download window).",
+      "Primary organizers can export the gallery as a ZIP from the app (async job, 24-hour download window).",
     ],
     futureTitle: "On the roadmap",
     futureDescription:
@@ -384,10 +384,6 @@ const copy: Record<Locale, LandingCopy> = {
       {
         title: "Broader event types",
         description: "Roadmap: admin and organizer flows for conferences, tournaments, festivals—not only weddings.",
-      },
-      {
-        title: "Payments in the app",
-        description: "Planned: integrated checkout (for example Stripe) when you upgrade or create paid-tier events.",
       },
       {
         title: "Store presence",
@@ -426,7 +422,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         q: "How long are photos and videos stored?",
-        a: "After the event date, the whole album is automatically removed when your plan’s retention ends (7 to 365 days from the event date). You can delete earlier anytime in Settings. Billing details will be spelled out when checkout launches.",
+        a: "After the event date, the whole album is automatically removed when your plan’s retention ends (7 to 365 days from the event date). You can delete earlier anytime in Settings.",
       },
     ],
     testimonialsSectionLabel: "What people say",
@@ -468,7 +464,7 @@ const copy: Record<Locale, LandingCopy> = {
     legalEnglishNotice: "",
     pageTitle: "Calisto — shared event photos & videos",
     pageDescription:
-      "Calisto lets wedding and event guests upload and browse photos and videos together. Share a join code or QR; plan tiers set limits inside the web app — integrated payments are roadmap.",
+      "Calisto lets wedding and event guests upload and browse photos and videos together. Share a join code or QR — no app, no account needed for guests.",
     auroraQuote: "Every memory deserves a home. I'll make sure yours is beautiful, organized, and yours forever.",
     auroraQuoteIntro: "From Aurora · Your Calisto guide",
     auroraQuoteSectionAria: "A message from Aurora",
@@ -601,9 +597,9 @@ const copy: Record<Locale, LandingCopy> = {
     plansTitle: "Paketi",
     plansSectionLabel: "4 · Cijene",
     plansPerEventSuffix: "/ događaj",
-    plansDescriptionStrong: "Paketi određuju limite danas",
+    plansDescriptionStrong: "Odaberi paket koji odgovara tvom događaju",
     plansDescriptionRest:
-      "kapaciteti, upload prozori i videi definiraju se paketom. Cijene su referenca za budući checkout — integracija plaćanja (npr. Stripe) je na roadmapu. U Postavkama događaja možeš promijeniti paket unutar aplikacije.",
+      "kapaciteti, upload prozori i videi definiraju se paketom. U Postavkama događaja možeš promijeniti paket unutar aplikacije.",
     plansAuroraBubble: "Odaberi što sada odgovara tvom događaju — nadogradnja je uvijek opcija.",
     plansMascotAlt: "Aurora bira paket pohrane",
     popularBadge: "Najpopularniji",
@@ -690,7 +686,7 @@ const copy: Record<Locale, LandingCopy> = {
     lifecycleRules: [
       "Gosti mogu učitavati još neko vrijeme nakon datuma događaja — koliko dugo ovisi o paketu (od 3 dana na Free do 60 dana na Max).",
       "Svaki događaj ima `scheduled_deletion_at` od datuma događaja plus zadržavanje paketa (7 / 30 / 90 / 180 / 365 dana). Satni posao uklanja dospjele događaje i medije osim ako organizator prije obriše u Postavkama.",
-      "Integrirani checkout i dalje je na roadmapu. Primarni organizator može iz aplikacije izvesti galeriju kao ZIP (asinkroni posao, 24 sata za preuzimanje).",
+      "Primarni organizator može iz aplikacije izvesti galeriju kao ZIP (asinkroni posao, 24 sata za preuzimanje).",
     ],
     futureTitle: "Na roadmapu",
     futureDescription:
@@ -699,10 +695,6 @@ const copy: Record<Locale, LandingCopy> = {
       {
         title: "Širenje na druge događaje",
         description: "Roadmap: admin i organizer tokovi za konferencije, turnire i festivale, ne samo vjenčanja.",
-      },
-      {
-        title: "Plaćanja u aplikaciji",
-        description: "Planirano: integrirani checkout (npr. Stripe) kod nadogradnje ili kreiranja plaćenih paketa.",
       },
       {
         title: "Objava u trgovinama",
@@ -741,7 +733,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         q: "Koliko dugo su fotografije i videa pohranjeni?",
-        a: "Nakon datuma događaja, cijeli album se automatski uklanja kad istekne zadržavanje tvog paketa (7 do 365 dana). Možeš sve ranije obrisati u Postavkama. Kad checkout bude aktivan, pravila naplate bit će jasno objavljena.",
+        a: "Nakon datuma događaja, cijeli album se automatski uklanja kad istekne zadržavanje tvog paketa (7 do 365 dana). Možeš sve ranije obrisati u Postavkama.",
       },
     ],
     testimonialsSectionLabel: "Što kažu korisnici",
@@ -783,7 +775,7 @@ const copy: Record<Locale, LandingCopy> = {
     legalEnglishNotice: "Pravni tekst na ovoj stranici dostupan je na engleskom jeziku.",
     pageTitle: "Calisto — zajedničke fotografije i videa događaja",
     pageDescription:
-      "Calisto gostima omogućuje učitavanje i pregled fotografija i videa na jednom mjestu. Podijeli kod ili QR; paketi određuju limite u web aplikaciji — integrirana plaćanja su na roadmapu.",
+      "Calisto gostima omogućuje učitavanje i pregled fotografija i videa na jednom mjestu. Podijeli kod ili QR — bez aplikacije i računa za goste.",
     auroraQuote: "Svaka uspomena zaslužuje dom. Pobrinut ću se da bude lijepa, organizirana i zauvijek vaša.",
     auroraQuoteIntro: "",
     auroraQuoteSectionAria: "Poruka od Aurore",
@@ -917,9 +909,9 @@ const copy: Record<Locale, LandingCopy> = {
     plansTitle: "Tarife",
     plansSectionLabel: "4 · Preise",
     plansPerEventSuffix: "/ Event",
-    plansDescriptionStrong: "Tarifstufen setzen heute die Grenzen fest",
+    plansDescriptionStrong: "Wähle den Tarif, der zu deinem Event passt",
     plansDescriptionRest:
-      "Gästelimits, Mediakontingente und Upload-Fenster richten sich nach der gewählten Stufe. Die Preise sind eine Referenz für künftigen Checkout — integrierte Abrechnung (z. B. Stripe) steht auf der Roadmap. In den Event-Einstellungen kannst du den Tarif ändern, um die Limits in der App anzupassen.",
+      "Gästelimits, Mediakontingente und Upload-Fenster richten sich nach der gewählten Stufe. In den Event-Einstellungen kannst du den Tarif ändern, um die Limits in der App anzupassen.",
     plansAuroraBubble:
       "Such dir den passenden Tarif – upgraden kannst du später, wenn du mehr brauchst.",
     plansMascotAlt: "Aurora wählt einen Speichertarif",
@@ -1007,7 +999,7 @@ const copy: Record<Locale, LandingCopy> = {
     lifecycleRules: [
       "Nach dem Eventdatum dürfen Gäste noch begrenzt hochladen — wie lange, hängt vom Tarif ab (von 3 Tagen beim Free-Tarif bis 60 Tagen bei Max).",
       "Jedes Event hat ein `scheduled_deletion_at` aus Eventdatum plus Tarif-Aufbewahrung (7 / 30 / 90 / 180 / 365 Tage). Ein stündlicher Job entfernt fällige Events und Medien, sofern Organisator:innen nicht zuvor in den Einstellungen löschen.",
-      "Integrierter Checkout bleibt auf der Roadmap. Primär-Organisator:innen können die Galerie als ZIP aus der App exportieren (asynchroner Job, 24 Stunden Download-Fenster).",
+      "Primär-Organisator:innen können die Galerie als ZIP aus der App exportieren (asynchroner Job, 24 Stunden Download-Fenster).",
     ],
     futureTitle: "Auf der Roadmap",
     futureDescription:
@@ -1016,10 +1008,6 @@ const copy: Record<Locale, LandingCopy> = {
       {
         title: "Weitere Event-Typen",
         description: "Roadmap: Admin- und Organizer-Flows für Konferenzen, Turniere und Festivals, nicht nur Hochzeiten.",
-      },
-      {
-        title: "Zahlungen in der App",
-        description: "Geplant: integrierter Checkout (z. B. Stripe) für Upgrades und bezahlte Tarife.",
       },
       {
         title: "Store-Veröffentlichung",
@@ -1058,7 +1046,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         q: "Wie lange werden Fotos und Videos gespeichert?",
-        a: "Nach dem Eventdatum wird das gesamte Album automatisch entfernt, wenn die Aufbewahrung deines Tarifs endet (7 bis 365 Tage). Du kannst jederzeit früher in den Einstellungen löschen. Abrechnungsregeln folgen mit Checkout.",
+        a: "Nach dem Eventdatum wird das gesamte Album automatisch entfernt, wenn die Aufbewahrung deines Tarifs endet (7 bis 365 Tage). Du kannst jederzeit früher in den Einstellungen löschen.",
       },
     ],
     testimonialsSectionLabel: "Was andere sagen",
@@ -1100,7 +1088,7 @@ const copy: Record<Locale, LandingCopy> = {
     legalEnglishNotice: "Der Rechtstext auf dieser Seite liegt auf Englisch vor.",
     pageTitle: "Calisto — gemeinsame Event-Fotos & Videos",
     pageDescription:
-      "Calisto lässt Hochzeits- und Eventgäste Fotos und Videos gemeinsam hochladen und ansehen. Code oder QR teilen; Tarifgrenzen gelten in der Web-App — integrierte Zahlungen stehen auf der Roadmap.",
+      "Calisto lässt Hochzeits- und Eventgäste Fotos und Videos gemeinsam hochladen und ansehen. Code oder QR teilen — keine App und kein Konto für Gäste nötig.",
     auroraQuote: "Jede Erinnerung verdient ein Zuhause. Ich sorge dafür, dass deines schön, geordnet und für immer deins ist.",
     auroraQuoteIntro: "Von Aurora · Dein Calisto-Guide",
     auroraQuoteSectionAria: "Eine Nachricht von Aurora",

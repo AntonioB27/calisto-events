@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/lib/i18n";
+import { getAllPostMeta } from "@/lib/blog";
 import { getPublicOrigin } from "@/lib/public-origin";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -30,5 +31,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   );
 
-  return [...localeHome, ...staticPaths, ...localizedLegal];
+  const blogIndex = { url: `${base}/blog`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.8 };
+
+  const blogPosts = getAllPostMeta().map((post) => ({
+    url: `${base}/blog/${post.slug}`,
+    lastModified: new Date(post.updatedAt || post.publishedAt),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [...localeHome, ...staticPaths, ...localizedLegal, blogIndex, ...blogPosts];
 }

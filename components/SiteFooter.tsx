@@ -50,6 +50,7 @@ export function SiteFooter({ copy, locale }: SiteFooterProps) {
         {/* Nav links */}
         <div style={{ display: "flex", gap: 24 }}>
           {[
+            { href: "/blog", label: "Blog" },
             { href: `/${locale}/privacy`, label: copy.footerPrivacy },
             { href: `/${locale}/terms`, label: copy.footerTerms },
             { href: "mailto:info@calisto-events.com", label: "info@calisto-events.com" },
