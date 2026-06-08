@@ -501,7 +501,7 @@ const copy: Record<Locale, LandingCopy> = {
     heroIntro: "Bok, ja sam Aurora, predstavljam ti Calisto.",
     heroTitle: "Svaka uspomena je važna. Pobrinite se da ne propustite nijednu.",
     heroDescription:
-      "Calisto je zajednički foto i video album za vjenčanja, rođendane i svaku proslavu. Gosti učitavaju izravno iz mobilnog preglednika. Bez preuzimanja aplikacije. Besplatno za isprobati.",
+      "Calisto je zajednički foto i video album za vjenčanja, rođendane i proslave. Gosti dijele slike izravno iz preglednika na mobitelu. Nema preuzimanja aplikacije. Isprobaj besplatno.",
     heroAuroraCardBlurb:
       "Želim da budeš na plesu, a ne da u ponedjeljak pretražuješ deset mapi s fotkama. Tu sam da taj neuredno lijepi dan — toaste, prvi ples, taj tren s kolačem — ostane jedna priča koju možeš otvoriti bez detektivskog posla.",
     heroPrimaryCta: "Isprobaj besplatno",
