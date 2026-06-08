@@ -118,6 +118,27 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     }
   }
 
+  // Fetch moderation columns — safe before migration is applied
+  let moderationEnabled = false;
+  let organizerGalleryReviewedAt: string | null = null;
+  if (event && isPrimaryOrganizer) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: modRow } = await (supabase as any)
+        .from("events")
+        .select("moderation_enabled, organizer_gallery_reviewed_at")
+        .eq("id", id)
+        .maybeSingle();
+      if (modRow) {
+        moderationEnabled = Boolean((modRow as Record<string, unknown>).moderation_enabled);
+        const rat = (modRow as Record<string, unknown>).organizer_gallery_reviewed_at;
+        organizerGalleryReviewedAt = typeof rat === "string" ? rat : null;
+      }
+    } catch {
+      // column not yet added — use defaults
+    }
+  }
+
   if (!event || !access.canAccess) {
     return (
       <div style={{ padding: '40px 0' }}>
@@ -156,6 +177,8 @@ export default async function EventPage({ params, searchParams }: EventPageProps
         mediaCount={mediaCountResult.count ?? 0}
         eventDate={event.event_date ?? null}
         bannerTheme={bannerTheme}
+        moderationEnabled={moderationEnabled}
+        organizerGalleryReviewedAt={organizerGalleryReviewedAt}
       />
 
       {!isPrimaryOrganizer ? (
@@ -183,7 +206,14 @@ export default async function EventPage({ params, searchParams }: EventPageProps
           />
         )}
         {selectedTab === "guests" && <GuestsTab eventId={id} />}
-        {selectedTab === "gallery" && <GalleryTab eventId={id} isPrimaryOrganizer={isPrimaryOrganizer} />}
+        {selectedTab === "gallery" && (
+          <GalleryTab
+            eventId={id}
+            isPrimaryOrganizer={isPrimaryOrganizer}
+            moderationEnabled={moderationEnabled}
+            organizerGalleryReviewedAt={organizerGalleryReviewedAt}
+          />
+        )}
         {selectedTab === "share" && (
           <ShareTab
             eventId={id}
@@ -214,6 +244,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             plan={event.plan}
             accessCode={event.access_code}
             bannerTheme={bannerTheme}
+            moderationEnabled={moderationEnabled}
           />
         )}
       </div>

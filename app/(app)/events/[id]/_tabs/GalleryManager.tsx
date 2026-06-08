@@ -29,6 +29,7 @@ type MediaRow = {
   mime_type: string | null;
   created_at: string;
   uploaded_by: string;
+  moderation_status: string;
 };
 
 type MediaItem = MediaRow & { signedUrl?: string; thumbnailUrl?: string; uploaderLabel: string };
@@ -126,7 +127,14 @@ type ProfileLabellingRow = { id: string; display_name: string | null };
 export function GalleryManager({
   eventId,
   isPrimaryOrganizer,
-}: Readonly<{ eventId: string; isPrimaryOrganizer: boolean }>) {
+  moderationEnabled,
+  organizerGalleryReviewedAt,
+}: Readonly<{
+  eventId: string;
+  isPrimaryOrganizer: boolean;
+  moderationEnabled: boolean;
+  organizerGalleryReviewedAt: string | null;
+}>) {
   const ui = useAppUi();
   const [eventUpload, setEventUpload] = useState<{ planId: PlanId; eventDate: string } | null>(null);
   const [items, setItems] = useState<MediaItem[]>([]);
@@ -154,6 +162,10 @@ export function GalleryManager({
   const [zipBusy, setZipBusy] = useState(false);
   const [zipPanelError, setZipPanelError] = useState<string | null>(null);
   const [columns, setColumns] = useState(3);
+  const [pendingItems, setPendingItems] = useState<MediaItem[]>([]);
+  const [moderationBusy, setModerationBusy] = useState<string | null>(null);
+  const [moderationError, setModerationError] = useState<string | null>(null);
+  const [newCount, setNewCount] = useState(0);
 
   const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
 
@@ -264,6 +276,17 @@ export function GalleryManager({
     };
   }, [supabase, isPrimaryOrganizer, eventId]);
 
+  useEffect(() => {
+    if (!isPrimaryOrganizer) return;
+    void fetch(`/api/events/${eventId}/moderation`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "mark_reviewed" }),
+    }).catch(() => {
+      // Non-critical — ignore silently.
+    });
+  }, [eventId, isPrimaryOrganizer]);
+
   const downloadZipExport = useCallback(
     async (jobId: string) => {
       setZipPanelError(null);
@@ -340,7 +363,7 @@ export function GalleryManager({
         supabase.from("events").select("organizer_id, plan, event_date").eq("id", eventId).maybeSingle(),
         supabase
           .from("media_items")
-          .select("id, storage_path, thumbnail_path, mime_type, created_at, uploaded_by")
+          .select("id, storage_path, thumbnail_path, mime_type, created_at, uploaded_by, moderation_status")
           .eq("event_id", eventId)
           .order("created_at", { ascending: false })
           .range(from, to),
@@ -424,6 +447,19 @@ export function GalleryManager({
       }));
 
       setItems((prev) => (replace ? mapped : [...prev, ...mapped]));
+
+      if (isPrimaryOrganizer) {
+        const reviewedAt = organizerGalleryReviewedAt ? new Date(organizerGalleryReviewedAt).getTime() : 0;
+        const newItems = mapped.filter((m) => new Date(m.created_at).getTime() > reviewedAt);
+        if (replace) setNewCount(newItems.length);
+      }
+
+      if (isPrimaryOrganizer && moderationEnabled) {
+        const pending = mapped.filter((m) => m.moderation_status === "pending");
+        if (replace) setPendingItems(pending);
+        else setPendingItems((prev) => [...prev, ...pending]);
+      }
+
       setLikeCounts((prev) => {
         const next = replace ? new Map<string, number>() : new Map(prev);
         for (const [id, count] of likeSummary.counts) next.set(id, count);
@@ -437,7 +473,7 @@ export function GalleryManager({
       setHasMore(typed.length === PAGE_SIZE);
       setLoading(false);
     },
-    [eventId, supabase, currentUserId, ui.gallery.loadFailed, ui.guests.guestLabelFallback, ui.guests.organizerLabelFallback],
+    [eventId, supabase, currentUserId, isPrimaryOrganizer, moderationEnabled, organizerGalleryReviewedAt, ui.gallery.loadFailed, ui.guests.guestLabelFallback, ui.guests.organizerLabelFallback],
   );
 
   useEffect(() => {
@@ -569,6 +605,64 @@ export function GalleryManager({
     return [...seen.entries()];
   }, [items]);
   const totalGuests = useMemo(() => new Set(items.map((i) => i.uploaded_by)).size, [items]);
+
+  async function handleApproveItem(item: MediaItem) {
+    setModerationBusy(item.id);
+    setModerationError(null);
+    try {
+      const res = await fetch(`/api/events/${eventId}/moderation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "approve", mediaItemId: item.id }),
+      });
+      if (!res.ok) throw new Error();
+      setPendingItems((prev) => prev.filter((p) => p.id !== item.id));
+      setPage(0);
+      void fetchPage(0, true);
+    } catch {
+      setModerationError(ui.gallery.moderationActionFail);
+    } finally {
+      setModerationBusy(null);
+    }
+  }
+
+  async function handleDiscardItem(item: MediaItem) {
+    setModerationBusy(item.id);
+    setModerationError(null);
+    try {
+      const res = await fetch(`/api/events/${eventId}/moderation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "discard", mediaItemId: item.id }),
+      });
+      if (!res.ok) throw new Error();
+      setPendingItems((prev) => prev.filter((p) => p.id !== item.id));
+    } catch {
+      setModerationError(ui.gallery.moderationActionFail);
+    } finally {
+      setModerationBusy(null);
+    }
+  }
+
+  async function handleApproveAll() {
+    setModerationBusy("__all__");
+    setModerationError(null);
+    try {
+      const res = await fetch(`/api/events/${eventId}/moderation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "approve_all" }),
+      });
+      if (!res.ok) throw new Error();
+      setPendingItems([]);
+      setPage(0);
+      void fetchPage(0, true);
+    } catch {
+      setModerationError(ui.gallery.moderationActionFail);
+    } finally {
+      setModerationBusy(null);
+    }
+  }
 
   if (!supabase) {
     return (
@@ -884,6 +978,143 @@ export function GalleryManager({
               </AppBtn>
             </div>
           </div>
+        </div>
+      ) : null}
+
+      {/* ── MODERATION PANEL ── (organizer only, when moderation_enabled) */}
+      {isPrimaryOrganizer && moderationEnabled ? (
+        <div
+          style={{
+            marginBottom: 24,
+            borderRadius: 14,
+            border: "1.5px solid color-mix(in srgb, var(--app-gold) 35%, var(--app-border))",
+            background: "color-mix(in srgb, var(--app-gold) 6%, var(--app-surface))",
+            padding: "16px 16px 14px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: "var(--app-gold)",
+              }}
+            >
+              {ui.gallery.moderationPanelTitle}
+              {pendingItems.length > 0 ? ` (${pendingItems.length})` : ""}
+            </span>
+            {pendingItems.length > 0 ? (
+              <AppBtn
+                type="button"
+                variant="gold"
+                size="sm"
+                disabled={moderationBusy !== null}
+                loading={moderationBusy === "__all__"}
+                onClick={() => void handleApproveAll()}
+              >
+                {ui.gallery.moderationApproveAll}
+              </AppBtn>
+            ) : null}
+          </div>
+
+          {moderationError ? (
+            <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--app-danger)" }}>{moderationError}</p>
+          ) : null}
+
+          {pendingItems.length === 0 ? (
+            <p style={{ margin: 0, fontSize: 13, color: "var(--app-muted)" }}>{ui.gallery.moderationPanelEmpty}</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {pendingItems.map((item) => {
+                const busy = moderationBusy === item.id;
+                return (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "8px 10px",
+                      borderRadius: 10,
+                      background: "var(--app-surface)",
+                      border: "1px solid var(--app-border)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 6,
+                        overflow: "hidden",
+                        flexShrink: 0,
+                        background: "var(--app-surface-2)",
+                      }}
+                    >
+                      {(item.thumbnailUrl ?? item.signedUrl) ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.thumbnailUrl ?? item.signedUrl}
+                          alt=""
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      ) : null}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <span style={{ fontSize: 12, color: "var(--app-muted)", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {item.uploaderLabel}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <AppBtn
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={moderationBusy !== null}
+                        loading={busy}
+                        onClick={() => void handleDiscardItem(item)}
+                      >
+                        {ui.gallery.moderationDiscard}
+                      </AppBtn>
+                      <AppBtn
+                        type="button"
+                        variant="gold"
+                        size="sm"
+                        disabled={moderationBusy !== null}
+                        loading={busy}
+                        onClick={() => void handleApproveItem(item)}
+                      >
+                        {busy ? ui.gallery.moderationApproveBusy : ui.gallery.moderationApprove}
+                      </AppBtn>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {/* ── NEW SINCE LAST VISIT badge ── */}
+      {isPrimaryOrganizer && newCount > 0 ? (
+        <div
+          style={{
+            marginBottom: 16,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "5px 12px",
+            borderRadius: 999,
+            background: "color-mix(in srgb, var(--app-gold) 18%, var(--app-surface))",
+            border: "1px solid color-mix(in srgb, var(--app-gold) 40%, var(--app-border))",
+            fontSize: 11,
+            fontWeight: 700,
+            color: "var(--app-gold)",
+            letterSpacing: "0.08em",
+          }}
+        >
+          {interpolate(ui.gallery.moderationNewBadge, { count: newCount })}
         </div>
       ) : null}
 

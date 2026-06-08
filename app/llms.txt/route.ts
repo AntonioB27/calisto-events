@@ -24,6 +24,7 @@ function llmsBody(origin: string): string {
 - Organizers create an event (name, date, plan) and receive a unique join code and QR code
 - Guests scan the QR or open the link and upload photos/videos directly from their phone browser
 - All uploads appear live in a shared gallery visible to every guest
+- Organizers can enable photo moderation: guest uploads land in a private review queue and only appear in the gallery after the organizer approves them
 - Organizers can delete individual uploads and download the full gallery as a ZIP
 - No app installation required for guests; no account or email required for guests
 

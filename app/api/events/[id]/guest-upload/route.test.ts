@@ -26,7 +26,7 @@ vi.mock("@/lib/supabase-server", () => ({
 }));
 
 const getEventUploadContextMock = vi.fn<
-  (eventId: string) => Promise<{ planId: "free" | "standard" | "plus" | "premium" | "max"; eventDate: string } | null>
+  (eventId: string) => Promise<{ planId: "free" | "standard" | "plus" | "premium" | "max"; eventDate: string; moderationEnabled: boolean; organizerId: string } | null>
 >();
 const countMediaForQuotaMock = vi.fn<(eventId: string, mediaType: "photo" | "video") => Promise<number>>();
 const insertMediaItemMock = vi.fn<
@@ -37,6 +37,7 @@ const insertMediaItemMock = vi.fn<
     mimeType: string;
     sizeBytes: number;
     thumbnailPath: string | null;
+    moderationStatus: "visible" | "pending";
   }) => Promise<{ id: string; storage_path: string }>
 >();
 
@@ -61,6 +62,8 @@ describe("guest-upload route", () => {
       getEventUploadContextMock.mockResolvedValue({
         planId: "free",
         eventDate: "2026-05-06T00:00:00.000Z",
+        moderationEnabled: false,
+        organizerId: "org_1",
       });
       countMediaForQuotaMock.mockResolvedValue(20);
 
@@ -87,6 +90,8 @@ describe("guest-upload route", () => {
       getEventUploadContextMock.mockResolvedValue({
         planId: "standard",
         eventDate: "2026-05-06T00:00:00.000Z",
+        moderationEnabled: false,
+        organizerId: "org_1",
       });
       countMediaForQuotaMock.mockResolvedValue(10);
       insertMediaItemMock.mockResolvedValue({ id: "m1", storage_path: "events/evt_2/x.jpg" });
@@ -113,6 +118,8 @@ describe("guest-upload route", () => {
     getEventUploadContextMock.mockResolvedValue({
       planId: "standard",
       eventDate: "2026-05-06T00:00:00.000Z",
+      moderationEnabled: false,
+      organizerId: "org_1",
     });
     countMediaForQuotaMock.mockResolvedValue(0);
 
@@ -136,6 +143,8 @@ describe("guest-upload route", () => {
       getEventUploadContextMock.mockResolvedValue({
         planId: "free",
         eventDate: "2026-05-06T00:00:00.000Z",
+        moderationEnabled: false,
+        organizerId: "org_1",
       });
       countMediaForQuotaMock.mockResolvedValue(0);
       insertMediaItemMock.mockResolvedValue({ id: "m1", storage_path: "events/evt_1/x.jpg" });
@@ -166,6 +175,8 @@ describe("guest-upload route", () => {
       getEventUploadContextMock.mockResolvedValue({
         planId: "standard",
         eventDate: "2026-05-06T00:00:00.000Z",
+        moderationEnabled: false,
+        organizerId: "org_1",
       });
       countMediaForQuotaMock.mockResolvedValue(0);
       insertMediaItemMock.mockResolvedValue({ id: "m2", storage_path: "events/evt_1/x.mp4" });
@@ -188,5 +199,62 @@ describe("guest-upload route", () => {
       __test.generateThumbnail = generateImageThumbnail as (buf: ArrayBuffer, mime: string) => Promise<Buffer | null>;
     }
   });
-});
 
+  it("inserts with moderation_status pending when event moderation is enabled", async () => {
+    vi.useFakeTimers({ now: new Date("2026-06-06T12:00:00.000Z") });
+    try {
+      getEventUploadContextMock.mockResolvedValue({
+        planId: "standard",
+        eventDate: "2026-06-05T12:00:00.000Z",
+        moderationEnabled: true,
+        organizerId: "org_1",
+      });
+      countMediaForQuotaMock.mockResolvedValue(0);
+      insertMediaItemMock.mockResolvedValue({ id: "m1", storage_path: "events/e1/f.jpg" });
+
+      const file = new File(["x"], "photo.jpg", { type: "image/jpeg" });
+      const form = new FormData();
+      form.append("file", file);
+      const req = new Request("http://localhost/api/events/e1/guest-upload", {
+        method: "POST",
+        body: form,
+      });
+      const res = await POST(req, { params: Promise.resolve({ id: "e1" }) });
+      expect(res.status).toBe(201);
+      expect(insertMediaItemMock).toHaveBeenCalledWith(
+        expect.objectContaining({ moderationStatus: "pending" }),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("inserts with moderation_status visible when event moderation is disabled", async () => {
+    vi.useFakeTimers({ now: new Date("2026-06-06T12:00:00.000Z") });
+    try {
+      getEventUploadContextMock.mockResolvedValue({
+        planId: "standard",
+        eventDate: "2026-06-05T12:00:00.000Z",
+        moderationEnabled: false,
+        organizerId: "org_1",
+      });
+      countMediaForQuotaMock.mockResolvedValue(0);
+      insertMediaItemMock.mockResolvedValue({ id: "m2", storage_path: "events/e1/g.jpg" });
+
+      const file = new File(["x"], "photo.jpg", { type: "image/jpeg" });
+      const form = new FormData();
+      form.append("file", file);
+      const req = new Request("http://localhost/api/events/e1/guest-upload", {
+        method: "POST",
+        body: form,
+      });
+      const res = await POST(req, { params: Promise.resolve({ id: "e1" }) });
+      expect(res.status).toBe(201);
+      expect(insertMediaItemMock).toHaveBeenCalledWith(
+        expect.objectContaining({ moderationStatus: "visible" }),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

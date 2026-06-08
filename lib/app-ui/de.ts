@@ -569,6 +569,20 @@ export const APP_UI_DE: AppUiDict = {
       "Die Export‑Warteschlange konnte nicht gelesen werden. Bei eigenem Supabase‑Projekt die neuesten Migrationen anwenden (inkl. `media_zip_exports`). Sonst kurz warten und erneut versuchen.",
     zipExportErrorTooMany: "Zu viele Elemente für ein ZIP. Uploads reduzieren oder ohne Videos exportieren.",
     columnsLabel: "Spalten",
+    moderationPanelTitle: "Ausstehende Genehmigung",
+    moderationPanelEmpty: "Keine ausstehenden Uploads.",
+    moderationApprove: "Genehmigen",
+    moderationDiscard: "Verwerfen",
+    moderationApproveAll: "Alle genehmigen",
+    moderationApproveBusy: "…",
+    moderationNewBadge: "{count} neu",
+    moderationPendingBadge: "Ausstehend",
+    moderationActionFail: "Aktion konnte nicht abgeschlossen werden.",
+    newUploadsSectionTitle: "Neue Uploads",
+    newUploadsViewAll: "Alle anzeigen",
+    newUploadsClose: "Schließen",
+    newUploadsKeep: "Behalten",
+    newUploadsDelete: "Löschen",
   },
 
   guests: {
@@ -686,6 +700,11 @@ export const APP_UI_DE: AppUiDict = {
     deletePlaceholderTitleOrWord: "Titel oder DELETE",
     deleteButton: "Veranstaltung komplett löschen",
     exactParen: "(exakt)",
+    moderationHeading: "Foto-Moderation",
+    moderationHint: "Wenn aktiv, sind Gäste-Uploads verborgen, bis du sie genehmigst. Jederzeit änderbar.",
+    moderationOn: "Moderation an",
+    moderationOff: "Moderation aus",
+    moderationSaveFail: "Moderationseinstellung konnte nicht gespeichert werden.",
   },
 
   validateCreate: {
@@ -705,6 +724,8 @@ export const APP_UI_DE: AppUiDict = {
     searchEmojiHint: "Alle Emojis durchsuchen. Es erscheint im Veranstaltungs‑Header.",
     noEmojiBtn: "Ohne Emoji",
     defaultEmojiAria: "Ausgewähltes Emoji",
+    moderationToggleLabel: "Fotos prüfen, bevor Gäste sie sehen",
+    moderationToggleHint: "Kann später in den Einstellungen geändert werden.",
   },
 
   createStep2: {

@@ -562,6 +562,20 @@ export const APP_UI_HR: AppUiDict = {
       "Nismo mogli pročitati red izvoza. Ako koristiš vlastiti Supabase projekt, primijeni najnovije migracije (uključujući `media_zip_exports`). Inače pokušaj ponovo za trenutak.",
     zipExportErrorTooMany: "Previše stavki za jedan ZIP. Ukloni neke uploadove ili izvezi bez videozapisa.",
     columnsLabel: "Stupci",
+    moderationPanelTitle: "Čeka odobrenje",
+    moderationPanelEmpty: "Nema uploada na čekanju.",
+    moderationApprove: "Odobri",
+    moderationDiscard: "Odbaci",
+    moderationApproveAll: "Odobri sve",
+    moderationApproveBusy: "…",
+    moderationNewBadge: "{count} novo",
+    moderationPendingBadge: "Na čekanju",
+    moderationActionFail: "Radnja nije uspjela.",
+    newUploadsSectionTitle: "Novi uploadi",
+    newUploadsViewAll: "Vidi sve",
+    newUploadsClose: "Zatvori",
+    newUploadsKeep: "Zadrži",
+    newUploadsDelete: "Obriši",
   },
 
   guests: {
@@ -677,6 +691,11 @@ export const APP_UI_HR: AppUiDict = {
     deletePlaceholderTitleOrWord: "Naslov ili DELETE",
     deleteButton: "Potpuno obriši događaj",
     exactParen: "(točno)",
+    moderationHeading: "Moderacija fotografija",
+    moderationHint: "Kad je uključeno, uploadi gostiju su skriveni dok ih ne odobriš. Možeš promijeniti u bilo koje vrijeme.",
+    moderationOn: "Moderacija uključena",
+    moderationOff: "Moderacija isključena",
+    moderationSaveFail: "Nije moguće promijeniti postavku moderacije.",
   },
 
   validateCreate: {
@@ -696,6 +715,8 @@ export const APP_UI_HR: AppUiDict = {
     searchEmojiHint: "Pretražite ili pregledajte sve emotikone. Pojavljuje se u zaglavlju događaja.",
     noEmojiBtn: "Bez emotikona",
     defaultEmojiAria: "Odabrani emoji",
+    moderationToggleLabel: "Pregledaj fotografije prije nego ih gosti vide",
+    moderationToggleHint: "Možeš promijeniti kasnije u Postavkama.",
   },
 
   createStep2: {

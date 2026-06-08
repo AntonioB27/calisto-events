@@ -55,11 +55,13 @@ type Step1DetailsProps = {
   defaultName: string;
   defaultEmoji: string;
   defaultDate: string;
+  defaultModerationEnabled: boolean;
 };
 
-export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1DetailsProps) {
+export function Step1Details({ defaultName, defaultEmoji, defaultDate, defaultModerationEnabled }: Step1DetailsProps) {
   const ui = useAppUi();
   const getPlanIdForDraft = (): PlanId => readCreateEventDraftFromStorage()?.planId ?? "free";
+  const [moderationEnabled, setModerationEnabled] = useState(defaultModerationEnabled);
 
   const initialEmoji = useMemo(
     () => (readCreateEventDraftFromStorage()?.emoji ?? defaultEmoji) || "📅",
@@ -84,11 +86,11 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
   }, [pickerOpen]);
 
   const writeStep1Draft = (name: string, date: string) => {
-    writeCreateEventDraftToStorage({ step: "1", name, emoji, date, planId: getPlanIdForDraft() });
+    writeCreateEventDraftToStorage({ step: "1", name, emoji, date, planId: getPlanIdForDraft(), moderationEnabled });
   };
 
   const writeStep2Draft = (name: string, date: string) => {
-    writeCreateEventDraftToStorage({ step: "2", name, emoji, date, planId: getPlanIdForDraft() });
+    writeCreateEventDraftToStorage({ step: "2", name, emoji, date, planId: getPlanIdForDraft(), moderationEnabled });
   };
 
   return (
@@ -227,11 +229,64 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate }: Step1De
                     const dateEl = document.getElementById("date");
                     const currentName = nameEl instanceof HTMLInputElement ? nameEl.value : defaultName;
                     const currentDate = dateEl instanceof HTMLInputElement ? dateEl.value : defaultDate;
-                    writeCreateEventDraftToStorage({ step: '1', name: currentName, emoji: next, date: currentDate, planId: getPlanIdForDraft() });
+                    writeCreateEventDraftToStorage({ step: '1', name: currentName, emoji: next, date: currentDate, planId: getPlanIdForDraft(), moderationEnabled });
                   }}
                 />
               </div>
             )}
+          </div>
+
+          <input type="hidden" name="moderationEnabled" value={String(moderationEnabled)} />
+
+          {/* ── Moderation toggle ── */}
+          <div style={{ borderTop: `1px dashed ${BORDER}`, padding: '12px 18px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: INK_S, fontFamily: FB }}>
+                {ui.createStep1.moderationToggleLabel}
+              </p>
+              <p style={{ margin: '2px 0 0', fontSize: 10, color: MUTED, fontFamily: FB }}>
+                {ui.createStep1.moderationToggleHint}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={moderationEnabled}
+              onClick={() => {
+                const next = !moderationEnabled;
+                setModerationEnabled(next);
+                const nameEl = document.getElementById("name");
+                const dateEl = document.getElementById("date");
+                const currentName = nameEl instanceof HTMLInputElement ? nameEl.value : defaultName;
+                const currentDate = dateEl instanceof HTMLInputElement ? dateEl.value : defaultDate;
+                writeCreateEventDraftToStorage({ step: "1", name: currentName, emoji, date: currentDate, planId: getPlanIdForDraft(), moderationEnabled: next });
+              }}
+              style={{
+                flexShrink: 0,
+                width: 40,
+                height: 22,
+                borderRadius: 999,
+                border: 'none',
+                background: moderationEnabled ? GOLD : BORDER,
+                position: 'relative',
+                cursor: 'pointer',
+                transition: 'background 0.2s',
+              }}
+            >
+              <span
+                style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: moderationEnabled ? 20 : 2,
+                  width: 18,
+                  height: 18,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.25)',
+                  transition: 'left 0.2s',
+                }}
+              />
+            </button>
           </div>
         </div>
 

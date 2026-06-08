@@ -44,8 +44,9 @@ describe("parseCreateEventQuery", () => {
       step: "1",
       name: "Launch Party",
       emoji: "",
-      date: "2026-01-01",
+      date: new Date().toISOString().split("T")[0],
       planId: "free",
+      moderationEnabled: false,
     });
   });
 
@@ -63,6 +64,7 @@ describe("parseCreateEventQuery", () => {
       emoji: "",
       date: "2026-08-20",
       planId: "free",
+      moderationEnabled: false,
     });
   });
 });

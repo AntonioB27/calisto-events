@@ -152,8 +152,35 @@ function ArrowIcon({ size = 13, color = '#fff' }: { size?: number; color?: strin
 }
 
 
+// ── New uploads badge ──────────────────────────────────────────────────────────
+function NewUploadsBadge({ count }: { count: number }) {
+  return (
+    <span style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 4,
+      background: 'linear-gradient(135deg, #E6BF66 0%, #C5922A 60%)',
+      color: '#fff',
+      borderRadius: 20,
+      padding: '2px 7px 2px 5px',
+      fontSize: 10,
+      fontWeight: 700,
+      fontFamily: FB,
+      letterSpacing: '0.01em',
+      boxShadow: '0 1px 6px rgba(148,108,24,0.32)',
+      flexShrink: 0,
+      whiteSpace: 'nowrap',
+    }}>
+      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M12 19V5M5 12l7-7 7 7" />
+      </svg>
+      {count}
+    </span>
+  );
+}
+
 // ── Featured event card ────────────────────────────────────────────────────────
-function FeaturedEvent({ event, onOpen, roleLabel, glassStyle, mostRecentLabel }: { event: DashboardEventRow; onOpen: () => void; roleLabel: string; glassStyle: React.CSSProperties; mostRecentLabel: string }) {
+function FeaturedEvent({ event, onOpen, roleLabel, glassStyle, mostRecentLabel, newCount }: { event: DashboardEventRow; onOpen: () => void; roleLabel: string; glassStyle: React.CSSProperties; mostRecentLabel: string; newCount?: number }) {
   const { emoji: storedEmoji, name } = splitEventTitleStored(String(event.title));
   const emoji = displayNavEmoji(storedEmoji);
   const date = parseDateDisplay(event.event_date);
@@ -183,7 +210,10 @@ function FeaturedEvent({ event, onOpen, roleLabel, glassStyle, mostRecentLabel }
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginTop: 12 }}>
         {date && <DateStamp mon={date.mon} day={date.day} year={date.year} accent={accent} />}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: MUTED, fontFamily: FB }}>{mostRecentLabel}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: MUTED, fontFamily: FB }}>{mostRecentLabel}</div>
+            {newCount != null && newCount > 0 && <NewUploadsBadge count={newCount} />}
+          </div>
           <h2 style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 24, lineHeight: 1.05, color: TEXT, letterSpacing: '-0.015em', marginTop: 4 }}>{name}</h2>
         </div>
       </div>
@@ -192,7 +222,7 @@ function FeaturedEvent({ event, onOpen, roleLabel, glassStyle, mostRecentLabel }
 }
 
 // ── Compact event row ──────────────────────────────────────────────────────────
-function CompactEventRow({ event, onOpen, roleLabel, last, isDark }: { event: DashboardEventRow; onOpen: () => void; roleLabel: string; last: boolean; isDark: boolean }) {
+function CompactEventRow({ event, onOpen, roleLabel, last, isDark, newCount }: { event: DashboardEventRow; onOpen: () => void; roleLabel: string; last: boolean; isDark: boolean; newCount?: number }) {
   const { emoji: storedEmoji, name } = splitEventTitleStored(String(event.title));
   const emoji = displayNavEmoji(storedEmoji);
   const date = parseDateDisplay(event.event_date);
@@ -207,6 +237,7 @@ function CompactEventRow({ event, onOpen, roleLabel, last, isDark }: { event: Da
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5, flexWrap: 'wrap' }}>
           <RoleChip role={event.membershipRole} label={roleLabel} />
           <PlanStamp tier={event.plan} size="sm" />
+          {newCount != null && newCount > 0 && <NewUploadsBadge count={newCount} />}
         </div>
       </div>
       <div style={{ width: 26, height: 26, borderRadius: '50%', background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.7)', border: `1px solid ${DIVIDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -221,9 +252,10 @@ type Props = Readonly<{
   organizerId: string;
   userName: string;
   events: DashboardEventRow[];
+  newUploadCounts?: Readonly<Record<string, number>>;
 }>;
 
-export function DashboardClient({ organizerId, userName, events }: Props) {
+export function DashboardClient({ organizerId, userName, events, newUploadCounts = {} }: Props) {
   const ui = useAppUi();
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [orderIds, setOrderIds] = useState<string[]>([]);
@@ -325,14 +357,14 @@ export function DashboardClient({ organizerId, userName, events }: Props) {
               </span>
             }
           />
-          <FeaturedEvent event={featured} onOpen={() => handleOpen(featured)} roleLabel={getRoleLabel(featured.membershipRole)} glassStyle={isDark ? GLASS_DARK : GLASS_LIGHT} mostRecentLabel={ui.dashboard.mostRecent} />
+          <FeaturedEvent event={featured} onOpen={() => handleOpen(featured)} roleLabel={getRoleLabel(featured.membershipRole)} glassStyle={isDark ? GLASS_DARK : GLASS_LIGHT} mostRecentLabel={ui.dashboard.mostRecent} newCount={newUploadCounts[featured.id]} />
           {rest.length > 0 && (
             <div style={{ marginTop: 18 }}>
               <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: MUTED_T, fontFamily: FB, marginBottom: 8 }}>
                 {ui.dashboard.earlierSeason}
               </div>
               {rest.map((ev, i) => (
-                <CompactEventRow key={ev.id} event={ev} onOpen={() => handleOpen(ev)} roleLabel={getRoleLabel(ev.membershipRole)} last={i === rest.length - 1} isDark={isDark} />
+                <CompactEventRow key={ev.id} event={ev} onOpen={() => handleOpen(ev)} roleLabel={getRoleLabel(ev.membershipRole)} last={i === rest.length - 1} isDark={isDark} newCount={newUploadCounts[ev.id]} />
               ))}
             </div>
           )}

@@ -12,13 +12,15 @@ type MediaType = "photo" | "video";
 type EventUploadContext = {
   planId: PlanId;
   eventDate: string;
+  moderationEnabled: boolean;
+  organizerId: string;
 };
 
 async function getEventUploadContext(eventId: string): Promise<EventUploadContext | null> {
   const db = getSupabaseServerClient();
   const { data, error } = await db
     .from("events")
-    .select("id, plan, event_date")
+    .select("id, plan, event_date, moderation_enabled, organizer_id")
     .eq("id", eventId)
     .maybeSingle();
 
@@ -37,7 +39,14 @@ async function getEventUploadContext(eventId: string): Promise<EventUploadContex
     return null;
   }
 
-  return { planId, eventDate: data.event_date };
+  return {
+    planId,
+    eventDate: data.event_date,
+    moderationEnabled: Boolean((data as { moderation_enabled?: unknown }).moderation_enabled),
+    organizerId: typeof (data as { organizer_id?: unknown }).organizer_id === "string"
+      ? (data as { organizer_id: string }).organizer_id
+      : "",
+  };
 }
 
 const MIME_TO_EXT: Record<string, string> = {
@@ -89,6 +98,7 @@ async function insertMediaItem(params: {
   mimeType: string;
   sizeBytes: number;
   thumbnailPath: string | null;
+  moderationStatus: "visible" | "pending";
 }) {
   const db = getSupabaseServerClient();
   const { data, error } = await db
@@ -100,6 +110,7 @@ async function insertMediaItem(params: {
       mime_type: params.mimeType,
       size_bytes: params.sizeBytes,
       thumbnail_path: params.thumbnailPath,
+      moderation_status: params.moderationStatus,
     })
     .select("id, storage_path")
     .single();
@@ -205,6 +216,10 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
   }
 
   // 7) Insert media row
+  // Organizer uploads always land as visible regardless of moderation mode.
+  const moderationStatus: "visible" | "pending" =
+    eventContext.moderationEnabled && user.id !== eventContext.organizerId ? "pending" : "visible";
+
   try {
     const inserted = await __test.insertMediaItem({
       eventId,
@@ -213,6 +228,7 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
       mimeType: file.type,
       sizeBytes: file.size,
       thumbnailPath,
+      moderationStatus,
     });
     return NextResponse.json({ id: inserted.id, file_path: inserted.storage_path }, { status: 201 });
   } catch {

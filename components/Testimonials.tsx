@@ -28,9 +28,14 @@ export function Testimonials({ copy }: TestimonialsProps) {
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
+    // Already in viewport (e.g. scroll restored after navigation) — show immediately
+    if (el.getBoundingClientRect().top < window.innerHeight) {
+      setVisible(true);
+      return;
+    }
     const obs = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.15 }
+      { threshold: 0.1 }
     );
     obs.observe(el);
     return () => obs.disconnect();

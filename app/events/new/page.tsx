@@ -67,6 +67,7 @@ export function parseCreateEventQuery(params: CreateEventQueryParams): {
   emoji: string;
   date: string;
   planId: PlanId;
+  moderationEnabled: boolean;
 } {
   const step = pickQueryValue(params.step) ?? "1";
   const name = pickQueryValue(params.name) ?? "";
@@ -74,7 +75,8 @@ export function parseCreateEventQuery(params: CreateEventQueryParams): {
   const date = pickQueryValue(params.date) ?? DEFAULT_DATE;
   const planIdCandidate = pickQueryValue(params.planId);
   const planId = isPlanId(planIdCandidate) ? planIdCandidate : DEFAULT_PLAN;
-  return { step, name, emoji, date, planId };
+  const moderationEnabled = pickQueryValue(params.moderationEnabled) === "true";
+  return { step, name, emoji, date, planId, moderationEnabled };
 }
 
 // ── Palette (matches DashboardClient) ────────────────────────────────────────
@@ -90,7 +92,7 @@ const STEP_LABELS = ['Details', 'Plan', 'Review'] as const;
 
 export default async function NewEventPage({ searchParams }: NewEventPageProps) {
   const resolvedParams = (await searchParams) ?? {};
-  const { step, name, emoji, date, planId } = parseCreateEventQuery(resolvedParams);
+  const { step, name, emoji, date, planId, moderationEnabled } = parseCreateEventQuery(resolvedParams);
 
   const validation = validateCreateEventInput({ name, date, planId });
   const cur = Number(step);
@@ -157,7 +159,14 @@ export default async function NewEventPage({ searchParams }: NewEventPageProps) 
         />
       </div>
 
-      {step === "1" && <Step1Details defaultName={name} defaultEmoji={emoji} defaultDate={date} />}
+      {step === "1" && (
+        <Step1Details
+          defaultName={name}
+          defaultEmoji={emoji}
+          defaultDate={date}
+          defaultModerationEnabled={moderationEnabled}
+        />
+      )}
       {step === "2" && (
         <Step2Plan
           name={name}
@@ -174,6 +183,7 @@ export default async function NewEventPage({ searchParams }: NewEventPageProps) 
           emoji={emoji}
           date={date}
           planId={planId}
+          moderationEnabled={moderationEnabled}
           validationError={validation.ok ? null : validation.error}
         />
       )}

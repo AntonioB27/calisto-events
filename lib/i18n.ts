@@ -183,7 +183,7 @@ const copy: Record<Locale, LandingCopy> = {
     heroIntro: "Hi, I'm Aurora, I'll guide you through Calisto.",
     heroTitle: "Every memory matters. Make sure you capture them all.",
     heroDescription:
-      "With Calisto, browse photos and videos in one place. No app download. Just scan the QR code and view gallery or upload. Try it for FREE!",
+      "Calisto is a shared photo and video album for weddings, birthdays, and every celebration. Guests upload straight from their phone browser. No app to download. Free to try.",
     heroAuroraCardBlurb:
       "I'd rather you be in the moment than digging through camera rolls on Monday. I'm here so the messy, wonderful parts of your day—the toasts, the candid grins, the kid with cake on his face—stay in one story you can reopen without a scavenger hunt.",
     heroPrimaryCta: "Try for free",
@@ -200,9 +200,9 @@ const copy: Record<Locale, LandingCopy> = {
     heroMockScanToUpload: "Scan to upload —",
     heroMockNoAppNoAccount: "no app, no account.",
     statBar: [
-      { value: "400+ weddings", label: "already celebrated" },
-      { value: "9,000+ photos", label: "captured and shared" },
-      { value: "5,000+ guests", label: "no app, no account" },
+      { value: "50+ weddings", label: "already celebrated" },
+      { value: "1,000+ photos", label: "captured and shared" },
+      { value: "500+ guests", label: "no app, no account" },
     ],
     appPreviewEyebrow: "See it in action",
     appPreviewTitlePrefix: "One album.",
@@ -253,6 +253,12 @@ const copy: Record<Locale, LandingCopy> = {
         description:
           "When the celebration's over, grab every photo and video in a single download. We'll email you when it's ready.",
         mascotBubble: "Whole album, one download.",
+      },
+      {
+        title: "Approve photos before they go live",
+        description:
+          "Turn on photo moderation and every guest upload lands in a private review queue first. Approve what belongs, discard what doesn't — guests only see what you allow.",
+        mascotBubble: "You decide what the gallery shows.",
       },
     ],
     howTitle: "How it works?",
@@ -495,7 +501,7 @@ const copy: Record<Locale, LandingCopy> = {
     heroIntro: "Bok, ja sam Aurora, predstavljam ti Calisto.",
     heroTitle: "Svaka uspomena je važna. Pobrinite se da ne propustite nijednu.",
     heroDescription:
-      "Uz Calisto, pregledavaj fotografije i videozapise na jednom mjestu. Bez preuzimanja aplikacije. Skeniraj QR kod i otvori galeriju ili učitaj. Probaj besplatno!",
+      "Calisto je zajednički foto i video album za vjenčanja, rođendane i svaku proslavu. Gosti učitavaju izravno iz mobilnog preglednika. Bez preuzimanja aplikacije. Besplatno za isprobati.",
     heroAuroraCardBlurb:
       "Želim da budeš na plesu, a ne da u ponedjeljak pretražuješ deset mapi s fotkama. Tu sam da taj neuredno lijepi dan — toaste, prvi ples, taj tren s kolačem — ostane jedna priča koju možeš otvoriti bez detektivskog posla.",
     heroPrimaryCta: "Isprobaj besplatno",
@@ -512,9 +518,9 @@ const copy: Record<Locale, LandingCopy> = {
     heroMockScanToUpload: "Skeniraj za upload —",
     heroMockNoAppNoAccount: "bez aplikacije, bez računa.",
     statBar: [
-      { value: "400+ vjenčanja", label: "već proslavljena" },
-      { value: "9.000+ fotografija", label: "snimljeno i podijeljeno" },
-      { value: "5.000+ gostiju", label: "bez aplikacije i računa" },
+      { value: "50+ vjenčanja", label: "već proslavljena" },
+      { value: "1.000+ fotografija", label: "snimljeno i podijeljeno" },
+      { value: "500+ gostiju", label: "bez aplikacije i računa" },
     ],
     appPreviewEyebrow: "Izgled aplikacije",
     appPreviewTitlePrefix: "Jedan album.",
@@ -564,6 +570,12 @@ const copy: Record<Locale, LandingCopy> = {
         description:
           "Kad proslava završi, preuzmi sve fotografije i videozapise u jednom preuzimanju. Javit ćemo ti se emailom kad bude spreman.",
         mascotBubble: "Cijeli album u jednom preuzimanju.",
+      },
+      {
+        title: "Odobri fotografije prije objave",
+        description:
+          "Uključi moderiranje i svaki gostov upload završi u privatnom redu čekanja. Odobri što spada, odbaci što ne spada — gosti vide samo ono što ti pustiš.",
+        mascotBubble: "Ti odlučuješ što galerija prikazuje.",
       },
     ],
     howTitle: "Kako funkcionira?",
@@ -806,7 +818,7 @@ const copy: Record<Locale, LandingCopy> = {
     heroIntro: "Hi, ich bin Aurora, ich stelle dir Calisto vor.",
     heroTitle: "Jede Erinnerung zählt. Stell sicher, dass du sie alle festhältst.",
     heroDescription:
-      "Mit Calisto, Fotos und Videos an einem Ort durchstöbern. Kein App-Download. QR-Code scannen, Galerie ansehen oder hochladen. Kostenlos ausprobieren!",
+      "Calisto ist das gemeinsame Foto- und Videoalbum für Hochzeiten, Geburtstage und jede Feier. Gäste laden direkt im Handy-Browser hoch. Keine App nötig. Kostenlos ausprobieren.",
     heroAuroraCardBlurb:
       "Lieber tanzt du auf der Feier, als dass du am Montag hundert Chatverläufe durchsuchst. Ich will, dass der Tag als eine lebendige Geschichte bleibt — Reden, Umarmungen, das schiefe Gruppenfoto — die man wiederfindet, ohne Schatzsuche.",
     heroPrimaryCta: "Kostenlos ausprobieren",
@@ -823,9 +835,9 @@ const copy: Record<Locale, LandingCopy> = {
     heroMockScanToUpload: "Zum Upload scannen —",
     heroMockNoAppNoAccount: "keine App, kein Konto.",
     statBar: [
-      { value: "400+ Hochzeiten", label: "bereits gefeiert" },
-      { value: "9.000+ Fotos", label: "aufgenommen und geteilt" },
-      { value: "5.000+ Gäste", label: "ohne App, ohne Konto" },
+      { value: "50+ Hochzeiten", label: "bereits gefeiert" },
+      { value: "1.000+ Fotos", label: "aufgenommen und geteilt" },
+      { value: "500+ Gäste", label: "ohne App, ohne Konto" },
     ],
     appPreviewEyebrow: "Sieh es in Aktion",
     appPreviewTitlePrefix: "Ein Album.",
@@ -876,6 +888,12 @@ const copy: Record<Locale, LandingCopy> = {
         description:
           "Wenn die Feier vorbei ist, lade alle Fotos und Videos in einem Rutsch herunter. Wir schicken dir eine E-Mail, sobald alles bereit ist.",
         mascotBubble: "Ganzes Album, ein Download.",
+      },
+      {
+        title: "Fotos vor der Veröffentlichung freigeben",
+        description:
+          "Aktiviere die Foto-Moderation und jeder Gäste-Upload landet zuerst in einer privaten Warteschlange. Freigeben was passt, verwerfen was nicht passt — Gäste sehen nur, was du erlaubst.",
+        mascotBubble: "Du entscheidest, was die Galerie zeigt.",
       },
     ],
     howTitle: "So funktioniert es",

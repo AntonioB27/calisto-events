@@ -53,6 +53,7 @@ type Step3PaymentProps = {
   emoji: string;
   date: string;
   planId: PlanId;
+  moderationEnabled: boolean;
   validationError: "NAME_REQUIRED" | null;
 };
 
@@ -65,7 +66,7 @@ const warmGlass: React.CSSProperties = {
   borderRadius: 14,
 };
 
-export function Step3Payment({ name, emoji, date, planId, validationError }: Step3PaymentProps) {
+export function Step3Payment({ name, emoji, date, planId, moderationEnabled, validationError }: Step3PaymentProps) {
   const ui = useAppUi();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -78,7 +79,7 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
   const registerHref = `/auth/login?mode=register&returnTo=${encodeURIComponent(returnTo)}`;
 
   const writeStep3Draft = () => {
-    writeCreateEventDraftToStorage({ step: "3", name, emoji, date, planId });
+    writeCreateEventDraftToStorage({ step: "3", name, emoji, date, planId, moderationEnabled });
   };
 
   useEffect(() => {
@@ -132,7 +133,14 @@ export function Step3Payment({ name, emoji, date, planId, validationError }: Ste
       const title = emoji?.trim() ? `${emoji.trim()} ${name.trim()}` : name.trim();
       const { data, error: insertError } = await supabase
         .from("events")
-        .insert({ title, event_date: new Date(date).toISOString(), organizer_id: user.id, plan: planId, access_code: accessCode })
+        .insert({
+          title,
+          event_date: new Date(date).toISOString(),
+          organizer_id: user.id,
+          plan: planId,
+          access_code: accessCode,
+          moderation_enabled: moderationEnabled,
+        })
         .select("id")
         .single();
 

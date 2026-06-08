@@ -28,6 +28,7 @@ type MediaItem = {
   signedUrl: string | undefined;
   thumbnailUrl: string | undefined;
   uploaderLabel: string;
+  moderation_status: string;
 };
 
 type MediaRow = {
@@ -36,6 +37,7 @@ type MediaRow = {
   thumbnail_path: string | null;
   mime_type: string | null;
   uploaded_by: string;
+  moderation_status: string;
 };
 
 type SignedUrlEntry = {
@@ -108,7 +110,7 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
         // Fast and cheap — only paths and mime types, no heavy columns.
         const { data: rows, error: fetchErr } = await supabase
           .from("media_items")
-          .select("id, storage_path, thumbnail_path, mime_type, uploaded_by")
+          .select("id, storage_path, thumbnail_path, mime_type, uploaded_by, moderation_status")
           .eq("event_id", eventId)
           .order("created_at", { ascending: false })
           .range(from, to);
@@ -176,6 +178,7 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
           storage_path: r.storage_path,
           mime_type: r.mime_type,
           uploaded_by: r.uploaded_by,
+          moderation_status: r.moderation_status,
           signedUrl: urlMap[r.storage_path],
           thumbnailUrl: r.thumbnail_path ? urlMap[r.thumbnail_path] : undefined,
           uploaderLabel:
@@ -389,8 +392,39 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
 
         const renderOverlay = (item: MediaItem) => {
           const isVideo = isVideoMime(item.mime_type);
+          const isPending = item.moderation_status === "pending";
           return (
             <>
+              {isPending ? (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "rgba(0,0,0,0.45)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "inherit",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <span
+                    style={{
+                      padding: "3px 9px",
+                      borderRadius: 999,
+                      background: "rgba(197,146,42,0.22)",
+                      border: "1px solid rgba(197,146,42,0.5)",
+                      fontSize: 9,
+                      fontWeight: 700,
+                      color: "var(--app-gold)",
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {ui.gallery.moderationPendingBadge}
+                  </span>
+                </div>
+              ) : null}
               <div style={{ position: "absolute", inset: "auto 0 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4, padding: "30px 8px 8px", background: "linear-gradient(transparent, rgba(0,0,0,0.7))", pointerEvents: "none" }}>
                 <MediaUploaderChip label={item.uploaderLabel} isMine={Boolean(userId && item.uploaded_by === userId)} mineAria={ui.gallery.uploadedByYouAria} />
               </div>

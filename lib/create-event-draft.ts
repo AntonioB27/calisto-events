@@ -10,6 +10,7 @@ export type CreateEventDraft = Readonly<{
   emoji?: string;
   date: string;
   planId: PlanId;
+  moderationEnabled?: boolean;
 }>;
 
 function isPlanId(value: unknown): value is PlanId {
@@ -36,6 +37,7 @@ export function decodeCreateEventDraft(raw: string): CreateEventDraft | null {
     if (parsed.emoji != null && typeof parsed.emoji !== "string") return null;
     if (typeof parsed.date !== "string") return null;
     if (!isPlanId(parsed.planId)) return null;
+    if (parsed.moderationEnabled != null && typeof parsed.moderationEnabled !== "boolean") return null;
     return parsed as CreateEventDraft;
   } catch {
     return null;

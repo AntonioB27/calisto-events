@@ -45,6 +45,54 @@ export default async function DashboardPage() {
 
   const events = mergeDashboardEvents(owned ?? [], coEvents ?? [], guestEvents ?? []);
 
+  // Fetch new-upload counts for owned + co-organised events (badge on dashboard cards)
+  const newUploadCounts: Record<string, number> = {};
+  const ownedIds = [...(owned ?? []).map((e) => e.id), ...coIds];
+  if (ownedIds.length > 0) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: modRows } = await (supabase as any)
+        .from("events")
+        .select("id, moderation_enabled, organizer_gallery_reviewed_at")
+        .in("id", ownedIds);
+
+      if (Array.isArray(modRows)) {
+        await Promise.all(
+          modRows.map(async (row: Record<string, unknown>) => {
+            const eventId = String(row.id ?? "");
+            if (!eventId) return;
+            const moderationEnabled = Boolean(row.moderation_enabled);
+            const reviewedAt = typeof row.organizer_gallery_reviewed_at === "string"
+              ? row.organizer_gallery_reviewed_at
+              : null;
+
+            let count = 0;
+            if (moderationEnabled) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const { count: c } = await (supabase as any)
+                .from("media_items")
+                .select("*", { count: "exact", head: true })
+                .eq("event_id", eventId)
+                .eq("moderation_status", "pending");
+              count = typeof c === "number" ? c : 0;
+            } else if (reviewedAt) {
+              const { count: c } = await supabase
+                .from("media_items")
+                .select("*", { count: "exact", head: true })
+                .eq("event_id", eventId)
+                .gt("created_at", reviewedAt);
+              count = typeof c === "number" ? c : 0;
+            }
+
+            if (count > 0) newUploadCounts[eventId] = count;
+          }),
+        );
+      }
+    } catch {
+      // moderation columns not yet applied — skip counts
+    }
+  }
+
   const userName =
     user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? ui.dashboard.fallbackName;
 
@@ -53,6 +101,7 @@ export default async function DashboardPage() {
       organizerId={user!.id}
       userName={userName}
       events={events}
+      newUploadCounts={newUploadCounts}
     />
   );
 }

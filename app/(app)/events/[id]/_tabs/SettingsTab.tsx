@@ -69,6 +69,7 @@ type SettingsTabProps = Readonly<{
   plan: string;
   accessCode: string;
   bannerTheme?: string;
+  moderationEnabled: boolean;
 }>;
 
 function SectionMark({ n, label }: { n: string; label: string }) {
@@ -97,6 +98,7 @@ export function SettingsTab({
   plan,
   accessCode,
   bannerTheme,
+  moderationEnabled: initialModerationEnabled,
 }: SettingsTabProps) {
   const ui = useAppUi();
   const router = useRouter();
@@ -138,6 +140,9 @@ export function SettingsTab({
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [scheduleDate, setScheduleDate] = useState("");
   const [scheduleSaving, setScheduleSaving] = useState(false);
+  const [modEnabled, setModEnabled] = useState(initialModerationEnabled);
+  const [modSaving, setModSaving] = useState(false);
+  const [modError, setModError] = useState<string | null>(null);
   const titleTrim = fullStoredTitle.trim();
   const phraseTrim = deletePhrase.trim();
   const typedDeleteWord = phraseTrim.toUpperCase() === "DELETE";
@@ -252,6 +257,25 @@ export function SettingsTab({
       setError(e instanceof Error ? e.message : ui.settingsTab.scheduleSaveFail);
     } finally {
       setScheduleSaving(false);
+    }
+  }
+
+  async function saveModeration(next: boolean) {
+    setModSaving(true);
+    setModError(null);
+    try {
+      const res = await fetch(`/api/events/${eventId}/moderation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "toggle_mode", enabled: next }),
+      });
+      if (!res.ok) throw new Error();
+      setModEnabled(next);
+      router.refresh();
+    } catch {
+      setModError(ui.settingsTab.moderationSaveFail);
+    } finally {
+      setModSaving(false);
     }
   }
 
@@ -400,9 +424,44 @@ export function SettingsTab({
           </div>
         </div>
 
-        {/* ── 03 Schedule ────────────────────────────── */}
+        {/* ── 03 Moderation ─────────────────────────── */}
         <div>
-          <SectionMark n="03" label={ui.settingsTab.sectionSchedule} />
+          <SectionMark n="03" label={ui.settingsTab.moderationHeading} />
+          <div style={{ ...glass, borderRadius: 18, padding: '20px 18px 22px' }}>
+            <p style={{ margin: '0 0 16px', fontFamily: FS, fontStyle: 'italic', fontSize: 13, color: MUTED, lineHeight: 1.55 }}>
+              {ui.settingsTab.moderationHint}
+            </p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <AppBtn
+                type="button"
+                variant={modEnabled ? 'gold' : 'outline'}
+                size="sm"
+                disabled={modSaving || modEnabled}
+                loading={modSaving && !modEnabled}
+                onClick={() => void saveModeration(true)}
+              >
+                {ui.settingsTab.moderationOn}
+              </AppBtn>
+              <AppBtn
+                type="button"
+                variant={!modEnabled ? 'gold' : 'outline'}
+                size="sm"
+                disabled={modSaving || !modEnabled}
+                loading={modSaving && modEnabled}
+                onClick={() => void saveModeration(false)}
+              >
+                {ui.settingsTab.moderationOff}
+              </AppBtn>
+            </div>
+            {modError ? (
+              <p style={{ margin: '10px 0 0', fontSize: 12, color: 'var(--app-danger)' }}>{modError}</p>
+            ) : null}
+          </div>
+        </div>
+
+        {/* ── 04 Schedule ────────────────────────────── */}
+        <div>
+          <SectionMark n="04" label={ui.settingsTab.sectionSchedule} />
           <div style={{ ...glass, borderRadius: 18, padding: '20px 18px 24px' }}>
 
             <p style={{ margin: '0 0 18px', fontFamily: FS, fontStyle: 'italic', fontSize: 14, color: MUTED, lineHeight: 1.6 }}>
@@ -462,9 +521,9 @@ export function SettingsTab({
           </div>
         </div>
 
-        {/* ── 03 Danger zone ─────────────────────────── */}
+        {/* ── 05 Danger zone ─────────────────────────── */}
         <div>
-          <SectionMark n="04" label={ui.settingsTab.dangerEyebrow} />
+          <SectionMark n="05" label={ui.settingsTab.dangerEyebrow} />
           <ConfirmDialog
             open={deleteConfirmOpen}
             title={ui.settingsTab.deleteTitleForever}

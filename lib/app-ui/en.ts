@@ -555,6 +555,20 @@ export const APP_UI_EN = {
       "The export queue could not be read. If you use your own Supabase project, apply the latest migrations (including `media_zip_exports`). Otherwise try again in a moment.",
     zipExportErrorTooMany: "Too many items for one ZIP. Remove some uploads or export without videos.",
     columnsLabel: "Columns",
+    moderationPanelTitle: "Pending approval",
+    moderationPanelEmpty: "No pending uploads.",
+    moderationApprove: "Approve",
+    moderationDiscard: "Discard",
+    moderationApproveAll: "Approve all",
+    moderationApproveBusy: "…",
+    moderationNewBadge: "{count} new",
+    moderationPendingBadge: "Pending",
+    moderationActionFail: "Could not complete action.",
+    newUploadsSectionTitle: "New uploads",
+    newUploadsViewAll: "View all",
+    newUploadsClose: "Close",
+    newUploadsKeep: "Keep",
+    newUploadsDelete: "Delete",
   },
 
   guests: {
@@ -667,6 +681,11 @@ export const APP_UI_EN = {
     deletePlaceholderTitleOrWord: "Title or DELETE",
     deleteButton: "Delete this event completely",
     exactParen: "(exact)",
+    moderationHeading: "Photo moderation",
+    moderationHint: "When on, guest uploads are hidden until you approve them. You can change this at any time.",
+    moderationOn: "Moderation on",
+    moderationOff: "Moderation off",
+    moderationSaveFail: "Could not update moderation setting.",
   },
 
   validateCreate: {
@@ -685,6 +704,8 @@ export const APP_UI_EN = {
     searchEmojiHint: "Search or browse all emojis. Your choice appears in the event header.",
     noEmojiBtn: "No emoji",
     defaultEmojiAria: "Selected emoji",
+    moderationToggleLabel: "Review photos before guests can see them",
+    moderationToggleHint: "You can change this later in Settings.",
   },
 
   createStep2: {

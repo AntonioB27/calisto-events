@@ -54,6 +54,8 @@ type EventAdminTabsProps = Readonly<{
   mediaCount?: number;
   eventDate?: string | null;
   bannerTheme?: string;
+  moderationEnabled?: boolean;
+  organizerGalleryReviewedAt?: string | null;
 }>;
 
 // ── Editorial Almanac palette ─────────────────────────────────────────────────
@@ -97,6 +99,416 @@ function parseDateFull(dateStr: string | null | undefined) {
   } catch { return null; }
 }
 
+// ── New Uploads Strip ─────────────────────────────────────────────────────────
+type NewUploadItem = {
+  id: string;
+  storage_path: string;
+  thumbnail_path: string | null;
+  mime_type: string | null;
+  signedUrl?: string;
+  thumbnailUrl?: string;
+};
+
+type SignedEntry = { path: string | null; signedUrl: string };
+
+function NewUploadsStrip({
+  eventId,
+  moderationEnabled,
+  organizerGalleryReviewedAt,
+}: {
+  eventId: string;
+  moderationEnabled: boolean;
+  organizerGalleryReviewedAt: string | null;
+}) {
+  const ui = useAppUi();
+  const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
+  const [items, setItems] = useState<NewUploadItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [allBusy, setAllBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.getAttribute("data-theme") === "dark");
+    const obs = new MutationObserver(() =>
+      setIsDark(document.documentElement.getAttribute("data-theme") === "dark"),
+    );
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => obs.disconnect();
+  }, []);
+
+  const fetchItems = useCallback(async () => {
+    if (!supabase) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let query = (supabase as any)
+        .from("media_items")
+        .select("id, storage_path, thumbnail_path, mime_type")
+        .eq("event_id", eventId)
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      if (moderationEnabled) {
+        query = query.eq("moderation_status", "pending");
+      } else if (organizerGalleryReviewedAt) {
+        query = query.gt("created_at", organizerGalleryReviewedAt);
+      }
+
+      const { data, error: fetchErr } = await query;
+      if (fetchErr || !data?.length) {
+        setItems([]);
+        setLoading(false);
+        return;
+      }
+
+      const rows = data as NewUploadItem[];
+      const allPaths = rows.flatMap((r) =>
+        [r.storage_path, r.thumbnail_path].filter((p): p is string => Boolean(p)),
+      );
+      const { data: signed } = allPaths.length
+        ? await supabase.storage.from("event-media").createSignedUrls(allPaths, 3600)
+        : { data: [] as SignedEntry[] };
+      const urlMap = Object.fromEntries(
+        ((signed ?? []) as SignedEntry[]).map((s) => [s.path, s.signedUrl]),
+      );
+      setItems(
+        rows.map((r) => ({
+          ...r,
+          signedUrl: urlMap[r.storage_path],
+          thumbnailUrl: r.thumbnail_path ? urlMap[r.thumbnail_path] : undefined,
+        })),
+      );
+    } catch {
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase, eventId, moderationEnabled, organizerGalleryReviewedAt]);
+
+  useEffect(() => { void fetchItems(); }, [fetchItems]);
+
+  async function handleDiscard(item: NewUploadItem) {
+    setBusyId(item.id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/events/${eventId}/moderation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "discard", mediaItemId: item.id }),
+      });
+      if (!res.ok) throw new Error();
+      setItems((prev) => prev.filter((i) => i.id !== item.id));
+    } catch {
+      setError(ui.gallery.moderationActionFail);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleKeep(item: NewUploadItem) {
+    if (!moderationEnabled) {
+      setItems((prev) => prev.filter((i) => i.id !== item.id));
+      return;
+    }
+    setBusyId(item.id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/events/${eventId}/moderation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "approve", mediaItemId: item.id }),
+      });
+      if (!res.ok) throw new Error();
+      setItems((prev) => prev.filter((i) => i.id !== item.id));
+    } catch {
+      setError(ui.gallery.moderationActionFail);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleAcceptAll() {
+    setAllBusy(true);
+    setError(null);
+    try {
+      const action = moderationEnabled ? "approve_all" : "mark_reviewed";
+      const res = await fetch(`/api/events/${eventId}/moderation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (!res.ok) throw new Error();
+      setItems([]);
+      setExpanded(false);
+    } catch {
+      setError(ui.gallery.moderationActionFail);
+    } finally {
+      setAllBusy(false);
+    }
+  }
+
+  if (loading || items.length === 0) return null;
+
+  const preview = items.slice(0, 6);
+  const hiddenCount = Math.max(0, items.length - 6);
+  // Warm-tinted glass — amber bleed from the cream background shows through
+  const glassBg = isDark
+    ? "rgba(255,242,195,0.07)"
+    : "rgba(255,249,235,0.84)";
+  const glassBorderColor = isDark
+    ? "rgba(220,175,80,0.14)"
+    : "rgba(180,138,48,0.22)";
+  // Specular: bright top edge (light hitting glass) + warm ambient drop shadow
+  const glassBoxShadow = isDark
+    ? "inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.2), 0 10px 36px rgba(0,0,0,0.38), 0 2px 8px rgba(0,0,0,0.22)"
+    : "inset 0 1px 0 rgba(255,255,255,0.96), inset 0 -1px 0 rgba(160,118,36,0.07), 0 10px 36px rgba(148,108,24,0.09), 0 2px 6px rgba(0,0,0,0.05)";
+  const mutedColor = isDark ? "rgba(255,255,255,0.32)" : "rgba(0,0,0,0.32)";
+  const thumbBorder = isDark ? "rgba(30,22,10,0.88)" : "rgba(255,255,255,0.94)";
+
+  return (
+    <div style={{ padding: "10px 16px 0" }}>
+      {/* ── Warm glass bar ── */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        background: glassBg,
+        backdropFilter: "blur(22px)",
+        WebkitBackdropFilter: "blur(22px)",
+        border: `1px solid ${glassBorderColor}`,
+        borderRadius: 14,
+        padding: "10px 10px 10px 14px",
+        boxShadow: glassBoxShadow,
+      }}>
+        {/* Count stacked vertically */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, gap: 1 }}>
+          <span style={{
+            fontFamily: FS_,
+            fontStyle: "italic",
+            fontWeight: 700,
+            fontSize: 26,
+            lineHeight: 1,
+            color: GOLD_,
+            letterSpacing: "-0.03em",
+          }}>
+            {items.length}
+          </span>
+          <span style={{
+            fontFamily: FB_,
+            fontSize: 8,
+            fontWeight: 700,
+            color: mutedColor,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+          }}>
+            new
+          </span>
+        </div>
+
+        {/* Warm gradient divider */}
+        <div style={{
+          width: 1,
+          height: 36,
+          flexShrink: 0,
+          background: isDark
+            ? "linear-gradient(to bottom, transparent, rgba(220,175,80,0.18), transparent)"
+            : "linear-gradient(to bottom, transparent, rgba(180,138,48,0.24), transparent)",
+        }} />
+
+        {/* Overlapping photo stack */}
+        <div
+          style={{ display: "flex", flex: 1, cursor: "pointer", minWidth: 0, alignItems: "center" }}
+          onClick={() => setExpanded((v) => !v)}
+          role="button"
+          tabIndex={0}
+          aria-expanded={expanded}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpanded((v) => !v); } }}
+        >
+          {preview.map((item, i) => {
+            const isVideo = item.mime_type?.startsWith("video/");
+            const src = item.thumbnailUrl ?? item.signedUrl;
+            return (
+              <div
+                key={item.id}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 7,
+                  overflow: "hidden",
+                  position: "relative",
+                  flexShrink: 0,
+                  marginLeft: i === 0 ? 0 : -10,
+                  border: `2.5px solid ${thumbBorder}`,
+                  background: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+                  zIndex: preview.length - i,
+                }}
+              >
+                {src && !isVideo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                ) : isVideo ? (
+                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill={GOLD_} aria-hidden><path d="M8 5v14l11-7z" /></svg>
+                  </div>
+                ) : null}
+                {i === 5 && hiddenCount > 0 && (
+                  <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.58)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ fontFamily: FB_, fontSize: 10, fontWeight: 700, color: "#fff" }}>+{hiddenCount}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Approve all */}
+        <button
+          type="button"
+          disabled={allBusy || busyId !== null}
+          onClick={() => void handleAcceptAll()}
+          style={{
+            background: allBusy
+              ? "transparent"
+              : "linear-gradient(145deg, #E6BF66 0%, #C5922A 55%, #9A6E18 100%)",
+            border: allBusy ? `1px solid ${GOLD_}` : "none",
+            borderRadius: 9,
+            padding: "7px 13px",
+            fontSize: 11,
+            fontWeight: 700,
+            color: allBusy ? GOLD_ : "#fff",
+            fontFamily: FB_,
+            cursor: allBusy ? "wait" : "pointer",
+            letterSpacing: "0.01em",
+            flexShrink: 0,
+            whiteSpace: "nowrap",
+            boxShadow: allBusy
+              ? "none"
+              : "0 3px 12px rgba(148,108,24,0.38), inset 0 1px 0 rgba(255,255,255,0.22)",
+          }}
+        >
+          {allBusy ? "…" : ui.gallery.moderationApproveAll}
+        </button>
+
+        {/* Expand toggle */}
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-label={expanded ? ui.gallery.newUploadsClose : ui.gallery.newUploadsViewAll}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: "4px",
+            color: mutedColor,
+            display: "flex",
+            alignItems: "center",
+            flexShrink: 0,
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            {expanded ? <path d="M18 15l-6-6-6 6" /> : <path d="M6 9l6 6 6-6" />}
+          </svg>
+        </button>
+      </div>
+
+      {error && <p style={{ margin: "6px 0 0", fontSize: 11, color: "var(--app-danger)" }}>{error}</p>}
+
+      {/* ── Expanded item list ── */}
+      {expanded && (
+        <div style={{
+          marginTop: 5,
+          background: glassBg,
+          backdropFilter: "blur(22px)",
+          WebkitBackdropFilter: "blur(22px)",
+          border: `1px solid ${glassBorderColor}`,
+          borderRadius: 14,
+          overflow: "hidden",
+          boxShadow: glassBoxShadow,
+        }}>
+          <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", gap: 4 }}>
+            {items.map((item) => {
+              const busy = busyId === item.id;
+              const isVideo = item.mime_type?.startsWith("video/");
+              const src = item.thumbnailUrl ?? item.signedUrl;
+              return (
+                <div
+                  key={item.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "6px 8px",
+                    borderRadius: 8,
+                    background: isDark ? "rgba(255,242,195,0.04)" : "rgba(255,255,255,0.62)",
+                    border: `1px solid ${glassBorderColor}`,
+                  }}
+                >
+                  <div style={{ width: 40, height: 40, borderRadius: 6, overflow: "hidden", flexShrink: 0, background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }}>
+                    {src && !isVideo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    ) : isVideo ? (
+                      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill={GOLD_} aria-hidden><path d="M8 5v14l11-7z" /></svg>
+                      </div>
+                    ) : null}
+                  </div>
+                  <div style={{ flex: 1 }} />
+                  <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                    <button
+                      type="button"
+                      disabled={busy || allBusy}
+                      onClick={() => void handleDiscard(item)}
+                      style={{
+                        background: "none",
+                        border: `1px solid ${glassBorderColor}`,
+                        borderRadius: 6,
+                        padding: "5px 11px",
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: mutedColor,
+                        fontFamily: FB_,
+                        cursor: busy ? "wait" : "pointer",
+                        opacity: busy || allBusy ? 0.45 : 1,
+                      }}
+                    >
+                      {busy ? "…" : ui.gallery.newUploadsDelete}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy || allBusy}
+                      onClick={() => void handleKeep(item)}
+                      style={{
+                        background: GOLD_,
+                        border: "none",
+                        borderRadius: 6,
+                        padding: "5px 11px",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: "#fff",
+                        fontFamily: FB_,
+                        cursor: busy ? "wait" : "pointer",
+                        opacity: busy || allBusy ? 0.45 : 1,
+                        boxShadow: "0 1px 6px rgba(148,108,24,0.28)",
+                      }}
+                    >
+                      {busy ? "…" : moderationEnabled ? ui.gallery.moderationApprove : ui.gallery.newUploadsKeep}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TabsInner({
   eventId,
   selectedTab,
@@ -107,6 +519,8 @@ function TabsInner({
   mediaCount = 0,
   eventDate,
   bannerTheme,
+  moderationEnabled = false,
+  organizerGalleryReviewedAt = null,
 }: EventAdminTabsProps) {
   const ui = useAppUi();
   const parsedDate = parseDateFull(eventDate);
@@ -280,6 +694,14 @@ function TabsInner({
       </div>
 
     </div>
+
+    {showOrganizerOnlyTabs && (
+      <NewUploadsStrip
+        eventId={eventId}
+        moderationEnabled={moderationEnabled}
+        organizerGalleryReviewedAt={organizerGalleryReviewedAt}
+      />
+    )}
 
     {/* ── Liquid glass bottom nav — mobile only; desktop uses top nav ── */}
     <nav
