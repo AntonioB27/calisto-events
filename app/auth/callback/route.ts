@@ -14,8 +14,22 @@ function buildLoginRecoverUrl(origin: string, nextPath: string): string {
   return u.toString();
 }
 
+function getPublicOrigin(requestOrigin: string): string {
+  // Prefer the build-time public URL — the raw request origin can be wrong
+  // behind a proxy (e.g. http:// instead of https://).
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_APP_URL;
+  if (siteUrl?.trim()) {
+    try {
+      const withProto = siteUrl.startsWith("http") ? siteUrl : `https://${siteUrl}`;
+      return new URL(withProto).origin;
+    } catch { /* fall through */ }
+  }
+  return requestOrigin;
+}
+
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams, origin: requestOrigin } = new URL(request.url);
+  const origin = getPublicOrigin(requestOrigin);
   const code = searchParams.get("code");
   const nextPath = getPostAuthRedirectPath(searchParams.get("next"));
 

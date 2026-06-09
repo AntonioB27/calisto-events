@@ -42,7 +42,7 @@ const THEME_SWATCHES = [
 
 function ThemeRail() {
   return (
-    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
       {THEME_SWATCHES.map((bg, i) => (
         <span
           key={i}
