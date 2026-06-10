@@ -819,6 +819,7 @@ export const APP_UI_EN = {
       "Two identical table cards per sheet. Cut along the dashed line to place one card on each table.",
     cutHere: "Cut here",
     downloadPdf: "Download PDF",
+    downloadQr: "Download QR",
     changeTheme: "Change theme",
     previewPdf: "Preview",
     paperSectionLabel: "Paper size",

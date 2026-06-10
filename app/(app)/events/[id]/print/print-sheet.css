@@ -1,5 +1,9 @@
 /* Event print route: table cards (two-up) or portrait invitation preview. @page size is injected per sheet. */
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .print-sheet-outer {
   margin-left: auto;
   margin-right: auto;

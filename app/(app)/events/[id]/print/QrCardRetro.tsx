@@ -15,9 +15,10 @@ export function QrCardRetro({ eventTitle, accessCode, joinUrl, copy }: Props) {
         {[...Array(24)].map((_, i) => {
           const a = (i / 24) * Math.PI * 2;
           const col = BURST_COLORS[i % 3];
+          const r = (n: number) => Math.round(n * 1e4) / 1e4;
           return (
             <path key={i}
-              d={`M280 300 L${280 + Math.cos(a) * 700} ${300 + Math.sin(a) * 700} L${280 + Math.cos(a + 0.13) * 700} ${300 + Math.sin(a + 0.13) * 700} Z`}
+              d={`M280 300 L${r(280 + Math.cos(a) * 700)} ${r(300 + Math.sin(a) * 700)} L${r(280 + Math.cos(a + 0.13) * 700)} ${r(300 + Math.sin(a + 0.13) * 700)} Z`}
               fill={col} opacity="0.22" />
           );
         })}

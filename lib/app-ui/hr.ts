@@ -832,6 +832,7 @@ export const APP_UI_HR: AppUiDict = {
       "Dva ista kartica za stol po listu. Zareži duž isprekidane linije i stavi jednu karticu na svaki stol.",
     cutHere: "Zareži ovdje",
     downloadPdf: "Preuzmi PDF",
+    downloadQr: "Preuzmi QR",
     changeTheme: "Promijeni temu",
     previewPdf: "Pregled",
     paperSectionLabel: "Veličina papira",

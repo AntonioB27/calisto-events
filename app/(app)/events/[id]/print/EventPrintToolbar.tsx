@@ -112,7 +112,7 @@ export function EventPrintToolbar({
                 variant="gold"
                 size="sm"
                 as="a"
-                href={`/api/events/${eventId}/qr-pdf`}
+                href={`/api/events/${eventId}/qr-pdf?template=${encodeURIComponent(activeTemplate)}`}
                 download
               >
                 {p.downloadPdf}

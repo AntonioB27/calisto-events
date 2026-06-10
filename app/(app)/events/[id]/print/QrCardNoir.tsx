@@ -38,7 +38,7 @@ export function QrCardNoir({ accessCode, joinUrl, copy }: Props) {
               {copy.body}
             </p>
             <p style={{ fontSize: 13, letterSpacing: 3, color: '#fff', margin: '16px 0 0', fontWeight: 600 }}>
-              CODE — {accessCode}
+              CODE · {accessCode}
             </p>
           </div>
           <div style={{ padding: 14, background: '#fff', flexShrink: 0 }}>

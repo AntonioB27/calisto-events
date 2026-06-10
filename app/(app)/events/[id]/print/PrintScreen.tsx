@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Home, Users, Images, Camera } from "lucide-react";
 
 import type { AppUiDict } from "@/lib/app-ui/en";
@@ -58,18 +58,10 @@ function ChevronIcon() {
     </svg>
   );
 }
-function PrinterIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <rect x="6" y="14" width="12" height="7" rx="1.2" stroke="#fff" strokeWidth="2" />
-    </svg>
-  );
-}
 function DownloadIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 19h16" stroke={C.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 19h16" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -185,10 +177,13 @@ export function PrintScreen({
 }: PrintScreenProps) {
   const [selected, setSelected] = useState<QrThemedTemplateId>(initialTemplate);
   const [paper, setPaper] = useState<PrintPaperId>(initialPaper);
+  const [pdfDownloading, setPdfDownloading] = useState(false);
   const p = chromePrint;
   const railRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const cardRef = useRef<HTMLDivElement>(null);
   const activeIdx = QR_THEMED_PRINT_TEMPLATE_IDS.indexOf(selected);
+  const copy = buildQrCardCopy(selected, posterPrint);
 
   useEffect(() => {
     const rail = railRef.current;
@@ -199,7 +194,62 @@ export function PrintScreen({
   }, [activeIdx]);
 
   const thumbProps = { eventTitle, accessCode, joinUrl, posterPrint };
-  const chipText = interpolate(p.printSheetChip, { paper: paper === "a4" ? "A4" : "Letter" });
+
+  const handleDownloadPdf = useCallback(async () => {
+    if (pdfDownloading || !cardRef.current) return;
+    setPdfDownloading(true);
+
+    const el = cardRef.current;
+
+    try {
+      const [{ toPng, getFontEmbedCSS }, { jsPDF }] = await Promise.all([
+        import("html-to-image"),
+        import("jspdf"),
+      ]);
+
+      await document.fonts.ready;
+      await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
+      // getFontEmbedCSS walks only the fonts this element actually uses,
+      // triggers html-to-image's SecurityError fallback to fetch Google Fonts
+      // via CORS (allowed), and returns a compact base64 CSS — far smaller
+      // than embedding every family/weight we load for the whole page.
+      const fontEmbedCSS = await getFontEmbedCSS(el).catch(() => undefined);
+
+      const dataUrl = await toPng(el, {
+        width: 559,
+        height: 793,
+        pixelRatio: 3,
+        ...(fontEmbedCSS ? { fontEmbedCSS } : {}),
+      });
+
+      const A4_W = 210;
+      const A4_H = 297;
+      const margin = 10;
+      const maxW = A4_W - 2 * margin;
+      const maxH = A4_H - 2 * margin;
+      const aspect = 559 / 793;
+      let imgW = maxW;
+      let imgH = imgW / aspect;
+      if (imgH > maxH) {
+        imgH = maxH;
+        imgW = imgH * aspect;
+      }
+
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      pdf.addImage(dataUrl, "PNG", (A4_W - imgW) / 2, (A4_H - imgH) / 2, imgW, imgH);
+
+      const slug = eventTitle
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 40) || "event";
+      pdf.save(`calisto-${slug}-${selected.replace(/^qr-/, "")}.pdf`);
+    } finally {
+      setPdfDownloading(false);
+    }
+  }, [pdfDownloading, selected, eventTitle]);
 
   const themeLabel = (tid: QrThemedTemplateId): string => ({
     "qr-simple":     p.templateQrSimple,
@@ -230,10 +280,6 @@ export function PrintScreen({
           <div className="ps-card-shadow">
             <CardThumb templateId={selected} w={300} {...thumbProps} />
           </div>
-          <div className="ps-chip">
-            <span className="ps-chip__dot" aria-hidden />
-            <span className="ps-chip__text">{chipText}</span>
-          </div>
         </div>
 
         {/* Options panel */}
@@ -245,18 +291,20 @@ export function PrintScreen({
               <ChevronIcon />
             </Link>
             <div className="ps-action-buttons">
-              <a
-                href={`/api/events/${eventId}/qr-pdf`}
-                download
-                className="ps-action-download"
-                aria-label={p.downloadPdf}
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                className="ps-action-print"
+                disabled={pdfDownloading}
               >
-                <DownloadIcon />
-                <span className="ps-action-download__text">{p.downloadPdf}</span>
-              </a>
-              <button onClick={() => window.print()} className="ps-action-print">
-                <PrinterIcon />
-                {p.print}
+                {pdfDownloading ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ animation: "spin 0.9s linear infinite" }}>
+                    <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeDasharray="28 56" strokeLinecap="round" />
+                  </svg>
+                ) : (
+                  <DownloadIcon />
+                )}
+                {p.downloadPdf}
               </button>
             </div>
           </div>
@@ -325,6 +373,27 @@ export function PrintScreen({
 
       {/* Mobile nav — fixed floating pill, prints tab active */}
       <MobileNav eventId={eventId} />
+
+      {/* Off-screen wrapper keeps the card out of the viewport.
+          ref targets the inner div so cloneCSSStyle copies position:static
+          (not position:fixed left:-9999px), ensuring the clone renders at
+          (0,0) inside the SVG foreignObject. */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          left: -9999,
+          top: 0,
+          pointerEvents: "none",
+        }}
+      >
+        <div
+          ref={cardRef}
+          style={{ width: 559, height: 793, overflow: "hidden" }}
+        >
+          {pickQrCard(selected, { eventTitle, accessCode, joinUrl, copy })}
+        </div>
+      </div>
 
       {/* ── Print layout (only visible on @media print) ──────────── */}
       <div className="ps-print-layout">

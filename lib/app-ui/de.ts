@@ -846,6 +846,7 @@ export const APP_UI_DE: AppUiDict = {
       "Zwei identische Tischkarten pro Blatt. Entlang der gestrichelten Linie schneiden und je eine Karte auf einen Tisch legen.",
     cutHere: "Hier schneiden",
     downloadPdf: "PDF herunterladen",
+    downloadQr: "QR herunterladen",
     changeTheme: "Design ändern",
     previewPdf: "Vorschau",
     paperSectionLabel: "Papierformat",

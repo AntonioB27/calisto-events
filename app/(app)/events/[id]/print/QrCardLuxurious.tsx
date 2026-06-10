@@ -23,7 +23,7 @@ export function QrCardLuxurious({ eventTitle, accessCode, joinUrl, copy }: Props
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', textAlign: 'center',
       }}>
         <div>
-          <p style={{ fontFamily: "'Jost', 'DM Sans', sans-serif", fontSize: 16, letterSpacing: 9, margin: 0, background: gold, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 500 }}>
+          <p style={{ fontFamily: "'Jost', 'DM Sans', sans-serif", fontSize: 16, letterSpacing: 9, margin: 0, background: gold, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', color: '#d8b35f', fontWeight: 500 }}>
             C A L I S T O
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, margin: '14px 0 10px' }}>
@@ -54,7 +54,7 @@ export function QrCardLuxurious({ eventTitle, accessCode, joinUrl, copy }: Props
           <QRCode value={joinUrl} size={202} fgColor="#1a140d" bgColor="#fbf7ee" />
         </div>
         <p style={{ fontFamily: "'Jost', 'DM Sans', sans-serif", fontSize: 14, letterSpacing: 5, color: '#8c7a4f', margin: 0 }}>
-          JOIN CODE — {accessCode}
+          JOIN CODE · {accessCode}
         </p>
       </div>
     </div>

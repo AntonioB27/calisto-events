@@ -12,9 +12,26 @@ import { QrPdfDocument } from "./QrPdfDocument";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
+function buildFilename(eventTitle: string, templateParam: string | null): string {
+  const slug = eventTitle
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40) || "event";
+  // Strip "qr-" prefix from template id for readability (e.g. "qr-romantic" → "romantic")
+  const theme = (templateParam ?? "")
+    .replace(/^qr-/, "")
+    .replace(/[^a-z0-9-]/g, "")
+    .slice(0, 30);
+  return theme ? `calisto-${slug}-${theme}.pdf` : `calisto-${slug}-qr.pdf`;
+}
+
 export async function GET(request: Request, { params }: RouteParams) {
   const { id } = await params;
-  const preview = new URL(request.url).searchParams.get("preview") === "1";
+  const searchParams = new URL(request.url).searchParams;
+  const preview = searchParams.get("preview") === "1";
+  const templateParam = searchParams.get("template");
 
   const supabase = await createSupabaseAuthServerClient();
   const {
@@ -59,9 +76,10 @@ export async function GET(request: Request, { params }: RouteParams) {
     }) as any,
   );
 
+  const filename = buildFilename(eventTitle, templateParam);
   const disposition = preview
-    ? `inline; filename="qr-${event.access_code}.pdf"`
-    : `attachment; filename="qr-${event.access_code}.pdf"`;
+    ? `inline; filename="${filename}"`
+    : `attachment; filename="${filename}"`;
 
   return new NextResponse(new Uint8Array(pdfBuffer), {
     headers: {
