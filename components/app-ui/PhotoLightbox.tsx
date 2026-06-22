@@ -112,7 +112,9 @@ export function PhotoLightbox({
       style={{
         position: "fixed",
         inset: 0,
-        background: "#000",
+        background: "rgba(10, 8, 14, 0.6)",
+        backdropFilter: "blur(32px) saturate(150%)",
+        WebkitBackdropFilter: "blur(32px) saturate(150%)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -139,42 +141,31 @@ export function PhotoLightbox({
         )
       ) : null}
 
-      {/* ── Header bar — close ── */}
-      <div
+      {/* ── Close button — always visible, exempt from controls auto-hide ── */}
+      <button
+        type="button"
+        aria-label={copy.closeLightboxAria}
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
         style={{
-          ...controlsStyle,
           position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          padding: "12px 16px 48px",
-          background: "linear-gradient(rgba(0,0,0,0.65), transparent)",
+          top: 16,
+          right: 16,
+          width: 36,
+          height: 36,
+          borderRadius: "50%",
+          background: "rgba(0,0,0,0.55)",
+          border: "1px solid rgba(255,255,255,0.18)",
+          color: "#fff",
+          cursor: "pointer",
+          fontSize: 20,
           display: "flex",
-          justifyContent: "flex-end",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1,
         }}
-        onClick={handleControlsClick}
       >
-        <button
-          type="button"
-          aria-label={copy.closeLightboxAria}
-          onClick={(e) => { e.stopPropagation(); onClose(); }}
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: "50%",
-            background: "rgba(0,0,0,0.55)",
-            border: "1px solid rgba(255,255,255,0.18)",
-            color: "#fff",
-            cursor: "pointer",
-            fontSize: 20,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          ×
-        </button>
-      </div>
+        ×
+      </button>
 
       {/* ── Footer bar — like, uploader, actions, likers ── */}
       <div

@@ -47,4 +47,24 @@ describe("generateImageThumbnail", () => {
     const result = await generateImageThumbnail(corrupt, "image/jpeg");
     expect(result).toBeNull();
   });
+
+  it("applies EXIF orientation instead of leaving the thumbnail sideways", async () => {
+    // Landscape pixel data tagged with EXIF orientation 6 (rotate 90° CW to display correctly),
+    // as produced by phone cameras for portrait shots.
+    const buf = await sharp({
+      create: { width: 800, height: 600, channels: 3, background: { r: 255, g: 0, b: 0 } },
+    })
+      .withMetadata({ orientation: 6 })
+      .jpeg()
+      .toBuffer();
+    const input = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
+
+    const result = await generateImageThumbnail(input, "image/jpeg");
+    const meta = await sharp(result!).metadata();
+
+    // Orientation should be baked into the pixels (portrait) and the tag cleared, not left for
+    // a viewer to apply on top of an already-reoriented thumbnail.
+    expect(meta.width).toBeLessThan(meta.height!);
+    expect(meta.orientation ?? 1).toBe(1);
+  });
 });

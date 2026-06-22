@@ -11,6 +11,7 @@ export async function generateImageThumbnail(
   if (!mimeType.startsWith("image/")) return null;
   try {
     return await sharp(Buffer.from(buffer))
+      .rotate()
       .resize(600, 600, { fit: "inside", withoutEnlargement: true })
       .jpeg({ quality: 80 })
       .toBuffer();
