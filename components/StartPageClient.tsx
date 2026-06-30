@@ -148,7 +148,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [emoji, setEmoji] = useState<string>("🎉");
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<PlanId>("plus");
+  const [selectedPlan, setSelectedPlan] = useState<PlanId>("premium");
   const [detailModalPlan, setDetailModalPlan] = useState<PlanId | null>(null);
   const [modalClosing, setModalClosing] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>;
@@ -571,7 +571,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                           whiteSpace: "nowrap" as const,
                         }}
                       >
-                        {!sel && p.id === "plus" && (
+                        {!sel && p.id === "premium" && (
                           <span
                             style={{
                               width: 5,
@@ -583,7 +583,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                           />
                         )}
                         {p.name}
-                        {sel && p.id === "plus" && (
+                        {sel && p.id === "premium" && (
                           <span
                             style={{
                               fontSize: 7,
@@ -697,7 +697,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                           >
                             {p.name}
                           </span>
-                          {p.id === "plus" && (
+                          {p.id === "premium" && (
                             <span
                               style={{
                                 fontSize: 7,
@@ -1160,7 +1160,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                       >
                         {p.name}
                       </span>
-                      {p.id === "plus" && (
+                      {p.id === "premium" && (
                         <span
                           style={{
                             fontSize: 7.5,

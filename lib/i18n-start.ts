@@ -44,7 +44,7 @@ export type StartPageCopy = {
 const copy: Record<Locale, StartPageCopy> = {
   en: {
     loginLink: "Sign in",
-    reviewBadge: "4.9 · 12,000+ events",
+    reviewBadge: "4.9",
     heroLine1: "Guests scan.",
     heroLine2: "You collect memories.",
     heroSub:
@@ -117,7 +117,7 @@ const copy: Record<Locale, StartPageCopy> = {
 
   hr: {
     loginLink: "Prijava",
-    reviewBadge: "4,9 · 12.000+ događaja",
+    reviewBadge: "4,9",
     heroLine1: "Gosti skeniraju.",
     heroLine2: "Vi skupljate uspomene.",
     heroSub:
@@ -190,7 +190,7 @@ const copy: Record<Locale, StartPageCopy> = {
 
   de: {
     loginLink: "Anmelden",
-    reviewBadge: "4,9 · 12.000+ Events",
+    reviewBadge: "4,9",
     heroLine1: "Gäste scannen.",
     heroLine2: "Du sammelst Erinnerungen.",
     heroSub:
