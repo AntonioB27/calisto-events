@@ -5,7 +5,9 @@ import { getPlanLimits, PLAN_DB_INT_MAX } from "@/lib/plan-limits";
 import { interpolate } from "@/lib/app-ui";
 import { useAppUi } from "@/components/AppUiProvider";
 import { writeCreateEventDraftToStorage } from "@/lib/create-event-draft";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePostHog } from "posthog-js/react";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const INK    = '#221509';
@@ -56,6 +58,12 @@ type Step2PlanProps = {
 
 export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, validationError }: Step2PlanProps) {
   const ui = useAppUi();
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    posthog.capture(ANALYTICS_EVENTS.CREATE_STEP2_VIEWED);
+  }, [posthog]);
+
   const [selected, setSelected] = useState<PlanId>(selectedPlanId);
   const [expanded, setExpanded] = useState<PlanId | null>(null);
 
@@ -250,6 +258,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
               const planInput = form.elements.namedItem("planId");
               const current = planInput instanceof HTMLInputElement ? (planInput.value as PlanId) : selected;
               writeStep2Draft(current);
+              posthog.capture(ANALYTICS_EVENTS.CREATE_STEP2_COMPLETED, { plan_id: current });
             }}
             style={{ flex: 1, background: `linear-gradient(135deg,#7B3FBE,${PURPLE})`, color: '#fff', border: 'none', borderRadius: 11, padding: '13px 18px', fontFamily: FB, fontSize: 13, fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 12px rgba(91,45,142,0.32)' }}
           >

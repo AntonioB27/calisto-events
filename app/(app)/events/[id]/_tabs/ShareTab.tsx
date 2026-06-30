@@ -6,6 +6,8 @@ import { useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 import Link from "next/link";
 import { AppBtn } from "@/components/app-ui/AppBtn";
+import { usePostHog } from "posthog-js/react";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const GOLD      = '#C5922A';
@@ -40,6 +42,7 @@ type ShareTabProps = Readonly<{
 
 export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: ShareTabProps) {
   const ui = useAppUi();
+  const posthog = usePostHog();
   const [copied, setCopied] = useState<string | null>(null);
   const [shareError, setShareError] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(false);
@@ -65,6 +68,7 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
       await navigator.clipboard.writeText(text);
       setCopied(label);
       setShareError(null);
+      posthog.capture(ANALYTICS_EVENTS.ORGANIZER_CODE_COPIED, { type: label, event_id: eventId });
     } catch {
       setShareError(ui.share.copyFailManual);
     }
@@ -75,9 +79,11 @@ export function ShareTab({ eventId, accessCode, eventTitle, publicOrigin }: Shar
     try {
       if (typeof navigator !== 'undefined' && navigator.share) {
         await navigator.share({ title: eventTitle, url: joinUrl });
+        posthog.capture(ANALYTICS_EVENTS.ORGANIZER_INVITE_SHARED, { method: "native_share", event_id: eventId });
         return;
       }
       await copyToClipboard('link', joinUrl);
+      posthog.capture(ANALYTICS_EVENTS.ORGANIZER_INVITE_SHARED, { method: "clipboard", event_id: eventId });
     } catch (e) {
       if (e instanceof DOMException && e.name === 'AbortError') return;
       setShareError(ui.share.shareUnavailable);

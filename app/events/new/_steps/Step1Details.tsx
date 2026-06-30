@@ -5,6 +5,8 @@ import { readCreateEventDraftFromStorage, writeCreateEventDraftToStorage } from 
 import type { PlanId } from "@/lib/plan-limits";
 import EmojiPicker, { type EmojiClickData, Theme } from "emoji-picker-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { usePostHog } from "posthog-js/react";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const INK    = '#221509';
@@ -71,6 +73,12 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate, defaultMo
   const [pickerOpen, setPickerOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement | null>(null);
 
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    posthog.capture(ANALYTICS_EVENTS.CREATE_STEP1_VIEWED);
+  }, [posthog]);
+
   useEffect(() => { setEmoji(initialEmoji); }, [initialEmoji]);
 
   useEffect(() => {
@@ -119,6 +127,10 @@ export function Step1Details({ defaultName, defaultEmoji, defaultDate, defaultMo
           const name = String(formData.get("name") ?? "");
           const date = String(formData.get("date") ?? "");
           writeStep2Draft(name, date);
+          posthog.capture(ANALYTICS_EVENTS.CREATE_STEP1_COMPLETED, {
+            has_emoji: emoji !== "📅",
+            moderation_enabled: moderationEnabled,
+          });
         }}
       >
         <input type="hidden" name="step" value="2" />

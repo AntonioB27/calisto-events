@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
@@ -14,6 +15,7 @@ import { WELCOME_HERO_COLUMN_MAX_WIDTH_PX } from "@/components/MascotSpot";
 import { getBrowserPublicOrigin } from "@/lib/browser-public-origin";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { getPostAuthRedirectPath } from "@/lib/safe-return-path";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 export type AuthCombinedMode = "login" | "register";
 
@@ -47,6 +49,7 @@ function GoogleMark() {
 export function AuthCombinedForm() {
   const ui = useAppUi();
   const router = useRouter();
+  const posthog = usePostHog();
   const searchParams = useSearchParams();
   const afterAuthPath = useMemo(
     () => getPostAuthRedirectPath(searchParams.get("returnTo")),
@@ -85,6 +88,7 @@ export function AuthCombinedForm() {
   async function onGoogleOAuth() {
     setOauthPending(true);
     setError(null);
+    posthog.capture(ANALYTICS_EVENTS.USER_OAUTH_STARTED, { provider: "google" });
 
     let willRedirect = false;
     try {
@@ -137,6 +141,12 @@ export function AuthCombinedForm() {
         return;
       }
 
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        posthog.identify(user.id, { email: user.email });
+        posthog.capture(ANALYTICS_EVENTS.USER_LOGGED_IN, { method: "email" });
+      }
+
       router.push(afterAuthPath);
       router.refresh();
     } finally {
@@ -169,11 +179,16 @@ export function AuthCombinedForm() {
       }
 
       if (data.session) {
+        if (data.user) {
+          posthog.identify(data.user.id, { email: data.user.email });
+          posthog.capture(ANALYTICS_EVENTS.USER_REGISTERED, { method: "email" });
+        }
         router.push(afterAuthPath);
         router.refresh();
         return;
       }
 
+      posthog.capture(ANALYTICS_EVENTS.USER_REGISTERED, { method: "email", email_verification_required: true });
       setSuccessMessage(ui.auth.checkEmailVerify);
     } finally {
       setPending(false);

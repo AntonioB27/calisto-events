@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { usePostHog } from "posthog-js/react";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 type UploadItem = {
   id: string;
@@ -327,6 +329,7 @@ function UploadStatusButton({ queue, onClick }: { queue: UploadItem[]; onClick: 
 
 // ── Main component ────────────────────────────────────────────────────────────
 export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
+  const posthog = usePostHog();
   const inputRef = useRef<HTMLInputElement>(null);
   const [queue, setQueue] = useState<UploadItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -365,6 +368,11 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
           );
         } else {
           setQueue((prev) => prev.map((item) => (item.id === pending.id ? { ...item, status: "done" } : item)));
+          posthog.capture(ANALYTICS_EVENTS.GUEST_MEDIA_UPLOADED, {
+            event_id: eventId,
+            file_type: pending.file.type.startsWith("video/") ? "video" : "photo",
+            file_size_mb: Math.round(pending.file.size / 1024 / 1024 * 10) / 10,
+          });
           onUploadedRef.current();
         }
       })

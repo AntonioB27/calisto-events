@@ -4,6 +4,8 @@ import Stripe from "stripe";
 
 import { fulfillPaidEventFromCheckoutSession } from "@/lib/event-stripe-checkout";
 import { getStripe } from "@/lib/stripe-server";
+import { getPostHogServerClient } from "@/lib/posthog-server";
+import { ANALYTICS_SERVER_EVENTS } from "@/lib/analytics-events";
 
 export const runtime = "nodejs";
 
@@ -55,6 +57,20 @@ export async function POST(request: Request) {
         if (!isPermanentCheckoutFulfillmentError(msg)) {
           return NextResponse.json({ error: msg }, { status: 500 });
         }
+      } else {
+        const organizerId = typeof session.metadata?.organizer_id === "string"
+          ? session.metadata.organizer_id
+          : session.id;
+        const posthog = getPostHogServerClient();
+        posthog.capture({
+          distinctId: organizerId,
+          event: ANALYTICS_SERVER_EVENTS.SERVER_EVENT_CREATED,
+          properties: {
+            plan: session.metadata?.plan,
+            session_id: session.id,
+          },
+        });
+        await posthog.shutdown();
       }
     }
   }

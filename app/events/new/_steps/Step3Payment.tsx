@@ -9,6 +9,8 @@ import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { clearCreateEventDraftFromStorage, writeCreateEventDraftToStorage } from "@/lib/create-event-draft";
 import { isPaidPlanForCheckout } from "@/lib/event-stripe-checkout";
 import { useAppUi } from "@/components/AppUiProvider";
+import { usePostHog } from "posthog-js/react";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const INK    = '#221509';
@@ -73,6 +75,11 @@ export function Step3Payment({ name, emoji, date, planId, moderationEnabled, val
   const [error, setError] = useState<string | null>(null);
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [requiresAuth, setRequiresAuth] = useState(false);
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    posthog.capture(ANALYTICS_EVENTS.CREATE_STEP3_VIEWED, { plan_id: planId });
+  }, [posthog, planId]);
 
   const returnTo = "/events/new?resume=1";
   const loginHref = `/auth/login?returnTo=${encodeURIComponent(returnTo)}`;
@@ -112,6 +119,11 @@ export function Step3Payment({ name, emoji, date, planId, moderationEnabled, val
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setRequiresAuth(true); setBusy(false); return; }
 
+      posthog.capture(ANALYTICS_EVENTS.CREATE_STEP3_COMPLETED, {
+        plan_id: planId,
+        is_paid: isPaidPlanForCheckout(planId),
+      });
+
       if (isPaidPlanForCheckout(planId)) {
         const response = await fetch("/api/stripe/checkout-create-event", {
           method: "POST",
@@ -145,6 +157,7 @@ export function Step3Payment({ name, emoji, date, planId, moderationEnabled, val
         .single();
 
       if (insertError || !data?.id) throw new Error(insertError?.message ?? ui.createStep3.createFail);
+      posthog.capture(ANALYTICS_EVENTS.CREATE_COMPLETED, { plan_id: planId, is_paid: false });
       clearCreateEventDraftFromStorage();
       router.push(`/events/${data.id}?tab=share`);
       router.refresh();

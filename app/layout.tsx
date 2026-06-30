@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import { AppUiProvider } from "@/components/AppUiProvider";
+import { PostHogProvider } from "@/components/PostHogProvider";
 import { CalistoThemeInit } from "@/components/CalistoThemeInit";
 import { getAppStrings } from "@/lib/app-ui";
 import { bcp47FromUiLocale } from "@/lib/locale-bcp47";
@@ -41,7 +42,9 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <CalistoThemeInit />
-        <AppUiProvider value={{ locale, ...dict }}>{children}</AppUiProvider>
+        <PostHogProvider>
+          <AppUiProvider value={{ locale, ...dict }}>{children}</AppUiProvider>
+        </PostHogProvider>
         <Analytics />
       </body>
     </html>

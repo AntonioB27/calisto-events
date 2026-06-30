@@ -4,8 +4,10 @@ import { normalizeAccessCode } from "@/lib/access-code";
 import { decodeJoinCodeFromScan } from "@/lib/join-code-from-scan";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
+import { usePostHog } from "posthog-js/react";
 
 import { useAppUi } from "@/components/AppUiProvider";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 import { JoinQrScanner } from "./JoinQrScanner";
 
@@ -38,6 +40,7 @@ function parseDatePreview(dateStr: string | null) {
 export function JoinCodeForm({ isLoggedIn }: { isLoggedIn: boolean }) {
   const ui = useAppUi();
   const router = useRouter();
+  const posthog = usePostHog();
   const [isDark, setIsDark] = useState(false);
   const [stage, setStage] = useState<"enter" | "scan" | "choice">("enter");
   const [code, setCode] = useState("");
@@ -58,6 +61,7 @@ export function JoinCodeForm({ isLoggedIn }: { isLoggedIn: boolean }) {
   async function fetchJoinPreview(normalized: string, source: "form" | "scan"): Promise<boolean> {
     setLoadingPreview(true);
     setError(null);
+    posthog.capture(ANALYTICS_EVENTS.GUEST_CODE_SUBMITTED, { source });
     try {
       const response = await fetch(`/api/join/preview?code=${encodeURIComponent(normalized)}`);
       if (response.status === 404) {
@@ -109,6 +113,7 @@ export function JoinCodeForm({ isLoggedIn }: { isLoggedIn: boolean }) {
   }
 
   function onContinueAsGuest() {
+    posthog.capture(ANALYTICS_EVENTS.GUEST_JOINED_EVENT, { access_code: resolvedCode });
     router.push(`/join/${encodeURIComponent(resolvedCode)}`);
   }
 

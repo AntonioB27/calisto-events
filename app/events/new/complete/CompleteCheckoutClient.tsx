@@ -8,6 +8,8 @@ import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppCard } from "@/components/app-ui/AppCard";
 import { clearCreateEventDraftFromStorage } from "@/lib/create-event-draft";
+import { usePostHog } from "posthog-js/react";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 export function CompleteCheckoutClient() {
   const ui = useAppUi();
@@ -15,6 +17,7 @@ export function CompleteCheckoutClient() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
 
+  const posthog = usePostHog();
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
 
@@ -51,6 +54,7 @@ export function CompleteCheckoutClient() {
         return;
       }
 
+      posthog.capture(ANALYTICS_EVENTS.CREATE_COMPLETED);
       clearCreateEventDraftFromStorage();
       router.replace(`/events/${payload.eventId}?tab=share`);
       router.refresh();
@@ -61,7 +65,7 @@ export function CompleteCheckoutClient() {
     return () => {
       cancelled = true;
     };
-  }, [sessionId, router, ui.locale]);
+  }, [sessionId, router, ui.locale, posthog]);
 
   return (
     <AppCard pad="lg" className="mt-8">
