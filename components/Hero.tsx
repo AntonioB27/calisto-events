@@ -1,9 +1,9 @@
 import Image from "next/image";
-import type { LandingCopy } from "@/lib/i18n";
+import type { LandingCopy, Locale } from "@/lib/i18n";
 
-type HeroProps = { copy: LandingCopy; isLoggedIn: boolean };
+type HeroProps = { copy: LandingCopy; isLoggedIn: boolean; locale: Locale };
 
-export function Hero({ copy, isLoggedIn }: HeroProps) {
+export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
   return (
     <section
       id="top"
@@ -49,7 +49,7 @@ export function Hero({ copy, isLoggedIn }: HeroProps) {
             {/* CTAs */}
             <div className="flex items-center flex-wrap" style={{ marginTop: 40, gap: 14 }}>
               <a
-                href={isLoggedIn ? "/dashboard" : "#plans"}
+                href={isLoggedIn ? "/dashboard" : `/${locale}/start`}
                 className="inline-flex items-center gap-2.5"
                 style={{
                   fontFamily: "var(--font-sans)",

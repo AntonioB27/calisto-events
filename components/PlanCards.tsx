@@ -1,130 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type React from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import EmojiPicker, { type EmojiClickData, Theme } from "emoji-picker-react";
 import type { LandingCopy } from "@/lib/i18n";
 import { buildPlanStartUrl } from "@/lib/landing-event-form";
+import { PlanQuickStartForm } from "@/components/plan-cards/PlanQuickStartForm";
+import { PlanCardList } from "@/components/plan-cards/PlanCardList";
 
 type PlanCardsProps = { copy: LandingCopy };
-
-type PlanConfig = {
-  icon: () => React.ReactElement;
-  accentColor: string;
-  borderColor: string;
-  panelBackground: string;
-  detailStripe: string;
-  glow: string;
-  originalPrice?: string;
-};
-
-function LeafIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
-      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" />
-      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-    </svg>
-  );
-}
-function StarIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-  );
-}
-function DiamondIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
-      <path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41L13.7 2.71a2.41 2.41 0 0 0-3.41 0Z" />
-    </svg>
-  );
-}
-function LayersIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
-      <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" />
-      <path d="M22 17.65l-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
-      <path d="m2 11.91 9.17 4.17a2 2 0 0 0 1.66 0L22 11.92" />
-    </svg>
-  );
-}
-function RocketIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
-      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
-      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
-    </svg>
-  );
-}
-
-const PLAN_CONFIG: Record<string, PlanConfig> = {
-  free: {
-    icon: LeafIcon,
-    accentColor: "#9FC58D",
-    borderColor: "rgba(159,197,141,0.35)",
-    panelBackground: "linear-gradient(165deg, rgba(159,197,141,0.24) 0%, rgba(159,197,141,0.08) 55%, rgba(0,0,0,0) 100%)",
-    detailStripe: "linear-gradient(90deg, rgba(159,197,141,1) 0%, rgba(159,197,141,0.55) 100%)",
-    glow: "rgba(159,197,141,0.28)",
-  },
-  standard: {
-    icon: StarIcon,
-    accentColor: "#86A9F9",
-    borderColor: "rgba(134,169,249,0.35)",
-    panelBackground: "linear-gradient(165deg, rgba(134,169,249,0.24) 0%, rgba(134,169,249,0.08) 55%, rgba(0,0,0,0) 100%)",
-    detailStripe: "linear-gradient(90deg, rgba(134,169,249,1) 0%, rgba(134,169,249,0.55) 100%)",
-    glow: "rgba(134,169,249,0.28)",
-  },
-  plus: {
-    icon: LayersIcon,
-    accentColor: "#B89BC4",
-    borderColor: "rgba(184,155,196,0.35)",
-    panelBackground: "linear-gradient(165deg, rgba(184,155,196,0.24) 0%, rgba(184,155,196,0.08) 55%, rgba(0,0,0,0) 100%)",
-    detailStripe: "linear-gradient(90deg, rgba(184,155,196,1) 0%, rgba(184,155,196,0.55) 100%)",
-    glow: "rgba(184,155,196,0.3)",
-  },
-  premium: {
-    icon: DiamondIcon,
-    accentColor: "#E6A760",
-    borderColor: "rgba(230,167,96,0.42)",
-    panelBackground: "linear-gradient(165deg, rgba(230,167,96,0.26) 0%, rgba(230,167,96,0.1) 55%, rgba(0,0,0,0) 100%)",
-    detailStripe: "linear-gradient(90deg, rgba(230,167,96,1) 0%, rgba(230,167,96,0.6) 100%)",
-    glow: "rgba(230,167,96,0.34)",
-    originalPrice: "70€",
-  },
-  max: {
-    icon: RocketIcon,
-    accentColor: "#E97AA4",
-    borderColor: "rgba(233,122,164,0.35)",
-    panelBackground: "linear-gradient(165deg, rgba(233,122,164,0.24) 0%, rgba(233,122,164,0.08) 55%, rgba(0,0,0,0) 100%)",
-    detailStripe: "linear-gradient(90deg, rgba(233,122,164,1) 0%, rgba(233,122,164,0.55) 100%)",
-    glow: "rgba(233,122,164,0.3)",
-    originalPrice: "100€",
-  },
-};
 
 export function PlanCards({ copy }: PlanCardsProps) {
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [emoji, setEmoji] = useState("");
-  const [pickerOpen, setPickerOpen] = useState(false);
   const [shaking, setShaking] = useState(false);
-  const nameInputRef = useRef<HTMLInputElement>(null);
-  const emojiBoxRef = useRef<HTMLDivElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>;
   const router = useRouter();
-
-  useEffect(() => {
-    if (!pickerOpen) return;
-    const onDocDown = (e: MouseEvent) => {
-      if (!emojiBoxRef.current?.contains(e.target as Node)) setPickerOpen(false);
-    };
-    document.addEventListener("mousedown", onDocDown);
-    return () => document.removeEventListener("mousedown", onDocDown);
-  }, [pickerOpen]);
 
   const toggle = (id: string) =>
     setExpandedPlan((prev) => (prev === id ? null : id));
@@ -134,8 +27,6 @@ export function PlanCards({ copy }: PlanCardsProps) {
     if (!name.trim()) {
       const el = nameInputRef.current;
       if (el) {
-        // classList drives the animation; reflow trick lets it restart on rapid re-clicks.
-        // setShaking(true) below is separate — it drives only the red border color.
         el.classList.remove("input-shake");
         void el.offsetWidth;
         el.classList.add("input-shake");
@@ -157,10 +48,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
     >
       <div className="mx-auto" style={{ maxWidth: 1280, padding: "0 32px" }}>
         {/* Header */}
-        <div
-          className="flex flex-col gap-6 lg:flex-row lg:items-start"
-          style={{ marginBottom: 56 }}
-        >
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start" style={{ marginBottom: 56 }}>
           <div style={{ width: "100%" }}>
             <div
               style={{
@@ -203,463 +91,34 @@ export function PlanCards({ copy }: PlanCardsProps) {
           </div>
         </div>
 
-        {/* Quick-start form — polaroid card */}
-        <div style={{ marginBottom: 32, position: "relative", paddingTop: 18, zIndex: 1 }}>
-          {/* Washi tape */}
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              top: 4,
-              left: "50%",
-              transform: "translateX(-50%) rotate(-2deg)",
-              width: 64,
-              height: 14,
-              background: "rgba(212,168,67,0.48)",
-              border: "0.5px solid rgba(212,168,67,0.6)",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.22)",
-              zIndex: 2,
-              borderRadius: 2,
-              pointerEvents: "none",
-            }}
-          />
-
-          {/* Polaroid card */}
-          <div
-            style={{
-              background: "#f9f6f1",
-              padding: "14px 18px 30px",
-              borderRadius: 2,
-              boxShadow: "0 8px 28px rgba(0,0,0,0.28), 0 2px 6px rgba(0,0,0,0.16)",
-              transform: "rotate(-0.6deg)",
-              position: "relative",
-            }}
-          >
-            {/* Emoji header — clickable, warm tinted */}
-            <div
-              role="button"
-              tabIndex={0}
-              aria-label={copy.plansFormEmojiPlaceholder}
-              onClick={() => setPickerOpen((v) => !v)}
-              onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); setPickerOpen((v) => !v); } }}
-              style={{
-                cursor: "pointer",
-                position: "relative",
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                gap: 5,
-                padding: "20px 16px 16px",
-                background: "linear-gradient(160deg, rgba(197,146,42,0.13) 0%, rgba(197,146,42,0.04) 100%)",
-                borderBottom: "1px solid rgba(197,146,42,0.18)",
-                userSelect: "none",
-              }}
-            >
-              {/* Gold corner marks */}
-              <span aria-hidden style={{ position: "absolute", top: 12, left: 14, width: 16, height: 16, borderTop: "2px solid rgba(197,146,42,0.55)", borderLeft: "2px solid rgba(197,146,42,0.55)", borderRadius: "2px 0 0 0", pointerEvents: "none" }} />
-              <span aria-hidden style={{ position: "absolute", top: 12, right: 14, width: 16, height: 16, borderTop: "2px solid rgba(197,146,42,0.55)", borderRight: "2px solid rgba(197,146,42,0.55)", borderRadius: "0 2px 0 0", pointerEvents: "none" }} />
-              <span style={{ fontSize: 56, lineHeight: 1, filter: "drop-shadow(0 4px 12px rgba(40,25,15,0.18))" }}>
-                {emoji || "📅"}
-              </span>
-              <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(163,113,24,0.6)", fontFamily: "'DM Sans', sans-serif" }}>
-                {copy.plansFormEmojiPlaceholder}
-              </span>
-            </div>
-
-            {/* Name + date inputs */}
-            <div style={{ padding: "14px 16px 0" }}>
-              <div className="plan-form-inputs">
-                <input
-                  ref={nameInputRef}
-                  type="text"
-                  autoComplete="off"
-                  aria-label={copy.plansFormNamePlaceholder}
-                  placeholder={copy.plansFormNamePlaceholder}
-                  value={name}
-                  onChange={(e) => { setName(e.target.value); setShaking(false); }}
-                  style={{
-                    background: "rgba(255,255,255,0.8)",
-                    border: `1.5px solid ${shaking ? "rgba(210,80,110,0.65)" : "#DDD4C5"}`,
-                    borderRadius: 8,
-                    padding: "10px 13px",
-                    fontFamily: "'DM Serif Display', serif",
-                    fontStyle: "italic",
-                    fontSize: 16,
-                    color: "#221509",
-                    outline: "none",
-                    transition: "border-color 200ms",
-                    width: "100%",
-                    boxSizing: "border-box",
-                    letterSpacing: "-0.01em",
-                  }}
-                />
-                <input
-                  type="date"
-                  value={date}
-                  min={new Date().toISOString().split("T")[0]}
-                  aria-label={copy.plansFormDateLabel}
-                  onChange={(e) => setDate(e.target.value)}
-                  style={{
-                    background: "rgba(255,255,255,0.8)",
-                    border: "1.5px solid #DDD4C5",
-                    borderRadius: 8,
-                    padding: "10px 13px",
-                    fontFamily: "var(--font-sans)",
-                    fontSize: 14,
-                    color: "#221509",
-                    outline: "none",
-                    colorScheme: "light",
-                    width: "100%",
-                    boxSizing: "border-box",
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Emoji picker row */}
-            <div
-              ref={emojiBoxRef}
-              style={{ position: "relative", borderTop: "1px dashed #DDD4C5", margin: "14px 0 0", padding: "10px 16px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}
-            >
-              <p style={{ margin: 0, fontSize: 11, color: "#9A8570", fontFamily: "'DM Sans', sans-serif" }}>
-                {emoji ? emoji : "📅"}&ensp;{copy.plansFormEmojiPlaceholder}
-              </p>
-              <button
-                type="button"
-                onClick={() => setPickerOpen((v) => !v)}
-                style={{ flexShrink: 0, background: "rgba(255,255,255,0.7)", border: `1.5px solid ${pickerOpen ? "#C5922A" : "#DDD4C5"}`, color: pickerOpen ? "#A37118" : "#5A4A36", padding: "5px 12px", borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "border-color 0.15s, color 0.15s" }}
-              >
-                {pickerOpen ? "✕" : copy.plansFormEmojiPlaceholder}
-              </button>
-              {pickerOpen && (
-                <div
-                  role="dialog"
-                  aria-label={copy.plansFormEmojiPlaceholder}
-                  style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", zIndex: 20, borderRadius: 14, overflow: "hidden", border: "1.5px solid #DDD4C5", boxShadow: "0 20px 40px rgba(40,25,15,0.22)" }}
-                >
-                  <EmojiPicker
-                    width={320}
-                    height={400}
-                    lazyLoadEmojis
-                    searchDisabled={false}
-                    skinTonesDisabled
-                    theme={Theme.LIGHT}
-                    onEmojiClick={(data: EmojiClickData) => {
-                      setEmoji(data.emoji);
-                      setPickerOpen(false);
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Plan stack (single column) */}
-        <div
-          className="plan-cards-grid"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            gap: 22,
-            maxWidth: 720,
-            margin: "0 auto",
+        <PlanQuickStartForm
+          name={name}
+          onNameChange={(v) => { setName(v); setShaking(false); }}
+          date={date}
+          onDateChange={setDate}
+          emoji={emoji}
+          onEmojiChange={setEmoji}
+          shaking={shaking}
+          nameInputRef={nameInputRef}
+          copy={{
+            plansFormNamePlaceholder: copy.plansFormNamePlaceholder,
+            plansFormDateLabel: copy.plansFormDateLabel,
+            plansFormEmojiPlaceholder: copy.plansFormEmojiPlaceholder,
           }}
-        >
-          {copy.plans.map((plan, idx) => {
-            const [priceRow, ...restRows] = plan.rows;
-            const config = PLAN_CONFIG[plan.id] ?? PLAN_CONFIG.free!;
-            const Icon = config.icon;
-            const isExpanded = expandedPlan === plan.id;
-            return (
-              <article
-                key={plan.id}
-                className={`plan-card plan-card-${plan.id}`}
-                tabIndex={0}
-                aria-labelledby={`plan-${plan.id}`}
-                aria-expanded={isExpanded}
-                data-expanded={isExpanded ? "true" : "false"}
-                onClick={() => toggle(plan.id)}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(plan.id); } }}
-                style={{
-                  background: "var(--ink)",
-                  border: `1px solid ${config.borderColor}`,
-                  borderRadius: 18,
-                  overflow: "hidden",
-                  position: "relative",
-                  outline: "none",
-                  cursor: "pointer",
-                  boxShadow: `0 20px 56px -40px ${config.glow}`,
-                  animation: "planCardReveal 520ms cubic-bezier(0.16, 1, 0.3, 1) both",
-                  animationDelay: `${idx * 80}ms`,
-                }}
-              >
-                <div className="plan-card-shell">
-                  <div
-                    className="plan-card-summary"
-                    style={{ background: config.panelBackground }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          width: 30,
-                          height: 30,
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: 9,
-                          border: `1px solid ${config.borderColor}`,
-                          background: `${config.accentColor}1C`,
-                          color: config.accentColor,
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Icon />
-                      </span>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ width: 16, height: 16, color: "var(--cream-4,#6E6758)", flexShrink: 0, transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 280ms ease" }}>
-                        <path d="m6 9 6 6 6-6" />
-                      </svg>
-                    </div>
-                    <h3
-                      id={`plan-${plan.id}`}
-                      style={{
-                        fontFamily: "var(--font-display)",
-                        fontStyle: "italic",
-                        fontSize: 30,
-                        fontWeight: 400,
-                        color: "var(--cream)",
-                        margin: "14px 0 12px",
-                        lineHeight: 1.05,
-                      }}
-                    >
-                      {plan.name}
-                    </h3>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: 56, color: "var(--cream)", lineHeight: 0.94 }}>
-                      {config.originalPrice ? (
-                        <span
-                          style={{
-                            display: "block",
-                            fontFamily: "var(--font-sans)",
-                            fontSize: 20,
-                            fontWeight: 500,
-                            color: "var(--cream-4, #6E6758)",
-                            textDecoration: "line-through",
-                            textDecorationThickness: "1.5px",
-                            marginBottom: 8,
-                          }}
-                        >
-                          {config.originalPrice}
-                        </span>
-                      ) : null}
-                      {priceRow?.value}
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: "10px",
-                        letterSpacing: "0.14em",
-                        textTransform: "uppercase",
-                        color: "var(--cream-3, #B5AB99)",
-                        marginTop: 7,
-                      }}
-                    >
-                      {copy.plansPerEventSuffix}
-                    </div>
-                    <p style={{ marginTop: 14, fontFamily: "var(--font-sans)", fontSize: 13.5, color: "var(--cream-3, #B5AB99)", lineHeight: 1.45 }}>
-                      {plan.tailoredFor}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={(e) => handleChoose(e, plan.id)}
-                      style={{
-                        marginTop: 16,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 6,
-                        padding: "9px 16px",
-                        borderRadius: 999,
-                        background: `${config.accentColor}18`,
-                        border: `1px solid ${config.borderColor}`,
-                        color: config.accentColor,
-                        fontFamily: "var(--font-sans)",
-                        fontSize: 13,
-                        fontWeight: 500,
-                        cursor: "pointer",
-                        letterSpacing: "0.01em",
-                        transition: "background 200ms",
-                      }}
-                    >
-                      {copy.plansFormChooseBtn}
-                      <svg
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={1.75}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        style={{ width: 13, height: 13 }}
-                        aria-hidden
-                      >
-                        <path d="M3 8h10M9 4l4 4-4 4" />
-                      </svg>
-                    </button>
-                  </div>
+        />
 
-                  <div className="plan-card-details">
-                    <div className="plan-card-details-inner">
-                      <div
-                        aria-hidden
-                        style={{
-                          height: 4,
-                          borderRadius: 999,
-                          background: config.detailStripe,
-                          marginBottom: 10,
-                        }}
-                      />
-                      <dl style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                        {restRows.map((row) => (
-                          <div
-                            key={row.label}
-                            className="plan-detail-row"
-                            style={{
-                              display: "grid",
-                              gridTemplateColumns: "minmax(130px, auto) 1fr",
-                              alignItems: "center",
-                              gap: 14,
-                              padding: "13px 0",
-                              borderBottom: "1px dashed rgba(181,171,153,0.2)",
-                              background: `linear-gradient(90deg, ${config.accentColor}10 0%, rgba(0,0,0,0) 30%)`,
-                            }}
-                          >
-                            <dt
-                              style={{
-                                fontFamily: "var(--font-mono)",
-                                fontSize: 10,
-                                color: "var(--cream-4, #6E6758)",
-                                letterSpacing: "0.09em",
-                                textTransform: "uppercase",
-                              }}
-                            >
-                              {row.label}
-                            </dt>
-                            <dd
-                              style={{
-                                fontFamily: "var(--font-sans)",
-                                color: "var(--cream)",
-                                fontWeight: 600,
-                                margin: 0,
-                                textAlign: "right",
-                                lineHeight: 1.35,
-                              }}
-                            >
-                              {row.value}
-                            </dd>
-                          </div>
-                        ))}
-                      </dl>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-
-        <p
-          style={{
-            marginTop: 16,
-            borderRadius: 12,
-            border: "1px solid var(--hair)",
-            background: "var(--glass-bg)",
-            padding: "12px 16px",
-            fontFamily: "var(--font-sans)",
-            fontSize: 12.5,
-            fontStyle: "italic",
-            color: "var(--cream-4, #6E6758)",
-            lineHeight: 1.6,
+        <PlanCardList
+          plans={copy.plans}
+          expandedPlan={expandedPlan}
+          onToggle={toggle}
+          onChoose={handleChoose}
+          copy={{
+            plansFormChooseBtn: copy.plansFormChooseBtn,
+            plansPerEventSuffix: copy.plansPerEventSuffix,
+            planFootnote: copy.planFootnote,
           }}
-        >
-          {copy.planFootnote}
-        </p>
+        />
       </div>
-
-      <style>{`
-        @keyframes planCardReveal {
-          0%   { opacity: 0; transform: translateY(14px) scale(0.985); }
-          100% { opacity: 1; transform: translateY(0)    scale(1); }
-        }
-        .plan-card-shell {
-          display: grid;
-          grid-template-columns: 1fr;
-        }
-        .plan-card-summary {
-          padding: 22px 20px 20px;
-        }
-        /* collapsed: details animate to 0 height */
-        .plan-card-details {
-          display: grid;
-          grid-template-rows: 0fr;
-          transition: grid-template-rows 280ms ease;
-        }
-        .plan-card[data-expanded="true"] .plan-card-details {
-          grid-template-rows: 1fr;
-        }
-        .plan-card-details-inner {
-          overflow: hidden;
-          padding: 0 20px;
-          border-top: 0px solid transparent;
-          transition: padding 280ms ease, border-color 280ms ease;
-        }
-        .plan-card[data-expanded="true"] .plan-card-details-inner {
-          padding: 16px 20px;
-          border-top-width: 1px;
-          border-top-color: rgba(181,171,153,0.2);
-        }
-        .plan-card {
-          transition: transform 220ms ease, box-shadow 220ms ease, filter 220ms ease;
-        }
-        .plan-card:hover { transform: translateY(-3px); filter: saturate(1.1); }
-        .plan-card-free:hover     { box-shadow: 0 20px 56px -32px rgba(159,197,141,0.35); }
-        .plan-card-standard:hover { box-shadow: 0 20px 56px -32px rgba(134,169,249,0.35); }
-        .plan-card-plus:hover     { box-shadow: 0 20px 56px -32px rgba(184,155,196,0.38); }
-        .plan-card-premium:hover  { box-shadow: 0 20px 56px -32px rgba(230,167,96,0.4);  }
-        .plan-card-max:hover      { box-shadow: 0 20px 56px -32px rgba(233,122,164,0.38); }
-        .plan-detail-row { transition: transform 200ms ease; }
-        .plan-card[data-expanded="true"] .plan-detail-row:hover { transform: translateX(2px); }
-        .plan-card .plan-detail-row:last-child { border-bottom: none !important; }
-        @media (max-width: 780px) {
-          .plan-detail-row {
-            grid-template-columns: 1fr !important;
-            gap: 6px !important;
-            padding: 11px 0 !important;
-          }
-          .plan-detail-row dd { text-align: left !important; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .plan-card, .plan-card-details, .plan-card-details-inner, .plan-detail-row {
-            animation: none !important;
-            transition: none !important;
-            transform: none !important;
-          }
-        }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20%       { transform: translateX(-6px); }
-          40%       { transform: translateX(6px); }
-          60%       { transform: translateX(-4px); }
-          80%       { transform: translateX(4px); }
-        }
-        .input-shake { animation: shake 420ms ease; }
-        .plan-form-inputs {
-          display: grid;
-          grid-template-columns: 1fr auto;
-          gap: 10px;
-          align-items: center;
-        }
-        @media (max-width: 600px) {
-          .plan-form-inputs {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }

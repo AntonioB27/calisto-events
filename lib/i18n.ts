@@ -186,7 +186,7 @@ const copy: Record<Locale, LandingCopy> = {
       "Calisto is a shared photo and video album for weddings, birthdays, and every celebration. Guests upload straight from their phone browser. No app to download. Free to try.",
     heroAuroraCardBlurb:
       "I'd rather you be in the moment than digging through camera rolls on Monday. I'm here so the messy, wonderful parts of your day—the toasts, the candid grins, the kid with cake on his face—stay in one story you can reopen without a scavenger hunt.",
-    heroPrimaryCta: "Try for free",
+    heroPrimaryCta: "Create your event",
     heroSecondaryCta: "Compare plans",
     heroSignals: [
       "No app to download — guests scan and upload from the browser.",
@@ -504,7 +504,7 @@ const copy: Record<Locale, LandingCopy> = {
       "Calisto je zajednički foto i video album za vjenčanja, rođendane i proslave. Gosti dijele slike izravno iz preglednika na mobitelu. Nema preuzimanja aplikacije. Isprobaj besplatno.",
     heroAuroraCardBlurb:
       "Želim da budeš na plesu, a ne da u ponedjeljak pretražuješ deset mapi s fotkama. Tu sam da taj neuredno lijepi dan — toaste, prvi ples, taj tren s kolačem — ostane jedna priča koju možeš otvoriti bez detektivskog posla.",
-    heroPrimaryCta: "Isprobaj besplatno",
+    heroPrimaryCta: "Kreiraj događaj",
     heroSecondaryCta: "Usporedi pakete",
     heroSignals: [
       "Nema preuzimanja aplikacije — gosti skeniraju i učitavaju u pregledniku.",
@@ -821,7 +821,7 @@ const copy: Record<Locale, LandingCopy> = {
       "Calisto ist das gemeinsame Foto- und Videoalbum für Hochzeiten, Geburtstage und jede Feier. Gäste laden direkt im Handy-Browser hoch. Keine App nötig. Kostenlos ausprobieren.",
     heroAuroraCardBlurb:
       "Lieber tanzt du auf der Feier, als dass du am Montag hundert Chatverläufe durchsuchst. Ich will, dass der Tag als eine lebendige Geschichte bleibt — Reden, Umarmungen, das schiefe Gruppenfoto — die man wiederfindet, ohne Schatzsuche.",
-    heroPrimaryCta: "Kostenlos ausprobieren",
+    heroPrimaryCta: "Event erstellen",
     heroSecondaryCta: "Tarife vergleichen",
     heroSignals: [
       "Keine App zum Herunterladen — Gäste scannen und laden im Browser.",

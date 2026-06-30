@@ -20,13 +20,15 @@ export default async function DemoEventPage({ searchParams }: Props) {
 
   return (
     <DemoToastProvider>
-      <div className="app-shell">
+      <div className="app-shell flex flex-col">
         <DemoRoleToggle currentRole={role} currentTab={tab} />
-        {role === "organizer" ? (
-          <DemoOrganizerView selectedTab={tab} publicOrigin={publicOrigin} />
-        ) : (
-          <DemoGuestView />
-        )}
+        <div className="relative z-0 min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+          {role === "organizer" ? (
+            <DemoOrganizerView selectedTab={tab} publicOrigin={publicOrigin} />
+          ) : (
+            <DemoGuestView />
+          )}
+        </div>
       </div>
     </DemoToastProvider>
   );

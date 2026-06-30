@@ -87,7 +87,7 @@ export default async function LocalePage({ params }: LocalePageProps) {
       <LanguageSelectorPopup copy={copy} locale={locale as Locale} />
       <SiteHeader copy={copy} locale={locale as Locale} isLoggedIn={isLoggedIn} />
       <main className="flex-1">
-        <Hero copy={copy} isLoggedIn={isLoggedIn} />
+        <Hero copy={copy} isLoggedIn={isLoggedIn} locale={locale as Locale} />
         <StatBar copy={copy} />
         <Testimonials copy={copy} />
         <AppPreviewWindow copy={copy} />
