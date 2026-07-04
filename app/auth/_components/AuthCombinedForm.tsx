@@ -88,10 +88,10 @@ export function AuthCombinedForm() {
   async function onGoogleOAuth() {
     setOauthPending(true);
     setError(null);
-    posthog.capture(ANALYTICS_EVENTS.USER_OAUTH_STARTED, { provider: "google" });
 
     let willRedirect = false;
     try {
+      posthog.capture(ANALYTICS_EVENTS.USER_OAUTH_STARTED, { provider: "google" });
       const supabase = getSupabaseBrowserClient();
       const nextPath = afterAuthPath;
       const origin = getBrowserPublicOrigin() || window.location.origin;

@@ -57,10 +57,16 @@ export async function GET(request: Request) {
       },
     });
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    try {
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
-      return NextResponse.redirect(`${origin}${nextPath}`);
+      if (!error) {
+        return NextResponse.redirect(`${origin}${nextPath}`);
+      }
+
+      console.error("[auth/callback] exchangeCodeForSession error:", error.name, error.message);
+    } catch (err) {
+      console.error("[auth/callback] exchangeCodeForSession threw:", err instanceof Error ? err.name : typeof err, err instanceof Error ? err.message : String(err));
     }
   }
 
