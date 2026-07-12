@@ -69,6 +69,7 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
   const [likeCounts, setLikeCounts] = useState<Map<string, number>>(() => new Map());
   const [likedByMe, setLikedByMe] = useState<Set<string>>(() => new Set());
   const [lightbox, setLightbox] = useState<MediaItem | null>(null);
+  const [advanceAfterLoad, setAdvanceAfterLoad] = useState(false);
   const [lightboxLikers, setLightboxLikers] = useState<LikerRow[]>([]);
   const [lightboxLikersLoading, setLightboxLikersLoading] = useState(false);
   const [likeToggleError, setLikeToggleError] = useState<string | null>(null);
@@ -78,6 +79,8 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
     () => ({
       lightboxAria: ui.gallery.lightboxAria,
       closeLightboxAria: ui.gallery.closeLightboxAria,
+      prevPhotoAria: ui.gallery.prevPhotoAria,
+      nextPhotoAria: ui.gallery.nextPhotoAria,
       heartLikeAria: ui.likes.heartLikeAria,
       heartUnlikeAria: ui.likes.heartUnlikeAria,
       likeCount: (count: number) => interpolate(ui.likes.likeCount, { count }),
@@ -87,6 +90,35 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
     }),
     [ui],
   );
+
+  const lightboxIndex = lightbox ? items.findIndex((i) => i.id === lightbox.id) : -1;
+
+  function goToPrevLightbox() {
+    if (lightboxIndex > 0) setLightbox(items[lightboxIndex - 1]);
+  }
+
+  function goToNextLightbox() {
+    if (lightboxIndex < 0) return;
+    if (lightboxIndex < items.length - 1) {
+      setLightbox(items[lightboxIndex + 1]);
+    } else if (hasMore) {
+      // At the end of what's loaded — pull the next page, then advance once it lands.
+      setAdvanceAfterLoad(true);
+      loadMore();
+    }
+  }
+
+  // When a page requested from the lightbox arrives, step onto the next photo.
+  useEffect(() => {
+    if (!advanceAfterLoad || !lightbox) return;
+    const idx = items.findIndex((i) => i.id === lightbox.id);
+    if (idx !== -1 && idx < items.length - 1) {
+      setLightbox(items[idx + 1]);
+      setAdvanceAfterLoad(false);
+    } else if (!hasMore) {
+      setAdvanceAfterLoad(false);
+    }
+  }, [advanceAfterLoad, items, lightbox, hasMore]);
 
   useEffect(() => {
     warmCache(eventId);
@@ -486,6 +518,10 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
           uploadedByYouAria={ui.gallery.uploadedByYouAria}
           onClose={() => setLightbox(null)}
           onToggleLike={() => void handleToggleLikeForItem(lightbox.id, lightbox.uploaded_by)}
+          hasPrev={lightboxIndex > 0}
+          hasNext={lightboxIndex >= 0 && (lightboxIndex < items.length - 1 || hasMore)}
+          onPrev={goToPrevLightbox}
+          onNext={goToNextLightbox}
         />
       ) : null}
     </div>

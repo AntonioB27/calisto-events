@@ -10,6 +10,8 @@ import { UserIcon } from "@/components/app-ui/UserIcon";
 export type PhotoLightboxCopy = Readonly<{
   lightboxAria: string;
   closeLightboxAria: string;
+  prevPhotoAria: string;
+  nextPhotoAria: string;
   heartLikeAria: string;
   heartUnlikeAria: string;
   likeCount: (count: number) => string;
@@ -36,7 +38,14 @@ type Props = Readonly<{
   isMineUpload?: boolean;
   uploadedByYouAria?: string;
   secondaryError?: string | null;
+  hasPrev?: boolean;
+  hasNext?: boolean;
+  onPrev?: () => void;
+  onNext?: () => void;
 }>;
+
+// Minimum horizontal travel (px) that counts as a deliberate swipe.
+const SWIPE_THRESHOLD = 50;
 
 const AUTO_HIDE_MS = 3000;
 
@@ -58,11 +67,16 @@ export function PhotoLightbox({
   isMineUpload = false,
   uploadedByYouAria,
   secondaryError,
+  hasPrev = false,
+  hasNext = false,
+  onPrev,
+  onNext,
 }: Props) {
   const isVideo = Boolean(mimeType?.startsWith("video/"));
   const [controlsVisible, setControlsVisible] = useState(true);
   const [mounted, setMounted] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
@@ -74,6 +88,35 @@ export function PhotoLightbox({
   }, [clearTimer]);
 
   useEffect(() => { setMounted(true); }, []);
+
+  // Arrow keys navigate between photos; Escape closes.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" && hasPrev) { e.preventDefault(); onPrev?.(); }
+      else if (e.key === "ArrowRight" && hasNext) { e.preventDefault(); onNext?.(); }
+      else if (e.key === "Escape") { e.preventDefault(); onClose(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [hasPrev, hasNext, onPrev, onNext, onClose]);
+
+  function handleTouchStart(e: React.TouchEvent) {
+    const t = e.changedTouches[0];
+    touchStartRef.current = { x: t.clientX, y: t.clientY };
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    // Only treat as a swipe when horizontal travel dominates and clears the threshold.
+    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy)) return;
+    if (dx > 0 && hasPrev) onPrev?.();
+    else if (dx < 0 && hasNext) onNext?.();
+  }
 
   // Auto-hide on mount
   useEffect(() => {
@@ -109,6 +152,8 @@ export function PhotoLightbox({
       aria-modal="true"
       aria-label={copy.lightboxAria}
       onClick={handleOverlayClick}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       style={{
         position: "fixed",
         inset: 0,
@@ -166,6 +211,64 @@ export function PhotoLightbox({
       >
         ×
       </button>
+
+      {/* ── Prev / next arrows — hidden at the ends of the gallery ── */}
+      {hasPrev ? (
+        <button
+          type="button"
+          aria-label={copy.prevPhotoAria}
+          onClick={(e) => { e.stopPropagation(); onPrev?.(); }}
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: 16,
+            transform: "translateY(-50%)",
+            width: 44,
+            height: 44,
+            borderRadius: "50%",
+            background: "rgba(0,0,0,0.55)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            color: "#fff",
+            cursor: "pointer",
+            fontSize: 24,
+            lineHeight: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1,
+          }}
+        >
+          ‹
+        </button>
+      ) : null}
+      {hasNext ? (
+        <button
+          type="button"
+          aria-label={copy.nextPhotoAria}
+          onClick={(e) => { e.stopPropagation(); onNext?.(); }}
+          style={{
+            position: "absolute",
+            top: "50%",
+            right: 16,
+            transform: "translateY(-50%)",
+            width: 44,
+            height: 44,
+            borderRadius: "50%",
+            background: "rgba(0,0,0,0.55)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            color: "#fff",
+            cursor: "pointer",
+            fontSize: 24,
+            lineHeight: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1,
+          }}
+        >
+          ›
+        </button>
+      ) : null}
 
       {/* ── Footer bar — like, uploader, actions, likers ── */}
       <div

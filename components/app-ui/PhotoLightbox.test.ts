@@ -7,6 +7,8 @@ import { PhotoLightbox } from "@/components/app-ui/PhotoLightbox";
 const copy = {
   lightboxAria: "Photo lightbox",
   closeLightboxAria: "Close lightbox",
+  prevPhotoAria: "Previous photo",
+  nextPhotoAria: "Next photo",
   heartLikeAria: "Like this photo",
   heartUnlikeAria: "Unlike this photo",
   likeCount: (count: number) => `${count} likes`,

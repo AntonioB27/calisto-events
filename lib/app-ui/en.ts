@@ -524,6 +524,8 @@ export const APP_UI_EN = {
     loadMore: "Load more…",
     lightboxAria: "Photo lightbox",
     closeLightboxAria: "Close lightbox",
+    prevPhotoAria: "Previous photo",
+    nextPhotoAria: "Next photo",
     downloadPhotoAria: "Download this photo",
     downloadBtn: "Download",
     downloadWorking: "Downloading…",

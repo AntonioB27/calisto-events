@@ -144,6 +144,7 @@ export function GalleryManager({
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [lightbox, setLightbox] = useState<MediaItem | null>(null);
+  const [advanceAfterLoad, setAdvanceAfterLoad] = useState(false);
   const [lightboxDownloading, setLightboxDownloading] = useState(false);
   const [lightboxDownloadError, setLightboxDownloadError] = useState<string | null>(null);
   const [eventOrganizerId, setEventOrganizerId] = useState<string | null>(null);
@@ -173,6 +174,8 @@ export function GalleryManager({
     () => ({
       lightboxAria: ui.gallery.lightboxAria,
       closeLightboxAria: ui.gallery.closeLightboxAria,
+      prevPhotoAria: ui.gallery.prevPhotoAria,
+      nextPhotoAria: ui.gallery.nextPhotoAria,
       heartLikeAria: ui.likes.heartLikeAria,
       heartUnlikeAria: ui.likes.heartUnlikeAria,
       likeCount: (count: number) => interpolate(ui.likes.likeCount, { count }),
@@ -594,6 +597,36 @@ export function GalleryManager({
     if (mediaFilter === 'videos') return isVideoMime(item.mime_type);
     return !isVideoMime(item.mime_type);
   });
+
+  const lightboxIndex = lightbox ? filtered.findIndex((i) => i.id === lightbox.id) : -1;
+
+  function goToPrev() {
+    if (lightboxIndex > 0) setLightbox(filtered[lightboxIndex - 1]);
+  }
+
+  function goToNext() {
+    if (lightboxIndex < 0) return;
+    if (lightboxIndex < filtered.length - 1) {
+      setLightbox(filtered[lightboxIndex + 1]);
+    } else if (hasMore) {
+      // At the end of what's loaded — pull the next page, then advance once it lands.
+      setAdvanceAfterLoad(true);
+      loadMore();
+    }
+  }
+
+  // When a page requested from the lightbox arrives, step onto the next photo.
+  useEffect(() => {
+    if (!advanceAfterLoad || !lightbox) return;
+    const idx = filtered.findIndex((i) => i.id === lightbox.id);
+    if (idx !== -1 && idx < filtered.length - 1) {
+      setLightbox(filtered[idx + 1]);
+      setAdvanceAfterLoad(false);
+    } else if (!hasMore) {
+      // Nothing more will load — give up waiting.
+      setAdvanceAfterLoad(false);
+    }
+  }, [advanceAfterLoad, filtered, lightbox, hasMore]);
 
   // Derived for the editorial header: unique uploaders (up to 5) + total counts
   const uniqueUploaderEntries = useMemo(() => {
@@ -1533,6 +1566,10 @@ export function GalleryManager({
           uploadedByYouAria={ui.gallery.uploadedByYouAria}
           onClose={() => setLightbox(null)}
           onToggleLike={() => void handleToggleLikeForItem(lightbox.id)}
+          hasPrev={lightboxIndex > 0}
+          hasNext={lightboxIndex >= 0 && (lightboxIndex < filtered.length - 1 || hasMore)}
+          onPrev={goToPrev}
+          onNext={goToNext}
           footerActions={
             <button
               type="button"

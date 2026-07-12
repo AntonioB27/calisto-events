@@ -11,6 +11,8 @@ import type { PhotoLightboxCopy } from "@/components/app-ui/PhotoLightbox";
 const DEMO_COPY: PhotoLightboxCopy = {
   lightboxAria: "Photo lightbox",
   closeLightboxAria: "Close",
+  prevPhotoAria: "Previous photo",
+  nextPhotoAria: "Next photo",
   heartLikeAria: "Like",
   heartUnlikeAria: "Unlike",
   likeCount: (count) => `${count}`,
@@ -28,6 +30,14 @@ type Props = {
 export function DemoMediaGrid({ canManage = false, columns, photos }: Props) {
   const { triggerDemoToast } = useDemoToast();
   const [lightboxPhoto, setLightboxPhoto] = useState<DemoPhoto | null>(null);
+  const lightboxIndex = lightboxPhoto ? photos.findIndex((p) => p.src === lightboxPhoto.src) : -1;
+  const goToOffset = (offset: number) =>
+    setLightboxPhoto((current) => {
+      if (!current) return current;
+      const idx = photos.findIndex((p) => p.src === current.src);
+      if (idx === -1) return current;
+      return photos[idx + offset] ?? current;
+    });
   const [liked, setLiked] = useState<Set<string>>(() => new Set());
   const [likeCounts, setLikeCounts] = useState<Map<string, number>>(
     () => new Map(photos.map((p) => [p.src, p.likeCount])),
@@ -138,6 +148,10 @@ export function DemoMediaGrid({ canManage = false, columns, photos }: Props) {
           uploaderLabel={lightboxPhoto.uploadedBy}
           onClose={() => setLightboxPhoto(null)}
           onToggleLike={() => handleToggleLike(lightboxPhoto.src)}
+          hasPrev={lightboxIndex > 0}
+          hasNext={lightboxIndex >= 0 && lightboxIndex < photos.length - 1}
+          onPrev={() => goToOffset(-1)}
+          onNext={() => goToOffset(1)}
         />
       ) : null}
     </>

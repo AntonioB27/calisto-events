@@ -531,6 +531,8 @@ export const APP_UI_HR: AppUiDict = {
     loadMore: "Učitaj više…",
     lightboxAria: "Svjetlosni prikaz fotografije",
     closeLightboxAria: "Zatvori lightbox",
+    prevPhotoAria: "Prethodna fotografija",
+    nextPhotoAria: "Sljedeća fotografija",
     downloadPhotoAria: "Preuzmi ovu fotografiju",
     downloadBtn: "Preuzmi",
     downloadWorking: "Preuzimanje…",

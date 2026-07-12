@@ -538,6 +538,8 @@ export const APP_UI_DE: AppUiDict = {
     loadMore: "Mehr laden …",
     lightboxAria: "Foto‑Lightbox",
     closeLightboxAria: "Lightbox schließen",
+    prevPhotoAria: "Vorheriges Foto",
+    nextPhotoAria: "Nächstes Foto",
     downloadPhotoAria: "Dieses Foto herunterladen",
     downloadBtn: "Herunterladen",
     downloadWorking: "Wird heruntergeladen …",
