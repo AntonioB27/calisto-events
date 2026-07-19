@@ -50,7 +50,11 @@ export function getCachedUrls(paths: string[]): {
 /** Persist freshly-signed URLs to both the in-memory cache and sessionStorage. */
 export function storeCachedUrls(eventId: string, urlMap: Record<string, string>): void {
   const expiresAt = Date.now() + TTL_MS;
-  for (const [path, url] of Object.entries(urlMap)) {
+  // Never cache empty URLs (failed/denied signs) — they would mask paths as
+  // "cached" and prevent re-signing until the TTL expires.
+  const validEntries = Object.entries(urlMap).filter(([, url]) => Boolean(url));
+  if (validEntries.length === 0) return;
+  for (const [path, url] of validEntries) {
     memCache.set(path, { url, expiresAt });
   }
   if (typeof window === "undefined") return;
@@ -71,7 +75,7 @@ export function storeCachedUrls(eventId: string, urlMap: Record<string, string>)
     for (const [path, entry] of Object.entries(existing)) {
       if (entry.expiresAt > now) merged[path] = entry;
     }
-    for (const [path, url] of Object.entries(urlMap)) {
+    for (const [path, url] of validEntries) {
       merged[path] = { url, expiresAt };
     }
     sessionStorage.setItem(key, JSON.stringify({ entries: merged }));

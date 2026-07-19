@@ -197,8 +197,13 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
           );
         }
 
+        // Only keep successful signs. On RLS denial / error, createSignedUrls returns
+        // entries with an empty signedUrl — caching those poisons sessionStorage and
+        // blocks re-signing until the TTL expires, so drop them and retry next fetch.
         const freshUrlMap = Object.fromEntries(
-          ((signedData as { data: SignedUrlEntry[] | null }).data ?? []).map((s: SignedUrlEntry) => [s.path, s.signedUrl]),
+          ((signedData as { data: SignedUrlEntry[] | null }).data ?? [])
+            .filter((s: SignedUrlEntry) => Boolean(s.path && s.signedUrl))
+            .map((s: SignedUrlEntry) => [s.path, s.signedUrl]),
         );
         if (Object.keys(freshUrlMap).length > 0) {
           storeCachedUrls(eventId, freshUrlMap);
