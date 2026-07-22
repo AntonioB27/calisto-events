@@ -15,6 +15,7 @@ import type { PlanId } from "@/lib/plan-limits";
 import { normalizePlanId } from "@/lib/plan-limits";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { BANNER_THEMES, normalizeBannerTheme, type BannerThemeId } from "@/lib/banner-theme";
+import { UpgradeSettingsButton } from "../_components/UpgradePlan";
 
 const GOLD    = '#C5922A';
 const GOLD_DK = '#A37118';
@@ -480,6 +481,7 @@ export function SettingsTab({
                 <div style={{ padding: '10px 12px', borderRadius: 'var(--app-radius-md, 12px)', border: `1px solid ${BORDER}`, background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', fontSize: 14, color: TEXT, fontFamily: FB }}>
                   {ui.plans[normalizePlanId(plan)]}
                 </div>
+                <UpgradeSettingsButton eventId={eventId} plan={plan} />
               </div>
             </div>
 

@@ -42,6 +42,29 @@ export const APP_UI_DE: AppUiDict = {
     max: "Max",
   },
 
+  upgrade: {
+    bannerEyebrow: "Upgrade",
+    bannerTitle: "Hol mehr aus deinem Event heraus",
+    bannerBody:
+      "Du nutzt den kostenlosen Plan. Upgrade jederzeit für mehr Gäste und Fotos, Videos und eine längere Zeit, bevor dein Event gelöscht wird.",
+    bannerCta: "Upgrade-Pläne ansehen",
+    settingsCta: "Plan upgraden",
+    pickerTitle: "Plan wählen",
+    pickerSubtitle: "Einmalige Zahlung, kein Abo. Wähle den Plan, der zu deinem Event passt.",
+    oneTimeNote: "Einmalige Zahlung. Dein Zugangscode und alle Einstellungen bleiben erhalten.",
+    guestsPhotosVideos: "{guests} Gäste · {photos} Fotos · {videos} Videos",
+    retentionDays: "Bleibt {n} Tage nach dem Event erhalten",
+    selectCta: "Auf {plan} upgraden",
+    cancel: "Nicht jetzt",
+    opening: "Checkout wird geöffnet…",
+    errorGeneric: "Checkout konnte nicht gestartet werden. Bitte versuche es erneut.",
+    finalizingTitle: "Upgrade wird abgeschlossen…",
+    finalizingBody: "Das kann nach der Zahlung ein paar Sekunden dauern. Einen Moment.",
+    successTitle: "Upgrade abgeschlossen",
+    successBody: "Dein Event nutzt jetzt den Plan {plan}.",
+    successDismiss: "Fertig",
+  },
+
   invites: {
     code: "Zugangscode",
     link: "Einladungslink",

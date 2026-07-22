@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { fulfillPaidEventForAuthenticatedUser } from "@/lib/event-stripe-checkout";
-import { sendPurchaseConfirmationFromSession } from "@/lib/event-purchase-email";
+import { fulfillEventUpgradeForAuthenticatedUser } from "@/lib/event-stripe-checkout";
 import { getStripe } from "@/lib/stripe-server";
 import { getSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 
@@ -35,7 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid session." }, { status: 400 });
   }
 
-  const result = await fulfillPaidEventForAuthenticatedUser({
+  const result = await fulfillEventUpgradeForAuthenticatedUser({
     stripe,
     sessionId,
     expectedOrganizerId: user.id,
@@ -46,27 +45,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error }, { status });
   }
 
-  // Best-effort congratulations email, only when this path created the event (webhook races us,
-  // and both gate on !alreadyExisted so exactly one send happens). Never blocks the response.
-  if (!result.alreadyExisted) {
-    try {
-      const session = await stripe.checkout.sessions.retrieve(sessionId);
-      await sendPurchaseConfirmationFromSession({
-        metadata: session.metadata,
-        customerEmail: session.customer_details?.email,
-        eventId: result.eventId,
-        request,
-      });
-    } catch (error) {
-      console.error("[stripe-fulfill] purchase confirmation email failed", {
-        sessionId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-  }
-
   return NextResponse.json({
     eventId: result.eventId,
+    plan: result.plan,
     alreadyExisted: result.alreadyExisted,
   });
 }

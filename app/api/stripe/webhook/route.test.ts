@@ -10,9 +10,20 @@ const fulfillMock = vi.fn<
   >
 >();
 
+const upgradeFulfillMock = vi.fn<
+  (stripe: Stripe, sessionId: string) => Promise<
+    Readonly<
+      | { ok: true; eventId: string; plan: string; alreadyExisted: boolean }
+      | { ok: false; error: string }
+    >
+  >
+>();
+
 vi.mock("@/lib/event-stripe-checkout", () => ({
   fulfillPaidEventFromCheckoutSession: (...args: unknown[]) =>
     fulfillMock(args[0] as Stripe, args[1] as string),
+  fulfillEventUpgradeFromCheckoutSession: (...args: unknown[]) =>
+    upgradeFulfillMock(args[0] as Stripe, args[1] as string),
 }));
 
 const constructEventMock = vi.fn<(payload: string, sig: string, secret: string) => Stripe.Event>();
@@ -30,6 +41,7 @@ vi.mock("@/lib/stripe-server", () => ({
 describe("POST /api/stripe/webhook", () => {
   beforeEach(() => {
     fulfillMock.mockReset();
+    upgradeFulfillMock.mockReset();
     constructEventMock.mockReset();
     process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_secret";
     constructEventMock.mockReturnValue({
@@ -88,6 +100,56 @@ describe("POST /api/stripe/webhook", () => {
 
     expect(res.status).toBe(200);
     expect(fulfillMock).toHaveBeenCalledWith(expect.anything(), "cs_test_123");
+  });
+
+  it("routes upgrade sessions to the upgrade fulfiller, not the create path", async () => {
+    constructEventMock.mockReturnValue({
+      type: "checkout.session.completed",
+      data: {
+        object: {
+          id: "cs_test_upgrade",
+          object: "checkout.session",
+          metadata: { kind: "upgrade", organizer_id: "org_1", event_id: "evt_1", plan: "plus" },
+        },
+      },
+    } as unknown as Stripe.Event);
+    upgradeFulfillMock.mockResolvedValue({ ok: true, eventId: "evt_1", plan: "plus", alreadyExisted: false });
+
+    const res = await webhookRoute.POST(
+      new Request("http://localhost/api/stripe/webhook", {
+        method: "POST",
+        body: "{}",
+        headers: { "stripe-signature": "sig" },
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    expect(upgradeFulfillMock).toHaveBeenCalledWith(expect.anything(), "cs_test_upgrade");
+    expect(fulfillMock).not.toHaveBeenCalled();
+  });
+
+  it("returns 500 when an upgrade fulfillment fails with a retriable error", async () => {
+    constructEventMock.mockReturnValue({
+      type: "checkout.session.completed",
+      data: {
+        object: {
+          id: "cs_test_upgrade",
+          object: "checkout.session",
+          metadata: { kind: "upgrade", organizer_id: "org_1", event_id: "evt_1", plan: "plus" },
+        },
+      },
+    } as unknown as Stripe.Event);
+    upgradeFulfillMock.mockResolvedValue({ ok: false, error: "Payment is not completed yet." });
+
+    const res = await webhookRoute.POST(
+      new Request("http://localhost/api/stripe/webhook", {
+        method: "POST",
+        body: "{}",
+        headers: { "stripe-signature": "sig" },
+      }),
+    );
+
+    expect(res.status).toBe(500);
   });
 });
 

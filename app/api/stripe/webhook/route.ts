@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 
 import Stripe from "stripe";
 
-import { fulfillPaidEventFromCheckoutSession } from "@/lib/event-stripe-checkout";
+import {
+  fulfillEventUpgradeFromCheckoutSession,
+  fulfillPaidEventFromCheckoutSession,
+} from "@/lib/event-stripe-checkout";
 import { getStripe } from "@/lib/stripe-server";
 import { getPostHogServerClient } from "@/lib/posthog-server";
 import { ANALYTICS_SERVER_EVENTS } from "@/lib/analytics-events";
+import { sendPurchaseConfirmationFromSession } from "@/lib/event-purchase-email";
 
 export const runtime = "nodejs";
 
@@ -46,6 +50,34 @@ export async function POST(request: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     if (typeof session.id === "string") {
+      // Upgrade sessions mutate an existing event; creation sessions insert a new one.
+      if (session.metadata?.kind === "upgrade") {
+        const upgrade = await fulfillEventUpgradeFromCheckoutSession(stripe, session.id);
+        if (!upgrade.ok) {
+          const msg = upgrade.error;
+          console.error("[stripe-webhook] upgrade fulfill failed after checkout.session.completed", {
+            sessionId: session.id,
+            error: msg,
+            permanentFailure: isPermanentCheckoutFulfillmentError(msg),
+          });
+          if (!isPermanentCheckoutFulfillmentError(msg)) {
+            return NextResponse.json({ error: msg }, { status: 500 });
+          }
+        } else if (!upgrade.alreadyExisted) {
+          const posthog = getPostHogServerClient();
+          posthog.capture({
+            distinctId:
+              typeof session.metadata?.organizer_id === "string"
+                ? session.metadata.organizer_id
+                : session.id,
+            event: ANALYTICS_SERVER_EVENTS.SERVER_EVENT_CREATED,
+            properties: { plan: upgrade.plan, session_id: session.id, upgrade: true },
+          });
+          await posthog.shutdown();
+        }
+        return NextResponse.json({ received: true });
+      }
+
       const result = await fulfillPaidEventFromCheckoutSession(stripe, session.id);
       if (!result.ok) {
         const msg = result.error;
@@ -71,6 +103,17 @@ export async function POST(request: Request) {
           },
         });
         await posthog.shutdown();
+
+        // Best-effort congratulations email. Skip on duplicate deliveries/retries so we
+        // never re-send, and never let a Resend failure change the 200 response to Stripe.
+        if (!result.alreadyExisted) {
+          await sendPurchaseConfirmationFromSession({
+            metadata: session.metadata,
+            customerEmail: session.customer_details?.email,
+            eventId: result.eventId,
+            request,
+          });
+        }
       }
     }
   }

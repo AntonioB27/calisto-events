@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 
 import {
-  buildEventTitle,
   isPaidPlanForCheckout,
   planUnitAmountEuroCents,
-  truncateStripeMetadataTitle,
   type PaidPlanId,
 } from "@/lib/event-stripe-checkout";
 import { normalizePlanId, type PlanId } from "@/lib/plan-limits";
@@ -38,9 +36,7 @@ function getAppOrigin(request: Request): string {
 }
 
 type Body = Readonly<{
-  name?: unknown;
-  emoji?: unknown;
-  date?: unknown;
+  eventId?: unknown;
   planId?: unknown;
 }>;
 
@@ -65,32 +61,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
 
-  const name = typeof body.name === "string" ? body.name.trim() : "";
-  const emoji = typeof body.emoji === "string" ? body.emoji : "";
-  const dateRaw = typeof body.date === "string" ? body.date.trim() : "";
+  const eventId = typeof body.eventId === "string" ? body.eventId.trim() : "";
   const planId: PlanId = normalizePlanId(body.planId);
 
-  if (!name) {
-    return NextResponse.json({ error: "Event name is required." }, { status: 400 });
-  }
-  if (!dateRaw) {
-    return NextResponse.json({ error: "Event date is required." }, { status: 400 });
+  if (!eventId) {
+    return NextResponse.json({ error: "Event is required." }, { status: 400 });
   }
   if (!isPaidPlanForCheckout(planId)) {
-    return NextResponse.json({ error: "This plan does not require checkout." }, { status: 400 });
+    return NextResponse.json({ error: "Choose a paid plan to upgrade to." }, { status: 400 });
   }
 
-  const eventMs = new Date(dateRaw).getTime();
-  if (Number.isNaN(eventMs)) {
-    return NextResponse.json({ error: "Invalid event date." }, { status: 400 });
+  // RLS scopes this read to events the caller can see; re-check ownership + free tier.
+  const { data: event } = await authClient
+    .from("events")
+    .select("id, plan, organizer_id, title")
+    .eq("id", eventId)
+    .maybeSingle();
+
+  if (!event || (event as { organizer_id?: unknown }).organizer_id !== user.id) {
+    return NextResponse.json({ error: "Event not found." }, { status: 404 });
   }
 
-  const title = buildEventTitle(name, emoji);
+  if (normalizePlanId((event as { plan?: unknown }).plan) !== "free") {
+    return NextResponse.json({ error: "Only free events can be upgraded here." }, { status: 409 });
+  }
+
   const paidPlanId = planId as PaidPlanId;
-  const accessCode = crypto.randomUUID().slice(0, 8).toUpperCase();
-  const origin = getAppOrigin(request);
-
   const displayPlan = `${paidPlanId.charAt(0).toUpperCase()}${paidPlanId.slice(1)}`;
+  const origin = getAppOrigin(request);
   const locale = await getUiLocale();
 
   const session = await stripe.checkout.sessions.create({
@@ -102,20 +100,19 @@ export async function POST(request: Request) {
           currency: "eur",
           unit_amount: planUnitAmountEuroCents(paidPlanId),
           product_data: {
-            name: `Calisto event — ${displayPlan}`,
+            name: `Calisto event upgrade: ${displayPlan}`,
           },
         },
         quantity: 1,
       },
     ],
-    success_url: `${origin}/events/new/complete?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/events/new?step=3&resume=1`,
+    success_url: `${origin}/events/${eventId}?tab=overview&upgraded=1&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/events/${eventId}?tab=overview`,
     metadata: {
+      kind: "upgrade",
+      event_id: eventId,
       organizer_id: user.id,
       plan: planId,
-      event_date: new Date(dateRaw).toISOString(),
-      access_code: accessCode,
-      event_title: truncateStripeMetadataTitle(title, 480),
       locale,
       ...(user.email ? { organizer_email: user.email } : {}),
     },

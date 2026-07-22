@@ -16,6 +16,7 @@ import {
 } from "@/lib/plan-limits";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { AuroraHourglass } from "@/components/app-ui/AuroraHourglass";
+import { UpgradeBanner, UpgradeReturnHandler } from "../_components/UpgradePlan";
 
 // ── Aurora Theater palette ────────────────────────────────────────────────────
 const GOLD   = '#C5922A';
@@ -935,7 +936,9 @@ export function OverviewTab({
           gap: 16,
         }}
       >
+        <UpgradeReturnHandler />
         <StatusRibbon eventDate={eventDate} planId={planId} adminRoleLabel={adminRoleLabel} />
+        <UpgradeBanner eventId={eventId} plan={plan} />
         {isEventUpcoming ? (
           <EventStartCountdown eventDate={eventDate} />
         ) : (

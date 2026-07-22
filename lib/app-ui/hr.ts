@@ -42,6 +42,29 @@ export const APP_UI_HR: AppUiDict = {
     max: "Max",
   },
 
+  upgrade: {
+    bannerEyebrow: "Nadogradnja",
+    bannerTitle: "Izvuci više iz svog događaja",
+    bannerBody:
+      "Koristiš besplatni plan. Nadogradi bilo kada za više gostiju i fotografija, videe te dulje razdoblje prije brisanja događaja.",
+    bannerCta: "Pogledaj planove",
+    settingsCta: "Nadogradi plan",
+    pickerTitle: "Odaberi plan",
+    pickerSubtitle: "Jednokratno plaćanje, bez pretplate. Odaberi plan koji odgovara tvom događaju.",
+    oneTimeNote: "Jednokratno plaćanje. Tvoj pristupni kod i sve postavke ostaju isti.",
+    guestsPhotosVideos: "{guests} gostiju · {photos} fotografija · {videos} videa",
+    retentionDays: "Čuva se {n} dana nakon događaja",
+    selectCta: "Nadogradi na {plan}",
+    cancel: "Ne sada",
+    opening: "Otvaranje naplate…",
+    errorGeneric: "Naplatu nije bilo moguće pokrenuti. Pokušaj ponovno.",
+    finalizingTitle: "Dovršavanje nadogradnje…",
+    finalizingBody: "Ovo može potrajati nekoliko sekundi nakon plaćanja. Pričekaj trenutak.",
+    successTitle: "Nadogradnja dovršena",
+    successBody: "Tvoj događaj sada koristi plan {plan}.",
+    successDismiss: "Gotovo",
+  },
+
   invites: {
     code: "Pristupni kod",
     link: "Poveznica za pridruživanje",
