@@ -45,7 +45,7 @@ export const APP_UI_EN = {
     bannerEyebrow: "Upgrade",
     bannerTitle: "Get more from your event",
     bannerBody:
-      "You're on the Free plan. Upgrade any time for more guests and photos, videos, and a longer time before your event is deleted.",
+      "Upgrade any time for more guests and photos, videos, and a longer time before your event is deleted.",
     bannerCta: "See upgrade plans",
     settingsCta: "Upgrade plan",
     pickerTitle: "Choose a plan",
@@ -53,6 +53,7 @@ export const APP_UI_EN = {
     oneTimeNote: "One time payment. Your access code and everything you've set up stays the same.",
     guestsPhotosVideos: "{guests} guests · {photos} photos · {videos} videos",
     retentionDays: "Kept for {n} days after the event",
+    creditNote: "{amount} credited for your {plan} plan",
     selectCta: "Upgrade to {plan}",
     cancel: "Not now",
     opening: "Opening checkout…",

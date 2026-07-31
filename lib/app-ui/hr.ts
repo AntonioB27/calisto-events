@@ -46,7 +46,7 @@ export const APP_UI_HR: AppUiDict = {
     bannerEyebrow: "Nadogradnja",
     bannerTitle: "Izvuci više iz svog događaja",
     bannerBody:
-      "Koristiš besplatni plan. Nadogradi bilo kada za više gostiju i fotografija, videe te dulje razdoblje prije brisanja događaja.",
+      "Nadogradi bilo kada za više gostiju i fotografija, videe te dulje razdoblje prije brisanja događaja.",
     bannerCta: "Pogledaj planove",
     settingsCta: "Nadogradi plan",
     pickerTitle: "Odaberi plan",
@@ -54,6 +54,7 @@ export const APP_UI_HR: AppUiDict = {
     oneTimeNote: "Jednokratno plaćanje. Tvoj pristupni kod i sve postavke ostaju isti.",
     guestsPhotosVideos: "{guests} gostiju · {photos} fotografija · {videos} videa",
     retentionDays: "Čuva se {n} dana nakon događaja",
+    creditNote: "{amount} odobreno za tvoj plan {plan}",
     selectCta: "Nadogradi na {plan}",
     cancel: "Ne sada",
     opening: "Otvaranje naplate…",

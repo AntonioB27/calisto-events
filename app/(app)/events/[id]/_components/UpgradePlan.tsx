@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 
 import { useAppUi } from "@/components/AppUiProvider";
 import { interpolate } from "@/lib/app-ui";
-import { getPlanLimits, PLAN_DB_INT_MAX, normalizePlanId, type PlanId } from "@/lib/plan-limits";
+import { planCreditEuroCents, planUnitAmountEuroCents } from "@/lib/event-stripe-checkout";
+import { getPlanLimits, PLAN_DB_INT_MAX, normalizePlanId, PLAN_ORDER, planRank, type PlanId } from "@/lib/plan-limits";
 
 // ── Palette (Aurora Theater, matches Overview/Settings) ────────────────────────
 const GOLD = "#C5922A";
@@ -44,6 +45,10 @@ const PLAN_PRICE: Record<PaidPlanId, { now: string; was?: string }> = {
   premium: { now: "65€", was: "70€" },
   max: { now: "90€", was: "100€" },
 };
+
+function formatEuroCents(cents: number): string {
+  return `${Math.round(cents / 100)}€`;
+}
 
 function useIsDark(): boolean {
   const [isDark, setIsDark] = useState(false);
@@ -97,11 +102,21 @@ const UPGRADE_ANIM_CSS = `
 `;
 
 // ── Plan picker dialog ─────────────────────────────────────────────────────────
-function UpgradeDialog({ eventId, onClose }: { eventId: string; onClose: () => void }) {
+function UpgradeDialog({
+  eventId,
+  currentPlan,
+  onClose,
+}: {
+  eventId: string;
+  currentPlan: PlanId;
+  onClose: () => void;
+}) {
   const ui = useAppUi();
   const isDark = useIsDark();
   const [busyPlan, setBusyPlan] = useState<PaidPlanId | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const creditEuroCents = planCreditEuroCents(currentPlan);
+  const availablePlans = UPGRADE_PLANS.filter((p) => planRank(p) > planRank(currentPlan));
 
   const formatCap = useCallback(
     (n: number) => (n >= PLAN_DB_INT_MAX ? ui.createStep2.unlimited : String(n)),
@@ -239,10 +254,14 @@ function UpgradeDialog({ eventId, onClose }: { eventId: string; onClose: () => v
             )}
 
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 18 }}>
-              {UPGRADE_PLANS.map((planId, cardIndex) => {
+              {availablePlans.map((planId, cardIndex) => {
             const limits = getPlanLimits(planId);
             const accent = PLAN_ACCENT[planId];
-            const price = PLAN_PRICE[planId];
+            const fullPrice = PLAN_PRICE[planId];
+            const priceNowCents = planUnitAmountEuroCents(planId) - creditEuroCents;
+            const price = creditEuroCents > 0
+              ? { now: formatEuroCents(priceNowCents), was: fullPrice.now }
+              : fullPrice;
             const busy = busyPlan === planId;
             const anyBusy = busyPlan !== null;
             return (
@@ -278,6 +297,14 @@ function UpgradeDialog({ eventId, onClose }: { eventId: string; onClose: () => v
                     <p style={{ margin: "3px 0 0", fontSize: 11.5, color: MUTED, fontFamily: FB }}>
                       {interpolate(ui.upgrade.retentionDays, { n: limits.retentionDaysAfterEvent })}
                     </p>
+                    {creditEuroCents > 0 && (
+                      <p style={{ margin: "3px 0 0", fontSize: 11.5, color: accent, fontFamily: FB, fontWeight: 600 }}>
+                        {interpolate(ui.upgrade.creditNote, {
+                          amount: formatEuroCents(creditEuroCents),
+                          plan: ui.plans[currentPlan],
+                        })}
+                      </p>
+                    )}
                   </div>
                   <div style={{ textAlign: "right", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.05 }}>
                     {price.was && (
@@ -338,8 +365,9 @@ export function UpgradeBanner({ eventId, plan }: { eventId: string; plan: string
   const ui = useAppUi();
   const isDark = useIsDark();
   const [open, setOpen] = useState(false);
+  const currentPlan = normalizePlanId(plan);
 
-  if (normalizePlanId(plan) !== "free") return null;
+  if (planRank(currentPlan) >= PLAN_ORDER.length - 1) return null;
 
   return (
     <>
@@ -384,7 +412,7 @@ export function UpgradeBanner({ eventId, plan }: { eventId: string; plan: string
           </button>
         </div>
       </div>
-      {open && <UpgradeDialog eventId={eventId} onClose={() => setOpen(false)} />}
+      {open && <UpgradeDialog eventId={eventId} currentPlan={currentPlan} onClose={() => setOpen(false)} />}
     </>
   );
 }
@@ -393,8 +421,9 @@ export function UpgradeBanner({ eventId, plan }: { eventId: string; plan: string
 export function UpgradeSettingsButton({ eventId, plan }: { eventId: string; plan: string }) {
   const ui = useAppUi();
   const [open, setOpen] = useState(false);
+  const currentPlan = normalizePlanId(plan);
 
-  if (normalizePlanId(plan) !== "free") return null;
+  if (planRank(currentPlan) >= PLAN_ORDER.length - 1) return null;
 
   return (
     <>
@@ -414,7 +443,7 @@ export function UpgradeSettingsButton({ eventId, plan }: { eventId: string; plan
           <path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
-      {open && <UpgradeDialog eventId={eventId} onClose={() => setOpen(false)} />}
+      {open && <UpgradeDialog eventId={eventId} currentPlan={currentPlan} onClose={() => setOpen(false)} />}
     </>
   );
 }

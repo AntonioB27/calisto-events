@@ -46,7 +46,7 @@ export const APP_UI_DE: AppUiDict = {
     bannerEyebrow: "Upgrade",
     bannerTitle: "Hol mehr aus deinem Event heraus",
     bannerBody:
-      "Du nutzt den kostenlosen Plan. Upgrade jederzeit für mehr Gäste und Fotos, Videos und eine längere Zeit, bevor dein Event gelöscht wird.",
+      "Upgrade jederzeit für mehr Gäste und Fotos, Videos und eine längere Zeit, bevor dein Event gelöscht wird.",
     bannerCta: "Upgrade-Pläne ansehen",
     settingsCta: "Plan upgraden",
     pickerTitle: "Plan wählen",
@@ -54,6 +54,7 @@ export const APP_UI_DE: AppUiDict = {
     oneTimeNote: "Einmalige Zahlung. Dein Zugangscode und alle Einstellungen bleiben erhalten.",
     guestsPhotosVideos: "{guests} Gäste · {photos} Fotos · {videos} Videos",
     retentionDays: "Bleibt {n} Tage nach dem Event erhalten",
+    creditNote: "{amount} für deinen {plan}-Plan gutgeschrieben",
     selectCta: "Auf {plan} upgraden",
     cancel: "Nicht jetzt",
     opening: "Checkout wird geöffnet…",

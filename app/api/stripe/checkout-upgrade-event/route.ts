@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 
 import {
   isPaidPlanForCheckout,
+  planCreditEuroCents,
   planUnitAmountEuroCents,
   type PaidPlanId,
 } from "@/lib/event-stripe-checkout";
-import { normalizePlanId, type PlanId } from "@/lib/plan-limits";
+import { normalizePlanId, planRank, type PlanId } from "@/lib/plan-limits";
 import { getStripe } from "@/lib/stripe-server";
 import { getSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 import { getUiLocale } from "@/lib/ui-locale";
@@ -82,12 +83,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Event not found." }, { status: 404 });
   }
 
-  if (normalizePlanId((event as { plan?: unknown }).plan) !== "free") {
-    return NextResponse.json({ error: "Only free events can be upgraded here." }, { status: 409 });
+  const currentPlan = normalizePlanId((event as { plan?: unknown }).plan);
+  if (planRank(planId) <= planRank(currentPlan)) {
+    return NextResponse.json({ error: "Choose a higher plan to upgrade to." }, { status: 409 });
   }
 
   const paidPlanId = planId as PaidPlanId;
   const displayPlan = `${paidPlanId.charAt(0).toUpperCase()}${paidPlanId.slice(1)}`;
+  const creditEuroCents = planCreditEuroCents(currentPlan);
+  const chargeEuroCents = planUnitAmountEuroCents(paidPlanId) - creditEuroCents;
   const origin = getAppOrigin(request);
   const locale = await getUiLocale();
 
@@ -98,7 +102,7 @@ export async function POST(request: Request) {
       {
         price_data: {
           currency: "eur",
-          unit_amount: planUnitAmountEuroCents(paidPlanId),
+          unit_amount: chargeEuroCents,
           product_data: {
             name: `Calisto event upgrade: ${displayPlan}`,
           },
@@ -113,6 +117,8 @@ export async function POST(request: Request) {
       event_id: eventId,
       organizer_id: user.id,
       plan: planId,
+      previous_plan: currentPlan,
+      credit_applied_cents: String(creditEuroCents),
       locale,
       ...(user.email ? { organizer_email: user.email } : {}),
     },

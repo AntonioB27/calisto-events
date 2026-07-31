@@ -63,6 +63,13 @@ export function getPlanLimits(planId: PlanId): PlanLimits {
 
 const PLAN_IDS: readonly PlanId[] = ["free", "standard", "plus", "premium", "max"];
 
+/** Ascending tier order — also the ascending price order (see `planUnitAmountEuroCents`). */
+export const PLAN_ORDER: readonly PlanId[] = PLAN_IDS;
+
+export function planRank(planId: PlanId): number {
+  return PLAN_ORDER.indexOf(planId);
+}
+
 export function normalizePlanId(value: unknown): PlanId {
   return typeof value === "string" && (PLAN_IDS as readonly string[]).includes(value) ? (value as PlanId) : "free";
 }

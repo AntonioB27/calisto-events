@@ -26,6 +26,11 @@ export function planUnitAmountEuroCents(planId: PaidPlanId): number {
   }
 }
 
+/** Credit toward a plan upgrade — the list price of whatever paid plan the event is already on. */
+export function planCreditEuroCents(currentPlanId: PlanId): number {
+  return currentPlanId === "free" ? 0 : planUnitAmountEuroCents(currentPlanId as PaidPlanId);
+}
+
 /** Stripe metadata values are capped (~500 chars); keep titles bounded. */
 export function truncateStripeMetadataTitle(title: string, maxUnicodeScalars: number): string {
   const chars = [...title];
