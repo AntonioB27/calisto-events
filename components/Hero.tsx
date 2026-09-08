@@ -1,8 +1,11 @@
 import Image from "next/image";
+import { ScanLine, UserCheck, QrCode, type LucideIcon } from "lucide-react";
 import type { LandingCopy, Locale } from "@/lib/i18n";
 import { HeroEventBuilder } from "@/components/HeroEventBuilder";
 
 type HeroProps = { copy: LandingCopy; isLoggedIn: boolean; locale: Locale };
+
+const SIGNAL_ICONS: LucideIcon[] = [ScanLine, UserCheck, QrCode];
 
 export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
   return (
@@ -100,43 +103,95 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
               </a>
             </div>
 
-            {/* Signal pills */}
-            <div className="flex flex-wrap" style={{ gap: 10, marginTop: 28 }}>
-              {copy.heroSignals.map((signal, i) => (
-                <div
-                  key={i}
-                  className="inline-flex items-center"
-                  style={{
-                    gap: 8, fontSize: 13, color: "var(--cream-3)", border: "1px solid var(--hair-2)",
-                    borderRadius: 999, padding: "7px 14px", fontFamily: "var(--font-sans)",
-                  }}
-                >
-                  <span aria-hidden style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--plum-2)", flexShrink: 0 }} />
-                  {signal}
-                </div>
-              ))}
+            {/* Trust bar: the three core differentiators */}
+            <div className="v2-trust-row flex flex-wrap" style={{ marginTop: 28, gap: 14 }}>
+              {copy.heroSignals.map((signal, i) => {
+                const Icon = SIGNAL_ICONS[i] ?? ScanLine;
+                return (
+                  <div
+                    key={signal}
+                    className={`v2-chip v2-chip-${i} flex items-center`}
+                    style={{
+                      flex: "1 1 160px",
+                      gap: 10,
+                      padding: "14px 16px",
+                      borderRadius: 18,
+                      border: "1px solid var(--hair-2)",
+                      background: "var(--glass-bg)",
+                      boxShadow: "0 8px 20px rgba(0,0,0,0.16)",
+                    }}
+                  >
+                    <span
+                      aria-hidden
+                      style={{
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0, width: 30, height: 30, borderRadius: "50%",
+                        background: "rgba(245,199,107,0.14)", color: "var(--gold)",
+                      }}
+                    >
+                      <Icon size={15} strokeWidth={2} />
+                    </span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: "var(--cream)", fontFamily: "var(--font-sans)", letterSpacing: "0.005em" }}>
+                      {signal}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
+            <style>{`
+              .v2-chip {
+                rotate: -3deg;
+                animation: v2-float 5s ease-in-out infinite;
+                transition: rotate 300ms ease, box-shadow 300ms ease;
+              }
+              .v2-chip-1 { rotate: 1.5deg; animation-delay: 0.5s; }
+              .v2-chip-2 { rotate: -1.8deg; animation-delay: 1s; }
+              .v2-chip:hover { rotate: 0deg; box-shadow: 0 14px 32px rgba(0,0,0,0.24); }
+              @keyframes v2-float {
+                0%, 100% { translate: 0 0; }
+                50% { translate: 0 -8px; }
+              }
+              @media (prefers-reduced-motion: reduce) {
+                .v2-chip { animation: none !important; }
+              }
+            `}</style>
 
-            {/* Mascot quote row */}
+            {/* Aurora introduction */}
             <div
-              className="flex items-center"
-              style={{ gap: 14, marginTop: 32, paddingTop: 24, borderTop: "1px solid var(--hair)" }}
+              className="flex items-start"
+              style={{ gap: 16, marginTop: 32, paddingTop: 28, borderTop: "1px solid var(--hair)" }}
             >
               <Image
-                src="/brand/mascot.png"
+                src="/brand/mascot/aurora_waving.png"
                 alt={copy.auroraMascotAlt}
-                width={64}
-                height={64}
+                width={160}
+                height={160}
                 style={{ width: 64, height: 64, objectFit: "contain", flexShrink: 0 }}
               />
-              <p
+              <blockquote
                 style={{
-                  margin: 0, fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 18,
-                  lineHeight: 1.35, color: "var(--cream-2)",
+                  margin: 0, flex: 1, minWidth: 0,
+                  borderLeft: "1px solid rgba(245,199,107,0.4)",
+                  paddingLeft: 18,
                 }}
               >
-                {copy.heroAuroraCardBlurb}
-              </p>
+                <p
+                  style={{
+                    margin: "0 0 6px", fontFamily: "var(--font-mono)", fontSize: 10.5,
+                    letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(245,199,107,0.75)",
+                  }}
+                >
+                  {copy.heroIntro}
+                </p>
+                <p
+                  style={{
+                    margin: 0, fontFamily: "var(--font-display)", fontStyle: "italic",
+                    fontSize: 15, lineHeight: 1.5, color: "var(--cream-2)",
+                  }}
+                >
+                  {copy.heroAuroraCardBlurb}
+                </p>
+              </blockquote>
             </div>
           </div>
 

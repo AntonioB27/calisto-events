@@ -1,40 +1,16 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { LandingCopy } from "@/lib/i18n";
-import { buildPlanStartUrl } from "@/lib/landing-event-form";
-import { PlanQuickStartForm } from "@/components/plan-cards/PlanQuickStartForm";
 import { PlanCompareTable } from "@/components/plan-cards/PlanCompareTable";
 import { PlanCardStack } from "@/components/plan-cards/PlanCardStack";
 
 type PlanCardsProps = { copy: LandingCopy };
 
 export function PlanCards({ copy }: PlanCardsProps) {
-  const [name, setName] = useState("");
-  const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
-  const [emoji, setEmoji] = useState("");
-  const [shaking, setShaking] = useState(false);
-  const nameInputRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>;
-  const router = useRouter();
-
-  function handleChoose(e: React.MouseEvent, planId: string) {
+  function handleChoose(e: React.MouseEvent) {
     e.stopPropagation();
-    if (!name.trim()) {
-      const el = nameInputRef.current;
-      if (el) {
-        el.classList.remove("input-shake");
-        void el.offsetWidth;
-        el.classList.add("input-shake");
-      }
-      setShaking(true);
-      nameInputRef.current?.focus();
-      nameInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-      setTimeout(() => setShaking(false), 420);
-      return;
-    }
-    router.push(buildPlanStartUrl(name.trim(), date, emoji, planId));
+    document.getElementById("create")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   return (
@@ -87,22 +63,6 @@ export function PlanCards({ copy }: PlanCardsProps) {
             </div>
           </div>
         </div>
-
-        <PlanQuickStartForm
-          name={name}
-          onNameChange={(v) => { setName(v); setShaking(false); }}
-          date={date}
-          onDateChange={setDate}
-          emoji={emoji}
-          onEmojiChange={setEmoji}
-          shaking={shaking}
-          nameInputRef={nameInputRef}
-          copy={{
-            plansFormNamePlaceholder: copy.plansFormNamePlaceholder,
-            plansFormDateLabel: copy.plansFormDateLabel,
-            plansFormEmojiPlaceholder: copy.plansFormEmojiPlaceholder,
-          }}
-        />
 
         <div className="hidden md:block">
           <PlanCompareTable
