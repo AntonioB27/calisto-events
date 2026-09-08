@@ -156,29 +156,43 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
               }
             `}</style>
 
-            {/* Aurora introduction */}
+            {/* Aurora introduction, with a piece of photographic evidence */}
             <div
-              className="flex items-start"
-              style={{ gap: 16, marginTop: 32, paddingTop: 28, borderTop: "1px solid var(--hair)" }}
+              className="flex items-center"
+              style={{ gap: 14, marginTop: 28, paddingTop: 24, borderTop: "1px solid var(--hair)" }}
             >
+              <div className="hero-polaroid" aria-hidden="true">
+                <div className="hero-polaroid-tape" />
+                <div className="hero-polaroid-photo">
+                  <Image
+                    src="/brand/preview-gallery/pexels-foto-art-events-332286070-29002699.jpg"
+                    alt=""
+                    fill
+                    sizes="64px"
+                    style={{ objectFit: "cover", objectPosition: "50% 38%" }}
+                  />
+                  <div className="hero-polaroid-grain" />
+                  <div className="hero-polaroid-vignette" />
+                </div>
+              </div>
               <Image
                 src="/brand/mascot/aurora_waving.png"
                 alt={copy.auroraMascotAlt}
                 width={160}
                 height={160}
-                style={{ width: 64, height: 64, objectFit: "contain", flexShrink: 0 }}
+                style={{ width: 44, height: 44, objectFit: "contain", flexShrink: 0 }}
               />
               <blockquote
                 style={{
                   margin: 0, flex: 1, minWidth: 0,
                   borderLeft: "1px solid rgba(245,199,107,0.4)",
-                  paddingLeft: 18,
+                  paddingLeft: 16,
                 }}
               >
                 <p
                   style={{
-                    margin: "0 0 6px", fontFamily: "var(--font-mono)", fontSize: 10.5,
-                    letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(245,199,107,0.75)",
+                    margin: "0 0 5px", fontFamily: "var(--font-mono)", fontSize: 10,
+                    letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,199,107,0.75)",
                   }}
                 >
                   {copy.heroIntro}
@@ -186,13 +200,58 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
                 <p
                   style={{
                     margin: 0, fontFamily: "var(--font-display)", fontStyle: "italic",
-                    fontSize: 15, lineHeight: 1.5, color: "var(--cream-2)",
+                    fontSize: 14.5, lineHeight: 1.45, color: "var(--cream-2)",
                   }}
                 >
                   {copy.heroAuroraCardBlurb}
                 </p>
               </blockquote>
             </div>
+            <style>{`
+              .hero-polaroid {
+                position: relative;
+                flex-shrink: 0;
+                width: 56px;
+                padding: 4px 4px 12px;
+                background: #faf7f2;
+                border-radius: 2px;
+                rotate: -4deg;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.32), 0 2px 6px rgba(0,0,0,0.2);
+              }
+              .hero-polaroid-tape {
+                position: absolute;
+                top: -5px;
+                left: 50%;
+                transform: translateX(-50%) rotate(-2deg);
+                width: 22px;
+                height: 7px;
+                border-radius: 1px;
+                background: rgba(245, 199, 107, 0.55);
+                box-shadow: 0 1px 3px rgba(0,0,0,0.22);
+              }
+              .hero-polaroid-photo {
+                position: relative;
+                width: 100%;
+                aspect-ratio: 4 / 3;
+                overflow: hidden;
+                border-radius: 1px;
+              }
+              .hero-polaroid-grain {
+                position: absolute;
+                inset: 0;
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+                background-size: 200px 200px;
+                opacity: 0.5;
+                pointer-events: none;
+                mix-blend-mode: overlay;
+              }
+              .hero-polaroid-vignette {
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(ellipse 90% 90% at 50% 50%, transparent 40%, rgba(0,0,0,0.38) 100%);
+                pointer-events: none;
+              }
+            `}</style>
           </div>
 
           {/* ── Right: interactive event builder ── */}

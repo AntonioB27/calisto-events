@@ -49,12 +49,18 @@ function StatItem({
     return () => cancelAnimationFrame(raf);
   }, [active, parsed, delay, DURATION]);
 
-  const displayValue = !parsed
+  // Number and noun render as two separate, differently-weighted pieces:
+  // the count stays the big italic display numeral, the noun ("weddings",
+  // "photos"...) is a small tracked kicker above it, matching the system's
+  // Label voice instead of being merged into the numeral at full size.
+  const countDisplay = !parsed
     ? value
-    : `${count.toLocaleString(parsed.periodSep ? "de-DE" : "en-US")}${parsed.suffix}`;
+    : count.toLocaleString(parsed.periodSep ? "de-DE" : "en-US");
+  const noun = parsed ? parsed.suffix.replace(/^\+?\s*/, "") : "";
 
   return (
     <div
+      className="stat-item"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -65,8 +71,21 @@ function StatItem({
         transition: `opacity 700ms cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 700ms cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
       }}
     >
+      {noun && (
+        <div
+          style={{
+            fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.2em",
+            textTransform: "uppercase", color: "var(--cream-4, #6E6758)", marginBottom: 6,
+            opacity: 0.85,
+          }}
+        >
+          {noun}
+        </div>
+      )}
+
       <dt
         style={{
+          margin: 0,
           fontFamily: "var(--font-display)",
           fontStyle: "italic",
           fontWeight: 400,
@@ -74,21 +93,23 @@ function StatItem({
           lineHeight: 1,
           letterSpacing: "-0.03em",
           color: "var(--amber, #E6A760)",
-          marginBottom: 8,
         }}
       >
-        {displayValue}
+        {countDisplay}
       </dt>
 
       {/* Expanding underline */}
       <div
         aria-hidden
+        className="stat-underline"
         style={{
           height: 1,
-          width: active ? 28 : 0,
+          width: 28,
           background: "linear-gradient(90deg, transparent, rgba(230,167,96,0.55), transparent)",
+          marginTop: 8,
           marginBottom: 10,
-          transition: `width 600ms cubic-bezier(0.16,1,0.3,1) ${delay + 220}ms`,
+          transform: active ? "scaleX(1)" : "scaleX(0)",
+          transition: `transform 600ms cubic-bezier(0.16,1,0.3,1) ${delay + 220}ms`,
         }}
       />
 
@@ -201,6 +222,17 @@ export function StatBar({ copy }: StatBarProps) {
           }
           #stat-bar-grid > div:last-child {
             border-bottom: none !important;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .stat-item {
+            opacity: 1 !important;
+            transform: none !important;
+            transition: none !important;
+          }
+          .stat-underline {
+            transform: scaleX(1) !important;
+            transition: none !important;
           }
         }
       `}</style>

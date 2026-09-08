@@ -12,12 +12,6 @@ type Feature = {
   mascotBubble: string;
 };
 
-type HowItWorksItem = {
-  step: string;
-  title: string;
-  description: string;
-};
-
 type PlanRow = {
   label: string;
   value: string;
@@ -123,18 +117,6 @@ export type LandingCopy = {
   featuresDescription: string;
   featuresAuroraBubble: string;
   features: Feature[];
-  howTitle: string;
-  howSectionLabel: string;
-  howSetupHint: string;
-  howStepPrefix: string;
-  howVisualLive: string;
-  howVisualGuests: string;
-  howUploadDone: string;
-  howModerationApproved: string;
-  howModerationNewTemplate: string;
-  howDescription: string;
-  howDemoCta: string;
-  howItems: HowItWorksItem[];
   plansTitle: string;
   plansSectionLabel: string;
   plansPerEventSuffix: string;
@@ -202,7 +184,6 @@ const copy: Record<Locale, LandingCopy> = {
     nav: [
       { href: "#preview", label: "Preview" },
       { href: "#features", label: "Features" },
-      { href: "#how", label: "How it works" },
       { href: "#plans", label: "Plans" },
       { href: "#faq", label: "FAQ" },
     ],
@@ -212,9 +193,9 @@ const copy: Record<Locale, LandingCopy> = {
     heroIntro: "Hi, I'm Aurora, I'll guide you through Calisto.",
     heroTitle: "Every memory matters. Make sure you capture them all.",
     heroDescription:
-      "Calisto is a shared photo and video album for weddings, birthdays, and every celebration. Guests upload straight from their phone browser. No app to download. Free to try.",
+      "One shared album. Every guest, every memory, in one place.",
     heroAuroraCardBlurb:
-      "I'd rather you be in the moment than digging through camera rolls on Monday. I'm here so the messy, wonderful parts of your day (the toasts, the candid grins, the kid with cake on his face) stay in one story you can reopen without a scavenger hunt.",
+      "The messy, wonderful moments deserve one story, not a scavenger hunt.",
     heroPrimaryCta: "Create your event",
     heroSecondaryCta: "Compare plans",
     heroSignals: [
@@ -313,36 +294,8 @@ const copy: Record<Locale, LandingCopy> = {
         mascotBubble: "You decide what the gallery shows.",
       },
     ],
-    howTitle: "How it works?",
-    howSectionLabel: "3 · Three simple steps",
-    howSetupHint: "< 90 seconds to set up",
-    howStepPrefix: "STEP",
-    howVisualLive: "LIVE",
-    howVisualGuests: "84 guests",
-    howUploadDone: "done",
-    howModerationApproved: "approved",
-    howModerationNewTemplate: "+{count} new",
-    howDescription: "Three steps from empty album to shared memories.",
-    howDemoCta: "Try the demo",
-    howItems: [
-      {
-        step: "1",
-        title: "Create your event",
-        description: "Choose a name, date, and plan. You become the organizer automatically.",
-      },
-      {
-        step: "2",
-        title: "Share code or QR",
-        description: "Send the code or link, or show them the QR.",
-      },
-      {
-        step: "3",
-        title: "Browse photos and enjoy",
-        description: "Guests upload and browse photos and videos together.",
-      },
-    ],
     plansTitle: "Plans",
-    plansSectionLabel: "4 · Pricing",
+    plansSectionLabel: "3 · Pricing",
     plansPerEventSuffix: "/ event",
     plansDescriptionStrong: "Choose the plan that fits your event",
     plansDescriptionRest:
@@ -458,7 +411,7 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     futureStatusLabels: { roadmap: "Roadmap", planned: "Planned", idea: "Idea" },
     faqTitle: "Questions",
-    faqSectionLabel: "5 · Questions",
+    faqSectionLabel: "4 · Questions",
     faqContactPrefix: "If something isn't here, write to",
     faqContactSuffix: "We answer within a day, usually faster.",
     faq: [
@@ -545,7 +498,6 @@ const copy: Record<Locale, LandingCopy> = {
     nav: [
       { href: "#preview", label: "Pregled" },
       { href: "#features", label: "Mogućnosti" },
-      { href: "#how", label: "Kako radi" },
       { href: "#plans", label: "Paketi" },
       { href: "#faq", label: "Pitanja" },
     ],
@@ -555,9 +507,9 @@ const copy: Record<Locale, LandingCopy> = {
     heroIntro: "Bok, ja sam Aurora, predstavljam ti Calisto.",
     heroTitle: "Svaka uspomena je važna. Pobrinite se da ne propustite nijednu.",
     heroDescription:
-      "Calisto je zajednički foto i video album za vjenčanja, rođendane i proslave. Gosti dijele slike izravno iz preglednika na mobitelu. Nema preuzimanja aplikacije. Isprobaj besplatno.",
+      "Jedan zajednički album. Svaki gost, svaka uspomena, na jednom mjestu.",
     heroAuroraCardBlurb:
-      "Želim da budeš na plesu, a ne da u ponedjeljak pretražuješ deset mapi s fotkama. Tu sam da taj neuredno lijepi dan (toaste, prvi ples, taj tren s kolačem) ostane jedna priča koju možeš otvoriti bez detektivskog posla.",
+      "Ti neuredni, prekrasni trenuci zaslužuju jednu priču, a ne detektivski posao.",
     heroPrimaryCta: "Kreiraj događaj",
     heroSecondaryCta: "Usporedi pakete",
     heroSignals: [
@@ -655,36 +607,8 @@ const copy: Record<Locale, LandingCopy> = {
         mascotBubble: "Ti odlučuješ što galerija prikazuje.",
       },
     ],
-    howTitle: "Kako funkcionira?",
-    howSectionLabel: "3 · Tri jednostavna koraka",
-    howSetupHint: "< 90 sekundi za postavljanje",
-    howStepPrefix: "KORAK",
-    howVisualLive: "UŽIVO",
-    howVisualGuests: "84 gosta",
-    howUploadDone: "gotovo",
-    howModerationApproved: "odobreno",
-    howModerationNewTemplate: "+{count} novo",
-    howDescription: "Tri koraka do zajedničkog albuma.",
-    howDemoCta: "Isprobaj demo",
-    howItems: [
-      {
-        step: "1",
-        title: "Kreiraj događaj",
-        description: "Odaberi naziv, datum i paket. Automatski postaješ organizator.",
-      },
-      {
-        step: "2",
-        title: "Podijeli kod ili QR",
-        description: "Pošalji kod ili link, ili im pokaži QR.",
-      },
-      {
-        step: "3",
-        title: "Pregledavaj slike i uživaj",
-        description: "Gosti zajedno učitavaju i pregledavaju slike i videozapise.",
-      },
-    ],
     plansTitle: "Paketi",
-    plansSectionLabel: "4 · Cijene",
+    plansSectionLabel: "3 · Cijene",
     plansPerEventSuffix: "/ događaj",
     plansDescriptionStrong: "Odaberi paket koji odgovara tvom događaju",
     plansDescriptionRest:
@@ -800,7 +724,7 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     futureStatusLabels: { roadmap: "Roadmap", planned: "Planirano", idea: "Ideja" },
     faqTitle: "Česta pitanja",
-    faqSectionLabel: "5 · Pitanja",
+    faqSectionLabel: "4 · Pitanja",
     faqContactPrefix: "Ako ovdje nema odgovora, piši na",
     faqContactSuffix: "Odgovaramo unutar jednog dana, često i brže.",
     faq: [
@@ -887,7 +811,6 @@ const copy: Record<Locale, LandingCopy> = {
     nav: [
       { href: "#preview", label: "Vorschau" },
       { href: "#features", label: "Funktionen" },
-      { href: "#how", label: "So funktioniert es" },
       { href: "#plans", label: "Tarife" },
       { href: "#faq", label: "Fragen" },
     ],
@@ -897,9 +820,9 @@ const copy: Record<Locale, LandingCopy> = {
     heroIntro: "Hi, ich bin Aurora, ich stelle dir Calisto vor.",
     heroTitle: "Jede Erinnerung zählt. Stell sicher, dass du sie alle festhältst.",
     heroDescription:
-      "Calisto ist das gemeinsame Foto- und Videoalbum für Hochzeiten, Geburtstage und jede Feier. Gäste laden direkt im Handy-Browser hoch. Keine App nötig. Kostenlos ausprobieren.",
+      "Ein gemeinsames Album. Jeder Gast, jede Erinnerung, an einem Ort.",
     heroAuroraCardBlurb:
-      "Lieber tanzt du auf der Feier, als dass du am Montag hundert Chatverläufe durchsuchst. Ich will, dass der Tag als eine lebendige Geschichte bleibt (Reden, Umarmungen, das schiefe Gruppenfoto), die man wiederfindet, ohne Schatzsuche.",
+      "Die schönen, chaotischen Momente verdienen eine Geschichte, keine Schatzsuche.",
     heroPrimaryCta: "Event erstellen",
     heroSecondaryCta: "Tarife vergleichen",
     heroSignals: [
@@ -998,36 +921,8 @@ const copy: Record<Locale, LandingCopy> = {
         mascotBubble: "Du entscheidest, was die Galerie zeigt.",
       },
     ],
-    howTitle: "So funktioniert es",
-    howSectionLabel: "3 · Drei einfache Schritte",
-    howSetupHint: "< 90 Sekunden zum Einrichten",
-    howStepPrefix: "SCHRITT",
-    howVisualLive: "LIVE",
-    howVisualGuests: "84 Gäste",
-    howUploadDone: "fertig",
-    howModerationApproved: "freigegeben",
-    howModerationNewTemplate: "+{count} neu",
-    howDescription: "Drei Schritte vom leeren Album zu gemeinsamen Erinnerungen.",
-    howDemoCta: "Demo ausprobieren",
-    howItems: [
-      {
-        step: "1",
-        title: "Event erstellen",
-        description: "Wähle Titel, Datum und Speichertarif. Du wirst automatisch Organisator.",
-      },
-      {
-        step: "2",
-        title: "Code oder QR teilen",
-        description: "Sende den Zugangscode, einen Einladungslink oder lass Gäste den QR-Code scannen.",
-      },
-      {
-        step: "3",
-        title: "Sammeln & genießen",
-        description: "Gäste laden gemeinsam hoch und stöbern Fotos und Videos zusammen.",
-      },
-    ],
     plansTitle: "Tarife",
-    plansSectionLabel: "4 · Preise",
+    plansSectionLabel: "3 · Preise",
     plansPerEventSuffix: "/ Event",
     plansDescriptionStrong: "Wähle den Tarif, der zu deinem Event passt",
     plansDescriptionRest:
@@ -1144,7 +1039,7 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     futureStatusLabels: { roadmap: "Roadmap", planned: "Geplant", idea: "Idee" },
     faqTitle: "Fragen",
-    faqSectionLabel: "5 · Fragen",
+    faqSectionLabel: "4 · Fragen",
     faqContactPrefix: "Wenn etwas fehlt, schreib an",
     faqContactSuffix: "Wir antworten innerhalb eines Tages, oft schneller.",
     faq: [

@@ -187,7 +187,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
           }}
         />
 
-        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
+        <div className="event-builder-header-row" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.26em", textTransform: "uppercase", color: "var(--gold)" }}>
             {b.eyebrow}
           </div>
@@ -197,7 +197,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
         </div>
 
         {/* Progress track */}
-        <div style={{ position: "relative", marginBottom: 20 }}>
+        <div className="event-builder-progress" style={{ position: "relative", marginBottom: 20 }}>
           <div style={{ position: "relative", height: 6, borderRadius: 999, background: "var(--hair-2)", overflow: "hidden", marginBottom: 14 }}>
             <div
               style={{
@@ -246,6 +246,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
           <div aria-hidden style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: "radial-gradient(circle, rgba(245,199,107,0.28), transparent 70%)" }} />
           <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12 }}>
             <div
+              className="event-builder-summary-icon"
               style={{
                 width: 44, height: 44, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                 background: "linear-gradient(135deg, var(--gold) 0%, var(--amber) 45%, var(--gold-deep) 100%)",
@@ -269,7 +270,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
               </div>
             </div>
           </div>
-          <div style={{ position: "relative", display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
+          <div className="event-builder-summary-chips" style={{ position: "relative", display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
             <span className="event-builder-chip">{prettyDate}</span>
             <span className="event-builder-chip">{guests >= 300 ? "300+" : guests} · {b.peopleInvited.split(" ")[0]}</span>
             <span className="event-builder-chip event-builder-chip-plum">{plan.name}</span>
@@ -279,10 +280,10 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
         <div key={step} className="event-builder-step-transition">
           {step === 0 && (
             <div style={{ position: "relative" }}>
-              <label style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--cream-4)", marginBottom: 9 }}>
+              <label className="event-builder-field-label" style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--cream-4)", marginBottom: 9 }}>
                 {b.whatCelebrating}
               </label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
+              <div className="event-builder-kind-row" style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
                 {b.kinds.map((k, i) => {
                   const Icon = KIND_ICONS[i] ?? Gem;
                   const selected = kindIndex === i;
@@ -311,7 +312,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
                 })}
               </div>
 
-              <label style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--cream-4)", marginBottom: 9 }}>
+              <label className="event-builder-field-label" style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--cream-4)", marginBottom: 9 }}>
                 {copy.plansFormNamePlaceholder}
               </label>
               <input
@@ -319,7 +320,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={copy.plansFormNamePlaceholder}
-                className="event-builder-input"
+                className="event-builder-input event-builder-name-input"
                 style={{
                   width: "100%", fontFamily: "var(--font-display)", fontSize: 20, padding: "14px 16px", borderRadius: 14,
                   background: "var(--glass-bg)", border: "1px solid var(--hair-2)", color: "var(--cream)", outline: "none",
@@ -327,7 +328,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
                 }}
               />
 
-              <label style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--cream-4)", margin: "18px 0 9px" }}>
+              <label className="event-builder-field-label" style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--cream-4)", margin: "18px 0 9px" }}>
                 {copy.plansFormDateLabel}
               </label>
               <input
@@ -367,7 +368,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
                 {b.guestsHeading}
               </label>
               <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 2 }}>
-                <span style={{ fontFamily: "var(--font-display)", fontSize: 56, lineHeight: 1, color: "var(--gold)", textShadow: "0 0 28px rgba(245,199,107,0.35)" }}>
+                <span className="event-builder-guest-number" style={{ fontFamily: "var(--font-display)", fontSize: 56, lineHeight: 1, color: "var(--gold)", textShadow: "0 0 28px rgba(245,199,107,0.35)" }}>
                   {guests >= 300 ? "300+" : guests}
                 </span>
                 <span style={{ fontSize: 14, color: "var(--cream-3)", fontFamily: "var(--font-sans)" }}>{b.peopleInvited}</span>
@@ -395,7 +396,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
                     </div>
                     <div style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--cream)", marginTop: 3 }}>{plan.name}</div>
                   </div>
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: 32, color: "var(--cream)" }}>{priceRow?.value}</div>
+                  <div className="event-builder-plan-price" style={{ fontFamily: "var(--font-display)", fontSize: 32, color: "var(--cream)" }}>{priceRow?.value}</div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "10px 16px", marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--hair-2)" }}>
                   {featureRows.slice(0, 5).map((row) => (
@@ -665,6 +666,26 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
           .event-builder-step-transition { animation: none; }
           .event-builder-arrival-glow { animation: none; opacity: 0; }
           .event-builder-kind-pill { transition: none; }
+        }
+
+        /* Mobile: this card is sized generously for desktop's spare room.
+           Tighten it down here rather than touch the shared inline styles above. */
+        @media (max-width: 640px) {
+          .event-builder-card { padding: 16px !important; border-radius: 20px !important; }
+          .event-builder-header-row { margin-bottom: 12px !important; }
+          .event-builder-progress { margin-bottom: 14px !important; }
+          .event-builder-summary { padding: 12px 14px !important; margin-bottom: 16px !important; }
+          .event-builder-summary-icon { width: 36px !important; height: 36px !important; border-radius: 11px !important; }
+          .event-builder-summary-icon svg { width: 17px !important; height: 17px !important; }
+          .event-builder-summary-chips { margin-top: 10px !important; gap: 6px !important; }
+          .event-builder-field-label { margin-bottom: 7px !important; margin-top: 14px !important; }
+          .event-builder-kind-row { gap: 6px !important; margin-bottom: 14px !important; }
+          .event-builder-kind-pill { padding: 7px 12px !important; font-size: 13px !important; gap: 5px !important; }
+          .event-builder-kind-pill svg { width: 13px !important; height: 13px !important; }
+          .event-builder-name-input { font-size: 17px !important; padding: 12px 14px !important; }
+          .event-builder-cta-glow { padding: 13px 18px !important; }
+          .event-builder-guest-number { font-size: 40px !important; }
+          .event-builder-plan-price { font-size: 26px !important; }
         }
       `}</style>
     </div>

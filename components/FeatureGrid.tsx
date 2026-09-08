@@ -35,56 +35,35 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
       }}
     >
       <div className="mx-auto features-section__container" style={{ maxWidth: 1280, padding: "0 32px" }}>
-        <header className="features-section__header">
-          <div className="features-section__intro">
-            <div className="features-section__eyebrow">
-              <span className="features-section__eyebrow-mark" aria-hidden />
-              <span>{copy.featuresSectionLabel}</span>
+        <header className="fg-header">
+          <div className="features-section__eyebrow">
+            <span className="features-section__eyebrow-mark" aria-hidden />
+            <span>{copy.featuresSectionLabel}</span>
+          </div>
+          <div className="flex w-full items-center gap-4">
+            <h2 className="fg-title" style={{ flex: 1, minWidth: 0 }}>{copy.featuresTitle}</h2>
+            <div className="ml-auto shrink-0">
+              <Image
+                src="/brand/mascot/aurora_camera.png"
+                alt={copy.auroraMascotAlt}
+                width={140}
+                height={140}
+                style={{ width: 80, height: "auto", objectFit: "contain" }}
+              />
             </div>
-            <div className="flex w-full items-center gap-4">
-              <h2 className="features-section__title" style={{ flex: 1, minWidth: 0 }}>
-                {copy.featuresTitle}
-              </h2>
-              <div className="ml-auto shrink-0">
-                <Image
-                  src="/brand/mascot/aurora_camera.png"
-                  alt={copy.auroraMascotAlt}
-                  width={140}
-                  height={140}
-                  style={{ width: 100, height: "auto", objectFit: "contain" }}
-                />
-              </div>
-            </div>
-            {/* <p className="features-section__lede">{copy.featuresDescription}</p> */}
           </div>
         </header>
-
-        <ul className="features-showcase" role="list" style={{ margin: 0, padding: 0, listStyle: "none" }}>
+        <ul className="fg-grid" role="list" style={{ margin: 0, padding: 0, listStyle: "none" }}>
           {copy.features.map((f, i) => {
             const accent = ACCENTS[i % ACCENTS.length]!;
             const Icon = ICONS[i] ?? ICONS[0];
             return (
-              <li key={f.title} className="feature-card">
-                <div
-                  className="features-lane__plate"
-                  style={
-                    {
-                      ["--lane-accent"]: accent.color,
-                    } as CSSProperties
-                  }
-                >
-                  <div className="features-lane__top">
-                    {/* <span className="features-lane__index">{idx}</span> */}
-                    <div className="features-lane__iconRing">{Icon}</div>
-                    <h3 className="features-lane__title">{f.title}</h3>
-                  </div>
-
-                  <div className="feature-card-desc-wrap">
-                    <div className="feature-card-desc-inner">
-                      <p className="feature-card-desc features-lane__desc">{f.description}</p>
-                    </div>
-                  </div>
+              <li key={f.title} className="fg-card" style={{ ["--lane-accent"]: accent.color } as CSSProperties}>
+                <div className="fg-top">
+                  <span className="fg-icon">{Icon}</span>
+                  <h3 className="fg-card-title">{f.title}</h3>
                 </div>
+                <p className="fg-card-desc">{f.description}</p>
               </li>
             );
           })}
