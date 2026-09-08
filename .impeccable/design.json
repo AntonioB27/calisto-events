@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-08T00:00:00.000Z",
+  "title": "Design System: Calisto Events — Marketing Landing",
+  "extensions": {
+    "colorMeta": {
+      "void-plum": {
+        "role": "neutral",
+        "displayName": "Void Plum",
+        "canonical": "#0C0A0F",
+        "tonalRamp": ["#08070A", "#0C0A0F", "#141019", "#1C1724", "#2A2333", "#3E3549", "#584D66", "#7A6D88"]
+      },
+      "warm-parchment": {
+        "role": "neutral",
+        "displayName": "Warm Parchment",
+        "canonical": "#F4EAD9",
+        "tonalRamp": ["#6E6758", "#8A7E6B", "#B5AB99", "#CDC0AA", "#E8DCC6", "#F0E6D5", "#F4EAD9", "#FBF7F0"]
+      },
+      "amber-flare": {
+        "role": "primary",
+        "displayName": "Amber Flare",
+        "canonical": "#F0B34B",
+        "tonalRamp": ["#5C3D17", "#8A5E22", "#B87F2D", "#D69C3C", "#F0B34B", "#F5C46B", "#FAD592", "#FFE6BC"]
+      },
+      "warm-gold": {
+        "role": "primary",
+        "displayName": "Warm Gold",
+        "canonical": "#F5C76B",
+        "tonalRamp": ["#5E4A22", "#8C6F30", "#B8933F", "#D9AF50", "#F5C76B", "#F8D488", "#FBE1AA", "#FDEECD"]
+      },
+      "warm-gold-deep": {
+        "role": "primary",
+        "displayName": "Warm Gold Deep",
+        "canonical": "#C9912E",
+        "tonalRamp": ["#4A3312", "#6E4C1B", "#906526", "#B07C2A", "#C9912E", "#D9A94F", "#E7C177", "#F2DBA8"]
+      },
+      "dusty-plum": {
+        "role": "secondary",
+        "displayName": "Dusty Plum",
+        "canonical": "#8B6A8C",
+        "tonalRamp": ["#2E2130", "#453245", "#5C445D", "#735675", "#8B6A8C", "#A584A6", "#C0A6C1", "#DBCADB"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Headlines, section titles, and (italic) Aurora's voice, pull-quotes, and live stat numerals." },
+      "body": { "displayName": "Body", "purpose": "Descriptive paragraphs and interface copy inside cards and buttons." },
+      "label": { "displayName": "Label", "purpose": "Uppercase tracked eyebrows, step counters, stat captions, and structural badges." }
+    },
+    "shadows": [
+      { "name": "cta-glow", "value": "0 0 0 1px rgba(255,255,255,0.28) inset, 0 12px 40px -12px rgba(240,179,75,0.55)", "purpose": "Primary gold CTA button only." },
+      { "name": "photo-proof-resting", "value": "0 8px 28px rgba(0,0,0,0.38), 0 2px 8px rgba(0,0,0,0.22)", "purpose": "Resting state of a staged real-photo object (testimonial polaroid, phone mockup)." },
+      { "name": "photo-proof-active", "value": "0 24px 64px rgba(0,0,0,0.55), 0 4px 16px rgba(0,0,0,0.3)", "purpose": "Active/focused state of a staged real-photo object." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Default state transitions (buttons, hovers)." },
+      { "name": "ease-spring", "value": "cubic-bezier(0.34, 1.28, 0.64, 1)", "purpose": "Photo-object transforms (polaroid scale/rotate) for a tactile, slightly overshooting feel." },
+      { "name": "ease-reveal", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Scroll-triggered reveals (stat bar count-up, testimonial fade-in)." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "960px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main call-to-action, e.g. \"Create your event\".",
+      "html": "<button class=\"ds-btn-primary\">Create your event <span aria-hidden>&rarr;</span></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 10px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.01em; padding: 11px 22px; border-radius: 999px; border: none; cursor: pointer; background: linear-gradient(135deg, #F5C76B 0%, #F0B34B 45%, #C9912E 100%); color: #1b1208; box-shadow: 0 0 0 1px rgba(255,255,255,0.28) inset, 0 12px 40px -12px rgba(240,179,75,0.55); transition: transform 250ms cubic-bezier(0.4,0,0.2,1), box-shadow 250ms cubic-bezier(0.4,0,0.2,1); } .ds-btn-primary:hover { transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 2px solid #F5C76B; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ghost/secondary action, e.g. \"Compare plans\".",
+      "html": "<button class=\"ds-btn-secondary\">Compare plans</button>",
+      "css": ".ds-btn-secondary { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.01em; padding: 11px 22px; border-radius: 999px; cursor: pointer; background: transparent; color: #F4EAD9; border: 1px solid rgba(244,234,217,0.22); box-shadow: 0 0 0 1px rgba(240,179,75,0.16) inset; transition: all 250ms cubic-bezier(0.4,0,0.2,1); } .ds-btn-secondary:hover { border-color: rgba(244,234,217,0.4); } .ds-btn-secondary:focus-visible { outline: 2px solid #F5C76B; outline-offset: 2px; }"
+    },
+    {
+      "name": "Glass Panel Card",
+      "kind": "card",
+      "refersTo": "card-panel",
+      "description": "The default flat, hairline-bordered card used for the trust bar, speech bubble, and plan cards.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-label\">Event Builder</div><div class=\"ds-card-body\">Details, guests, and payment in one place.</div></div>",
+      "css": ".ds-card { background: rgba(244,234,217,0.04); border: 1px solid rgba(244,234,217,0.14); border-radius: 18px; padding: 16px 20px; } .ds-card-label { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.22em; text-transform: uppercase; color: #F5C76B; margin-bottom: 8px; } .ds-card-body { font-family: 'DM Sans', sans-serif; font-size: 14px; color: #E8DCC6; }"
+    },
+    {
+      "name": "Eyebrow Label",
+      "kind": "chip",
+      "refersTo": "badge-eyebrow",
+      "description": "Section eyebrow / structural label, e.g. \"MEET AURORA\" or \"4 · PRICING\".",
+      "html": "<div class=\"ds-eyebrow\">Meet Aurora</div>",
+      "css": ".ds-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase; color: #F5C76B; }"
+    },
+    {
+      "name": "Photo Proof Card",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Signature component: real event photography staged as a physical, slightly rotated object with washi tape and a grounding shadow.",
+      "html": "<figure class=\"ds-photo-proof\"><div class=\"ds-photo-proof-tape\"></div><div class=\"ds-photo-proof-frame\"><img src=\"\" alt=\"\" /></div><figcaption class=\"ds-photo-proof-caption\">&ldquo;340 photos by midnight.&rdquo;</figcaption></figure>",
+      "css": ".ds-photo-proof { width: 240px; background: #faf7f2; padding: 10px 10px 32px; border-radius: 2px; transform: rotate(-2.5deg); box-shadow: 0 8px 28px rgba(0,0,0,0.38), 0 2px 8px rgba(0,0,0,0.22); transition: transform 480ms cubic-bezier(0.34,1.28,0.64,1), box-shadow 360ms ease; } .ds-photo-proof:hover { transform: rotate(0deg) scale(1.04); box-shadow: 0 24px 64px rgba(0,0,0,0.55), 0 4px 16px rgba(0,0,0,0.3); } .ds-photo-proof-tape { position: absolute; width: 52px; height: 13px; margin: -11px auto 0; background: rgba(212,168,67,0.48); border-radius: 2px; } .ds-photo-proof-frame { aspect-ratio: 4/3; border-radius: 1px; overflow: hidden; background: #ddd; } .ds-photo-proof-frame img { width: 100%; height: 100%; object-fit: cover; } .ds-photo-proof-caption { margin-top: 14px; font-family: 'DM Serif Display', serif; font-style: italic; font-size: 13px; color: #2A1805; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Golden Hour Album",
+    "overview": "This system reads as a keepsake album opened at golden hour: a near-black, plum-tinted void holds warm amber and gold light like the last hour of a wedding reception, and every surface is a page in that album rather than a dashboard panel. Type does the heavy lifting — a serif display face (DM Serif Display) carries headlines, section titles, pull-quotes and even the italic stat numerals at full size, while a plain, quiet sans (DM Sans) carries body copy and interface labels without competing with it. Ambient radial washes of plum and amber drift behind sections instead of hard-edged blocks, a film-grain overlay sits over the whole page, and hairline borders plus barely-there glass fills (never solid cards, never pure white) do almost all of the structural work. Real candid event photography — golden-hour wedding dances, string-lit dinners, birthday sparklers — is the system's evidence, staged as physical objects (rotated, washi-taped, drop-shadowed) rather than cropped into flat image tiles. Aurora, the mascot, is a named character with her own contextual portrait art and a distinct first-person voice, always set apart from factual product copy by an italic serif treatment or a bordered speech-bubble panel.",
+    "keyCharacteristics": [
+      "Dark-first (near-black plum void), with a fully mirrored light theme that swaps token roles rather than just inverting lightness.",
+      "Serif display type at full strength for anything that needs to feel emotional or important; mono/uppercase/tracked type for anything that needs to feel structural or factual.",
+      "Flat, hairline-bordered surfaces by default; shadow and rotation are reserved for two things only — primary calls to action, and physical photographic evidence.",
+      "Real, warm, golden-hour event photography as proof, never generic stock or decorative crops.",
+      "Aurora's voice is always visually distinct from the product's factual copy."
+    ],
+    "rules": [
+      { "name": "The One Warm Color Rule", "body": "Gold/amber is the only saturated, interactive color anywhere on the page. Plum stays ambient and background-only; it never appears on a button, link, or anything clickable.", "section": "colors" },
+      { "name": "The Three-Voice Rule", "body": "Every piece of text on the page is legible at a glance as one of exactly three voices: serif display (emotional/important), sans body (informational), or mono uppercase (structural/labeling). Mixing a fourth type treatment in reads as off-system.", "section": "typography" },
+      { "name": "The Flat-Except-Proof Rule", "body": "Everything is flat and hairline-bordered except the primary CTA (which glows) and real photographic evidence (which casts a physical-object shadow and sits at a slight rotation). If a new panel wants a shadow for neither reason, give it a hairline border instead.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do treat gold/amber as the only saturated, interactive color; everything else (including plum) stays ambient or textual.",
+      "Do use the serif display face at full size for anything emotional (headlines, Aurora's voice, pull-quotes, live stat numerals); keep the sans small and quiet everywhere else.",
+      "Do use pill radius (999px) for every button and interactive chip; reserve 18-22px for static cards/panels.",
+      "Do stage real event photography as a physical object (rotation, tape, grain, shadow) rather than a flat cropped image.",
+      "Do keep Aurora's voice visually distinct from factual product copy (italic serif and/or a bordered speech-bubble panel), matching her own contextual portrait art rather than a generic icon."
+    ],
+    "donts": [
+      "Don't use pure-white glass or opaque white card fills; glass surfaces stay parchment-tinted and near-transparent even in light mode.",
+      "Don't add box-shadow to an ordinary card or panel; flat + hairline border is the default, shadow is earned only by the primary CTA or real photographic evidence.",
+      "Don't use em dashes anywhere in copy, UI strings, or labels.",
+      "Don't invent a fourth type voice; every text element is display-serif, sans-body, or mono-label."
+    ]
+  }
+}

@@ -4,7 +4,6 @@ import { AuroraQuote } from "@/components/AuroraQuote";
 import { FAQ } from "@/components/FAQ";
 import { FeatureGrid } from "@/components/FeatureGrid";
 import { Hero } from "@/components/Hero";
-import { HowItWorks } from "@/components/HowItWorks";
 import { Testimonials } from "@/components/Testimonials";
 import { LanguageSelectorPopup } from "@/components/LanguageSelectorPopup";
 import { AppPreviewWindow } from "@/components/AppPreviewWindow";
@@ -92,7 +91,6 @@ export default async function LocalePage({ params }: LocalePageProps) {
         <Testimonials copy={copy} />
         <AppPreviewWindow copy={copy} />
         <FeatureGrid copy={copy} />
-        <HowItWorks copy={copy} />
         <PlanCards copy={copy} />
         <AuroraQuote copy={copy} />
         <FAQ copy={copy} />

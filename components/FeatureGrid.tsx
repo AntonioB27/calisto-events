@@ -1,5 +1,7 @@
+"use client";
+
 import Image from "next/image";
-import type { CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { LandingCopy } from "@/lib/i18n";
 
 type FeatureGridProps = { copy: LandingCopy };
@@ -24,6 +26,46 @@ const ICONS = [
 ];
 
 export function FeatureGrid({ copy }: FeatureGridProps) {
+  const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
+  const [activeIndices, setActiveIndices] = useState<Set<number>>(new Set());
+
+  // On mobile, cards collapse to icon+title; the one nearest the vertical
+  // center of the viewport expands, since there's no hover on touch.
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    let observer: IntersectionObserver | null = null;
+
+    function setup() {
+      observer?.disconnect();
+      if (!mq.matches) {
+        setActiveIndices(new Set());
+        return;
+      }
+      observer = new IntersectionObserver(
+        (entries) => {
+          setActiveIndices((prev) => {
+            const next = new Set(prev);
+            for (const entry of entries) {
+              const idx = Number((entry.target as HTMLElement).dataset.index);
+              if (entry.isIntersecting) next.add(idx);
+              else next.delete(idx);
+            }
+            return next;
+          });
+        },
+        { rootMargin: "-42% 0px -42% 0px", threshold: 0 }
+      );
+      itemRefs.current.forEach((el) => { if (el) observer!.observe(el); });
+    }
+
+    setup();
+    mq.addEventListener("change", setup);
+    return () => {
+      observer?.disconnect();
+      mq.removeEventListener("change", setup);
+    };
+  }, []);
+
   return (
     <section
       id="features"
@@ -35,55 +77,43 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
       }}
     >
       <div className="mx-auto features-section__container" style={{ maxWidth: 1280, padding: "0 32px" }}>
-        <header className="features-section__header">
-          <div className="features-section__intro">
-            <div className="features-section__eyebrow">
-              <span className="features-section__eyebrow-mark" aria-hidden />
-              <span>{copy.featuresSectionLabel}</span>
+        <header className="fg-header">
+          <div className="features-section__eyebrow">
+            <span className="features-section__eyebrow-mark" aria-hidden />
+            <span>{copy.featuresSectionLabel}</span>
+          </div>
+          <div className="flex w-full items-center gap-4">
+            <h2 className="fg-title" style={{ flex: 1, minWidth: 0 }}>{copy.featuresTitle}</h2>
+            <div className="ml-auto shrink-0">
+              <Image
+                src="/brand/mascot/aurora_camera.png"
+                alt={copy.auroraMascotAlt}
+                width={140}
+                height={140}
+                style={{ width: 80, height: "auto", objectFit: "contain" }}
+              />
             </div>
-            <div className="flex w-full items-center gap-4">
-              <h2 className="features-section__title" style={{ flex: 1, minWidth: 0 }}>
-                {copy.featuresTitle}
-              </h2>
-              <div className="ml-auto shrink-0">
-                <Image
-                  src="/brand/mascot/aurora_camera.png"
-                  alt={copy.auroraMascotAlt}
-                  width={140}
-                  height={140}
-                  style={{ width: 100, height: "auto", objectFit: "contain" }}
-                />
-              </div>
-            </div>
-            {/* <p className="features-section__lede">{copy.featuresDescription}</p> */}
           </div>
         </header>
-
-        <ul className="features-showcase" role="list" style={{ margin: 0, padding: 0, listStyle: "none" }}>
+        <ul className="fg-grid" role="list" style={{ margin: 0, padding: 0, listStyle: "none" }}>
           {copy.features.map((f, i) => {
             const accent = ACCENTS[i % ACCENTS.length]!;
             const Icon = ICONS[i] ?? ICONS[0];
+            const isActive = activeIndices.has(i);
             return (
-              <li key={f.title} className="feature-card">
-                <div
-                  className="features-lane__plate"
-                  style={
-                    {
-                      ["--lane-accent"]: accent.color,
-                    } as CSSProperties
-                  }
-                >
-                  <div className="features-lane__top">
-                    {/* <span className="features-lane__index">{idx}</span> */}
-                    <div className="features-lane__iconRing">{Icon}</div>
-                    <h3 className="features-lane__title">{f.title}</h3>
-                  </div>
-
-                  <div className="feature-card-desc-wrap">
-                    <div className="feature-card-desc-inner">
-                      <p className="feature-card-desc features-lane__desc">{f.description}</p>
-                    </div>
-                  </div>
+              <li
+                key={f.title}
+                ref={(el) => { itemRefs.current[i] = el; }}
+                data-index={i}
+                className={`fg-card${isActive ? " fg-card-active" : ""}`}
+                style={{ ["--lane-accent"]: accent.color } as CSSProperties}
+              >
+                <div className="fg-top">
+                  <span className="fg-icon">{Icon}</span>
+                  <h3 className="fg-card-title">{f.title}</h3>
+                </div>
+                <div className="fg-card-desc-wrap">
+                  <p className="fg-card-desc">{f.description}</p>
                 </div>
               </li>
             );

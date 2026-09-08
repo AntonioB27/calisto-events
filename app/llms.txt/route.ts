@@ -14,7 +14,6 @@ function llmsBody(origin: string): string {
 - [Home (Croatian)](${origin}/hr)
 - [Home (German)](${origin}/de)
 - [Pricing](${origin}/en#plans)
-- [How it works](${origin}/en#how)
 - [FAQ](${origin}/en#faq)
 - [Live demo](${origin}/demo)
 - [Pricing (machine-readable)](${origin}/pricing.md)

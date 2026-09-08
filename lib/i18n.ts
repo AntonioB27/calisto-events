@@ -12,12 +12,6 @@ type Feature = {
   mascotBubble: string;
 };
 
-type HowItWorksItem = {
-  step: string;
-  title: string;
-  description: string;
-};
-
 type PlanRow = {
   label: string;
   value: string;
@@ -38,6 +32,30 @@ type FutureItem = {
 type FaqItem = {
   q: string;
   a: string;
+};
+
+type HeroBuilderCopy = {
+  eyebrow: string;
+  stepLabels: readonly [string, string, string];
+  whatCelebrating: string;
+  kinds: readonly [string, string, string, string, string];
+  continueCta: string;
+  back: string;
+  noAccountYet: string;
+  guestsHeading: string;
+  peopleInvited: string;
+  recommended: string;
+  comparePlans: string;
+  guestPassLabel: string;
+  accessCodeLabel: string;
+  joinLinkLabel: string;
+  shareHint: string;
+  tags: readonly [string, string];
+  copyLink: string;
+  copyLinkDone: string;
+  downloadQr: string;
+  saveEvent: string;
+  startOver: string;
 };
 
 type WaitlistCopy = {
@@ -62,6 +80,8 @@ export type LandingCopy = {
   themeLight: string;
   themeDark: string;
   navAriaLabel: string;
+  menuOpenLabel: string;
+  menuCloseLabel: string;
   nav: NavItem[];
   joinWaitlistShort: string;
   goToApp: string;
@@ -69,7 +89,7 @@ export type LandingCopy = {
   heroIntro: string;
   heroTitle: string;
   heroDescription: string;
-  /** Aurora's voice in the hero mascot card—separate from the factual hero subhead. */
+  /** Aurora's voice in the hero mascot card, separate from the factual hero subhead. */
   heroAuroraCardBlurb: string;
   heroPrimaryCta: string;
   heroSecondaryCta: string;
@@ -80,6 +100,7 @@ export type LandingCopy = {
   heroMockJoinAlbum: string;
   heroMockScanToUpload: string;
   heroMockNoAppNoAccount: string;
+  heroBuilder: HeroBuilderCopy;
   statBar: { value: string; label: string }[];
   appPreviewEyebrow: string;
   appPreviewTitlePrefix: string;
@@ -96,18 +117,6 @@ export type LandingCopy = {
   featuresDescription: string;
   featuresAuroraBubble: string;
   features: Feature[];
-  howTitle: string;
-  howSectionLabel: string;
-  howSetupHint: string;
-  howStepPrefix: string;
-  howVisualLive: string;
-  howVisualGuests: string;
-  howUploadDone: string;
-  howModerationApproved: string;
-  howModerationNewTemplate: string;
-  howDescription: string;
-  howDemoCta: string;
-  howItems: HowItWorksItem[];
   plansTitle: string;
   plansSectionLabel: string;
   plansPerEventSuffix: string;
@@ -170,10 +179,11 @@ const copy: Record<Locale, LandingCopy> = {
     themeLight: "Light",
     themeDark: "Dark",
     navAriaLabel: "Page sections",
+    menuOpenLabel: "Open menu",
+    menuCloseLabel: "Close menu",
     nav: [
       { href: "#preview", label: "Preview" },
       { href: "#features", label: "Features" },
-      { href: "#how", label: "How it works" },
       { href: "#plans", label: "Plans" },
       { href: "#faq", label: "FAQ" },
     ],
@@ -183,22 +193,45 @@ const copy: Record<Locale, LandingCopy> = {
     heroIntro: "Hi, I'm Aurora, I'll guide you through Calisto.",
     heroTitle: "Every memory matters. Make sure you capture them all.",
     heroDescription:
-      "Calisto is a shared photo and video album for weddings, birthdays, and every celebration. Guests upload straight from their phone browser. No app to download. Free to try.",
+      "One shared album. Every guest, every memory, in one place.",
     heroAuroraCardBlurb:
-      "I'd rather you be in the moment than digging through camera rolls on Monday. I'm here so the messy, wonderful parts of your day—the toasts, the candid grins, the kid with cake on his face—stay in one story you can reopen without a scavenger hunt.",
+      "The messy, wonderful moments deserve one story, not a scavenger hunt.",
     heroPrimaryCta: "Create your event",
     heroSecondaryCta: "Compare plans",
     heroSignals: [
-      "No app to download — guests scan and upload from the browser.",
-      "No account required for guests to contribute.",
-      "Organizers control the invite code; everyone you invite shares the same gallery.",
+      "No app required",
+      "No account for guests",
+      "One code, one gallery",
     ],
     heroMockLiveUploading: "Live · 3 uploading",
     heroMockGuestsContributing: "84 guests contributing",
     heroMockMediaSummary: "247 photos · 16 videos",
     heroMockJoinAlbum: "Join this album",
-    heroMockScanToUpload: "Scan to upload —",
+    heroMockScanToUpload: "Scan to upload…",
     heroMockNoAppNoAccount: "no app, no account.",
+    heroBuilder: {
+      eyebrow: "Event builder",
+      stepLabels: ["Details", "Guests", "Payment"],
+      whatCelebrating: "What are you celebrating?",
+      kinds: ["Wedding", "Birthday", "Party", "Reunion", "Corporate"],
+      continueCta: "Continue →",
+      back: "Back",
+      noAccountYet: "No account needed yet",
+      guestsHeading: "How many guests?",
+      peopleInvited: "people invited",
+      recommended: "Recommended",
+      comparePlans: "Compare every plan",
+      guestPassLabel: "Guest pass",
+      accessCodeLabel: "Access code",
+      joinLinkLabel: "Join link",
+      shareHint: "Print it for the tables, text the link, or read the code out loud: all three work.",
+      tags: ["No app", "No account"],
+      copyLink: "Copy join link",
+      copyLinkDone: "Copied ✓",
+      downloadQr: "Download QR sign",
+      saveEvent: "Save event · sign up free",
+      startOver: "Start over",
+    },
     statBar: [
       { value: "50+ weddings", label: "already celebrated" },
       { value: "1,000+ photos", label: "captured and shared" },
@@ -213,28 +246,28 @@ const copy: Record<Locale, LandingCopy> = {
     appPreviewAriaThumbs: "Screenshot thumbnails",
     appPreviewCaptions: ["Welcome", "Home", "Gallery", "Event home"],
     appPreviewViewAriaTemplate: "View {name}",
-    appPreviewImageAltTemplate: "Calisto app — {name}",
+    appPreviewImageAltTemplate: "Calisto app: {name}",
     featuresTitle: "What's included",
     featuresSectionLabel: "2 · Features",
     featuresDescription:
-      "For days when everyone is taking photos—uploads stay organized and easy to share.",
+      "For days when everyone is taking photos, uploads stay organized and easy to share.",
     featuresAuroraBubble:
-      "Every guest upload lands in one gallery—I'll help you keep it tidy.",
+      "Every guest upload lands in one gallery, and I'll help you keep it tidy.",
     features: [
       {
         title: "One code for your event",
-        description: "Each event gets its own code — like WEDDING2026. Share it and guests are in instantly.",
-        mascotBubble: "Your event, your code—simple.",
+        description: "Each event gets its own code, like WEDDING2026. Share it and guests are in instantly.",
+        mascotBubble: "Your event, your code: simple.",
       },
       {
         title: "Share by link, QR, or code",
-        description: "Send a link, display a QR code, or just text the code. Guests join from their phone in seconds — no app needed.",
-        mascotBubble: "Scan or tap—they're in!",
+        description: "Send a link, display a QR code, or just text the code. Guests join from their phone in seconds, no app needed.",
+        mascotBubble: "Scan or tap: they're in!",
       },
       {
         title: "Everyone sees it live",
         description:
-          "Every photo and video shows up for all guests the moment it's uploaded — like a shared camera roll for your whole event.",
+          "Every photo and video shows up for all guests the moment it's uploaded, like a shared camera roll for your whole event.",
         mascotBubble: "One gallery, all the magic.",
       },
       {
@@ -257,45 +290,17 @@ const copy: Record<Locale, LandingCopy> = {
       {
         title: "Approve photos before they go live",
         description:
-          "Turn on photo moderation and every guest upload lands in a private review queue first. Approve what belongs, discard what doesn't — guests only see what you allow.",
+          "Turn on photo moderation and every guest upload lands in a private review queue first. Approve what belongs, discard what doesn't; guests only see what you allow.",
         mascotBubble: "You decide what the gallery shows.",
       },
     ],
-    howTitle: "How it works?",
-    howSectionLabel: "3 · Three simple steps",
-    howSetupHint: "< 90 seconds to set up",
-    howStepPrefix: "STEP",
-    howVisualLive: "LIVE",
-    howVisualGuests: "84 guests",
-    howUploadDone: "done",
-    howModerationApproved: "approved",
-    howModerationNewTemplate: "+{count} new",
-    howDescription: "Three steps from empty album to shared memories.",
-    howDemoCta: "Try the demo",
-    howItems: [
-      {
-        step: "1",
-        title: "Create your event",
-        description: "Choose a name, date, and plan. You become the organizer automatically.",
-      },
-      {
-        step: "2",
-        title: "Share code or QR",
-        description: "Send the code or link, or show them the QR.",
-      },
-      {
-        step: "3",
-        title: "Browse photos and enjoy",
-        description: "Guests upload and browse photos and videos together.",
-      },
-    ],
     plansTitle: "Plans",
-    plansSectionLabel: "4 · Pricing",
+    plansSectionLabel: "3 · Pricing",
     plansPerEventSuffix: "/ event",
     plansDescriptionStrong: "Choose the plan that fits your event",
     plansDescriptionRest:
       "guest caps, media quotas, and upload windows follow the tier you pick. Raising or lowering a tier in Settings updates limits in the app.",
-    plansAuroraBubble: "Choose what fits your event now — upgrading is always an option.",
+    plansAuroraBubble: "Choose what fits your event now; upgrading is always an option.",
     plansMascotAlt: "Aurora choosing a storage plan",
     popularBadge: "Most popular",
     plans: [
@@ -308,7 +313,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Photos", value: "20" },
           { label: "Videos", value: "0" },
           { label: "Guest limit", value: "5" },
-          { label: "Download all", value: "Gallery — primary organizer, 24h link" },
+          { label: "Download all", value: "Gallery: primary organizer, 24h link" },
           { label: "Guests can upload for", value: "3 days" },
           { label: "Photos kept for", value: "7 days" },
         ],
@@ -322,7 +327,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Photos", value: "150" },
           { label: "Videos", value: "10" },
           { label: "Guest limit", value: "30" },
-          { label: "Download all", value: "Gallery — primary organizer, 24h link" },
+          { label: "Download all", value: "Gallery: primary organizer, 24h link" },
           { label: "Guests can upload for", value: "7 days" },
           { label: "Photos kept for", value: "30 days" },
         ],
@@ -336,7 +341,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Photos", value: "500" },
           { label: "Videos", value: "50" },
           { label: "Guest limit", value: "100" },
-          { label: "Download all", value: "Gallery — primary organizer, 24h link" },
+          { label: "Download all", value: "Gallery: primary organizer, 24h link" },
           { label: "Guests can upload for", value: "14 days" },
           { label: "Photos kept for", value: "90 days" },
         ],
@@ -350,7 +355,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Photos", value: "2000" },
           { label: "Videos", value: "200" },
           { label: "Guest limit", value: "250" },
-          { label: "Download all", value: "Gallery — primary organizer, 24h link" },
+          { label: "Download all", value: "Gallery: primary organizer, 24h link" },
           { label: "Guests can upload for", value: "30 days" },
           { label: "Photos kept for", value: "180 days" },
         ],
@@ -364,7 +369,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Photos", value: "Unlimited" },
           { label: "Videos", value: "Unlimited" },
           { label: "Guest limit", value: "Unlimited" },
-          { label: "Download all", value: "Gallery — primary organizer, 24h link" },
+          { label: "Download all", value: "Gallery: primary organizer, 24h link" },
           { label: "Guests can upload for", value: "60 days" },
           { label: "Photos kept for", value: "365 days" },
         ],
@@ -377,7 +382,7 @@ const copy: Record<Locale, LandingCopy> = {
     plansFormEmojiPlaceholder: "Emoji",
     plansFormChooseBtn: "Choose",
     lifecycleTitle: "Event lifecycle",
-    lifecycleDescription: "What the Calisto web app does today vs what ships next — including scheduled event teardown.",
+    lifecycleDescription: "What the Calisto web app does today vs what ships next, including scheduled event teardown.",
     lifecycleRules: [
       "Guest upload windows are enforced in-app based on plan tier (`uploadDaysAfterEvent`, from 3 days on Free through 60 days on Max).",
       "Each event has a `scheduled_deletion_at` from the event date plus plan retention (7 / 30 / 90 / 180 / 365 days). An hourly job removes due events and their media unless the organizer deletes them first in Settings.",
@@ -389,7 +394,7 @@ const copy: Record<Locale, LandingCopy> = {
     futureItems: [
       {
         title: "Broader event types",
-        description: "Roadmap: admin and organizer flows for conferences, tournaments, festivals—not only weddings.",
+        description: "Roadmap: admin and organizer flows for conferences, tournaments, festivals, not only weddings.",
       },
       {
         title: "Store presence",
@@ -406,7 +411,7 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     futureStatusLabels: { roadmap: "Roadmap", planned: "Planned", idea: "Idea" },
     faqTitle: "Questions",
-    faqSectionLabel: "5 · Questions",
+    faqSectionLabel: "4 · Questions",
     faqContactPrefix: "If something isn't here, write to",
     faqContactSuffix: "We answer within a day, usually faster.",
     faq: [
@@ -453,24 +458,24 @@ const copy: Record<Locale, LandingCopy> = {
     waitlist: {
       title: "Try for free.",
       description:
-        "Create your event in minutes. Enter the details, choose a plan — free or paid — and you're ready to go. Sign up only when you're ready to confirm.",
+        "Create your event in minutes. Enter the details, choose a plan (free or paid), and you're ready to go. Sign up only when you're ready to confirm.",
       discount: "The first 10 people on the waiting list get 20% off any paid plan (Standard, Plus, Premium, or Max).",
-      submitted: "You're on the list—we'll be in touch.",
+      submitted: "You're on the list; we'll be in touch.",
       submitFailed: "Could not join the waitlist right now. Please try again in a moment.",
       inputLabel: "Email",
       inputPlaceholder: "you@example.com",
       invalidEmail: "Enter a valid email address.",
       buttonIdle: "Try for free",
       buttonBusy: "Joining...",
-      note: "Discount details and eligibility may be updated before launch. No spam—unsubscribe anytime once we send real emails.",
+      note: "Discount details and eligibility may be updated before launch. No spam; unsubscribe anytime once we send real emails.",
     },
-    footerText: "Event media for weddings and celebrations. Questions? Join the waitlist—we'll reach out.",
+    footerText: "Event media for weddings and celebrations. Questions? Join the waitlist, and we'll reach out.",
     footerPrivacy: "Privacy",
     footerTerms: "Terms",
     legalEnglishNotice: "",
-    pageTitle: "Calisto — shared event photos & videos",
+    pageTitle: "Calisto · shared event photos & videos",
     pageDescription:
-      "Calisto lets wedding and event guests upload and browse photos and videos together. Share a join code or QR — no app, no account needed for guests.",
+      "Calisto lets wedding and event guests upload and browse photos and videos together. Share a join code or QR: no app, no account needed for guests.",
     auroraQuote: "Every memory deserves a home. I'll make sure yours is beautiful, organized, and yours forever.",
     auroraQuoteIntro: "From Aurora · Your Calisto guide",
     auroraQuoteSectionAria: "A message from Aurora",
@@ -488,10 +493,11 @@ const copy: Record<Locale, LandingCopy> = {
     themeLight: "Svijetla",
     themeDark: "Tamna",
     navAriaLabel: "Sekcije stranice",
+    menuOpenLabel: "Otvori izbornik",
+    menuCloseLabel: "Zatvori izbornik",
     nav: [
       { href: "#preview", label: "Pregled" },
       { href: "#features", label: "Mogućnosti" },
-      { href: "#how", label: "Kako radi" },
       { href: "#plans", label: "Paketi" },
       { href: "#faq", label: "Pitanja" },
     ],
@@ -501,22 +507,45 @@ const copy: Record<Locale, LandingCopy> = {
     heroIntro: "Bok, ja sam Aurora, predstavljam ti Calisto.",
     heroTitle: "Svaka uspomena je važna. Pobrinite se da ne propustite nijednu.",
     heroDescription:
-      "Calisto je zajednički foto i video album za vjenčanja, rođendane i proslave. Gosti dijele slike izravno iz preglednika na mobitelu. Nema preuzimanja aplikacije. Isprobaj besplatno.",
+      "Jedan zajednički album. Svaki gost, svaka uspomena, na jednom mjestu.",
     heroAuroraCardBlurb:
-      "Želim da budeš na plesu, a ne da u ponedjeljak pretražuješ deset mapi s fotkama. Tu sam da taj neuredno lijepi dan — toaste, prvi ples, taj tren s kolačem — ostane jedna priča koju možeš otvoriti bez detektivskog posla.",
+      "Ti neuredni, prekrasni trenuci zaslužuju jednu priču, a ne detektivski posao.",
     heroPrimaryCta: "Kreiraj događaj",
     heroSecondaryCta: "Usporedi pakete",
     heroSignals: [
-      "Nema preuzimanja aplikacije — gosti skeniraju i učitavaju u pregledniku.",
-      "Gostima nije obavezan račun.",
-      "Organizator upravlja pozivnim kodom — svi s pristupom dijele istu galeriju.",
+      "Bez aplikacije",
+      "Bez računa za goste",
+      "Jedan kod, jedna galerija",
     ],
     heroMockLiveUploading: "Uživo · 3 u prijenosu",
     heroMockGuestsContributing: "84 gosta sudjeluju",
     heroMockMediaSummary: "247 fotografija · 16 videa",
     heroMockJoinAlbum: "Pridruži se albumu",
-    heroMockScanToUpload: "Skeniraj za upload —",
+    heroMockScanToUpload: "Skeniraj za upload…",
     heroMockNoAppNoAccount: "bez aplikacije, bez računa.",
+    heroBuilder: {
+      eyebrow: "Izradi događaj",
+      stepLabels: ["Detalji", "Gosti", "Plaćanje"],
+      whatCelebrating: "Što slavite?",
+      kinds: ["Vjenčanje", "Rođendan", "Zabava", "Susret", "Poslovni event"],
+      continueCta: "Nastavi →",
+      back: "Natrag",
+      noAccountYet: "Račun još nije potreban",
+      guestsHeading: "Koliko gostiju?",
+      peopleInvited: "pozvanih osoba",
+      recommended: "Preporučeno",
+      comparePlans: "Usporedi sve pakete",
+      guestPassLabel: "Propusnica za goste",
+      accessCodeLabel: "Pristupni kod",
+      joinLinkLabel: "Link za pridruživanje",
+      shareHint: "Ispiši ga za stolove, pošalji link porukom ili pročitaj kod naglas: sve troje radi.",
+      tags: ["Bez aplikacije", "Bez računa"],
+      copyLink: "Kopiraj link",
+      copyLinkDone: "Kopirano ✓",
+      downloadQr: "Preuzmi QR znak",
+      saveEvent: "Spremi događaj · besplatna registracija",
+      startOver: "Počni ispočetka",
+    },
     statBar: [
       { value: "50+ vjenčanja", label: "već proslavljena" },
       { value: "1.000+ fotografija", label: "snimljeno i podijeljeno" },
@@ -531,27 +560,27 @@ const copy: Record<Locale, LandingCopy> = {
     appPreviewAriaThumbs: "Minijature snimki zaslona",
     appPreviewCaptions: ["Dobrodošlica", "Početna", "Galerija", "Početna događaja"],
     appPreviewViewAriaTemplate: "Pogledaj: {name}",
-    appPreviewImageAltTemplate: "Calisto aplikacija — {name}",
+    appPreviewImageAltTemplate: "Calisto aplikacija: {name}",
     featuresTitle: "Što sve uključuje",
     featuresSectionLabel: "2 · Mogućnosti",
-    featuresDescription: "Za dane kad svi fotografiraju — uploadovi ostaju uredni i lako dijeljivi.",
+    featuresDescription: "Za dane kad svi fotografiraju, uploadovi ostaju uredni i lako dijeljivi.",
     featuresAuroraBubble:
-      "Svaki gost učitava u jednu galeriju — pomažem da sve ostane uredno.",
+      "Svaki gost učitava u jednu galeriju, pomažem da sve ostane uredno.",
     features: [
       {
         title: "Jedan kod za tvoj događaj",
-        description: "Svaki događaj dobiva vlastiti kod — poput WEDDING2026. Podijeli ga i gosti su odmah unutra.",
-        mascotBubble: "Tvoj događaj, tvoj kod—lako.",
+        description: "Svaki događaj dobiva vlastiti kod, poput WEDDING2026. Podijeli ga i gosti su odmah unutra.",
+        mascotBubble: "Tvoj događaj, tvoj kod: lako.",
       },
       {
         title: "Podijeli linkom, QR-om ili kodom",
-        description: "Pošalji link, prikaži QR kod ili samo pošalji kod porukom. Gosti se pridružuju s mobitela za nekoliko sekundi — bez aplikacije.",
-        mascotBubble: "Skeniraj ili dodirni—ulaze odmah!",
+        description: "Pošalji link, prikaži QR kod ili samo pošalji kod porukom. Gosti se pridružuju s mobitela za nekoliko sekundi, bez aplikacije.",
+        mascotBubble: "Skeniraj ili dodirni: ulaze odmah!",
       },
       {
         title: "Svi vide uživo",
         description:
-          "Svaka fotografija i video pojavljuju se svim gostima čim se učitaju — kao zajednički foto-album za cijeli događaj.",
+          "Svaka fotografija i video pojavljuju se svim gostima čim se učitaju, kao zajednički foto-album za cijeli događaj.",
         mascotBubble: "Jedna galerija, svi u istom trenu.",
       },
       {
@@ -574,45 +603,17 @@ const copy: Record<Locale, LandingCopy> = {
       {
         title: "Odobri fotografije prije objave",
         description:
-          "Uključi moderiranje i svaki gostov upload završi u privatnom redu čekanja. Odobri što spada, odbaci što ne spada — gosti vide samo ono što ti pustiš.",
+          "Uključi moderiranje i svaki gostov upload završi u privatnom redu čekanja. Odobri što spada, odbaci što ne spada; gosti vide samo ono što ti pustiš.",
         mascotBubble: "Ti odlučuješ što galerija prikazuje.",
       },
     ],
-    howTitle: "Kako funkcionira?",
-    howSectionLabel: "3 · Tri jednostavna koraka",
-    howSetupHint: "< 90 sekundi za postavljanje",
-    howStepPrefix: "KORAK",
-    howVisualLive: "UŽIVO",
-    howVisualGuests: "84 gosta",
-    howUploadDone: "gotovo",
-    howModerationApproved: "odobreno",
-    howModerationNewTemplate: "+{count} novo",
-    howDescription: "Tri koraka do zajedničkog albuma.",
-    howDemoCta: "Isprobaj demo",
-    howItems: [
-      {
-        step: "1",
-        title: "Kreiraj događaj",
-        description: "Odaberi naziv, datum i paket. Automatski postaješ organizator.",
-      },
-      {
-        step: "2",
-        title: "Podijeli kod ili QR",
-        description: "Pošalji kod ili link, ili im pokaži QR.",
-      },
-      {
-        step: "3",
-        title: "Pregledavaj slike i uživaj",
-        description: "Gosti zajedno učitavaju i pregledavaju slike i videozapise.",
-      },
-    ],
     plansTitle: "Paketi",
-    plansSectionLabel: "4 · Cijene",
+    plansSectionLabel: "3 · Cijene",
     plansPerEventSuffix: "/ događaj",
     plansDescriptionStrong: "Odaberi paket koji odgovara tvom događaju",
     plansDescriptionRest:
       "kapaciteti, upload prozori i videi definiraju se paketom. U Postavkama događaja možeš promijeniti paket unutar aplikacije.",
-    plansAuroraBubble: "Odaberi što sada odgovara tvom događaju — nadogradnja je uvijek opcija.",
+    plansAuroraBubble: "Odaberi što sada odgovara tvom događaju; nadogradnja je uvijek opcija.",
     plansMascotAlt: "Aurora bira paket pohrane",
     popularBadge: "Najpopularniji",
     plans: [
@@ -625,7 +626,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotografije", value: "20" },
           { label: "Videa", value: "0" },
           { label: "Limit gostiju", value: "5" },
-          { label: "Preuzmi sve", value: "Galerija — primarni organizator, 24h link" },
+          { label: "Preuzmi sve", value: "Galerija: primarni organizator, 24h link" },
           { label: "Gosti mogu učitavati još", value: "3 dana" },
           { label: "Fotografije čuvamo", value: "7 dana" },
         ],
@@ -639,7 +640,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotografije", value: "150" },
           { label: "Videa", value: "10" },
           { label: "Limit gostiju", value: "30" },
-          { label: "Preuzmi sve", value: "Galerija — primarni organizator, 24h link" },
+          { label: "Preuzmi sve", value: "Galerija: primarni organizator, 24h link" },
           { label: "Gosti mogu učitavati još", value: "7 dana" },
           { label: "Fotografije čuvamo", value: "30 dana" },
         ],
@@ -653,7 +654,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotografije", value: "500" },
           { label: "Videa", value: "50" },
           { label: "Limit gostiju", value: "100" },
-          { label: "Preuzmi sve", value: "Galerija — primarni organizator, 24h link" },
+          { label: "Preuzmi sve", value: "Galerija: primarni organizator, 24h link" },
           { label: "Gosti mogu učitavati još", value: "14 dana" },
           { label: "Fotografije čuvamo", value: "90 dana" },
         ],
@@ -667,7 +668,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotografije", value: "2000" },
           { label: "Videa", value: "200" },
           { label: "Limit gostiju", value: "250" },
-          { label: "Preuzmi sve", value: "Galerija — primarni organizator, 24h link" },
+          { label: "Preuzmi sve", value: "Galerija: primarni organizator, 24h link" },
           { label: "Gosti mogu učitavati još", value: "30 dana" },
           { label: "Fotografije čuvamo", value: "180 dana" },
         ],
@@ -681,7 +682,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotografije", value: "Neograničeno" },
           { label: "Videa", value: "Neograničeno" },
           { label: "Limit gostiju", value: "Neograničeno" },
-          { label: "Preuzmi sve", value: "Galerija — primarni organizator, 24h link" },
+          { label: "Preuzmi sve", value: "Galerija: primarni organizator, 24h link" },
           { label: "Gosti mogu učitavati još", value: "60 dana" },
           { label: "Fotografije čuvamo", value: "365 dana" },
         ],
@@ -694,9 +695,9 @@ const copy: Record<Locale, LandingCopy> = {
     plansFormEmojiPlaceholder: "Emoji",
     plansFormChooseBtn: "Odaberi",
     lifecycleTitle: "Životni ciklus događaja",
-    lifecycleDescription: "Što radi web aplikacija danas naspram što slijedi — uključujući zakazano uklanjanje događaja.",
+    lifecycleDescription: "Što radi web aplikacija danas naspram što slijedi, uključujući zakazano uklanjanje događaja.",
     lifecycleRules: [
-      "Gosti mogu učitavati još neko vrijeme nakon datuma događaja — koliko dugo ovisi o paketu (od 3 dana na Free do 60 dana na Max).",
+      "Gosti mogu učitavati još neko vrijeme nakon datuma događaja: koliko dugo ovisi o paketu (od 3 dana na Free do 60 dana na Max).",
       "Svaki događaj ima `scheduled_deletion_at` od datuma događaja plus zadržavanje paketa (7 / 30 / 90 / 180 / 365 dana). Satni posao uklanja dospjele događaje i medije osim ako organizator prije obriše u Postavkama.",
       "Primarni organizator može iz aplikacije izvesti galeriju kao ZIP (asinkroni posao, 24 sata za preuzimanje).",
     ],
@@ -723,7 +724,7 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     futureStatusLabels: { roadmap: "Roadmap", planned: "Planirano", idea: "Ideja" },
     faqTitle: "Česta pitanja",
-    faqSectionLabel: "5 · Pitanja",
+    faqSectionLabel: "4 · Pitanja",
     faqContactPrefix: "Ako ovdje nema odgovora, piši na",
     faqContactSuffix: "Odgovaramo unutar jednog dana, često i brže.",
     faq: [
@@ -770,24 +771,24 @@ const copy: Record<Locale, LandingCopy> = {
     waitlist: {
       title: "Isprobaj besplatno.",
       description:
-        "Kreirajte događaj za nekoliko minuta. Unesite detalje, odaberite paket — besplatni ili plaćeni — i krenite. Prijava samo kad ste spremni potvrditi.",
+        "Kreirajte događaj za nekoliko minuta. Unesite detalje, odaberite paket (besplatni ili plaćeni) i krenite. Prijava samo kad ste spremni potvrditi.",
       discount: "Prvih 10 na listi dobiva 20% popusta na bilo koji plaćeni paket (Standard, Plus, Premium ili Max).",
-      submitted: "Na listi si — javimo ti se uskoro.",
+      submitted: "Na listi si; javimo ti se uskoro.",
       submitFailed: "Trenutno se ne možeš prijaviti na listu čekanja. Pokušaj ponovno za trenutak.",
       inputLabel: "Email",
       inputPlaceholder: "ti@primjer.com",
       invalidEmail: "Unesi valjanu email adresu.",
       buttonIdle: "Isprobaj besplatno",
       buttonBusy: "Prijava...",
-      note: "Detalji popusta i uvjeti mogu se promijeniti prije lansiranja. Bez spama — odjava je uvijek moguća.",
+      note: "Detalji popusta i uvjeti mogu se promijeniti prije lansiranja. Bez spama; odjava je uvijek moguća.",
     },
     footerText: "Calisto za vjenčanja i proslave. Imaš pitanje? Pridruži se listi čekanja.",
     footerPrivacy: "Privatnost",
     footerTerms: "Uvjeti",
     legalEnglishNotice: "Pravni tekst na ovoj stranici dostupan je na engleskom jeziku.",
-    pageTitle: "Calisto — zajedničke fotografije i videa događaja",
+    pageTitle: "Calisto · zajedničke fotografije i videa događaja",
     pageDescription:
-      "Calisto gostima omogućuje učitavanje i pregled fotografija i videa na jednom mjestu. Podijeli kod ili QR — bez aplikacije i računa za goste.",
+      "Calisto gostima omogućuje učitavanje i pregled fotografija i videa na jednom mjestu. Podijeli kod ili QR: bez aplikacije i računa za goste.",
     auroraQuote: "Svaka uspomena zaslužuje dom. Pobrinut ću se da bude lijepa, organizirana i zauvijek vaša.",
     auroraQuoteIntro: "",
     auroraQuoteSectionAria: "Poruka od Aurore",
@@ -805,10 +806,11 @@ const copy: Record<Locale, LandingCopy> = {
     themeLight: "Hell",
     themeDark: "Dunkel",
     navAriaLabel: "Seitenabschnitte",
+    menuOpenLabel: "Menü öffnen",
+    menuCloseLabel: "Menü schließen",
     nav: [
       { href: "#preview", label: "Vorschau" },
       { href: "#features", label: "Funktionen" },
-      { href: "#how", label: "So funktioniert es" },
       { href: "#plans", label: "Tarife" },
       { href: "#faq", label: "Fragen" },
     ],
@@ -818,22 +820,45 @@ const copy: Record<Locale, LandingCopy> = {
     heroIntro: "Hi, ich bin Aurora, ich stelle dir Calisto vor.",
     heroTitle: "Jede Erinnerung zählt. Stell sicher, dass du sie alle festhältst.",
     heroDescription:
-      "Calisto ist das gemeinsame Foto- und Videoalbum für Hochzeiten, Geburtstage und jede Feier. Gäste laden direkt im Handy-Browser hoch. Keine App nötig. Kostenlos ausprobieren.",
+      "Ein gemeinsames Album. Jeder Gast, jede Erinnerung, an einem Ort.",
     heroAuroraCardBlurb:
-      "Lieber tanzt du auf der Feier, als dass du am Montag hundert Chatverläufe durchsuchst. Ich will, dass der Tag als eine lebendige Geschichte bleibt — Reden, Umarmungen, das schiefe Gruppenfoto — die man wiederfindet, ohne Schatzsuche.",
+      "Die schönen, chaotischen Momente verdienen eine Geschichte, keine Schatzsuche.",
     heroPrimaryCta: "Event erstellen",
     heroSecondaryCta: "Tarife vergleichen",
     heroSignals: [
-      "Keine App zum Herunterladen — Gäste scannen und laden im Browser.",
-      "Kein Konto für Gäste erforderlich.",
-      "Organisator:innen steuern den Einladungscode; alle Eingeladenen teilen dieselbe Galerie.",
+      "Keine App nötig",
+      "Kein Konto für Gäste",
+      "Ein Code, eine Galerie",
     ],
     heroMockLiveUploading: "Live · 3 Uploads",
     heroMockGuestsContributing: "84 Gäste beteiligen sich",
     heroMockMediaSummary: "247 Fotos · 16 Videos",
     heroMockJoinAlbum: "Diesem Album beitreten",
-    heroMockScanToUpload: "Zum Upload scannen —",
+    heroMockScanToUpload: "Zum Upload scannen…",
     heroMockNoAppNoAccount: "keine App, kein Konto.",
+    heroBuilder: {
+      eyebrow: "Event-Baukasten",
+      stepLabels: ["Details", "Gäste", "Zahlung"],
+      whatCelebrating: "Was feierst du?",
+      kinds: ["Hochzeit", "Geburtstag", "Party", "Treffen", "Firmenevent"],
+      continueCta: "Weiter →",
+      back: "Zurück",
+      noAccountYet: "Noch kein Konto nötig",
+      guestsHeading: "Wie viele Gäste?",
+      peopleInvited: "eingeladene Personen",
+      recommended: "Empfohlen",
+      comparePlans: "Alle Tarife vergleichen",
+      guestPassLabel: "Gästepass",
+      accessCodeLabel: "Zugangscode",
+      joinLinkLabel: "Beitritts-Link",
+      shareHint: "Für die Tische ausdrucken, den Link per Nachricht senden oder den Code laut vorlesen: alle drei funktionieren.",
+      tags: ["Keine App", "Kein Konto"],
+      copyLink: "Link kopieren",
+      copyLinkDone: "Kopiert ✓",
+      downloadQr: "QR-Schild herunterladen",
+      saveEvent: "Event speichern · kostenlos registrieren",
+      startOver: "Neu beginnen",
+    },
     statBar: [
       { value: "50+ Hochzeiten", label: "bereits gefeiert" },
       { value: "1.000+ Fotos", label: "aufgenommen und geteilt" },
@@ -848,7 +873,7 @@ const copy: Record<Locale, LandingCopy> = {
     appPreviewAriaThumbs: "Screenshot-Vorschau",
     appPreviewCaptions: ["Willkommen", "Startseite", "Galerie", "Event-Startseite"],
     appPreviewViewAriaTemplate: "{name} ansehen",
-    appPreviewImageAltTemplate: "Calisto-App — {name}",
+    appPreviewImageAltTemplate: "Calisto-App: {name}",
     featuresTitle: "Was du machen kannst",
     featuresSectionLabel: "2 · Funktionen",
     featuresDescription:
@@ -858,18 +883,18 @@ const copy: Record<Locale, LandingCopy> = {
     features: [
       {
         title: "Ein Code für dein Event",
-        description: "Jedes Event bekommt seinen eigenen Code — z. B. WEDDING2026. Teile ihn und Gäste sind sofort dabei.",
-        mascotBubble: "Dein Event, dein Code—so einfach.",
+        description: "Jedes Event bekommt seinen eigenen Code, z. B. WEDDING2026. Teile ihn und Gäste sind sofort dabei.",
+        mascotBubble: "Dein Event, dein Code: so einfach.",
       },
       {
         title: "Per Link, QR-Code oder Code teilen",
-        description: "Schicke einen Link, zeige einen QR-Code oder sende einfach den Code. Gäste treten vom Handy bei — keine App nötig.",
-        mascotBubble: "Scannen oder tippen—fertig!",
+        description: "Schicke einen Link, zeige einen QR-Code oder sende einfach den Code. Gäste treten vom Handy bei, keine App nötig.",
+        mascotBubble: "Scannen oder tippen: fertig!",
       },
       {
         title: "Alle sehen es live",
         description:
-          "Jedes Foto und Video erscheint bei allen Gästen sofort nach dem Hochladen — wie ein gemeinsamer Fotoordner für dein ganzes Event.",
+          "Jedes Foto und Video erscheint bei allen Gästen sofort nach dem Hochladen, wie ein gemeinsamer Fotoordner für dein ganzes Event.",
         mascotBubble: "Eine Galerie, alle im gleichen Takt.",
       },
       {
@@ -892,40 +917,12 @@ const copy: Record<Locale, LandingCopy> = {
       {
         title: "Fotos vor der Veröffentlichung freigeben",
         description:
-          "Aktiviere die Foto-Moderation und jeder Gäste-Upload landet zuerst in einer privaten Warteschlange. Freigeben was passt, verwerfen was nicht passt — Gäste sehen nur, was du erlaubst.",
+          "Aktiviere die Foto-Moderation und jeder Gäste-Upload landet zuerst in einer privaten Warteschlange. Freigeben was passt, verwerfen was nicht passt; Gäste sehen nur, was du erlaubst.",
         mascotBubble: "Du entscheidest, was die Galerie zeigt.",
       },
     ],
-    howTitle: "So funktioniert es",
-    howSectionLabel: "3 · Drei einfache Schritte",
-    howSetupHint: "< 90 Sekunden zum Einrichten",
-    howStepPrefix: "SCHRITT",
-    howVisualLive: "LIVE",
-    howVisualGuests: "84 Gäste",
-    howUploadDone: "fertig",
-    howModerationApproved: "freigegeben",
-    howModerationNewTemplate: "+{count} neu",
-    howDescription: "Drei Schritte vom leeren Album zu gemeinsamen Erinnerungen.",
-    howDemoCta: "Demo ausprobieren",
-    howItems: [
-      {
-        step: "1",
-        title: "Event erstellen",
-        description: "Wähle Titel, Datum und Speichertarif. Du wirst automatisch Organisator.",
-      },
-      {
-        step: "2",
-        title: "Code oder QR teilen",
-        description: "Sende den Zugangscode, einen Einladungslink oder lass Gäste den QR-Code scannen.",
-      },
-      {
-        step: "3",
-        title: "Sammeln & genießen",
-        description: "Gäste laden gemeinsam hoch und stöbern Fotos und Videos zusammen.",
-      },
-    ],
     plansTitle: "Tarife",
-    plansSectionLabel: "4 · Preise",
+    plansSectionLabel: "3 · Preise",
     plansPerEventSuffix: "/ Event",
     plansDescriptionStrong: "Wähle den Tarif, der zu deinem Event passt",
     plansDescriptionRest:
@@ -944,7 +941,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotos", value: "20" },
           { label: "Videos", value: "0" },
           { label: "Gästelimit", value: "5" },
-          { label: "Alles herunterladen", value: "Galerie — Primär, 24h-Link" },
+          { label: "Alles herunterladen", value: "Galerie: Primär, 24h-Link" },
           { label: "Gäste können hochladen für", value: "3 Tage" },
           { label: "Fotos gespeichert für", value: "7 Tage" },
         ],
@@ -958,7 +955,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotos", value: "150" },
           { label: "Videos", value: "10" },
           { label: "Gästelimit", value: "30" },
-          { label: "Alles herunterladen", value: "Galerie — Primär, 24h-Link" },
+          { label: "Alles herunterladen", value: "Galerie: Primär, 24h-Link" },
           { label: "Gäste können hochladen für", value: "7 Tage" },
           { label: "Fotos gespeichert für", value: "30 Tage" },
         ],
@@ -972,7 +969,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotos", value: "500" },
           { label: "Videos", value: "50" },
           { label: "Gästelimit", value: "100" },
-          { label: "Alles herunterladen", value: "Galerie — Primär, 24h-Link" },
+          { label: "Alles herunterladen", value: "Galerie: Primär, 24h-Link" },
           { label: "Gäste können hochladen für", value: "14 Tage" },
           { label: "Fotos gespeichert für", value: "90 Tage" },
         ],
@@ -986,7 +983,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotos", value: "2000" },
           { label: "Videos", value: "200" },
           { label: "Gästelimit", value: "250" },
-          { label: "Alles herunterladen", value: "Galerie — Primär, 24h-Link" },
+          { label: "Alles herunterladen", value: "Galerie: Primär, 24h-Link" },
           { label: "Gäste können hochladen für", value: "30 Tage" },
           { label: "Fotos gespeichert für", value: "180 Tage" },
         ],
@@ -1000,7 +997,7 @@ const copy: Record<Locale, LandingCopy> = {
           { label: "Fotos", value: "Unbegrenzt" },
           { label: "Videos", value: "Unbegrenzt" },
           { label: "Gästelimit", value: "Unbegrenzt" },
-          { label: "Alles herunterladen", value: "Galerie — Primär, 24h-Link" },
+          { label: "Alles herunterladen", value: "Galerie: Primär, 24h-Link" },
           { label: "Gäste können hochladen für", value: "60 Tage" },
           { label: "Fotos gespeichert für", value: "365 Tage" },
         ],
@@ -1013,9 +1010,9 @@ const copy: Record<Locale, LandingCopy> = {
     plansFormEmojiPlaceholder: "Emoji",
     plansFormChooseBtn: "Auswählen",
     lifecycleTitle: "Event-Lebenszyklus",
-    lifecycleDescription: "Was die Calisto-Web-App heute schon tut und was später kommt — inklusive geplanter Event-Bereinigung.",
+    lifecycleDescription: "Was die Calisto-Web-App heute schon tut und was später kommt, inklusive geplanter Event-Bereinigung.",
     lifecycleRules: [
-      "Nach dem Eventdatum dürfen Gäste noch begrenzt hochladen — wie lange, hängt vom Tarif ab (von 3 Tagen beim Free-Tarif bis 60 Tagen bei Max).",
+      "Nach dem Eventdatum dürfen Gäste noch begrenzt hochladen: wie lange, hängt vom Tarif ab (von 3 Tagen beim Free-Tarif bis 60 Tagen bei Max).",
       "Jedes Event hat ein `scheduled_deletion_at` aus Eventdatum plus Tarif-Aufbewahrung (7 / 30 / 90 / 180 / 365 Tage). Ein stündlicher Job entfernt fällige Events und Medien, sofern Organisator:innen nicht zuvor in den Einstellungen löschen.",
       "Primär-Organisator:innen können die Galerie als ZIP aus der App exportieren (asynchroner Job, 24 Stunden Download-Fenster).",
     ],
@@ -1042,7 +1039,7 @@ const copy: Record<Locale, LandingCopy> = {
     ],
     futureStatusLabels: { roadmap: "Roadmap", planned: "Geplant", idea: "Idee" },
     faqTitle: "Fragen",
-    faqSectionLabel: "5 · Fragen",
+    faqSectionLabel: "4 · Fragen",
     faqContactPrefix: "Wenn etwas fehlt, schreib an",
     faqContactSuffix: "Wir antworten innerhalb eines Tages, oft schneller.",
     faq: [
@@ -1089,7 +1086,7 @@ const copy: Record<Locale, LandingCopy> = {
     waitlist: {
       title: "Kostenlos ausprobieren.",
       description:
-        "Erstelle dein Event in wenigen Minuten. Gib die Details ein, wähle einen Tarif — kostenlos oder kostenpflichtig — und du kannst loslegen. Anmeldung erst beim Bestätigen.",
+        "Erstelle dein Event in wenigen Minuten. Gib die Details ein, wähle einen Tarif (kostenlos oder kostenpflichtig) und du kannst loslegen. Anmeldung erst beim Bestätigen.",
       discount: "Die ersten 10 Personen auf der Warteliste erhalten 20% Rabatt auf jeden bezahlten Tarif (Standard, Plus, Premium oder Max).",
       submitted: "Du bist auf der Liste – wir melden uns bald.",
       submitFailed: "Ein Eintrag in die Warteliste ist gerade nicht möglich. Bitte versuche es gleich noch einmal.",
@@ -1104,9 +1101,9 @@ const copy: Record<Locale, LandingCopy> = {
     footerPrivacy: "Datenschutz",
     footerTerms: "AGB",
     legalEnglishNotice: "Der Rechtstext auf dieser Seite liegt auf Englisch vor.",
-    pageTitle: "Calisto — gemeinsame Event-Fotos & Videos",
+    pageTitle: "Calisto · gemeinsame Event-Fotos & Videos",
     pageDescription:
-      "Calisto lässt Hochzeits- und Eventgäste Fotos und Videos gemeinsam hochladen und ansehen. Code oder QR teilen — keine App und kein Konto für Gäste nötig.",
+      "Calisto lässt Hochzeits- und Eventgäste Fotos und Videos gemeinsam hochladen und ansehen. Code oder QR teilen: keine App und kein Konto für Gäste nötig.",
     auroraQuote: "Jede Erinnerung verdient ein Zuhause. Ich sorge dafür, dass deines schön, geordnet und für immer deins ist.",
     auroraQuoteIntro: "Von Aurora · Dein Calisto-Guide",
     auroraQuoteSectionAria: "Eine Nachricht von Aurora",
