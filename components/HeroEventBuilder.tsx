@@ -145,6 +145,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
     <div style={{ position: "relative" }} className="event-builder-glow-wrap">
       <div
         aria-hidden
+        className="event-builder-glow"
         style={{
           position: "absolute",
           inset: -40,
@@ -561,6 +562,21 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
         </div>
       </div>
       <style>{`
+        /* Below the ~960px point Hero stacks to one column and this card loses
+           the vertical breathing room the two-column grid gave it, so the
+           ambient glow and drop shadow (sized for that extra room) were
+           getting hard-clipped by the Hero section's overflow:hidden right at
+           the seam with the next section. Tighten both so they fully fade
+           within the space actually available on a stacked/mobile layout. */
+        @media (max-width: 960px) {
+          .event-builder-glow-wrap .event-builder-glow {
+            inset: -16px !important;
+            filter: blur(24px) !important;
+          }
+          .event-builder-glow-wrap .event-builder-card {
+            box-shadow: 0 6px 16px -8px rgba(0,0,0,0.4), 0 18px 36px -22px rgba(0,0,0,0.65) !important;
+          }
+        }
         .event-builder-summary {
           background: linear-gradient(135deg, rgba(245,199,107,0.16) 0%, rgba(165,132,166,0.14) 100%);
           border: 1px solid rgba(245,199,107,0.3);

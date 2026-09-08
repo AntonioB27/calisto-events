@@ -146,7 +146,7 @@ export function Testimonials({ copy }: TestimonialsProps) {
             return (
               <article
                 key={t.name}
-                className="polaroid-card"
+                className={`polaroid-card${isActive ? " polaroid-card-active" : ""}`}
                 onClick={() => { if (!hasDragged.current) setActive(i); }}
                 style={{
                   opacity: visible ? 1 : 0,
@@ -154,7 +154,7 @@ export function Testimonials({ copy }: TestimonialsProps) {
                   filter: isActive ? "none" : "brightness(0.65) saturate(0.8)",
                   transition: [
                     `opacity 700ms cubic-bezier(0.16,1,0.3,1) ${i * 110}ms`,
-                    "transform 480ms cubic-bezier(0.34,1.28,0.64,1)",
+                    "transform 480ms cubic-bezier(0.16,1,0.3,1)",
                     "filter 360ms ease",
                   ].join(", "),
                   cursor: isActive ? "grab" : "pointer",
@@ -329,6 +329,50 @@ export function Testimonials({ copy }: TestimonialsProps) {
         @media (max-width: 640px) {
           :root {
             --card-width: min(280px, calc(100vw - 80px));
+          }
+
+          .polaroid-viewport {
+            padding: 40px 0;
+          }
+
+          .polaroid-card {
+            padding: 8px 8px 24px;
+          }
+
+          .polaroid-caption {
+            padding: 10px 3px 0;
+          }
+
+          .polaroid-stars {
+            margin-bottom: 6px;
+          }
+
+          .polaroid-quote {
+            margin: 0 0 10px;
+          }
+
+          .polaroid-footer {
+            padding-top: 8px;
+          }
+
+          .polaroid-name {
+            margin-bottom: 2px;
+          }
+
+          #testimonials {
+            padding: 20px 0 28px !important;
+          }
+
+          #testimonials > div:first-child {
+            margin-bottom: 10px !important;
+          }
+
+          .polaroid-card {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.32), 0 2px 6px rgba(0,0,0,0.2) !important;
+          }
+
+          .polaroid-card-active {
+            box-shadow: 0 10px 22px rgba(0,0,0,0.42), 0 3px 10px rgba(0,0,0,0.26) !important;
           }
         }
 

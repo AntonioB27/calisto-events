@@ -450,6 +450,44 @@ html[data-theme="light"] body::after {
   .fg-grid {
     grid-template-columns: 1fr;
   }
+
+  .fg-card {
+    padding-bottom: 10px;
+  }
+
+  .fg-card-active {
+    padding-bottom: 14px;
+  }
+
+  .fg-card-desc-wrap {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 380ms cubic-bezier(0.16,1,0.3,1);
+  }
+
+  .fg-card-active .fg-card-desc-wrap {
+    grid-template-rows: 1fr;
+  }
+
+  .fg-card-desc {
+    min-height: 0;
+    margin: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: opacity 260ms ease;
+  }
+
+  .fg-card-active .fg-card-desc {
+    margin-top: 2px;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) and (prefers-reduced-motion: reduce) {
+  .fg-card-desc-wrap,
+  .fg-card-desc {
+    transition: none !important;
+  }
 }
 
 /* ════════ App shell — light-first tokens (authenticated app + /join) ════════
@@ -2153,20 +2191,6 @@ html[data-theme="dark"] .auth-oauth-google-btn.app-btn--outline {
 
 @media (max-width: 480px) {
   .dash-empty-card { padding: 40px 20px 36px; }
-}
-
-/* Co-organiser event cards: purple-tinted left accent */
-.event-card--org.app-card {
-  border-left-color: color-mix(in srgb, var(--app-gold) 55%, var(--app-border));
-  border-left-width: 3px;
-}
-.event-card--coorg.app-card {
-  border-left-color: color-mix(in srgb, var(--app-purple) 55%, var(--app-border));
-  border-left-width: 3px;
-}
-.event-card--guest.app-card {
-  border-left-color: color-mix(in srgb, var(--app-muted) 50%, var(--app-border));
-  border-left-width: 3px;
 }
 
 /* Upcoming / past dot indicators on event cards */

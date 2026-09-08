@@ -1,5 +1,7 @@
+"use client";
+
 import Image from "next/image";
-import type { CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { LandingCopy } from "@/lib/i18n";
 
 type FeatureGridProps = { copy: LandingCopy };
@@ -24,6 +26,46 @@ const ICONS = [
 ];
 
 export function FeatureGrid({ copy }: FeatureGridProps) {
+  const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
+  const [activeIndices, setActiveIndices] = useState<Set<number>>(new Set());
+
+  // On mobile, cards collapse to icon+title; the one nearest the vertical
+  // center of the viewport expands, since there's no hover on touch.
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    let observer: IntersectionObserver | null = null;
+
+    function setup() {
+      observer?.disconnect();
+      if (!mq.matches) {
+        setActiveIndices(new Set());
+        return;
+      }
+      observer = new IntersectionObserver(
+        (entries) => {
+          setActiveIndices((prev) => {
+            const next = new Set(prev);
+            for (const entry of entries) {
+              const idx = Number((entry.target as HTMLElement).dataset.index);
+              if (entry.isIntersecting) next.add(idx);
+              else next.delete(idx);
+            }
+            return next;
+          });
+        },
+        { rootMargin: "-42% 0px -42% 0px", threshold: 0 }
+      );
+      itemRefs.current.forEach((el) => { if (el) observer!.observe(el); });
+    }
+
+    setup();
+    mq.addEventListener("change", setup);
+    return () => {
+      observer?.disconnect();
+      mq.removeEventListener("change", setup);
+    };
+  }, []);
+
   return (
     <section
       id="features"
@@ -57,13 +99,22 @@ export function FeatureGrid({ copy }: FeatureGridProps) {
           {copy.features.map((f, i) => {
             const accent = ACCENTS[i % ACCENTS.length]!;
             const Icon = ICONS[i] ?? ICONS[0];
+            const isActive = activeIndices.has(i);
             return (
-              <li key={f.title} className="fg-card" style={{ ["--lane-accent"]: accent.color } as CSSProperties}>
+              <li
+                key={f.title}
+                ref={(el) => { itemRefs.current[i] = el; }}
+                data-index={i}
+                className={`fg-card${isActive ? " fg-card-active" : ""}`}
+                style={{ ["--lane-accent"]: accent.color } as CSSProperties}
+              >
                 <div className="fg-top">
                   <span className="fg-icon">{Icon}</span>
                   <h3 className="fg-card-title">{f.title}</h3>
                 </div>
-                <p className="fg-card-desc">{f.description}</p>
+                <div className="fg-card-desc-wrap">
+                  <p className="fg-card-desc">{f.description}</p>
+                </div>
               </li>
             );
           })}

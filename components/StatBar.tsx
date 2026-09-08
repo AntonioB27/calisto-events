@@ -218,10 +218,20 @@ export function StatBar({ copy }: StatBarProps) {
           #stat-bar-grid > div {
             border-right: none !important;
             border-bottom: 1px solid var(--hair);
-            padding: 16px !important;
+            padding: 10px 16px !important;
           }
           #stat-bar-grid > div:last-child {
             border-bottom: none !important;
+          }
+          .stat-item dt {
+            font-size: 2rem !important;
+          }
+          .stat-item > div:first-child {
+            margin-bottom: 3px !important;
+          }
+          .stat-underline {
+            margin-top: 5px !important;
+            margin-bottom: 6px !important;
           }
         }
         @media (prefers-reduced-motion: reduce) {
