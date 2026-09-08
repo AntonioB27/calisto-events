@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { LandingCopy, Locale } from "@/lib/i18n";
+import { HeroEventBuilder } from "@/components/HeroEventBuilder";
 
 type HeroProps = { copy: LandingCopy; isLoggedIn: boolean; locale: Locale };
 
@@ -8,22 +9,31 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
     <section
       id="top"
       className="relative overflow-hidden"
-      style={{ padding: "32px 0 48px", zIndex: 2 }}
+      style={{ padding: "clamp(28px, 5vw, 64px) 0 clamp(24px, 4vw, 48px)", zIndex: 2 }}
     >
-      <div className="mx-auto" style={{ maxWidth: 1280, padding: "0 32px" }}>
+      <div className="mx-auto" style={{ maxWidth: 1200, padding: "0 clamp(16px, 4vw, 32px)" }}>
         <div
           className="grid items-center"
-          style={{ gridTemplateColumns: "1.05fr 1fr", gap: 60 }}
+          style={{ gridTemplateColumns: "1.05fr 1fr", gap: 56 }}
         >
           {/* ── Left: copy ── */}
           <div style={{ position: "relative", zIndex: 3 }}>
+            <div
+              style={{
+                fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.28em",
+                textTransform: "uppercase", color: "var(--gold)", marginBottom: 18,
+              }}
+            >
+              {copy.heroBadge}
+            </div>
+
             {/* Headline */}
             <h1
               style={{
                 fontFamily: "var(--font-display)",
                 fontWeight: 400,
-                fontSize: "clamp(52px, 8.5vw, 120px)",
-                lineHeight: 0.97,
+                fontSize: "clamp(40px, 6.4vw, 78px)",
+                lineHeight: 1.0,
                 letterSpacing: "-0.025em",
                 color: "var(--cream)",
                 margin: 0,
@@ -35,19 +45,19 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
             {/* Sub */}
             <p
               style={{
-                marginTop: 28,
+                marginTop: 24,
                 fontFamily: "var(--font-sans)",
                 fontSize: 17,
-                lineHeight: 1.55,
+                lineHeight: 1.6,
                 color: "var(--cream-3, #B5AB99)",
-                maxWidth: 440,
+                maxWidth: 460,
               }}
             >
               {copy.heroDescription}
             </p>
 
             {/* CTAs */}
-            <div className="flex items-center flex-wrap" style={{ marginTop: 40, gap: 14 }}>
+            <div className="flex items-center flex-wrap" style={{ marginTop: 28, gap: 14 }}>
               <a
                 href={isLoggedIn ? "/dashboard" : `/${locale}/start`}
                 className="inline-flex items-center gap-2.5"
@@ -90,149 +100,61 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
               </a>
             </div>
 
-            {/* Signal lines */}
-            {/*<div className="flex flex-col" style={{ marginTop: 52, gap: 16 }}>
+            {/* Signal pills */}
+            <div className="flex flex-wrap" style={{ gap: 10, marginTop: 28 }}>
               {copy.heroSignals.map((signal, i) => (
-                <div key={i} className="flex items-start gap-2.5">
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2.2}
-                    strokeLinecap="round"
-                    style={{ color: "var(--plum-2, #A584A6)", flexShrink: 0, marginTop: 2 }}
-                  >
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "12.5px",
-                      color: "var(--cream-3, #B5AB99)",
-                      lineHeight: 1.5,
-                      letterSpacing: "0.01em",
-                    }}
-                  >
-                    {signal}
-                  </span>
+                <div
+                  key={i}
+                  className="inline-flex items-center"
+                  style={{
+                    gap: 8, fontSize: 13, color: "var(--cream-3)", border: "1px solid var(--hair-2)",
+                    borderRadius: 999, padding: "7px 14px", fontFamily: "var(--font-sans)",
+                  }}
+                >
+                  <span aria-hidden style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--plum-2)", flexShrink: 0 }} />
+                  {signal}
                 </div>
               ))}
-            </div> */}
-          </div>
+            </div>
 
-          {/* ── Right: Aurora welcome panel ── */}
-          <div
-            className="relative flex justify-center items-center"
-            style={{ minHeight: 560, zIndex: 2 }}
-          >
-            {/* Warm radial glow */}
+            {/* Mascot quote row */}
             <div
-              aria-hidden
-              style={{
-                position: "absolute",
-                inset: -60,
-                background: "radial-gradient(circle at center, rgba(165,132,166,0.35), transparent 55%)",
-                filter: "blur(50px)",
-                opacity: 0.75,
-                zIndex: 0,
-              }}
-            />
-            <div
-              className="phone-float"
-              style={{
-                position: "relative",
-                zIndex: 1,
-                width: "min(420px, 92vw)",
-                borderRadius: 28,
-                border: "1px solid var(--hair-2)",
-                background: "linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%)",
-                boxShadow: "0 28px 64px -22px rgba(0,0,0,0.28)",
-                padding: "16px 22px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 8,
-              }}
+              className="flex items-center"
+              style={{ gap: 14, marginTop: 32, paddingTop: 24, borderTop: "1px solid var(--hair)" }}
             >
-              <div
-                className="inline-flex items-center gap-2.5"
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "10.5px",
-                  letterSpacing: "0.28em",
-                  textTransform: "uppercase",
-                  color: "var(--cream-3, #B5AB99)",
-                  padding: "7px 14px",
-                  border: "1px solid var(--hair-2)",
-                  borderRadius: 999,
-                  background: "var(--glass-bg)",
-                }}
-              >
-                <span
-                  aria-hidden
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: "var(--plum-2, #A584A6)",
-                    boxShadow: "0 0 10px rgba(165,132,166,0.5)",
-                    display: "inline-block",
-                    flexShrink: 0,
-                  }}
-                />
-                {copy.heroBadge}
-              </div>
               <Image
                 src="/brand/mascot.png"
                 alt={copy.auroraMascotAlt}
-                width={260}
-                height={260}
-                style={{ width: "min(260px, 70%)", height: "auto", objectFit: "contain" }}
+                width={64}
+                height={64}
+                style={{ width: 64, height: 64, objectFit: "contain", flexShrink: 0 }}
               />
               <p
                 style={{
-                  margin: 0,
-                  textAlign: "center",
-                  fontFamily: "var(--font-display)",
-                  fontStyle: "italic",
-                  fontSize: 24,
-                  color: "var(--cream)",
-                  lineHeight: 1.2,
+                  margin: 0, fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 18,
+                  lineHeight: 1.35, color: "var(--cream-2)",
                 }}
               >
-                {copy.heroIntro}
+                {copy.heroAuroraCardBlurb}
               </p>
             </div>
+          </div>
+
+          {/* ── Right: interactive event builder ── */}
+          <div id="create" className="relative" style={{ zIndex: 2 }}>
+            <HeroEventBuilder copy={copy} locale={locale} />
           </div>
         </div>
       </div>
 
-      {/* Mobile: stack copy above phone */}
+      {/* Mobile: stack copy above builder */}
       <style>{`
         @media (max-width: 960px) {
-          #top > div {
-            padding-left: 18px !important;
-            padding-right: 18px !important;
-          }
+          #top > div { padding-left: 18px !important; padding-right: 18px !important; }
           #top > div > div { grid-template-columns: 1fr !important; }
-          #top > div > div > div:first-child {
-            text-align: center;
-            margin-left: auto;
-            margin-right: auto;
-          }
-          #top > div > div > div:first-child > p {
-            margin-left: auto !important;
-            margin-right: auto !important;
-          }
-          #top > div > div > div:first-child > div:nth-of-type(1) {
-            justify-content: center !important;
-          }
-          #top > div > div > div:first-child > div:last-child {
-            align-items: center !important;
-          }
-          #top > div > div > div:last-child { min-height: 560px; }
+          #top > div > div > div:first-child { text-align: center; margin-left: auto; margin-right: auto; }
+          #top > div > div > div:first-child > p { margin-left: auto !important; margin-right: auto !important; }
+          #top > div > div > div:first-child > div { justify-content: center !important; }
         }
       `}</style>
     </section>

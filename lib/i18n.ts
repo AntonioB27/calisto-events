@@ -40,6 +40,30 @@ type FaqItem = {
   a: string;
 };
 
+type HeroBuilderCopy = {
+  eyebrow: string;
+  stepLabels: readonly [string, string, string];
+  whatCelebrating: string;
+  kinds: readonly [string, string, string, string, string];
+  continueCta: string;
+  back: string;
+  noAccountYet: string;
+  guestsHeading: string;
+  peopleInvited: string;
+  recommended: string;
+  comparePlans: string;
+  guestPassLabel: string;
+  accessCodeLabel: string;
+  joinLinkLabel: string;
+  shareHint: string;
+  tags: readonly [string, string];
+  copyLink: string;
+  copyLinkDone: string;
+  downloadQr: string;
+  saveEvent: string;
+  startOver: string;
+};
+
 type WaitlistCopy = {
   title: string;
   description: string;
@@ -62,6 +86,8 @@ export type LandingCopy = {
   themeLight: string;
   themeDark: string;
   navAriaLabel: string;
+  menuOpenLabel: string;
+  menuCloseLabel: string;
   nav: NavItem[];
   joinWaitlistShort: string;
   goToApp: string;
@@ -80,6 +106,7 @@ export type LandingCopy = {
   heroMockJoinAlbum: string;
   heroMockScanToUpload: string;
   heroMockNoAppNoAccount: string;
+  heroBuilder: HeroBuilderCopy;
   statBar: { value: string; label: string }[];
   appPreviewEyebrow: string;
   appPreviewTitlePrefix: string;
@@ -170,6 +197,8 @@ const copy: Record<Locale, LandingCopy> = {
     themeLight: "Light",
     themeDark: "Dark",
     navAriaLabel: "Page sections",
+    menuOpenLabel: "Open menu",
+    menuCloseLabel: "Close menu",
     nav: [
       { href: "#preview", label: "Preview" },
       { href: "#features", label: "Features" },
@@ -199,6 +228,29 @@ const copy: Record<Locale, LandingCopy> = {
     heroMockJoinAlbum: "Join this album",
     heroMockScanToUpload: "Scan to upload —",
     heroMockNoAppNoAccount: "no app, no account.",
+    heroBuilder: {
+      eyebrow: "Event builder",
+      stepLabels: ["Details", "Guests", "Payment"],
+      whatCelebrating: "What are you celebrating?",
+      kinds: ["Wedding", "Birthday", "Party", "Reunion", "Corporate"],
+      continueCta: "Continue →",
+      back: "Back",
+      noAccountYet: "No account needed yet",
+      guestsHeading: "How many guests?",
+      peopleInvited: "people invited",
+      recommended: "Recommended",
+      comparePlans: "Compare every plan",
+      guestPassLabel: "Guest pass",
+      accessCodeLabel: "Access code",
+      joinLinkLabel: "Join link",
+      shareHint: "Print it for the tables, text the link, or read the code out loud — all three work.",
+      tags: ["No app", "No account"],
+      copyLink: "Copy join link",
+      copyLinkDone: "Copied ✓",
+      downloadQr: "Download QR sign",
+      saveEvent: "Save event — sign up free",
+      startOver: "Start over",
+    },
     statBar: [
       { value: "50+ weddings", label: "already celebrated" },
       { value: "1,000+ photos", label: "captured and shared" },
@@ -488,6 +540,8 @@ const copy: Record<Locale, LandingCopy> = {
     themeLight: "Svijetla",
     themeDark: "Tamna",
     navAriaLabel: "Sekcije stranice",
+    menuOpenLabel: "Otvori izbornik",
+    menuCloseLabel: "Zatvori izbornik",
     nav: [
       { href: "#preview", label: "Pregled" },
       { href: "#features", label: "Mogućnosti" },
@@ -517,6 +571,29 @@ const copy: Record<Locale, LandingCopy> = {
     heroMockJoinAlbum: "Pridruži se albumu",
     heroMockScanToUpload: "Skeniraj za upload —",
     heroMockNoAppNoAccount: "bez aplikacije, bez računa.",
+    heroBuilder: {
+      eyebrow: "Izradi događaj",
+      stepLabels: ["Detalji", "Gosti", "Plaćanje"],
+      whatCelebrating: "Što slavite?",
+      kinds: ["Vjenčanje", "Rođendan", "Zabava", "Susret", "Poslovni event"],
+      continueCta: "Nastavi →",
+      back: "Natrag",
+      noAccountYet: "Račun još nije potreban",
+      guestsHeading: "Koliko gostiju?",
+      peopleInvited: "pozvanih osoba",
+      recommended: "Preporučeno",
+      comparePlans: "Usporedi sve pakete",
+      guestPassLabel: "Propusnica za goste",
+      accessCodeLabel: "Pristupni kod",
+      joinLinkLabel: "Link za pridruživanje",
+      shareHint: "Ispiši ga za stolove, pošalji link porukom ili pročitaj kod naglas — sve troje radi.",
+      tags: ["Bez aplikacije", "Bez računa"],
+      copyLink: "Kopiraj link",
+      copyLinkDone: "Kopirano ✓",
+      downloadQr: "Preuzmi QR znak",
+      saveEvent: "Spremi događaj — besplatna registracija",
+      startOver: "Počni ispočetka",
+    },
     statBar: [
       { value: "50+ vjenčanja", label: "već proslavljena" },
       { value: "1.000+ fotografija", label: "snimljeno i podijeljeno" },
@@ -805,6 +882,8 @@ const copy: Record<Locale, LandingCopy> = {
     themeLight: "Hell",
     themeDark: "Dunkel",
     navAriaLabel: "Seitenabschnitte",
+    menuOpenLabel: "Menü öffnen",
+    menuCloseLabel: "Menü schließen",
     nav: [
       { href: "#preview", label: "Vorschau" },
       { href: "#features", label: "Funktionen" },
@@ -834,6 +913,29 @@ const copy: Record<Locale, LandingCopy> = {
     heroMockJoinAlbum: "Diesem Album beitreten",
     heroMockScanToUpload: "Zum Upload scannen —",
     heroMockNoAppNoAccount: "keine App, kein Konto.",
+    heroBuilder: {
+      eyebrow: "Event-Baukasten",
+      stepLabels: ["Details", "Gäste", "Zahlung"],
+      whatCelebrating: "Was feierst du?",
+      kinds: ["Hochzeit", "Geburtstag", "Party", "Treffen", "Firmenevent"],
+      continueCta: "Weiter →",
+      back: "Zurück",
+      noAccountYet: "Noch kein Konto nötig",
+      guestsHeading: "Wie viele Gäste?",
+      peopleInvited: "eingeladene Personen",
+      recommended: "Empfohlen",
+      comparePlans: "Alle Tarife vergleichen",
+      guestPassLabel: "Gästepass",
+      accessCodeLabel: "Zugangscode",
+      joinLinkLabel: "Beitritts-Link",
+      shareHint: "Für die Tische ausdrucken, den Link per Nachricht senden oder den Code laut vorlesen — alle drei funktionieren.",
+      tags: ["Keine App", "Kein Konto"],
+      copyLink: "Link kopieren",
+      copyLinkDone: "Kopiert ✓",
+      downloadQr: "QR-Schild herunterladen",
+      saveEvent: "Event speichern — kostenlos registrieren",
+      startOver: "Neu beginnen",
+    },
     statBar: [
       { value: "50+ Hochzeiten", label: "bereits gefeiert" },
       { value: "1.000+ Fotos", label: "aufgenommen und geteilt" },

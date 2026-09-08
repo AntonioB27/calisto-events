@@ -61,7 +61,7 @@ export function WaitlistForm({ copy, mascotAlt }: WaitlistFormProps) {
           {copy.description}
         </p>
 
-        <div style={{ margin: "32px auto 0", maxWidth: 240 }}>
+        <div className="mascot-float" style={{ margin: "32px auto 0", maxWidth: 240 }}>
           <Image
             src="/brand/mascot/aurora_planning.png"
             alt={mascotAlt}

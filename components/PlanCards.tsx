@@ -6,21 +6,18 @@ import Image from "next/image";
 import type { LandingCopy } from "@/lib/i18n";
 import { buildPlanStartUrl } from "@/lib/landing-event-form";
 import { PlanQuickStartForm } from "@/components/plan-cards/PlanQuickStartForm";
-import { PlanCardList } from "@/components/plan-cards/PlanCardList";
+import { PlanCompareTable } from "@/components/plan-cards/PlanCompareTable";
+import { PlanCardStack } from "@/components/plan-cards/PlanCardStack";
 
 type PlanCardsProps = { copy: LandingCopy };
 
 export function PlanCards({ copy }: PlanCardsProps) {
-  const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [emoji, setEmoji] = useState("");
   const [shaking, setShaking] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>;
   const router = useRouter();
-
-  const toggle = (id: string) =>
-    setExpandedPlan((prev) => (prev === id ? null : id));
 
   function handleChoose(e: React.MouseEvent, planId: string) {
     e.stopPropagation();
@@ -107,17 +104,30 @@ export function PlanCards({ copy }: PlanCardsProps) {
           }}
         />
 
-        <PlanCardList
-          plans={copy.plans}
-          expandedPlan={expandedPlan}
-          onToggle={toggle}
-          onChoose={handleChoose}
-          copy={{
-            plansFormChooseBtn: copy.plansFormChooseBtn,
-            plansPerEventSuffix: copy.plansPerEventSuffix,
-            planFootnote: copy.planFootnote,
-          }}
-        />
+        <div className="hidden md:block">
+          <PlanCompareTable
+            plans={copy.plans}
+            onChoose={handleChoose}
+            copy={{
+              plansFormChooseBtn: copy.plansFormChooseBtn,
+              plansPerEventSuffix: copy.plansPerEventSuffix,
+              planFootnote: copy.planFootnote,
+              popularBadge: copy.popularBadge,
+            }}
+          />
+        </div>
+        <div className="md:hidden">
+          <PlanCardStack
+            plans={copy.plans}
+            onChoose={handleChoose}
+            copy={{
+              plansFormChooseBtn: copy.plansFormChooseBtn,
+              plansPerEventSuffix: copy.plansPerEventSuffix,
+              planFootnote: copy.planFootnote,
+              popularBadge: copy.popularBadge,
+            }}
+          />
+        </div>
       </div>
     </section>
   );

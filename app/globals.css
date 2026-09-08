@@ -23,6 +23,9 @@
   --hair-strong: rgba(244, 234, 217, 0.22);
   --glass-bg:    rgba(244, 234, 217, 0.04);
   --glass-bg-2:  rgba(244, 234, 217, 0.07);
+  --header-bg:   rgba(12, 10, 15, 0.82);
+  --panel-a:     #141019;
+  --panel-b:     #0C0A0F;
 
   /* Legacy aliases kept for any unported references */
   --primary:      #8B6A8C;
@@ -45,6 +48,9 @@
   --hair-strong: rgba(12, 10, 15, 0.20);
   --glass-bg:    rgba(12, 10, 15, 0.03);
   --glass-bg-2:  rgba(12, 10, 15, 0.06);
+  --header-bg:   rgba(249, 245, 238, 0.86);
+  --panel-a:     #FFFFFF;
+  --panel-b:     #FBF7F0;
   --background:  #F9F5EE;
   --foreground:  #1A1108;
 }
@@ -226,6 +232,13 @@ html[data-theme="light"] body::after {
   50%       { opacity: 0.35; }
 }
 .live-dot { animation: livePulse 2s ease-in-out infinite; }
+
+/* ════════ Gentle mascot float (closing CTA) ════════ */
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.mascot-float { animation: floaty 6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .mascot-float { animation: none; }
+}
 .nav-link:hover { color: var(--cream) !important; }
 
 /* In-page nav: current section (scroll-spy) */

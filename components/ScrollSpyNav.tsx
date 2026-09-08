@@ -5,6 +5,8 @@ import type { LandingCopy } from "@/lib/i18n";
 
 type ScrollSpyNavProps = {
   copy: Pick<LandingCopy, "nav" | "navAriaLabel">;
+  variant?: "underline" | "pill" | "stack";
+  onNavigate?: () => void;
 };
 
 function sectionIdsFromNav(nav: LandingCopy["nav"]): string[] {
@@ -31,7 +33,7 @@ function headerScanLineY(): number {
   return 80;
 }
 
-export function ScrollSpyNav({ copy }: ScrollSpyNavProps) {
+export function ScrollSpyNav({ copy, variant = "underline", onNavigate }: ScrollSpyNavProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const ids = useMemo(() => sectionIdsFromNav(copy.nav), [copy.nav]);
 
@@ -83,6 +85,71 @@ export function ScrollSpyNav({ copy }: ScrollSpyNavProps) {
       window.removeEventListener("hashchange", onScroll);
     };
   }, [ids, update]);
+
+  if (variant === "stack") {
+    return (
+      <nav className="flex w-full flex-col gap-1" aria-label={copy.navAriaLabel}>
+        {copy.nav.map((item) => {
+          const id = item.href.replace(/^#/, "");
+          const isActive = activeId !== null && id === activeId;
+          return (
+            <a
+              key={item.href}
+              href={item.href}
+              aria-current={isActive ? "location" : undefined}
+              onClick={onNavigate}
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: 20,
+                padding: "12px 4px",
+                borderRadius: 10,
+                textDecoration: "none",
+                color: isActive ? "var(--gold)" : "var(--cream)",
+                borderBottom: "1px solid var(--hair-2)",
+              }}
+            >
+              {item.label}
+            </a>
+          );
+        })}
+      </nav>
+    );
+  }
+
+  if (variant === "pill") {
+    return (
+      <nav
+        className="flex w-max min-w-0 flex-nowrap items-center gap-0.5"
+        aria-label={copy.navAriaLabel}
+      >
+        {copy.nav.map((item) => {
+          const id = item.href.replace(/^#/, "");
+          const isActive = activeId !== null && id === activeId;
+          return (
+            <a
+              key={item.href}
+              href={item.href}
+              aria-current={isActive ? "location" : undefined}
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 13.5,
+                fontWeight: 500,
+                whiteSpace: "nowrap",
+                padding: "8px 15px",
+                borderRadius: 999,
+                transition: "background 200ms, color 200ms",
+                textDecoration: "none",
+                background: isActive ? "var(--accent-tint, rgba(245,199,107,0.16))" : "transparent",
+                color: isActive ? "var(--gold)" : "var(--cream-3)",
+              }}
+            >
+              {item.label}
+            </a>
+          );
+        })}
+      </nav>
+    );
+  }
 
   return (
     <nav
