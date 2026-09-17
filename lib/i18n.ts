@@ -120,6 +120,8 @@ export type LandingCopy = {
   plansTitle: string;
   plansSectionLabel: string;
   plansPerEventSuffix: string;
+  plansFoundingEventsOffer: string;
+  launchOffer: { label: string; headline: string; details: string; timing: string; cta: string; announcement: string; plansLink: string };
   plansDescriptionStrong: string;
   plansDescriptionRest: string;
   plansAuroraBubble: string;
@@ -297,6 +299,8 @@ const copy: Record<Locale, LandingCopy> = {
     plansTitle: "Plans",
     plansSectionLabel: "3 · Pricing",
     plansPerEventSuffix: "/ event",
+    plansFoundingEventsOffer: "Launch offer: 50% off every paid plan through October 17.",
+    launchOffer: { label: "Launch offer", headline: "Your event. Every memory. Half the price.", details: "50% off every paid plan through October 17. Your discount is applied automatically.", timing: "Book your plan by October 17. Your event can take place later.", cta: "Create your event with 50% off", announcement: "We're celebrating our launch: all paid plans are half price through October 17.", plansLink: "See plans" },
     plansDescriptionStrong: "Choose the plan that fits your event",
     plansDescriptionRest:
       "guest caps, media quotas, and upload windows follow the tier you pick. Raising or lowering a tier in Settings updates limits in the app.",
@@ -610,6 +614,8 @@ const copy: Record<Locale, LandingCopy> = {
     plansTitle: "Paketi",
     plansSectionLabel: "3 · Cijene",
     plansPerEventSuffix: "/ događaj",
+    plansFoundingEventsOffer: "Početna ponuda: 50% popusta na svaki plaćeni paket do 17. listopada.",
+    launchOffer: { label: "Početna ponuda", headline: "Tvoj događaj. Sve uspomene. Upola cijene.", details: "50% popusta na svaki plaćeni paket do 17. listopada. Popust se primjenjuje automatski.", timing: "Kupi paket do 17. listopada. Događaj može biti i kasnije.", cta: "Kreiraj događaj uz 50% popusta", announcement: "Slavimo početak: svi plaćeni paketi 50% jeftiniji do 17. listopada.", plansLink: "Pogledaj pakete" },
     plansDescriptionStrong: "Odaberi paket koji odgovara tvom događaju",
     plansDescriptionRest:
       "kapaciteti, upload prozori i videi definiraju se paketom. U Postavkama događaja možeš promijeniti paket unutar aplikacije.",
@@ -924,6 +930,8 @@ const copy: Record<Locale, LandingCopy> = {
     plansTitle: "Tarife",
     plansSectionLabel: "3 · Preise",
     plansPerEventSuffix: "/ Event",
+    plansFoundingEventsOffer: "Startangebot: 50 % Rabatt auf alle kostenpflichtigen Pakete bis 17. Oktober.",
+    launchOffer: { label: "Startangebot", headline: "Dein Event. Alle Erinnerungen. Zum halben Preis.", details: "50 % Rabatt auf alle kostenpflichtigen Pakete bis 17. Oktober. Der Rabatt wird automatisch angewendet.", timing: "Buche dein Paket bis 17. Oktober. Dein Event kann später stattfinden.", cta: "Event mit 50 % Rabatt erstellen", announcement: "Wir feiern den Start: alle kostenpflichtigen Pakete zum halben Preis bis 17. Oktober.", plansLink: "Pakete ansehen" },
     plansDescriptionStrong: "Wähle den Tarif, der zu deinem Event passt",
     plansDescriptionRest:
       "Gästelimits, Mediakontingente und Upload-Fenster richten sich nach der gewählten Stufe. In den Event-Einstellungen kannst du den Tarif ändern, um die Limits in der App anzupassen.",

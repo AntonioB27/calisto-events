@@ -2,6 +2,8 @@ import Image from "next/image";
 import { ScanLine, UserCheck, QrCode, type LucideIcon } from "lucide-react";
 import type { LandingCopy, Locale } from "@/lib/i18n";
 import { HeroEventBuilder } from "@/components/HeroEventBuilder";
+import { LaunchHeroOffer } from "@/components/LaunchOffer";
+import { isFoundingEventsPromotionActive } from "@/lib/founding-events-promotion";
 
 type HeroProps = { copy: LandingCopy; isLoggedIn: boolean; locale: Locale };
 
@@ -60,6 +62,9 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
             </p>
 
             {/* CTAs */}
+            {isFoundingEventsPromotionActive() ? (
+              <LaunchHeroOffer copy={copy} href={`/${locale}/offer`} />
+            ) : (
             <div className="flex items-center flex-wrap" style={{ marginTop: 28, gap: 14 }}>
               <a
                 href={isLoggedIn ? "/dashboard" : `/${locale}/start`}
@@ -102,6 +107,7 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
                 {copy.heroSecondaryCta}
               </a>
             </div>
+            )}
 
             {/* Trust bar: the three core differentiators */}
             <div className="v2-trust-row flex flex-wrap" style={{ marginTop: 28, gap: 14 }}>

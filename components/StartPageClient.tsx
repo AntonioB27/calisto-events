@@ -7,6 +7,7 @@ import EmojiPicker, { type EmojiClickData, Theme } from "emoji-picker-react";
 import type { Locale } from "@/lib/i18n";
 import { buildPlanStartUrl } from "@/lib/landing-event-form";
 import type { StartPageCopy } from "@/lib/i18n-start";
+import { formatEuroCents, getFoundingEventsPlanPrice } from "@/lib/founding-events-promotion";
 
 // ── Design tokens (warm theme — exact values from spec) ───────────
 const SERIF = "'Playfair Display', serif";
@@ -519,7 +520,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                 )}
               </div>
 
-              {/* Plan selector — pill tabs + detail card */}
+              {/* All plans stay visible, including on narrow phones. */}
               <div style={{ marginTop: 14 }}>
                 <span
                   style={{
@@ -536,71 +537,54 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                   Plan
                 </span>
 
-                {/* Pill tabs */}
+                {/* Two-column choices; Free spans the first row. */}
                 <div
                   className="sp-plan-tabs"
                   style={{
-                    display: "flex",
-                    gap: 5,
-                    overflowX: "auto" as const,
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                    gap: 8,
                     paddingBottom: 9,
                   }}
                 >
                   {PLAN_CONFIG.map((p) => {
                     const sel = selectedPlan === p.id;
+                    const price = getFoundingEventsPlanPrice(p.id);
                     return (
                       <button
                         key={p.id}
                         type="button"
+                        aria-pressed={sel}
                         onClick={() => setSelectedPlan(p.id)}
                         style={{
-                          flexShrink: 0,
-                          padding: "6px 13px",
-                          borderRadius: 20,
+                          gridColumn: p.id === "free" ? "1 / -1" : undefined,
+                          minWidth: 0,
+                          minHeight: 64,
+                          padding: "10px 12px",
+                          borderRadius: 12,
                           border: `1.5px solid ${sel ? gold : line}`,
                           background: sel ? goldTint : "transparent",
-                          color: sel ? "#3A2A0A" : muted,
+                          color: "#3A2A0A",
                           fontFamily: SANS,
                           fontSize: 12.5,
                           fontWeight: sel ? 700 : 500,
                           cursor: "pointer",
-                          transition: "all 0.15s",
+                          transition: "background-color 0.15s, border-color 0.15s",
                           display: "flex",
-                          alignItems: "center",
+                          alignItems: "flex-start",
+                          flexDirection: "column",
                           gap: 4,
-                          whiteSpace: "nowrap" as const,
+                          textAlign: "left" as const,
                         }}
                       >
-                        {!sel && p.id === "premium" && (
-                          <span
-                            style={{
-                              width: 5,
-                              height: 5,
-                              borderRadius: "50%",
-                              background: gold,
-                              flexShrink: 0,
-                            }}
-                          />
-                        )}
-                        {p.name}
-                        {sel && p.id === "premium" && (
-                          <span
-                            style={{
-                              fontSize: 7,
-                              fontWeight: 800,
-                              fontFamily: SANS,
-                              letterSpacing: "0.1em",
-                              textTransform: "uppercase" as const,
-                              background: goldSoft,
-                              color: "#3A2A0A",
-                              padding: "1.5px 5px",
-                              borderRadius: 6,
-                              marginLeft: 2,
-                            }}
-                          >
-                            {copy.popularBadge}
-                          </span>
-                        )}
+                        <span style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: 4 }}>
+                          <span>{p.name}</span>
+                          <span aria-hidden style={{ color: sel ? "#805900" : "transparent" }}>✓</span>
+                        </span>
+                        <span style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: 5 }}>
+                          {price.promotionId && <s style={{ fontSize: 11, color: muted }}>{formatEuroCents(price.listAmountEuroCents)}</s>}
+                          <strong style={{ fontSize: 16 }}>{formatEuroCents(price.amountEuroCents)}</strong>
+                        </span>
                       </button>
                     );
                   })}
@@ -609,6 +593,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                 {/* Selected plan detail card */}
                 {(() => {
                   const p = PLAN_CONFIG.find((pl) => pl.id === selectedPlan)!;
+                  const price = getFoundingEventsPlanPrice(p.id);
                   return (
                     <div
                       style={{
@@ -740,7 +725,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
 
                       {/* Price */}
                       <div style={{ flexShrink: 0, textAlign: "right" as const }}>
-                        {p.was && (
+                        {price.promotionId && (
                           <div
                             style={{
                               fontSize: 11,
@@ -749,7 +734,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                               marginBottom: 1,
                             }}
                           >
-                            {p.was}
+                            {formatEuroCents(price.listAmountEuroCents)}
                           </div>
                         )}
                         <div
@@ -761,7 +746,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                             lineHeight: 1,
                           }}
                         >
-                          {p.price}
+                          {formatEuroCents(price.amountEuroCents)}
                         </div>
                         <div
                           style={{
@@ -1037,6 +1022,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
       {/* ── PLAN DETAIL MODAL (bottom sheet) ── */}
       {detailModalPlan && (() => {
         const p = PLAN_CONFIG.find((pl) => pl.id === detailModalPlan)!;
+        const price = getFoundingEventsPlanPrice(p.id);
         const rows = PLAN_DETAILS[detailModalPlan];
         return (
           <>
@@ -1183,9 +1169,9 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                     </div>
                   </div>
                   <div style={{ marginLeft: "auto", textAlign: "right" as const, flexShrink: 0 }}>
-                    {p.was && (
+                    {price.promotionId && (
                       <div style={{ fontSize: 11, color: faint, textDecoration: "line-through" }}>
-                        {p.was}
+                        {formatEuroCents(price.listAmountEuroCents)}
                       </div>
                     )}
                     <div
@@ -1197,7 +1183,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                         lineHeight: 1,
                       }}
                     >
-                      {p.price}
+                      {formatEuroCents(price.amountEuroCents)}
                     </div>
                     <div
                       style={{
@@ -1365,11 +1351,10 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
           border-color: ${gold} !important;
           outline: none;
         }
-        .sp-plan-tabs {
-          scrollbar-width: none;
-          -ms-overflow-style: none;
+        .sp-plan-tabs button:focus-visible {
+          outline: 3px solid ${gold};
+          outline-offset: 2px;
         }
-        .sp-plan-tabs::-webkit-scrollbar { display: none; }
         .sp-help-btn:hover {
           background: rgba(255,255,255,0.8) !important;
           transform: scale(1.12);

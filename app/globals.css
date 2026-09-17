@@ -1,5 +1,71 @@
 @import "tailwindcss";
 
+/* Launch offer: a scrolling announcement and a thumb-friendly hero action. */
+.launch-announcement {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 12px 24px;
+  background: var(--gold);
+  color: #1b1208;
+  font-size: 14px;
+  line-height: 1.4;
+  text-decoration: none;
+}
+.launch-announcement__badge { font-size: 22px; font-weight: 800; white-space: nowrap; }
+.launch-announcement__link { font-weight: 700; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
+.launch-discount-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: var(--gold);
+  color: #1b1208;
+  font: 700 14px/1.4 var(--font-sans);
+  white-space: nowrap;
+}
+.launch-hero-offer {
+  margin-top: 24px;
+  padding: 22px;
+  border: 1px solid var(--gold-deep);
+  border-radius: 20px;
+  background: var(--panel-a);
+  text-align: left;
+  max-width: 520px;
+}
+.launch-hero-offer__label { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--cream); }
+.launch-hero-offer h2 { margin: 14px 0 10px; font: 400 clamp(25px, 3vw, 32px)/1.15 var(--font-display); color: var(--cream); }
+.launch-hero-offer p { font-size: 14px; line-height: 1.5; color: var(--cream-2); margin: 0; }
+.launch-hero-offer__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  margin: 18px 0 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--gold);
+  color: #1b1208;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+}
+.launch-hero-offer .launch-hero-offer__timing { font-size: 13px; color: var(--cream-3); }
+.launch-hero-offer__plans { display: inline-flex; align-items: center; min-height: 44px; margin-top: 4px; font-size: 14px; color: var(--cream); text-underline-offset: 4px; }
+.launch-announcement:focus-visible, .launch-hero-offer a:focus-visible { outline: 3px solid var(--plum-2); outline-offset: 4px; }
+@media (max-width: 640px) {
+  .launch-announcement { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; padding: 10px 16px; font-size: 13px; }
+  .launch-announcement__badge { grid-row: span 2; font-size: 28px; }
+  .launch-announcement__link { grid-column: 2; }
+  .launch-hero-offer { padding: 18px; margin-top: 20px; }
+}
+
 /* ════════════════════════════════════════════
    Design tokens — editorial tech aesthetic
    ════════════════════════════════════════════ */
@@ -2216,4 +2282,3 @@ html[data-theme="dark"] .auth-oauth-google-btn.app-btn--outline {
   animation: polaroid-sway 4s ease-in-out infinite;
   transform-origin: 50% 0%;
 }
-

@@ -5,9 +5,14 @@ import { getPlanLimits, PLAN_DB_INT_MAX } from "@/lib/plan-limits";
 import { interpolate } from "@/lib/app-ui";
 import { useAppUi } from "@/components/AppUiProvider";
 import { writeCreateEventDraftToStorage } from "@/lib/create-event-draft";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
+import {
+  formatEuroCents,
+  getFoundingEventsPrice,
+  isFoundingEventsPromotionActive,
+} from "@/lib/founding-events-promotion";
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const INK    = '#221509';
@@ -38,13 +43,8 @@ const PLAN_STRIPE: Record<PlanId, string> = {
   max:      'linear-gradient(90deg,#8B5FCC,#5B2D8E40)',
 };
 
-// NOTE: prices are business-facing; adjust to match mobile pricing.
-const PLAN_PRICE: Record<PlanId, string> = {
-  free: "0€", standard: "15€", plus: "35€", premium: "65€", max: "90€",
-};
-
-const PLAN_ORIGINAL_PRICE: Partial<Record<PlanId, string>> = {
-  premium: "70€", max: "100€",
+const PLAN_LIST_PRICE_EURO_CENTS: Record<PlanId, number> = {
+  free: 0, standard: 1500, plus: 3500, premium: 6500, max: 9000,
 };
 
 type Step2PlanProps = {
@@ -66,6 +66,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
 
   const [selected, setSelected] = useState<PlanId>(selectedPlanId);
   const [expanded, setExpanded] = useState<PlanId | null>(null);
+  const isFoundingEventsOfferActive = isFoundingEventsPromotionActive();
 
   function formatCap(n: number): string {
     return n >= PLAN_DB_INT_MAX ? ui.createStep2.unlimited : String(n);
@@ -79,17 +80,17 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
     setExpanded(current => current === planId ? null : planId);
   };
 
-  const cards = useMemo(
-    () => planOptions.map(planId => ({
+  const cards = planOptions.map(planId => {
+    const price = getFoundingEventsPrice(PLAN_LIST_PRICE_EURO_CENTS[planId]);
+    return {
       planId,
       limits: getPlanLimits(planId),
-      price: PLAN_PRICE[planId],
-      originalPrice: PLAN_ORIGINAL_PRICE[planId],
+      price: formatEuroCents(price.amountEuroCents),
+      originalPrice: price.promotionId ? formatEuroCents(price.listAmountEuroCents) : undefined,
       accent: PLAN_ACCENT[planId],
       stripe: PLAN_STRIPE[planId],
-    })),
-    [planOptions, ui.createStep2.unlimited],
-  );
+    };
+  });
 
   return (
     <div className="welcome-reveal welcome-reveal--d1">
@@ -107,6 +108,11 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
         <p style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 14, color: INK_S, lineHeight: 1.5, marginTop: 6, marginBottom: 0 }}>
           {ui.createStep2.description}
         </p>
+        {isFoundingEventsOfferActive && (
+          <p style={{ display: 'inline-flex', margin: '10px 0 0', padding: '5px 8px', borderRadius: 6, background: `${GOLD}18`, color: GOLD_DK, fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', fontFamily: FB }}>
+            {ui.createStep2.foundingEventsOffer}
+          </p>
+        )}
       </div>
 
       <form action="/events/new" method="get">

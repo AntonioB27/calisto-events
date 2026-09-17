@@ -760,6 +760,7 @@ export const APP_UI_DE: AppUiDict = {
     description: "Wähle einen Tarif, der zur Veranstaltung passt.",
     priceEyebrow: "Preis",
     sale: "Aktion",
+    foundingEventsOffer: "Founding Events: 50 % auf kostenpflichtige Tarife bis 17. Oktober.",
     popularBadge: "Beliebt",
     unlimited: "Unbegrenzt",
     guestsPhotosVideos: "{guests} Gäste • {photos} Fotos • {videos} Videos",
@@ -803,6 +804,7 @@ export const APP_UI_DE: AppUiDict = {
       "Die kostenlose Stufe wird hier ohne Checkout bestätigt – lade gleich Gäste ein.",
     selectedPlanEyebrow: "Gewählter Tarif",
     saleBadge: "Angebot",
+    foundingEventsOffer: "Founding Events Rabatt: 50 % sind beim Checkout bereits abgezogen.",
     priceNotePaid:
       "Inkl. Mehrwertsteuer wenn anwendbar — einmalig bei Bestätigung in Stripe.",
     priceNoteFree: "Kostenlos bleibt kostenlos.",
