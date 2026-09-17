@@ -7,6 +7,7 @@ import EmojiPicker, { type EmojiClickData, Theme } from "emoji-picker-react";
 import type { Locale } from "@/lib/i18n";
 import { buildPlanStartUrl } from "@/lib/landing-event-form";
 import type { StartPageCopy } from "@/lib/i18n-start";
+import { formatEuroCents, getFoundingEventsPlanPrice } from "@/lib/founding-events-promotion";
 
 // ── Design tokens (warm theme — exact values from spec) ───────────
 const SERIF = "'Playfair Display', serif";
@@ -609,6 +610,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                 {/* Selected plan detail card */}
                 {(() => {
                   const p = PLAN_CONFIG.find((pl) => pl.id === selectedPlan)!;
+                  const price = getFoundingEventsPlanPrice(p.id);
                   return (
                     <div
                       style={{
@@ -740,7 +742,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
 
                       {/* Price */}
                       <div style={{ flexShrink: 0, textAlign: "right" as const }}>
-                        {p.was && (
+                        {price.promotionId && (
                           <div
                             style={{
                               fontSize: 11,
@@ -749,7 +751,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                               marginBottom: 1,
                             }}
                           >
-                            {p.was}
+                            {formatEuroCents(price.listAmountEuroCents)}
                           </div>
                         )}
                         <div
@@ -761,7 +763,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                             lineHeight: 1,
                           }}
                         >
-                          {p.price}
+                          {formatEuroCents(price.amountEuroCents)}
                         </div>
                         <div
                           style={{
@@ -1037,6 +1039,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
       {/* ── PLAN DETAIL MODAL (bottom sheet) ── */}
       {detailModalPlan && (() => {
         const p = PLAN_CONFIG.find((pl) => pl.id === detailModalPlan)!;
+        const price = getFoundingEventsPlanPrice(p.id);
         const rows = PLAN_DETAILS[detailModalPlan];
         return (
           <>
@@ -1183,9 +1186,9 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                     </div>
                   </div>
                   <div style={{ marginLeft: "auto", textAlign: "right" as const, flexShrink: 0 }}>
-                    {p.was && (
+                    {price.promotionId && (
                       <div style={{ fontSize: 11, color: faint, textDecoration: "line-through" }}>
-                        {p.was}
+                        {formatEuroCents(price.listAmountEuroCents)}
                       </div>
                     )}
                     <div
@@ -1197,7 +1200,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                         lineHeight: 1,
                       }}
                     >
-                      {p.price}
+                      {formatEuroCents(price.amountEuroCents)}
                     </div>
                     <div
                       style={{
