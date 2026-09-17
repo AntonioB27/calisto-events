@@ -63,7 +63,7 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
 
             {/* CTAs */}
             {isFoundingEventsPromotionActive() ? (
-              <LaunchHeroOffer copy={copy} href={`/${locale}/start`} />
+              <LaunchHeroOffer copy={copy} href={`/${locale}/offer`} />
             ) : (
             <div className="flex items-center flex-wrap" style={{ marginTop: 28, gap: 14 }}>
               <a
