@@ -4,10 +4,13 @@ import Image from "next/image";
 import type { LandingCopy } from "@/lib/i18n";
 import { PlanCompareTable } from "@/components/plan-cards/PlanCompareTable";
 import { PlanCardStack } from "@/components/plan-cards/PlanCardStack";
+import { isFoundingEventsPromotionActive } from "@/lib/founding-events-promotion";
 
 type PlanCardsProps = { copy: LandingCopy };
 
 export function PlanCards({ copy }: PlanCardsProps) {
+  const isFoundingEventsOfferActive = isFoundingEventsPromotionActive();
+
   function handleChoose(e: React.MouseEvent) {
     e.stopPropagation();
     document.getElementById("create")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -61,6 +64,11 @@ export function PlanCards({ copy }: PlanCardsProps) {
                 />
               </div>
             </div>
+            {isFoundingEventsOfferActive && (
+              <p style={{ margin: "12px 0 0", color: "var(--gold)", fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 600 }}>
+                {copy.plansFoundingEventsOffer}
+              </p>
+            )}
           </div>
         </div>
 

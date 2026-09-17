@@ -8,6 +8,7 @@ import { useAppUi } from "@/components/AppUiProvider";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { isPaidPlanForCheckout } from "@/lib/event-stripe-checkout";
 import { writeCreateEventDraftToStorage } from "@/lib/create-event-draft";
+import { formatEuroCents, getFoundingEventsPlanPrice } from "@/lib/founding-events-promotion";
 
 type HeroEventBuilderProps = {
   copy: LandingCopy;
@@ -51,7 +52,8 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
   const KindIcon = KIND_ICONS[kindIndex] ?? Gem;
   const planIndex = pickPlanIndex(guests);
   const plan = copy.plans[planIndex] ?? copy.plans[0]!;
-  const [priceRow, ...featureRows] = plan.rows;
+  const [, ...featureRows] = plan.rows;
+  const planPrice = getFoundingEventsPlanPrice(plan.id);
   const guestPct = ((guests - 5) / (300 - 5)) * 100;
 
   const prettyDate = useMemo(() => {
@@ -397,7 +399,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
                     </div>
                     <div style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--cream)", marginTop: 3 }}>{plan.name}</div>
                   </div>
-                  <div className="event-builder-plan-price" style={{ fontFamily: "var(--font-display)", fontSize: 32, color: "var(--cream)" }}>{priceRow?.value}</div>
+                  <div className="event-builder-plan-price" style={{ fontFamily: "var(--font-display)", fontSize: 32, color: "var(--cream)" }}>{formatEuroCents(planPrice.amountEuroCents)}</div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "10px 16px", marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--hair-2)" }}>
                   {featureRows.slice(0, 5).map((row) => (
@@ -464,7 +466,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
                       <span>{guests >= 300 ? "300+" : guests} · {b.peopleInvited}</span>
                       <span>{plan.name}</span>
                     </div>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "#1A1108" }}>{priceRow?.value}</div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "#1A1108" }}>{formatEuroCents(planPrice.amountEuroCents)}</div>
                   </div>
                 </div>
               </div>

@@ -2,6 +2,7 @@
 
 import type React from "react";
 import type { LandingCopy } from "@/lib/i18n";
+import { formatEuroCents, getFoundingEventsPlanPrice } from "@/lib/founding-events-promotion";
 
 export type PlanCompareTableProps = {
   plans: LandingCopy["plans"];
@@ -9,7 +10,6 @@ export type PlanCompareTableProps = {
   copy: Pick<LandingCopy, "plansFormChooseBtn" | "plansPerEventSuffix" | "planFootnote" | "popularBadge">;
 };
 
-const ORIGINAL_PRICE: Record<string, string> = { premium: "70€", max: "100€" };
 const FEATURED_PLAN_ID = "premium";
 
 export function PlanCompareTable({ plans, onChoose, copy }: PlanCompareTableProps) {
@@ -37,8 +37,7 @@ export function PlanCompareTable({ plans, onChoose, copy }: PlanCompareTableProp
               />
               {plans.map((plan) => {
                 const featured = plan.id === FEATURED_PLAN_ID;
-                const [priceRow] = plan.rows;
-                const originalPrice = ORIGINAL_PRICE[plan.id];
+                const price = getFoundingEventsPlanPrice(plan.id);
                 return (
                   <th
                     key={plan.id}
@@ -64,12 +63,13 @@ export function PlanCompareTable({ plans, onChoose, copy }: PlanCompareTableProp
                       )}
                     </div>
                     <div style={{ fontSize: 14, color: "var(--cream-3)", marginTop: 4, fontFamily: "var(--font-sans)" }}>
-                      {originalPrice && (
+                      {price.promotionId && (
                         <span style={{ textDecoration: "line-through", color: "var(--cream-4)", marginRight: 6 }}>
-                          {originalPrice}
+                          {formatEuroCents(price.listAmountEuroCents)}
                         </span>
                       )}
-                      {priceRow?.value} {plan.id !== "free" && copy.plansPerEventSuffix}
+                      {formatEuroCents(price.amountEuroCents)} {plan.id !== "free" && copy.plansPerEventSuffix}
+                      {price.promotionId && <span className="launch-discount-badge" style={{ marginLeft: 6 }}>−50%</span>}
                     </div>
                   </th>
                 );
