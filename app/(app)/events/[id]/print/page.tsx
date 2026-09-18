@@ -231,8 +231,8 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
           posterLang={posterLocale}
           chromePrint={uiDict.print}
           localeOptionLabels={uiDict.languagePicker.locales}
-          backHref={(isInvitationPrint || isQrThemed) ? `/events/${id}?tab=prints` : `/events/${id}?tab=share`}
-          backLabel={(isInvitationPrint || isQrThemed) ? uiDict.print.backPrints : uiDict.print.backShare}
+          backHref={isInvitationPrint ? `/events/${id}/invitations` : isQrThemed ? `/events/${id}?tab=prints` : `/events/${id}?tab=share`}
+          backLabel={isInvitationPrint ? uiDict.printsTab.categoryInvitation : isQrThemed ? uiDict.print.backPrints : uiDict.print.backShare}
           sheetHelperLine={isInvitationPrint ? uiDict.print.sheetHelperInvitation : uiDict.print.sheetHelper}
         />
 

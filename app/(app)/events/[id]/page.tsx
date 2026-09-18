@@ -73,33 +73,6 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     selectedTab = "overview";
   }
 
-  let printDraftByTemplateId: Readonly<Record<string, Readonly<Record<string, string>>>> = {};
-  if (isPrimaryOrganizer && selectedTab === "prints") {
-    const { data: draftRows, error: draftErr } = await supabase
-      .from("event_print_template_instances")
-      .select("template_id, field_values")
-      .eq("event_id", id);
-
-    if (!draftErr && Array.isArray(draftRows)) {
-      const acc: Record<string, Record<string, string>> = {};
-      for (const row of draftRows) {
-        const tid = (row as { template_id?: unknown }).template_id;
-        const fv = (row as { field_values?: unknown }).field_values;
-        if (typeof tid !== "string" || !tid) continue;
-        if (!fv || typeof fv !== "object" || Array.isArray(fv)) {
-          acc[tid] = {};
-          continue;
-        }
-        const out: Record<string, string> = {};
-        for (const [k, v] of Object.entries(fv as Record<string, unknown>)) {
-          if (typeof v === "string") out[k] = v;
-        }
-        acc[tid] = out;
-      }
-      printDraftByTemplateId = acc;
-    }
-  }
-
   // Fetch banner_theme separately — safe before migration is applied
   let bannerTheme: string | undefined;
   if (event) {
@@ -228,10 +201,6 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             eventId={id}
             eventKind={storedEventKind}
             printsEventKindSetAt={printsEventKindSetAt}
-            eventDisplayName={eventName}
-            eventDateIso={typeof event.event_date === "string" ? event.event_date : ""}
-            uiLocale={uiLocale}
-            printDraftByTemplateId={printDraftByTemplateId}
           />
         )}
         {selectedTab === "settings" && isPrimaryOrganizer && (

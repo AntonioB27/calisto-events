@@ -42,7 +42,6 @@ import "../prints/setup/prints-setup.css";
 type InvitationsEditorProps = Readonly<{
   eventId: string;
   eventKind: EventKind;
-  printsEventKindSetAt: string | null;
   eventDisplayName: string;
   eventDateIso: string;
   uiLocale: Locale;

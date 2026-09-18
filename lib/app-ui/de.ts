@@ -342,6 +342,8 @@ export const APP_UI_DE: AppUiDict = {
     confirmKindFail: "Speichern fehlgeschlagen. Bitte erneut versuchen.",
     title: "Drucke",
     subtitle: "Wähle ein Layout, ergänze deine Angaben und öffne die druckfertige Ansicht, wenn du soweit bist.",
+    invitationDesignCount: "{count} Designs",
+    invitationEditorHint: "Wähle ein Design, gestalte deine Einladung und öffne die Druckvorschau.",
     invitationsWeddingOnly: "Einladungsdesigns sind derzeit für Hochzeiten verfügbar.",
     categoryInvitation: "Einladungen",
     eventDetails: "Veranstaltungsdetails",

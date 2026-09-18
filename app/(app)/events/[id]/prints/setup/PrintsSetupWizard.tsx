@@ -139,7 +139,7 @@ export function PrintsSetupWizard({
     if (step < STEPS.length - 1) {
       setStep((p) => p + 1);
     } else {
-      router.push(`/events/${eventId}?tab=prints`);
+      router.push(`/events/${eventId}/invitations`);
     }
   }
 

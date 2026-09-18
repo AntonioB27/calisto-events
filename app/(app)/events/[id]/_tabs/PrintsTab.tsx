@@ -5,18 +5,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import type { EventKind } from "@/lib/event-kind";
-import type { Locale } from "@/lib/i18n";
-import { InvitationsEditor } from "./InvitationsEditor";
+import { INVITATION_PRINT_TEMPLATE_IDS } from "@/lib/event-print/template-catalog";
 import { useAppUi } from "@/components/AppUiProvider";
 
 type PrintsTabProps = Readonly<{
   eventId: string;
   eventKind: EventKind;
   printsEventKindSetAt: string | null;
-  eventDisplayName: string;
-  eventDateIso: string;
-  uiLocale: Locale;
-  printDraftByTemplateId: Readonly<Record<string, Readonly<Record<string, string>>>>;
 }>;
 
 const GOLD   = '#C5922A';
@@ -168,7 +163,27 @@ export function PrintsTab(props: PrintsTabProps) {
         </div>
       </Link>
 
-      {isWedding ? <InvitationsEditor {...props} /> : (
+      {isWedding ? (
+        <Link
+          href={`/events/${eventId}/invitations`}
+          className="block rounded-2xl border p-[18px] transition-colors hover:border-[var(--app-gold)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--app-gold)]"
+          style={{ background: SURFACE, borderColor: BORDER, textDecoration: "none" }}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#5B2D8E22", color: "var(--app-text)" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
+              </span>
+              <div>
+                <h2 style={{ color: TEXT, fontSize: 15, fontWeight: 700 }}>{t.categoryInvitation}</h2>
+                <p style={{ color: MUTED, fontSize: 12 }}>{t.invitationDesignCount.replace("{count}", String(INVITATION_PRINT_TEMPLATE_IDS.length))}</p>
+              </div>
+            </div>
+            <span style={{ color: MUTED }}><ArrowIcon /></span>
+          </div>
+          <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.5, marginTop: 12 }}>{t.invitationEditorHint}</p>
+        </Link>
+      ) : (
         <section style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: 18 }}>
           <h2 style={{ color: TEXT, fontSize: 18, fontWeight: 600 }}>{t.categoryInvitation}</h2>
           <p style={{ color: MUTED, fontSize: 14, marginTop: 8 }}>{t.invitationsWeddingOnly}</p>
