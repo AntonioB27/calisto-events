@@ -2,124 +2,18 @@ import { NextResponse } from "next/server";
 
 import { generateImageThumbnail } from "@/lib/image-thumbnail";
 import { maxGuestUploadBytesForMime } from "@/lib/guest-upload-limits";
+import {
+  countMediaForQuota,
+  getEventUploadContext,
+  insertMediaItem,
+  resolveModerationStatus,
+  MIME_TO_EXT,
+  type MediaType,
+} from "@/lib/guest-upload";
 import { canGuestUpload } from "@/lib/plan-limits";
-import { getPlanLimits, type PlanId } from "@/lib/plan-limits";
+import { getPlanLimits } from "@/lib/plan-limits";
 import { getSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
-
-type MediaType = "photo" | "video";
-
-type EventUploadContext = {
-  planId: PlanId;
-  eventDate: string;
-  moderationEnabled: boolean;
-  organizerId: string;
-};
-
-async function getEventUploadContext(eventId: string): Promise<EventUploadContext | null> {
-  const db = getSupabaseServerClient();
-  const { data, error } = await db
-    .from("events")
-    .select("id, plan, event_date, moderation_enabled, organizer_id")
-    .eq("id", eventId)
-    .maybeSingle();
-
-  if (error || !data || typeof data.plan !== "string" || typeof data.event_date !== "string" || !data.event_date) {
-    return null;
-  }
-
-  const planId = data.plan;
-  if (
-    planId !== "free" &&
-    planId !== "standard" &&
-    planId !== "plus" &&
-    planId !== "premium" &&
-    planId !== "max"
-  ) {
-    return null;
-  }
-
-  return {
-    planId,
-    eventDate: data.event_date,
-    moderationEnabled: Boolean((data as { moderation_enabled?: unknown }).moderation_enabled),
-    organizerId: typeof (data as { organizer_id?: unknown }).organizer_id === "string"
-      ? (data as { organizer_id: string }).organizer_id
-      : "",
-  };
-}
-
-const MIME_TO_EXT: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/gif": "gif",
-  "image/webp": "webp",
-  "image/heic": "heic",
-  "image/heif": "heif",
-  "video/mp4": "mp4",
-  "video/quicktime": "mov",
-  "video/webm": "webm",
-  "video/x-msvideo": "avi",
-  "video/x-matroska": "mkv",
-};
-
-/**
- * Counts align with `media_items_enforce_plan_limits` in Postgres (photos = null or image/*, videos = video/*).
- */
-async function countMediaForQuota(eventId: string, mediaType: MediaType): Promise<number> {
-  const db = getSupabaseServerClient();
-  if (mediaType === "photo") {
-    const { count: nullCount } = await db
-      .from("media_items")
-      .select("*", { count: "exact", head: true })
-      .eq("event_id", eventId)
-      .is("mime_type", null);
-    const { count: imageCount } = await db
-      .from("media_items")
-      .select("*", { count: "exact", head: true })
-      .eq("event_id", eventId)
-      .ilike("mime_type", "image/%");
-    return (nullCount ?? 0) + (imageCount ?? 0);
-  }
-
-  const { count } = await db
-    .from("media_items")
-    .select("*", { count: "exact", head: true })
-    .eq("event_id", eventId)
-    .ilike("mime_type", "video/%");
-
-  return count ?? 0;
-}
-
-async function insertMediaItem(params: {
-  eventId: string;
-  uploaderId: string;
-  filePath: string;
-  mimeType: string;
-  sizeBytes: number;
-  thumbnailPath: string | null;
-  moderationStatus: "visible" | "pending";
-}) {
-  const db = getSupabaseServerClient();
-  const { data, error } = await db
-    .from("media_items")
-    .insert({
-      event_id: params.eventId,
-      uploaded_by: params.uploaderId,
-      storage_path: params.filePath,
-      mime_type: params.mimeType,
-      size_bytes: params.sizeBytes,
-      thumbnail_path: params.thumbnailPath,
-      moderation_status: params.moderationStatus,
-    })
-    .select("id, storage_path")
-    .single();
-
-  if (error) {
-    throw error;
-  }
-  return data as { id: string; storage_path: string };
-}
 
 // Test seam: override these in route tests to avoid Supabase env requirements.
 export const __test = {
@@ -216,9 +110,7 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
   }
 
   // 7) Insert media row
-  // Organizer uploads always land as visible regardless of moderation mode.
-  const moderationStatus: "visible" | "pending" =
-    eventContext.moderationEnabled && user.id !== eventContext.organizerId ? "pending" : "visible";
+  const moderationStatus = resolveModerationStatus({ eventContext, uploaderId: user.id });
 
   try {
     const inserted = await __test.insertMediaItem({
