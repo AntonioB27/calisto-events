@@ -336,6 +336,7 @@ export const APP_UI_HR: AppUiDict = {
     confirmKindFail: "Spremanje nije uspjelo. Pokušajte ponovno.",
     title: "Ispisi",
     subtitle: "Odaberite raspored, unesite podatke i otvorite prikaz spreman za ispis kad ste spremni.",
+    invitationsWeddingOnly: "Dizajni pozivnica trenutačno su dostupni za vjenčanja.",
     categoryInvitation: "Pozivnice",
     eventDetails: "Detalji događaja",
     eventDetailsModalTitle: "Detalji događaja",

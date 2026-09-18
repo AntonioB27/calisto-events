@@ -333,6 +333,7 @@ export const APP_UI_EN = {
     confirmKindFail: "Could not save. Try again.",
     title: "Prints",
     subtitle: "Choose a layout, add your details, and open the print-ready view when you are ready.",
+    invitationsWeddingOnly: "Invitation designs are currently available for wedding events.",
     categoryInvitation: "Invitations",
     eventDetails: "Event details",
     eventDetailsModalTitle: "Event details",

@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { AppBtn } from "@/components/app-ui/AppBtn";
 import type { EventKind } from "@/lib/event-kind";
 import type { Locale } from "@/lib/i18n";
 import { InvitationsEditor } from "./InvitationsEditor";
@@ -81,6 +84,26 @@ export function PrintsTab(props: PrintsTabProps) {
   const { eventId, eventKind } = props;
   const ui = useAppUi();
   const t = ui.printsTab;
+  const router = useRouter();
+  const [savingKind, setSavingKind] = useState(false);
+  const [kindError, setKindError] = useState<string | null>(null);
+  async function confirmKind(eventKind: EventKind) {
+    setSavingKind(true);
+    setKindError(null);
+    try {
+      const response = await fetch(`/api/events/${eventId}/prints-confirm-event-kind`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventKind }),
+      });
+      if (!response.ok) throw new Error();
+      router.refresh();
+    } catch {
+      setKindError(t.confirmKindFail);
+    } finally {
+      setSavingKind(false);
+    }
+  }
   const isWedding = eventKind === 'wedding';
 
   return (
@@ -145,7 +168,26 @@ export function PrintsTab(props: PrintsTabProps) {
         </div>
       </Link>
 
-      {isWedding && <InvitationsEditor {...props} />}
+      {isWedding ? <InvitationsEditor {...props} /> : (
+        <section style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: 18 }}>
+          <h2 style={{ color: TEXT, fontSize: 18, fontWeight: 600 }}>{t.categoryInvitation}</h2>
+          <p style={{ color: MUTED, fontSize: 14, marginTop: 8 }}>{t.invitationsWeddingOnly}</p>
+          {!props.printsEventKindSetAt && (
+            <>
+              <p style={{ color: TEXT, marginTop: 16, marginBottom: 12 }}>{t.kindTitle}</p>
+              <div className="flex flex-wrap gap-3">
+                <AppBtn type="button" variant="gold" disabled={savingKind} onClick={() => void confirmKind("wedding")}>
+                  {t.kindOptionWedding}
+                </AppBtn>
+                <AppBtn type="button" variant="outline" disabled={savingKind} onClick={() => void confirmKind("generic")}>
+                  {t.kindOptionGeneric}
+                </AppBtn>
+              </div>
+              {kindError && <p role="alert" style={{ marginTop: 12, color: "var(--app-danger)" }}>{kindError}</p>}
+            </>
+          )}
+        </section>
+      )}
 
     </section>
   );
