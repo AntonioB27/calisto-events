@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { LanguageSelectorBar } from "@/components/LanguageSelectorBar";
 import { MobileNavMenu } from "@/components/MobileNavMenu";
 import { ScrollSpyNav } from "@/components/ScrollSpyNav";
@@ -31,7 +32,7 @@ export function SiteHeader({ copy, locale, isLoggedIn }: SiteHeaderProps) {
         }}
       >
         {/* Brand */}
-        <a
+        <Link
           href="#top"
           className="min-w-0 shrink-0 focus:outline-none"
           style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, marginRight: 4 }}
@@ -59,7 +60,7 @@ export function SiteHeader({ copy, locale, isLoggedIn }: SiteHeaderProps) {
             Calisto
             <em style={{ fontStyle: "italic", color: "var(--gold)", fontWeight: 400 }}>.</em>
           </span>
-        </a>
+        </Link>
 
         {/* Nav: centered pill, desktop only */}
         <div className="hidden min-w-0 flex-1 md:block">
@@ -81,7 +82,15 @@ export function SiteHeader({ copy, locale, isLoggedIn }: SiteHeaderProps) {
         <div className="hidden shrink-0 items-center gap-2 md:flex">
           <LanguageSelectorBar copy={copy} locale={locale} variant="header" />
           <ThemeToggleButton copy={copy} />
-          <a
+          {!isLoggedIn && (
+            <Link
+              href="/dashboard"
+              className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-[var(--hair-2)] px-4 py-2 text-[13.5px] font-semibold text-[var(--cream)] transition-colors hover:bg-[var(--glass-bg)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--gold)]"
+            >
+              {copy.goToApp}
+            </Link>
+          )}
+          <Link
             href={ctaHref}
             className="inline-flex items-center gap-1.5"
             style={{
@@ -100,13 +109,13 @@ export function SiteHeader({ copy, locale, isLoggedIn }: SiteHeaderProps) {
           >
             {isLoggedIn ? copy.goToApp : copy.heroPrimaryCta}
             <span aria-hidden>→</span>
-          </a>
+          </Link>
         </div>
 
         {/* Right: compact CTA + hamburger, mobile only */}
         <div className="flex shrink-0 items-center gap-2 md:hidden">
-          <a
-            href={ctaHref}
+          <Link
+            href="/dashboard"
             style={{
               fontFamily: "var(--font-sans)",
               fontSize: 12,
@@ -118,8 +127,8 @@ export function SiteHeader({ copy, locale, isLoggedIn }: SiteHeaderProps) {
               textDecoration: "none",
             }}
           >
-            {isLoggedIn ? copy.goToApp : copy.heroPrimaryCta}
-          </a>
+            {copy.goToApp}
+          </Link>
           <MobileNavMenu
             copy={copy}
             locale={locale}
