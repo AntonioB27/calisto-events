@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePostHog } from "posthog-js/react";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+
+const EVENT_MEDIA_BUCKET = "event-media";
 
 type UploadItem = {
   id: string;
@@ -48,7 +51,7 @@ function mapUploadError(status: number, raw: unknown, mimeType?: string): string
       const isVideo = mimeType?.startsWith("video/");
       return isVideo
         ? "This video is too large. Videos must be under 280 MB."
-        : "This photo is too large. Photos must be under 35 MB.";
+        : "This photo is too large. Photos must be under 50 MB.";
     }
 
     case 415:
@@ -60,11 +63,56 @@ function mapUploadError(status: number, raw: unknown, mimeType?: string): string
     case 500:
       if (code === "Upload failed.")       return "The file reached the server but couldn't be saved to storage. Please try again.";
       if (code === "Failed to save upload.") return "The file was stored but couldn't be recorded. Please try again.";
+      if (code === "Could not start upload.") return "Couldn't start the upload. Please try again.";
       return "A server error occurred. Please try again in a moment.";
 
     default:
       return `Upload failed (HTTP ${status}). Please try again.`;
   }
+}
+
+type UploadResult = { ok: true } | { ok: false; status: number; body: unknown };
+
+async function uploadPhotoViaApi(eventId: string, file: File): Promise<UploadResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`/api/events/${eventId}/guest-upload`, { method: "POST", body: formData });
+  if (res.ok) return { ok: true };
+  const body = await res.json().catch(() => ({}));
+  return { ok: false, status: res.status, body };
+}
+
+// Uploads the video straight to Supabase Storage from the browser via a signed URL,
+// bypassing the Vercel Function request-body limit that a proxied upload would hit.
+async function uploadVideoDirect(eventId: string, file: File): Promise<UploadResult> {
+  const initRes = await fetch(`/api/events/${eventId}/guest-video-upload/init`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mimeType: file.type, sizeBytes: file.size }),
+  });
+  if (!initRes.ok) {
+    const body = await initRes.json().catch(() => ({}));
+    return { ok: false, status: initRes.status, body };
+  }
+  const { path, token } = (await initRes.json()) as { path: string; token: string };
+
+  const { error: storageError } = await getSupabaseBrowserClient()
+    .storage.from(EVENT_MEDIA_BUCKET)
+    .uploadToSignedUrl(path, token, file, { contentType: file.type });
+  if (storageError) {
+    return { ok: false, status: 500, body: { error: "Upload failed." } };
+  }
+
+  const finalizeRes = await fetch(`/api/events/${eventId}/guest-video-upload/finalize`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ path }),
+  });
+  if (!finalizeRes.ok) {
+    const body = await finalizeRes.json().catch(() => ({}));
+    return { ok: false, status: finalizeRes.status, body };
+  }
+  return { ok: true };
 }
 
 // ── Spinner SVG ───────────────────────────────────────────────────────────────
@@ -348,21 +396,20 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
 
     processingRef.current = true;
 
-    const formData = new FormData();
-    formData.append("file", pending.file);
+    const isVideo = pending.file.type.startsWith("video/");
+    const upload = isVideo ? uploadVideoDirect(eventId, pending.file) : uploadPhotoViaApi(eventId, pending.file);
 
     Promise.resolve()
       .then(() => {
         setUploadingId(pending.id);
-        return fetch(`/api/events/${eventId}/guest-upload`, { method: "POST", body: formData });
+        return upload;
       })
-      .then(async (res) => {
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
+      .then((result) => {
+        if (!result.ok) {
           setQueue((prev) =>
             prev.map((item) =>
               item.id === pending.id
-                ? { ...item, status: "error", errorMessage: mapUploadError(res.status, body, pending.file.type) }
+                ? { ...item, status: "error", errorMessage: mapUploadError(result.status, result.body, pending.file.type) }
                 : item,
             ),
           );
@@ -370,7 +417,7 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
           setQueue((prev) => prev.map((item) => (item.id === pending.id ? { ...item, status: "done" } : item)));
           posthog.capture(ANALYTICS_EVENTS.GUEST_MEDIA_UPLOADED, {
             event_id: eventId,
-            file_type: pending.file.type.startsWith("video/") ? "video" : "photo",
+            file_type: isVideo ? "video" : "photo",
             file_size_mb: Math.round(pending.file.size / 1024 / 1024 * 10) / 10,
           });
           onUploadedRef.current();
