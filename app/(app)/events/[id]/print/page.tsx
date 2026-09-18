@@ -1,38 +1,29 @@
+import { LOCALES } from "@/lib/i18n";
+import { InvitationArtwork } from "../_tabs/InvitationArtwork";
+import { InvitationPreflight } from "../_tabs/InvitationPreflight";
+import { InvitationCanvas } from "../_tabs/InvitationCanvas";
+import { mergeInvitationDocuments } from "@/lib/event-print/invitation-document";
+import { invitationWorkspaceCopy } from "@/lib/event-print/invitation-workspace-copy";
 import Link from "next/link";
 
 import { EventPrintToolbar } from "./EventPrintToolbar";
-import { QrThemedPrintSheet } from "./QrThemedPrintSheet";
 import { PrintScreen } from "./PrintScreen";
-import { WeddingInviteBlueFloraPrintSheet } from "./WeddingInviteBlueFloraPrintSheet";
-import { WeddingInviteCherryBlossomPrintSheet } from "./WeddingInviteCherryBlossomPrintSheet";
-import { WeddingInviteGeometricPrintSheet } from "./WeddingInviteGeometricPrintSheet";
-import { WeddingInviteWatercolorCoastPrintSheet } from "./WeddingInviteWatercolorCoastPrintSheet";
-import { WeddingInviteGoldArchFloralPrintSheet } from "./WeddingInviteGoldArchFloralPrintSheet";
-import { WeddingInviteGrayscaleGlitterPrintSheet } from "./WeddingInviteGrayscaleGlitterPrintSheet";
-import { WeddingInviteNavyBotanicalPrintSheet } from "./WeddingInviteNavyBotanicalPrintSheet";
-import { WeddingInviteOliveGoldPrintSheet } from "./WeddingInviteOliveGoldPrintSheet";
-import { WeddingInviteTerracottaPillPrintSheet } from "./WeddingInviteTerracottaPillPrintSheet";
-import { WeddingInviteGoldCirclesPhotoPrintSheet } from "./WeddingInviteGoldCirclesPhotoPrintSheet";
-import { parseInvitationFieldVisibility } from "@/lib/event-print/invitation-field-visibility";
-import type { WeddingInviteDetails, WeddingInviteDetailsStrings } from "@/lib/event-print/wedding-invite-details";
 import { getAppStrings } from "@/lib/app-ui";
 import { getEventAdminAccess } from "@/lib/event-admin-access";
 import { splitEventTitleStored } from "@/lib/event-title";
 import { normalizeEventKind } from "@/lib/event-kind";
 import { mergeInvitationDraftWithDefaults } from "@/lib/event-print/merge-invitation-print-fields";
 import {
-  DEFAULT_POSTER_TEMPLATE,
   parsePosterContentLocale,
   parsePrintPaper,
   parsePrintRouteTemplate,
   POSTER_LANG_QUERY,
 } from "@/lib/event-print/print-options";
-import { getPrintTemplateDef, isInvitationPrintTemplateId, isTableQrTemplateId, isQrThemedPrintTemplateId, type QrThemedTemplateId } from "@/lib/event-print/template-catalog";
+import { getPrintTemplateDef, isInvitationPrintTemplateId, isQrThemedPrintTemplateId, type QrThemedTemplateId } from "@/lib/event-print/template-catalog";
 import { getWebJoinUrl } from "@/lib/join-link";
 import { getPublicOrigin } from "@/lib/public-origin";
 import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 import { getUiLocale } from "@/lib/ui-locale";
-import { LOCALES } from "@/lib/i18n";
 
 import "./print-sheet.css";
 
@@ -56,7 +47,6 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
   const posterLocale = parsePosterContentLocale(pickQueryValue(resolvedSearchParams[POSTER_LANG_QUERY]), uiLocale);
   const posterDict = getAppStrings(posterLocale);
   const deniedPrint = uiDict.print;
-  const posterPrint = posterDict.print;
 
   const supabase = await createSupabaseAuthServerClient();
   const {
@@ -148,73 +138,40 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
     );
   }
 
-  let qrThemedJoinUrl: string | null = null;
 
-  let mergedInvitation: Record<string, string> | null = null;
+
   if (isInvitationPrint && invitationAllowed) {
-    const { data: draftRow } = await supabase
-      .from("event_print_template_instances")
-      .select("field_values")
-      .eq("event_id", id)
-      .eq("template_id", routeTemplate)
-      .maybeSingle();
-
-    const rawFv = (draftRow as { field_values?: unknown } | null)?.field_values;
-    const stored =
-      rawFv && typeof rawFv === "object" && !Array.isArray(rawFv)
-        ? Object.fromEntries(
-            Object.entries(rawFv as Record<string, unknown>)
-              .filter(([, v]) => typeof v === "string")
-              .map(([k, v]) => [k, v as string]),
-          )
-        : undefined;
-
-    const { name: eventDisplayName } = splitEventTitleStored(String(event.title ?? ""));
-    const eventDateIso = typeof event.event_date === "string" ? event.event_date : "";
-    mergedInvitation = mergeInvitationDraftWithDefaults(routeTemplate, eventDisplayName, eventDateIso, posterLocale, stored);
-  }
-
-  const inviteVisibility = mergedInvitation
-    ? parseInvitationFieldVisibility(mergedInvitation)
-    : null;
-
-  const inviteDetails: WeddingInviteDetails | null =
-    isInvitationPrint && mergedInvitation
-      ? {
-          connectorSymbol: mergedInvitation.connector_symbol ?? "ampersand",
-          gatheringType: mergedInvitation.gathering_type ?? "",
-          gatheringAddress: mergedInvitation.gathering_address ?? "",
-          gatheringTime: mergedInvitation.gathering_time ?? "",
-          partnerAGatheringAddress: mergedInvitation.partner_a_gathering_address ?? "",
-          partnerAGatheringTime: mergedInvitation.partner_a_gathering_time ?? "",
-          partnerBGatheringAddress: mergedInvitation.partner_b_gathering_address ?? "",
-          partnerBGatheringTime: mergedInvitation.partner_b_gathering_time ?? "",
-          churchAddress: mergedInvitation.church_address ?? "",
-          churchTime: mergedInvitation.church_time ?? "",
-          dinnerAddress: mergedInvitation.dinner_address ?? "",
-          dinnerTime: mergedInvitation.dinner_time ?? "",
-          quoteText: mergedInvitation.quote_text ?? "",
-          quoteAuthor: mergedInvitation.quote_author ?? "",
-        }
-      : null;
-
-  const detailStrings: WeddingInviteDetailsStrings = {
-    gatheringTitle: posterPrint.inviteDetailsGathering,
-    churchTitle: posterPrint.inviteDetailsChurch,
-    dinnerTitle: posterPrint.inviteDetailsDinner,
-  };
-
-  const eventDateIso = typeof event.event_date === "string" ? event.event_date : "";
-
-  let goldCirclesPhotoUrl: string | null = null;
-  if (isInvitationPrint && mergedInvitation && routeTemplate === "wedding-invite-gold-circles-photo") {
-    const photoPath = mergedInvitation.couple_photo_path ?? "";
-    if (photoPath) {
-      const { data: urlData } = await supabase.storage
-        .from("event-media")
-        .createSignedUrl(photoPath, 3600);
-      goldCirclesPhotoUrl = urlData?.signedUrl ?? null;
+    if (!access.isPrimaryOrganizer) return <main>{deniedPrint.deniedDeny}</main>;
+    const { data: rows, error } = await supabase.from("event_print_template_instances")
+      .select("template_id, field_values").eq("event_id", id);
+    if (error) throw new Error("Could not load invitation. Please retry.");
+    const drafts: Record<string, Record<string, string>> = {};
+    for (const row of rows ?? []) {
+      if (typeof row.template_id === "string" && row.field_values && typeof row.field_values === "object" && !Array.isArray(row.field_values)) {
+        drafts[row.template_id] = Object.fromEntries(Object.entries(row.field_values).filter((entry): entry is [string, string] => typeof entry[1] === "string"));
+      }
     }
+    const { name } = splitEventTitleStored(String(event.title ?? ""));
+    const date = typeof event.event_date === "string" ? event.event_date : "";
+    const fields = mergeInvitationDraftWithDefaults(routeTemplate, name, date, posterLocale, mergeInvitationDocuments(drafts));
+    const language = parsePosterContentLocale(fields.content_locale, posterLocale);
+    let photoUrl: string | null = null;
+    if (routeTemplate === "wedding-invite-gold-circles-photo" && fields.couple_photo_path) {
+      if (!fields.couple_photo_path.startsWith(`${id}/invite-photo/`) || fields.couple_photo_path.includes("..")) throw new Error("Invalid invitation photo.");
+      const { data, error: photoError } = await supabase.storage.from("event-media").createSignedUrl(fields.couple_photo_path, 3600);
+      if (photoError || !data?.signedUrl) throw new Error("Could not load invitation photo. Please retry.");
+      photoUrl = data.signedUrl;
+    }
+    const copy = invitationWorkspaceCopy(uiLocale);
+    return <main>
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Dancing+Script:wght@500;600;700&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet" />
+      <EventPrintToolbar eventId={id} activeTemplate={routeTemplate} eventKind={storedEventKind} paper="a4" posterLang={language}
+        chromePrint={uiDict.print} localeOptionLabels={uiDict.languagePicker.locales} backHref={`/events/${id}/invitations`}
+        backLabel={uiDict.printsTab.categoryInvitation} sheetHelperLine={copy.productionHint} uiLocale={uiLocale} />
+      <div className="invitation-print-help"><InvitationPreflight fields={fields} locale={uiLocale} templateId={routeTemplate} targetId="invitation-print-proof" /></div>
+      <div className="invitation-print-proof" id="invitation-print-proof" lang={language}><InvitationCanvas fields={fields}><InvitationArtwork templateId={routeTemplate} fields={fields} eventDateIso={date} locale={language} photoUrl={photoUrl} /></InvitationCanvas></div>
+    </main>;
   }
 
   return (
@@ -270,190 +227,7 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
           </div>
         )}
 
-        <div lang={posterLocale} className={isInvitationPrint ? "print-invite-page-root" : undefined}>
-          {isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-olive-gold-frame" ? (
-            <WeddingInviteOliveGoldPrintSheet
-              paper={paper}
-              partnerA={mergedInvitation.partner_a ?? ""}
-              partnerB={mergedInvitation.partner_b ?? ""}
-              extraLine={mergedInvitation.extra_line ?? ""}
-              eventDateIso={eventDateIso}
-              locale={posterLocale}
-              strings={{
-                withLove: posterPrint.inviteOliveWithLove,
-                cordiallyLine1: posterPrint.inviteOliveCordiallyLine1,
-                cordiallyLine2: posterPrint.inviteOliveCordiallyLine2,
-              }}
-              details={inviteDetails}
-              detailStrings={detailStrings}
-              visibility={inviteVisibility!}
-            />
-          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-cherry-blossom" ? (
-            <WeddingInviteCherryBlossomPrintSheet
-              paper={paper}
-              partnerA={mergedInvitation.partner_a ?? ""}
-              partnerB={mergedInvitation.partner_b ?? ""}
-              extraLine={mergedInvitation.extra_line ?? ""}
-              eventDateIso={eventDateIso}
-              locale={posterLocale}
-              strings={{
-                preambleStart: posterPrint.inviteCherryPreambleStart,
-                preambleScript: posterPrint.inviteCherryPreambleScript,
-                preambleMid: posterPrint.inviteCherryPreambleMid,
-                preambleEnd: posterPrint.inviteCherryPreambleEnd,
-                and: posterPrint.inviteAnd,
-              }}
-              details={inviteDetails}
-              detailStrings={detailStrings}
-              visibility={inviteVisibility!}
-            />
-          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-gold-arch-floral" ? (
-            <WeddingInviteGoldArchFloralPrintSheet
-              paper={paper}
-              partnerA={mergedInvitation.partner_a ?? ""}
-              partnerB={mergedInvitation.partner_b ?? ""}
-              extraLine={mergedInvitation.extra_line ?? ""}
-              eventDateIso={eventDateIso}
-              locale={posterLocale}
-              strings={{
-                headline: posterPrint.inviteGoldArchHeadline,
-                and: posterPrint.inviteAnd,
-              }}
-              details={inviteDetails}
-              detailStrings={detailStrings}
-              visibility={inviteVisibility!}
-            />
-          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-terra-pill" ? (
-            <WeddingInviteTerracottaPillPrintSheet
-              paper={paper}
-              partnerA={mergedInvitation.partner_a ?? ""}
-              partnerB={mergedInvitation.partner_b ?? ""}
-              extraLine={mergedInvitation.extra_line ?? ""}
-              eventDateIso={eventDateIso}
-              locale={posterLocale}
-              strings={{
-                pleaseJoinUsFor: posterPrint.inviteTerraPleaseJoinUsFor,
-                theWeddingOf: posterPrint.inviteTerraTheWeddingOf,
-                and: posterPrint.inviteAnd,
-              }}
-              details={inviteDetails}
-              detailStrings={detailStrings}
-              visibility={inviteVisibility!}
-            />
-          ) : isInvitationPrint && mergedInvitation && routeTemplate === "wedding-invite-grayscale-glitter" ? (
-            <WeddingInviteGrayscaleGlitterPrintSheet
-              paper={paper}
-              partnerA={mergedInvitation.partner_a ?? ""}
-              partnerB={mergedInvitation.partner_b ?? ""}
-              connectorSymbol={mergedInvitation.connector_symbol ?? "ampersand"}
-              extraLine={mergedInvitation.extra_line ?? ""}
-              eventDateIso={eventDateIso}
-              locale={posterLocale}
-              strings={{
-                togetherWithFamilies: posterPrint.inviteGlitterTogetherFamilies,
-                cordiallyInviteCaps: posterPrint.inviteGlitterCordiallyInviteCaps,
-                weddingWord: posterPrint.inviteGlitterWeddingWord,
-                on: posterPrint.inviteGlitterOn,
-                and: posterPrint.inviteAnd,
-              }}
-              visibility={inviteVisibility!}
-            />
-          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-navy-botanical" ? (
-            <WeddingInviteNavyBotanicalPrintSheet
-              paper={paper}
-              partnerA={mergedInvitation.partner_a ?? ""}
-              partnerB={mergedInvitation.partner_b ?? ""}
-              extraLine={mergedInvitation.extra_line ?? ""}
-              eventDateIso={eventDateIso}
-              locale={posterLocale}
-              strings={{
-                togetherWithOurFamilies: posterPrint.inviteTogetherWithOurFamilies,
-                honorUniteMarriage: posterPrint.inviteHonorUniteMarriage,
-                and: posterPrint.inviteAnd,
-              }}
-              details={inviteDetails}
-              detailStrings={detailStrings}
-              visibility={inviteVisibility!}
-            />
-          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-watercolor-coast" ? (
-            <WeddingInviteWatercolorCoastPrintSheet
-              paper={paper}
-              partnerA={mergedInvitation.partner_a ?? ""}
-              partnerB={mergedInvitation.partner_b ?? ""}
-              venue={mergedInvitation.venue ?? ""}
-              venueLine2={mergedInvitation.venue_line_2 ?? ""}
-              extraLine={mergedInvitation.extra_line ?? ""}
-              eventDateIso={eventDateIso}
-              locale={posterLocale}
-              strings={{
-                pleaseJoinUs: posterPrint.inviteWatercolorPleaseJoinUs,
-                forOurCeremony: posterPrint.inviteWatercolorForCeremony,
-                and: posterPrint.inviteAnd,
-                receptionToFollow: posterPrint.inviteReceptionFollow,
-              }}
-              details={inviteDetails}
-              detailStrings={detailStrings}
-              visibility={inviteVisibility!}
-            />
-          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-geometric" ? (
-            <WeddingInviteGeometricPrintSheet
-              paper={paper}
-              partnerA={mergedInvitation.partner_a ?? ""}
-              partnerB={mergedInvitation.partner_b ?? ""}
-              venue={mergedInvitation.venue ?? ""}
-              venueLine2={mergedInvitation.venue_line_2 ?? ""}
-              extraLine={mergedInvitation.extra_line ?? ""}
-              eventDateIso={eventDateIso}
-              locale={posterLocale}
-              strings={{
-                withJoyYouAre: posterPrint.inviteWithJoyYouAre,
-                invitedToWeddingOf: posterPrint.inviteInvitedToWeddingOf,
-                and: posterPrint.inviteAnd,
-                receptionToFollow: posterPrint.inviteReceptionFollow,
-              }}
-              details={inviteDetails}
-              detailStrings={detailStrings}
-              visibility={inviteVisibility!}
-            />
-          ) : isInvitationPrint && mergedInvitation && inviteDetails && routeTemplate === "wedding-invite-blue-floral" ? (
-            <WeddingInviteBlueFloraPrintSheet
-              paper={paper}
-              partnerA={mergedInvitation.partner_a ?? ""}
-              partnerB={mergedInvitation.partner_b ?? ""}
-              extraLine={mergedInvitation.extra_line ?? ""}
-              eventDateIso={eventDateIso}
-              locale={posterLocale}
-              strings={{
-                withJoyYouAre: posterPrint.inviteWithJoyYouAre,
-                invitedToWeddingOf: posterPrint.inviteInvitedToWeddingOf,
-                and: posterPrint.inviteAnd,
-              }}
-              details={inviteDetails}
-              detailStrings={detailStrings}
-              visibility={inviteVisibility!}
-            />
-          ) : isInvitationPrint && mergedInvitation && routeTemplate === "wedding-invite-gold-circles-photo" ? (
-            <WeddingInviteGoldCirclesPhotoPrintSheet
-              paper={paper}
-              partnerA={mergedInvitation.partner_a ?? ""}
-              partnerB={mergedInvitation.partner_b ?? ""}
-              venue={mergedInvitation.venue ?? ""}
-              extraLine={mergedInvitation.extra_line ?? ""}
-              eventDateIso={eventDateIso}
-              locale={posterLocale}
-              photoUrl={goldCirclesPhotoUrl}
-              cropX={parseFloat(mergedInvitation.couple_photo_crop_x ?? "") || 0}
-              cropY={parseFloat(mergedInvitation.couple_photo_crop_y ?? "") || 0}
-              cropScale={parseFloat(mergedInvitation.couple_photo_crop_scale ?? "") || 1}
-              strings={{
-                youreInvited: posterPrint.inviteGoldCirclesYoureInvited,
-                and: posterPrint.inviteAnd,
-                receptionToFollow: posterPrint.inviteReceptionFollow,
-              }}
-              visibility={inviteVisibility!}
-            />
-          ) : null}
-        </div>
+
       </div>
     </main>
   );

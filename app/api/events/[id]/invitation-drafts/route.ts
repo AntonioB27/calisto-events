@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
-import { listPrintTemplatesForEventKind } from "@/lib/event-print/template-catalog";
-import { validatePrintTemplateFieldValues } from "@/lib/event-print/validate-print-template-fields";
+import { INVITATION_DOCUMENT_ID, validateInvitationDocument } from "@/lib/event-print/invitation-document";
 
 export const runtime = "nodejs";
 
-/** Save all invitation designs in one database statement, so designs cannot partially save. */
+/** Atomically save one canonical invitation with optimistic concurrency. */
 export async function POST(request: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id: eventId } = await ctx.params;
   const client = getSupabaseAuthServerClient();
@@ -25,17 +24,25 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
   if (!fields || typeof fields !== "object" || Array.isArray(fields)) {
     return NextResponse.json({ error: "Invalid invitation fields." }, { status: 400 });
   }
-  const rows = [];
-  for (const template of listPrintTemplatesForEventKind("wedding").filter((t) => t.category === "invitation")) {
-    const result = validatePrintTemplateFieldValues(template.id, fields);
-    if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
-    rows.push({ event_id: eventId, template_id: template.id, field_values: result.values });
+  if (!Object.prototype.hasOwnProperty.call(body, "expectedFields") ||
+      (body.expectedFields !== null && (typeof body.expectedFields !== "object" || Array.isArray(body.expectedFields)))) {
+    return NextResponse.json({ error: "Missing draft revision." }, { status: 400 });
   }
-  const { error: saveError } = await client.from("event_print_template_instances")
-    .upsert(rows, { onConflict: "event_id,template_id" });
+  const result = validateInvitationDocument(fields, eventId);
+  if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
+  const row = { event_id: eventId, template_id: INVITATION_DOCUMENT_ID, field_values: result.values };
+  // JSONB equality is checked by Postgres in the same statement as the update.
+  // Insert-on-conflict DO NOTHING also protects simultaneous first saves.
+  const query = body.expectedFields === null
+    ? client.from("event_print_template_instances").upsert(row, { onConflict: "event_id,template_id", ignoreDuplicates: true }).select("field_values")
+    : client.from("event_print_template_instances").update({ field_values: result.values })
+        .eq("event_id", eventId).eq("template_id", INVITATION_DOCUMENT_ID)
+        .eq("field_values", JSON.stringify(body.expectedFields)).select("field_values");
+  const { data: saved, error: saveError } = await query;
   if (saveError) {
     console.error("[invitation-drafts] save failed", saveError);
     return NextResponse.json({ error: "Could not save invitation." }, { status: 500 });
   }
-  return NextResponse.json({ ok: true });
+  if (!saved?.length) return NextResponse.json({ error: "Draft changed elsewhere." }, { status: 409 });
+  return NextResponse.json({ ok: true, fieldValues: result.values });
 }

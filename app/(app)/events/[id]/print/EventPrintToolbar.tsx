@@ -1,5 +1,7 @@
 "use client";
 
+import { prepareInvitationPrint } from "@/lib/event-print/prepare-invitation-print";
+import { invitationWorkspaceCopy } from "@/lib/event-print/invitation-workspace-copy";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -8,7 +10,6 @@ import type { AppUiDict } from "@/lib/app-ui/en";
 import type { EventKind } from "@/lib/event-kind";
 import type { Locale } from "@/lib/i18n";
 import {
-  POSTER_LANG_QUERY,
   type PrintPaperId,
   type PrintRouteTemplateId,
 } from "@/lib/event-print/print-options";
@@ -29,6 +30,7 @@ export type EventPrintToolbarProps = Readonly<{
   backHref: string;
   backLabel: string;
   sheetHelperLine: string;
+  uiLocale?: Locale;
 }>;
 
 function buildActiveLabel(tid: PrintRouteTemplateId, p: AppUiDict["print"]): string {
@@ -78,9 +80,22 @@ export function EventPrintToolbar({
   chromePrint,
   backHref,
   backLabel,
+  uiLocale = "en",
 }: EventPrintToolbarProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const p = chromePrint;
+  const copy = invitationWorkspaceCopy(uiLocale);
+  const [preparing, setPreparing] = useState(false);
+  const [printError, setPrintError] = useState(false);
+  async function print() {
+    setPreparing(true); setPrintError(false);
+    try {
+      const proof = document.querySelector<HTMLElement>('[data-invitation-proof]');
+      if (proof) await Promise.race([prepareInvitationPrint(proof), new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 20000))]);
+      window.print();
+    } catch { setPrintError(true); }
+    finally { setPreparing(false); }
+  }
   const isInvitationView =
     isInvitationPrintTemplateId(activeTemplate) ||
     isQrThemedPrintTemplateId(activeTemplate);
@@ -97,14 +112,14 @@ export function EventPrintToolbar({
         <span className="print-topbar__title">{activeLabel}</span>
 
         <div className="print-topbar__actions">
-          <button
+          {!isInvitationPrintTemplateId(activeTemplate) && <button
             className="print-change-theme-btn"
             onClick={() => setPickerOpen(true)}
             type="button"
           >
             <GridIcon />
             <span className="print-change-theme-btn__text">{p.changeTheme}</span>
-          </button>
+          </button>}
 
           {!isInvitationView ? (
             <>
@@ -123,14 +138,16 @@ export function EventPrintToolbar({
               variant="gold"
               size="sm"
               type="button"
-              onClick={() => window.print()}
+              disabled={preparing}
+              onClick={() => void print()}
             >
-              {p.print}
+              {preparing ? copy.preparing : p.print}
             </AppBtn>
           )}
         </div>
       </div>
 
+      {printError && <p className="invitation-print-help" role="alert">{copy.assetFail}</p>}
       {/* ── Template picker bottom sheet ───────────────────────────── */}
       <TemplatePicker
         isOpen={pickerOpen}

@@ -35,7 +35,7 @@ export default async function InvitationsPage({ params }: { params: Promise<{ id
   }
   const { name } = splitEventTitleStored(String(event.title ?? ui.defaults.eventTitle));
   return (
-    <main className="mx-auto w-full max-w-[960px] px-4 py-6 pb-20">
+    <main className="mx-auto w-full max-w-[1280px] px-4 py-6 pb-20">
       <Link href={`/events/${id}?tab=prints`} className="inline-flex items-center gap-2 text-sm text-[var(--app-muted)] hover:text-[var(--app-text)]">
         <span aria-hidden="true">←</span>{ui.print.backPrints}
       </Link>

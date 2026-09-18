@@ -367,7 +367,7 @@
   margin: 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
   font-style: italic;
-  font-size: clamp(12px, 2.85cqi, 17px);
+  font-size: calc((clamp(12px, 2.85cqi, 17px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   color: #4a4a5a;
   letter-spacing: 0.03em;
@@ -385,7 +385,7 @@
 .print-invite-bluefloral__nameGold {
   margin: 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
-  font-size: clamp(30px, 9.65cqi, 64px);
+  font-size: calc((clamp(30px, 9.65cqi, 64px)) * var(--invite-text-scale, 1));
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -396,7 +396,7 @@
 .print-invite-bluefloral__and {
   margin: 0;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(18px, 5.15cqi, 32px);
+  font-size: calc((clamp(18px, 5.15cqi, 32px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   color: #3a3a4a;
 }
@@ -413,7 +413,7 @@
   margin: 0;
   font-family: "Cormorant Garamond", serif;
   font-style: italic;
-  font-size: clamp(14px, 3.65cqi, 23px);
+  font-size: calc((clamp(14px, 3.65cqi, 23px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   color: #3a3a4a;
   letter-spacing: 0.05em;
@@ -438,7 +438,7 @@
 
 .print-invite-bluefloral__dateToken {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(13px, 3.2cqi, 19px);
+  font-size: calc((clamp(13px, 3.2cqi, 19px)) * var(--invite-text-scale, 1));
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -448,7 +448,7 @@
 
 .print-invite-bluefloral__dateSep {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(12px, 2.5cqi, 16px);
+  font-size: calc((clamp(12px, 2.5cqi, 16px)) * var(--invite-text-scale, 1));
   font-weight: 400;
   color: #9090a0;
   flex: 0 0 auto;
@@ -464,7 +464,7 @@
 .print-invite-bluefloral__venueLine {
   margin: 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(12px, 2.75cqi, 16px);
+  font-size: calc((clamp(12px, 2.75cqi, 16px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.1em;
   color: #4a4a5a;
@@ -476,7 +476,7 @@
   margin: 0;
   font-family: "Cormorant Garamond", serif;
   font-style: italic;
-  font-size: clamp(13px, 3.2cqi, 18px);
+  font-size: calc((clamp(13px, 3.2cqi, 18px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   color: #4a4a5a;
   letter-spacing: 0.03em;
@@ -577,7 +577,7 @@
   margin: 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
   font-style: italic;
-  font-size: clamp(12px, 2.75cqi, 16px);
+  font-size: calc((clamp(12px, 2.75cqi, 16px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   color: #5a4030;
   letter-spacing: 0.04em;
@@ -594,7 +594,7 @@
 .print-invite-geometric__nameGold {
   margin: 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
-  font-size: clamp(30px, 9.65cqi, 64px);
+  font-size: calc((clamp(30px, 9.65cqi, 64px)) * var(--invite-text-scale, 1));
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -605,7 +605,7 @@
 .print-invite-geometric__and {
   margin: 0;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(17px, 4.8cqi, 30px);
+  font-size: calc((clamp(17px, 4.8cqi, 30px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   color: #4a2a18;
 }
@@ -621,7 +621,7 @@
   margin: 0;
   font-family: "Cormorant Garamond", serif;
   font-style: italic;
-  font-size: clamp(13px, 3.4cqi, 21px);
+  font-size: calc((clamp(13px, 3.4cqi, 21px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   color: #4a2a18;
   letter-spacing: 0.05em;
@@ -646,7 +646,7 @@
 
 .print-invite-geometric__dateToken {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(12px, 2.95cqi, 18px);
+  font-size: calc((clamp(12px, 2.95cqi, 18px)) * var(--invite-text-scale, 1));
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -656,7 +656,7 @@
 
 .print-invite-geometric__dateSep {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(12px, 2.5cqi, 16px);
+  font-size: calc((clamp(12px, 2.5cqi, 16px)) * var(--invite-text-scale, 1));
   font-weight: 400;
   color: #c8a878;
   flex: 0 0 auto;
@@ -671,7 +671,7 @@
 .print-invite-geometric__venueLine {
   margin: 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(11px, 2.65cqi, 15px);
+  font-size: calc((clamp(11px, 2.65cqi, 15px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.1em;
   color: #5a4030;
@@ -682,7 +682,7 @@
   margin: 0;
   font-family: "Cormorant Garamond", serif;
   font-style: italic;
-  font-size: clamp(12px, 2.95cqi, 17px);
+  font-size: calc((clamp(12px, 2.95cqi, 17px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   color: #5a4030;
   letter-spacing: 0.03em;
@@ -786,7 +786,7 @@
   margin: 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
   font-style: italic;
-  font-size: clamp(12px, 2.85cqi, 17px);
+  font-size: calc((clamp(12px, 2.85cqi, 17px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   color: #2f4f4f;
   letter-spacing: 0.04em;
@@ -804,7 +804,7 @@
 .print-invite-watercolor__nameCaps {
   margin: 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
-  font-size: clamp(26px, 8.2cqi, 56px);
+  font-size: calc((clamp(26px, 8.2cqi, 56px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.28em;
@@ -816,7 +816,7 @@
 .print-invite-watercolor__and {
   margin: 0.5mm 0;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(16px, 4.5cqi, 28px);
+  font-size: calc((clamp(16px, 4.5cqi, 28px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   color: #2f4f4f;
   line-height: 1;
@@ -825,7 +825,7 @@
 .print-invite-watercolor__datePipe {
   margin: 2mm 0 1.5mm;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
-  font-size: clamp(11px, 2.65cqi, 16px);
+  font-size: calc((clamp(11px, 2.65cqi, 16px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.22em;
   text-indent: 0.22em;
@@ -845,7 +845,7 @@
 .print-invite-watercolor__ceremonyLine {
   margin: 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
-  font-size: clamp(9px, 2.2cqi, 13px);
+  font-size: calc((clamp(9px, 2.2cqi, 13px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.18em;
   text-indent: 0.18em;
@@ -858,7 +858,7 @@
   margin: 3mm 0 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
   font-style: italic;
-  font-size: clamp(12px, 2.85cqi, 17px);
+  font-size: calc((clamp(12px, 2.85cqi, 17px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   color: #2f4f4f;
   letter-spacing: 0.04em;
@@ -967,7 +967,7 @@
   margin: 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
   font-style: italic;
-  font-size: clamp(11px, 2.35cqi, 14px);
+  font-size: calc((clamp(11px, 2.35cqi, 14px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.28em;
   text-transform: uppercase;
@@ -983,7 +983,7 @@
     -apple-system,
     "Segoe UI",
     sans-serif;
-  font-size: clamp(11px, 2.35cqi, 14px);
+  font-size: calc((clamp(11px, 2.35cqi, 14px)) * var(--invite-text-scale, 1));
   font-weight: 400;
   letter-spacing: 0.02em;
   color: rgba(247, 242, 228, 0.92);
@@ -1001,7 +1001,7 @@
 .print-invite-navybotanical__nameScript {
   margin: 0;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(32px, 10.5cqi, 71px);
+  font-size: calc((clamp(32px, 10.5cqi, 71px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   line-height: 1.06;
   color: #fcf6e8;
@@ -1010,7 +1010,7 @@
 .print-invite-navybotanical__andScript {
   margin: 0;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(18px, 5.7cqi, 39px);
+  font-size: calc((clamp(18px, 5.7cqi, 39px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   line-height: 1.1;
   color: rgba(252, 246, 232, 0.95);
@@ -1028,7 +1028,7 @@
 .print-invite-navybotanical__dateCaps {
   margin: 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(13px, 3.15cqi, 18px);
+  font-size: calc((clamp(13px, 3.15cqi, 18px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -1040,7 +1040,7 @@
   margin: 0;
   font-family: "Cormorant Garamond", serif;
   font-style: italic;
-  font-size: clamp(12px, 2.7cqi, 16px);
+  font-size: calc((clamp(12px, 2.7cqi, 16px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.035em;
   line-height: 1.42;
@@ -1058,7 +1058,7 @@
 .print-invite-navybotanical__venueTitle {
   margin: 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(13px, 3.02cqi, 17px);
+  font-size: calc((clamp(13px, 3.02cqi, 17px)) * var(--invite-text-scale, 1));
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -1069,7 +1069,7 @@
 .print-invite-navybotanical__venueDetail {
   margin: 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(11px, 2.7cqi, 15px);
+  font-size: calc((clamp(11px, 2.7cqi, 15px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.04em;
   line-height: 1.45;
@@ -1079,7 +1079,7 @@
 .print-invite-navybotanical__reception {
   margin: 2mm 0 0;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(16px, 4.5cqi, 28px);
+  font-size: calc((clamp(16px, 4.5cqi, 28px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.03em;
   line-height: 1.35;
@@ -1176,7 +1176,7 @@
   margin: 0 0 1.5mm;
   max-width: 92%;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(16px, 4.35cqi, 28px);
+  font-size: calc((clamp(16px, 4.35cqi, 28px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.02em;
   line-height: 1.2;
@@ -1195,7 +1195,7 @@
 .print-invite-glitter__nameCaps {
   margin: 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
-  font-size: clamp(20px, 6.2cqi, 44px);
+  font-size: calc((clamp(20px, 6.2cqi, 44px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.22em;
   text-indent: 0.22em;
@@ -1207,7 +1207,7 @@
 .print-invite-glitter__andCaps {
   margin: 0.5mm 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(14px, 3.5cqi, 22px);
+  font-size: calc((clamp(14px, 3.5cqi, 22px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.08em;
   line-height: 1;
@@ -1218,7 +1218,7 @@
   margin: 2mm 0 0;
   max-width: 94%;
   font-family: "Montserrat", "Segoe UI", system-ui, sans-serif;
-  font-size: clamp(7px, 1.55cqi, 10px);
+  font-size: calc((clamp(7px, 1.55cqi, 10px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.34em;
   text-indent: 0.34em;
@@ -1230,7 +1230,7 @@
 .print-invite-glitter__weddingScript {
   margin: 1mm 0 0;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(44px, 13.5cqi, 92px);
+  font-size: calc((clamp(44px, 13.5cqi, 92px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   line-height: 0.95;
   letter-spacing: 0.01em;
@@ -1252,7 +1252,7 @@
 .print-invite-glitter__onCaps {
   margin: 1.5mm 0 0;
   font-family: "Montserrat", "Segoe UI", system-ui, sans-serif;
-  font-size: clamp(7px, 1.45cqi, 9px);
+  font-size: calc((clamp(7px, 1.45cqi, 9px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.38em;
   text-indent: 0.38em;
@@ -1265,7 +1265,7 @@
   margin: 0.5mm 0 0;
   max-width: 96%;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
-  font-size: clamp(11px, 2.75cqi, 16px);
+  font-size: calc((clamp(11px, 2.75cqi, 16px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.2em;
   text-indent: 0.2em;
@@ -1279,7 +1279,7 @@
   max-width: 92%;
   font-family: "Cormorant Garamond", serif;
   font-style: italic;
-  font-size: clamp(9px, 2.2cqi, 13px);
+  font-size: calc((clamp(9px, 2.2cqi, 13px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.04em;
   line-height: 1.5;
@@ -1299,7 +1299,7 @@
   margin: 0;
   font-family: "Cormorant Garamond", serif;
   font-style: italic;
-  font-size: clamp(9px, 2.2cqi, 13px);
+  font-size: calc((clamp(9px, 2.2cqi, 13px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.04em;
   line-height: 1.45;
@@ -1310,7 +1310,7 @@
   margin: 2.5mm 0 0;
   max-width: 90%;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(14px, 3.65cqi, 24px);
+  font-size: calc((clamp(14px, 3.65cqi, 24px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.02em;
   line-height: 1.25;
@@ -1420,7 +1420,7 @@
 .print-invite-terra__archTop {
   margin: 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
-  font-size: clamp(10px, 2.35cqi, 14px);
+  font-size: calc((clamp(10px, 2.35cqi, 14px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: lowercase;
@@ -1432,7 +1432,7 @@
 .print-invite-terra__subLine {
   margin: 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
-  font-size: clamp(10px, 2.35cqi, 14px);
+  font-size: calc((clamp(10px, 2.35cqi, 14px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: lowercase;
@@ -1452,7 +1452,7 @@
 .print-invite-terra__nameSerif {
   margin: 0;
   font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
-  font-size: clamp(22px, 6.65cqi, 46px);
+  font-size: calc((clamp(22px, 6.65cqi, 46px)) * var(--invite-text-scale, 1));
   font-weight: 700;
   letter-spacing: 0.28em;
   text-indent: 0.28em;
@@ -1482,7 +1482,7 @@
 .print-invite-terra__andScript {
   flex: 0 0 auto;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(17px, 5cqi, 32px);
+  font-size: calc((clamp(17px, 5cqi, 32px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.02em;
   line-height: 1;
@@ -1492,7 +1492,7 @@
 .print-invite-terra__dateCaps {
   margin: 2mm 0 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(11px, 2.85cqi, 17px);
+  font-size: calc((clamp(11px, 2.85cqi, 17px)) * var(--invite-text-scale, 1));
   font-weight: 700;
   letter-spacing: 0.14em;
   text-indent: 0.14em;
@@ -1513,7 +1513,7 @@
 .print-invite-terra__venueLine {
   margin: 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(9px, 2.15cqi, 13px);
+  font-size: calc((clamp(9px, 2.15cqi, 13px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.06em;
   line-height: 1.48;
@@ -1523,7 +1523,7 @@
 .print-invite-terra__archBot {
   margin: 2mm 0 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
-  font-size: clamp(10px, 2.35cqi, 14px);
+  font-size: calc((clamp(10px, 2.35cqi, 14px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: lowercase;
@@ -1615,7 +1615,7 @@
   z-index: 4;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
   font-weight: 700;
-  font-size: clamp(13px, 3.85cqi, 22px);
+  font-size: calc((clamp(13px, 3.85cqi, 22px)) * var(--invite-text-scale, 1));
   letter-spacing: 0.12em;
   color: #b89446;
   line-height: 1;
@@ -1651,7 +1651,7 @@
 .print-invite-goldarch__headline {
   margin: 0;
   font-family: "Montserrat", "Segoe UI", system-ui, sans-serif;
-  font-size: clamp(7px, 1.65cqi, 10px);
+  font-size: calc((clamp(7px, 1.65cqi, 10px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.32em;
   text-indent: 0.32em;
@@ -1672,7 +1672,7 @@
 .print-invite-goldarch__nameSans {
   margin: 0;
   font-family: "Montserrat", "Segoe UI", system-ui, sans-serif;
-  font-size: clamp(20px, 6.25cqi, 42px);
+  font-size: calc((clamp(20px, 6.25cqi, 42px)) * var(--invite-text-scale, 1));
   font-weight: 300;
   letter-spacing: 0.34em;
   text-indent: 0.34em;
@@ -1684,7 +1684,7 @@
 .print-invite-goldarch__andScript {
   margin: 0;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(16px, 4.85cqi, 30px);
+  font-size: calc((clamp(16px, 4.85cqi, 30px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.02em;
   line-height: 1;
@@ -1703,7 +1703,7 @@
 .print-invite-goldarch__detail {
   margin: 0;
   font-family: "Montserrat", "Segoe UI", system-ui, sans-serif;
-  font-size: clamp(8px, 2.05cqi, 12px);
+  font-size: calc((clamp(8px, 2.05cqi, 12px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.26em;
   text-indent: 0.26em;
@@ -1805,7 +1805,7 @@
 .print-invite-cherry__preambleLine {
   margin: 0;
   font-family: "Cormorant Garamond", "Times New Roman", serif;
-  font-size: clamp(12px, 3cqi, 16px);
+  font-size: calc((clamp(12px, 3cqi, 16px)) * var(--invite-text-scale, 1));
   font-weight: 400;
   font-style: italic;
   letter-spacing: 0.01em;
@@ -1817,7 +1817,7 @@
   margin: 0;
   font-family: "Dancing Script", "Brush Script MT", cursive;
   font-style: italic;
-  font-size: clamp(28px, 8.5cqi, 52px);
+  font-size: calc((clamp(28px, 8.5cqi, 52px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.01em;
   line-height: 1.1;
@@ -1843,7 +1843,7 @@
 .print-invite-cherry__name {
   margin: 0;
   font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
-  font-size: clamp(22px, 7.2cqi, 50px);
+  font-size: calc((clamp(22px, 7.2cqi, 50px)) * var(--invite-text-scale, 1));
   font-weight: 700;
   letter-spacing: 0.2em;
   text-indent: 0.2em;
@@ -1855,7 +1855,7 @@
 .print-invite-cherry__andScript {
   margin: 0.5mm 0;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(18px, 5.4cqi, 34px);
+  font-size: calc((clamp(18px, 5.4cqi, 34px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.02em;
   line-height: 1;
@@ -1874,7 +1874,7 @@
 .print-invite-cherry__dateCaps {
   margin: 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(10px, 2.6cqi, 15px);
+  font-size: calc((clamp(10px, 2.6cqi, 15px)) * var(--invite-text-scale, 1));
   font-weight: 700;
   letter-spacing: 0.16em;
   text-indent: 0.16em;
@@ -1886,7 +1886,7 @@
 .print-invite-cherry__detail {
   margin: 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(10px, 2.6cqi, 15px);
+  font-size: calc((clamp(10px, 2.6cqi, 15px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.03em;
   line-height: 1.55;
@@ -1897,7 +1897,7 @@
   margin: 0;
   font-family: "Cormorant Garamond", serif;
   font-style: italic;
-  font-size: clamp(10px, 2.6cqi, 15px);
+  font-size: calc((clamp(10px, 2.6cqi, 15px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.02em;
   line-height: 1.55;
@@ -1907,7 +1907,7 @@
 .print-invite-cherry__receptionScript {
   margin: 1mm 0 0;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(14px, 3.8cqi, 24px);
+  font-size: calc((clamp(14px, 3.8cqi, 24px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.02em;
   line-height: 1.2;
@@ -2008,7 +2008,7 @@
 .print-invite-olive__love {
   margin: 0 0 1mm;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(14px, 4cqi, 24px);
+  font-size: calc((clamp(14px, 4cqi, 24px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.02em;
   line-height: 1.15;
@@ -2019,7 +2019,7 @@
 .print-invite-olive__leadCaps {
   margin: 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(7px, 1.55cqi, 10px);
+  font-size: calc((clamp(7px, 1.55cqi, 10px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.34em;
   text-indent: 0.34em;
@@ -2047,7 +2047,7 @@
 .print-invite-olive__nameLine {
   margin: 0;
   font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
-  font-size: clamp(17px, 5.35cqi, 34px);
+  font-size: calc((clamp(17px, 5.35cqi, 34px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.18em;
   text-indent: 0.18em;
@@ -2059,7 +2059,7 @@
 .print-invite-olive__ampersand {
   margin: 1mm 0;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(26px, 8cqi, 52px);
+  font-size: calc((clamp(26px, 8cqi, 52px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   line-height: 0.85;
   color: #6d7658;
@@ -2077,7 +2077,7 @@
 .print-invite-olive__dateCaps {
   margin: 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(10px, 2.55cqi, 14px);
+  font-size: calc((clamp(10px, 2.55cqi, 14px)) * var(--invite-text-scale, 1));
   font-weight: 700;
   letter-spacing: 0.14em;
   text-indent: 0.14em;
@@ -2089,7 +2089,7 @@
 .print-invite-olive__detailLower {
   margin: 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(10px, 2.45cqi, 13px);
+  font-size: calc((clamp(10px, 2.45cqi, 13px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.06em;
   line-height: 1.55;
@@ -2100,7 +2100,7 @@
 .print-invite-olive__venueCaps {
   margin: 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(9px, 2.25cqi, 12px);
+  font-size: calc((clamp(9px, 2.25cqi, 12px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.16em;
   text-indent: 0.16em;
@@ -2112,7 +2112,7 @@
 .print-invite-olive__addressLower {
   margin: 0;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(9px, 2.25cqi, 12px);
+  font-size: calc((clamp(9px, 2.25cqi, 12px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.04em;
   line-height: 1.55;
@@ -2123,7 +2123,7 @@
 .print-invite-olive__footerScript {
   margin: 3mm 0 0;
   font-family: "Dancing Script", "Brush Script MT", cursive;
-  font-size: clamp(13px, 3.65cqi, 22px);
+  font-size: calc((clamp(13px, 3.65cqi, 22px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.02em;
   line-height: 1.25;
@@ -2144,7 +2144,7 @@
 .print-invite-details__label {
   margin: 0 0 0.5mm;
   font-family: "Cormorant Garamond", "Montserrat", "Segoe UI", system-ui, sans-serif;
-  font-size: clamp(7px, 1.75cqi, 10px);
+  font-size: calc((clamp(7px, 1.75cqi, 10px)) * var(--invite-text-scale, 1));
   font-weight: 700;
   letter-spacing: 0.22em;
   text-indent: 0.22em;
@@ -2156,7 +2156,7 @@
 .print-invite-details__text {
   margin: 0;
   font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: clamp(9px, 2.25cqi, 13px);
+  font-size: calc((clamp(9px, 2.25cqi, 13px)) * var(--invite-text-scale, 1));
   font-weight: 500;
   letter-spacing: 0.04em;
   line-height: 1.55;
@@ -2166,7 +2166,7 @@
   margin: 1mm 0 0.15mm;
   font-family: "Cormorant Garamond", Georgia, serif;
   font-style: italic;
-  font-size: clamp(8px, 2cqi, 12px);
+  font-size: calc((clamp(8px, 2cqi, 12px)) * var(--invite-text-scale, 1));
   font-weight: 600;
   letter-spacing: 0.06em;
   line-height: 1.4;
@@ -2177,7 +2177,7 @@
   margin: 0;
   font-family: "Cormorant Garamond", Georgia, serif;
   font-style: italic;
-  font-size: clamp(9px, 2.4cqi, 14px);
+  font-size: calc((clamp(9px, 2.4cqi, 14px)) * var(--invite-text-scale, 1));
   font-weight: 400;
   letter-spacing: 0.02em;
   line-height: 1.65;
@@ -2351,7 +2351,7 @@
 .print-invite-gold-circles__preamble {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-style: italic;
-  font-size: clamp(0.6rem, 2.2cqw, 0.9rem);
+  font-size: calc((clamp(0.6rem, 2.2cqw, 0.9rem)) * var(--invite-text-scale, 1));
   color: #3a3a3a;
   margin: 0 0 0.4em;
   letter-spacing: 0.01em;
@@ -2360,7 +2360,7 @@
 .print-invite-gold-circles__names {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-weight: 700;
-  font-size: clamp(1.1rem, 4.5cqw, 2rem);
+  font-size: calc((clamp(1.1rem, 4.5cqw, 2rem)) * var(--invite-text-scale, 1));
   color: #1a1a1a;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2370,7 +2370,7 @@
 
 .print-invite-gold-circles__dateLine {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(0.58rem, 2cqw, 0.85rem);
+  font-size: calc((clamp(0.58rem, 2cqw, 0.85rem)) * var(--invite-text-scale, 1));
   color: #3a3a3a;
   margin: 0 0 0.2em;
   letter-spacing: 0.02em;
@@ -2378,7 +2378,7 @@
 
 .print-invite-gold-circles__venueLine {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(0.58rem, 2cqw, 0.85rem);
+  font-size: calc((clamp(0.58rem, 2cqw, 0.85rem)) * var(--invite-text-scale, 1));
   color: #3a3a3a;
   margin: 0 0 0.2em;
   letter-spacing: 0.02em;
@@ -2387,7 +2387,7 @@
 .print-invite-gold-circles__extraLine {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-style: italic;
-  font-size: clamp(0.58rem, 2cqw, 0.85rem);
+  font-size: calc((clamp(0.58rem, 2cqw, 0.85rem)) * var(--invite-text-scale, 1));
   color: #3a3a3a;
   margin: 0.15em 0 0;
   letter-spacing: 0.02em;

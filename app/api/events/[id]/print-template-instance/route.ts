@@ -33,6 +33,10 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     return NextResponse.json({ error: "Invalid template." }, { status: 400 });
   }
 
+  if (getPrintTemplateDef(templateId)?.category === "invitation") {
+    return NextResponse.json({ error: "Use the invitation workspace to save this draft." }, { status: 409 });
+  }
+
   const fieldValuesRaw =
     body.fieldValues && typeof body.fieldValues === "object" && !Array.isArray(body.fieldValues)
       ? (body.fieldValues as Record<string, unknown>)

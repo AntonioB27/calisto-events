@@ -73,8 +73,8 @@ export function WeddingInviteGoldCirclesPhotoPrintSheet({
 
   const photoFrameStyle: CSSProperties = {
     "--gc-scale": cropScale,
-    "--gc-crop-x": `${cropX}px`,
-    "--gc-crop-y": `${cropY}px`,
+    "--gc-crop-x": `${cropX / (2 * cropScale)}%`,
+    "--gc-crop-y": `${cropY / (2 * cropScale)}%`,
   } as CSSProperties;
 
   return (

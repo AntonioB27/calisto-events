@@ -43,7 +43,7 @@ export function defaultFieldValuesForTemplate(
 ): Record<string, string> {
   if (!isInvitationPrintTemplateId(templateId)) return {};
   const { partnerA, partnerB } = guessPartnerNamesFromEventTitle(eventDisplayName);
-  const partnerBLine = partnerB || partnerA;
+  const partnerBLine = partnerB;
   return {
     partner_a: partnerA,
     partner_b: partnerBLine,

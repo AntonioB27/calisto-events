@@ -12,6 +12,30 @@
         ],
         "createdAt": "2026-09-08T14:17:53.318Z",
         "reason": "false positive on .app-nav-link (line ~1231): border-bottom:3px solid is paired with border-radius:0 in the same rule, so there is no rounded corner to clash with"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "dancing script",
+        "createdAt": "2026-09-18T15:21:11.100Z",
+        "reason": "Existing invitation artwork uses this script face; retained for user-selected professional stationery direction."
+      },
+      {
+        "rule": "design-system-font",
+        "value": "cormorant garamond",
+        "createdAt": "2026-09-18T15:21:11.101Z",
+        "reason": "Existing invitation artwork uses this display face; retained for user-selected professional stationery direction."
+      },
+      {
+        "rule": "design-system-font",
+        "value": "montserrat",
+        "createdAt": "2026-09-18T15:21:11.104Z",
+        "reason": "Existing invitation artwork uses this supporting face; retained for user-selected professional stationery direction."
+      },
+      {
+        "rule": "overused-font",
+        "value": "montserrat",
+        "createdAt": "2026-09-18T15:21:29.121Z",
+        "reason": "Supporting font in the existing wedding invitation artwork; retained for the user-selected professional stationery direction."
       }
     ]
   }
