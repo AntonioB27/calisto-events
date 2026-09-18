@@ -65,13 +65,6 @@ function ArrowLeft() {
     </svg>
   );
 }
-function CheckIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <polyline points="20 6 9 17 4 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 function SymbolGlyph({ symbol }: { symbol: string }) {
   return <>{symbol === "heart" ? "♥" : symbol === "infinity" ? "∞" : "&"}</>;
@@ -125,20 +118,12 @@ export function PrintsSetupWizard({
     setSaving(true);
     setSaveError(null);
     try {
-      await Promise.all(
-        invitationTemplateIds.map((templateId) =>
-          fetch(`/api/events/${eventId}/print-template-instance`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ templateId, fieldValues: fields }),
-          }).then(async (res) => {
-            if (!res.ok) {
-              const p = (await res.json().catch(() => null)) as { error?: string } | null;
-              throw new Error(typeof p?.error === "string" ? p.error : s.saveFail);
-            }
-          }),
-        ),
-      );
+      const res = await fetch(`/api/events/${eventId}/invitation-drafts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fieldValues: { ...existingDraft, ...fields } }),
+      });
+      if (!res.ok) throw new Error(s.saveFail);
       return true;
     } catch {
       setSaveError(s.saveFail);
@@ -536,7 +521,7 @@ export function PrintsSetupWizard({
               ) : null}
 
               {fields.quote_text ? (
-                <p className="psw-invite-quote">"{fields.quote_text}"</p>
+                <p className="psw-invite-quote">&ldquo;{fields.quote_text}&rdquo;</p>
               ) : null}
             </div>
           </div>

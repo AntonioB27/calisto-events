@@ -2274,7 +2274,7 @@
   min-height: 100%;
   position: relative;
   background-color: #f5f2ee;
-  background-image: url("/print-backgrounds/wedding-gold-circles-photo.png");
+  background-image: radial-gradient(ellipse at 50% 20%, #fffdf7, #f5f2ee 70%);
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
@@ -2285,11 +2285,27 @@
   flex-direction: column;
 }
 
-/*
-  Photo frame: positioned over the gold circle in the background.
-  Adjust left/top/width if the background image is cropped differently.
-  Center is ~50% x, ~30% from top; diameter ~72% of card width.
-*/
+/* Vector-like gold rings remain sharp in both browser previews and print. */
+.print-invite-gold-circles__card::before,
+.print-invite-gold-circles__card::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  width: 76%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 2px solid #b68b3c;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.print-invite-gold-circles__card::after {
+  width: 79%;
+  border-width: 1px;
+  border-color: #d4b775;
+}
+
 .print-invite-gold-circles__photoFrame {
   position: absolute;
   left: 50%;

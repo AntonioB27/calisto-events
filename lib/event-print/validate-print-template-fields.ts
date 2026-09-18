@@ -1,3 +1,4 @@
+import { INVITATION_VISIBILITY_KEYS, visibilityStorageKey } from "./invitation-field-visibility";
 import { getPrintTemplateDef } from "./template-catalog";
 
 export type ValidatePrintFieldValuesResult =
@@ -35,5 +36,14 @@ export function validatePrintTemplateFieldValues(
     out[field.key] = str;
   }
 
+  if (def.category === "invitation") {
+    for (const key of INVITATION_VISIBILITY_KEYS) {
+      const storedKey = visibilityStorageKey(key);
+      const value = src[storedKey];
+      if (value === undefined) continue;
+      if (value !== "0" && value !== "1") return { ok: false, error: `Invalid visibility: ${key}` };
+      out[storedKey] = value;
+    }
+  }
   return { ok: true, values: out };
 }

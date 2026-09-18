@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
 
@@ -62,7 +61,8 @@ function offsetStyle(off: number): CSSProperties | null {
 }
 
 export type InvitationDesignCarouselProps = Readonly<{
-  eventId: string;
+  saving: boolean;
+  onOpenPrint: (templateId: string) => Promise<void>;
   templates: readonly PrintTemplateDef[];
   renderPreview: (template: PrintTemplateDef) => ReactNode;
   getTitle: (templateId: string) => string;
@@ -82,7 +82,8 @@ export type InvitationDesignCarouselProps = Readonly<{
 }>;
 
 export function InvitationDesignCarousel({
-  eventId,
+  saving,
+  onOpenPrint,
   templates,
   renderPreview,
   getTitle,
@@ -104,15 +105,17 @@ export function InvitationDesignCarousel({
   const [fontScalePct, setFontScalePct] = useState(100);
   const [autoFitPct, setAutoFitPct] = useState(100);
   const [autoHiddenKeys, setAutoHiddenKeys] = useState<readonly InvitationVisibilityKey[]>([]);
-  const [autoFitEnabled, setAutoFitEnabled] = useState(true);
+  const [autoFitEnabled, setAutoFitEnabled] = useState(false);
   const touchStartX = useRef(0);
   const activeSlideRef = useRef<HTMLDivElement>(null);
 
   // Stable ref so the layout effect doesn't need onAutoHide in its deps.
   const onAutoHideRef = useRef(onAutoHide);
-  onAutoHideRef.current = onAutoHide;
   const onAutoRestoreRef = useRef(onAutoRestore);
-  onAutoRestoreRef.current = onAutoRestore;
+  useLayoutEffect(() => {
+    onAutoHideRef.current = onAutoHide;
+    onAutoRestoreRef.current = onAutoRestore;
+  }, [onAutoHide, onAutoRestore]);
 
   // Detect overflow on the active card after every content or scale change.
   // __card elements have overflow:hidden + fixed A4 aspect ratio, so
@@ -129,6 +132,8 @@ export function InvitationDesignCarousel({
     if (!overflowing) return;
 
     if (autoFitPct > SCALE_FLOOR) {
+      // DOM measurement must update the preview before paint.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAutoFitPct((prev) => Math.max(SCALE_FLOOR, prev - SCALE_STEP));
       return;
     }
@@ -195,7 +200,7 @@ export function InvitationDesignCarousel({
         onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
         onTouchEnd={(e) => {
           const dx = e.changedTouches[0].clientX - touchStartX.current;
-          if (Math.abs(dx) > 48) { dx < 0 ? goTo(activeIndex + 1) : goTo(activeIndex - 1); }
+          if (Math.abs(dx) > 48) { goTo(activeIndex + (dx < 0 ? 1 : -1)); }
         }}
       >
         {/* Prev arrow */}
@@ -274,8 +279,10 @@ export function InvitationDesignCarousel({
 
         {active ? (
           <AppBtn
-            href={`/events/${eventId}/print?template=${encodeURIComponent(active.id)}`}
-            as={Link}
+            type="button"
+            disabled={saving}
+            loading={saving}
+            onClick={() => void onOpenPrint(active.id)}
             variant="gold"
           >
             {openPrintPreviewLabel}

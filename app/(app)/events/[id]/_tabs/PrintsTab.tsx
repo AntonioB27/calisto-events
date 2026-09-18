@@ -1,20 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import type { EventKind } from "@/lib/event-kind";
+import type { Locale } from "@/lib/i18n";
+import { InvitationsEditor } from "./InvitationsEditor";
 import { useAppUi } from "@/components/AppUiProvider";
 
 type PrintsTabProps = Readonly<{
   eventId: string;
-  eventKind: string;
+  eventKind: EventKind;
   printsEventKindSetAt: string | null;
   eventDisplayName: string;
   eventDateIso: string;
-  uiLocale: string;
+  uiLocale: Locale;
   printDraftByTemplateId: Readonly<Record<string, Readonly<Record<string, string>>>>;
 }>;
 
 const GOLD   = '#C5922A';
-const PURPLE = '#5B2D8E';
 const TEXT   = 'var(--app-text)';
 const MUTED  = 'var(--app-muted)';
 const BORDER = 'var(--app-border)';
@@ -67,15 +69,6 @@ function PrinterIcon() {
   );
 }
 
-function InviteIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M3 9l9 6 9-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function ArrowIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -84,10 +77,8 @@ function ArrowIcon() {
   );
 }
 
-export function PrintsTab({
-  eventId,
-  eventKind,
-}: PrintsTabProps) {
+export function PrintsTab(props: PrintsTabProps) {
+  const { eventId, eventKind } = props;
   const ui = useAppUi();
   const t = ui.printsTab;
   const isWedding = eventKind === 'wedding';
@@ -154,52 +145,7 @@ export function PrintsTab({
         </div>
       </Link>
 
-      {/* Invitations entry card (wedding only) — coming soon */}
-      {isWedding && (
-        <div style={{
-          background: SURFACE,
-          border: `1px solid ${BORDER}`,
-          borderRadius: 16,
-          padding: '18px 18px 16px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 12,
-          opacity: 0.6,
-          cursor: 'default',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-                background: `linear-gradient(135deg, ${PURPLE}22, ${PURPLE}44)`,
-                border: `1.5px solid ${PURPLE}44`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: PURPLE,
-              }}>
-                <InviteIcon />
-              </div>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: TEXT, lineHeight: 1.2 }}>
-                  {t.categoryInvitation}
-                </div>
-                <div style={{ fontSize: 12, color: MUTED, marginTop: 2 }}>
-                  10 designs
-                </div>
-              </div>
-            </div>
-            <span style={{
-              fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
-              color: MUTED, background: BORDER, borderRadius: 6, padding: '3px 8px',
-              flexShrink: 0, marginTop: 2,
-            }}>
-              {t.invitationsComingSoon}
-            </span>
-          </div>
-          <p style={{ fontSize: 12.5, color: MUTED, lineHeight: 1.5, margin: 0 }}>
-            {t.invitationsComingSoonHint}
-          </p>
-        </div>
-      )}
+      {isWedding && <InvitationsEditor {...props} />}
 
     </section>
   );
