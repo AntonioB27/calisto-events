@@ -144,6 +144,13 @@ export function InvitationsEditor({ eventId, eventKind, eventDisplayName, eventD
     <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
     {/* eslint-disable-next-line @next/next/no-page-custom-font */}
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Dancing+Script:wght@500;600;700&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet" />
+    <header className="invitation-workspace__masthead">
+      <div>
+        <h1>{eventDisplayName}</h1>
+        <p>{templateCardTitle(activeId, ui.printsTab)}</p>
+      </div>
+      <span aria-hidden="true" />
+    </header>
     <div className="invitation-workspace__toolbar">
       <span role="status">{saving ? copy.saving : dirty ? copy.unsaved : copy.saved}</span>
       <div className="invitation-workspace__actions">
@@ -183,7 +190,9 @@ export function InvitationsEditor({ eventId, eventKind, eventDisplayName, eventD
       </aside>
       <div className="invitation-workspace__studio">
         <div className="invitation-workspace__proof-head"><h2>{copy.proof}</h2><span>{INVITATION_FORMATS[fields.print_format === '5x7' ? '5x7' : 'a5'].label}</span></div>
-        <div id="invitation-editor-proof" className="invitation-workspace__proof"><InvitationCanvas fields={fields} guides><InvitationArtwork templateId={activeId} fields={fields} eventDateIso={eventDateIso} locale={contentLocale} photoUrl={photoUrl} /></InvitationCanvas></div>
+        <div className="invitation-workspace__proof-stage">
+          <div id="invitation-editor-proof" className="invitation-workspace__proof"><InvitationCanvas fields={fields} guides><InvitationArtwork templateId={activeId} fields={fields} eventDateIso={eventDateIso} locale={contentLocale} photoUrl={photoUrl} /></InvitationCanvas></div>
+        </div>
         <p className="invitation-workspace__caption">{templateCardTitle(activeId, ui.printsTab)}</p>
         {unsupported && <p className="invitation-notice">{copy.unsupported}</p>}
         <details className="invitation-workspace__designs" open><summary>{copy.design} · {templates.length}</summary><div className="invitation-design-grid">{templates.map(template => <button key={template.id} type="button" disabled={busy} aria-pressed={activeId === template.id} onClick={() => change({ selected_template: template.id })}>
