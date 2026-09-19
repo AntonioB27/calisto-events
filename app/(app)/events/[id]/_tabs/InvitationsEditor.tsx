@@ -78,6 +78,11 @@ export function InvitationsEditor({ eventId, eventKind, eventDisplayName, eventD
     setRecoveryReady(true);
   }, [storageKey]);
   useEffect(() => {
+    // The app shell owns the scroll container. Reset it when entering this
+    // dedicated route so a previous Prints-tab scroll cannot hide the masthead.
+    document.querySelector<HTMLElement>('.app-shell > main')?.scrollTo({ top: 0 });
+  }, []);
+  useEffect(() => {
     if (!recoveryReady || recovery) return;
     try { if (dirty) localStorage.setItem(storageKey, JSON.stringify(fields)); else localStorage.removeItem(storageKey); } catch { /* Private browsing/quota. */ }
   }, [fields, dirty, storageKey, recoveryReady, recovery]);
