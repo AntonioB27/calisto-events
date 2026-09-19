@@ -37,7 +37,7 @@ export default async function InvitationsPage({ params }: { params: Promise<{ id
   return (
     <main className="mx-auto w-full max-w-[1280px] px-4 py-6 pb-20">
       <Link href={`/events/${id}?tab=prints`} className="inline-flex items-center gap-2 text-sm text-[var(--app-muted)] hover:text-[var(--app-text)]">
-        <span aria-hidden="true">←</span>{ui.print.backPrints}
+        {ui.print.backPrints}
       </Link>
       <h1 className="mt-5 text-2xl font-semibold text-[var(--app-text)]">{ui.printsTab.categoryInvitation}</h1>
       <p className="mt-2 text-sm text-[var(--app-muted)]">{name}</p>
