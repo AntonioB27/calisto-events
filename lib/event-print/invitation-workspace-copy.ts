@@ -17,7 +17,7 @@ const en = {
   overflow: 'Some text may extend outside the safe area or overlap. Shorten the text or reduce its size and review the proof.',
   photoResolution: 'This photo may be too small for sharp printing at this crop. Use a higher-resolution original.',
   readiness: 'Before you print', assetFail: 'An image or font could not load. Retry before printing.', preparing: 'Preparing print…',
-  unsupported: 'Some saved details are not displayed by this design. They are kept when you switch designs.',
+  unsupported: 'Some saved details are not displayed by this design. They are kept when you switch designs.', digital: 'Digital RSVPs',
 };
 const hr: typeof en = {
   details: 'Detalji', design: 'Dizajn', proof: 'Probni otisak', saved: 'Sve promjene su spremljene', unsaved: 'Nespremljene promjene', saving: 'Spremanje…',
@@ -37,7 +37,7 @@ const hr: typeof en = {
   overflow: 'Dio teksta možda izlazi iz sigurnog područja ili se preklapa. Skratite tekst ili smanjite veličinu i provjerite pregled.',
   photoResolution: 'Fotografija je možda premala za oštar tisak pri ovom izrezu. Koristite izvornik veće rezolucije.',
   readiness: 'Prije ispisa', assetFail: 'Slika ili font nisu se učitali. Pokušajte ponovno prije ispisa.', preparing: 'Priprema ispisa…',
-  unsupported: 'Ovaj dizajn ne prikazuje dio spremljenih detalja. Ostaju sačuvani za druge dizajne.',
+  unsupported: 'Ovaj dizajn ne prikazuje dio spremljenih detalja. Ostaju sačuvani za druge dizajne.', digital: 'Digitalni odgovori',
 };
 const de: typeof en = {
   details: 'Details', design: 'Design', proof: 'Druckvorschau', saved: 'Alle Änderungen gespeichert', unsaved: 'Ungespeicherte Änderungen', saving: 'Wird gespeichert…',
@@ -57,6 +57,6 @@ const de: typeof en = {
   overflow: 'Text könnte außerhalb des Sicherheitsbereichs liegen oder überlappen. Text kürzen oder verkleinern und die Vorschau prüfen.',
   photoResolution: 'Dieses Foto könnte für einen scharfen Druck zu klein sein. Verwenden Sie ein höher aufgelöstes Original.',
   readiness: 'Vor dem Drucken', assetFail: 'Bild oder Schrift konnte nicht geladen werden. Vor dem Drucken erneut versuchen.', preparing: 'Druck wird vorbereitet…',
-  unsupported: 'Dieses Design zeigt einige gespeicherte Details nicht an. Sie bleiben für andere Designs erhalten.',
+  unsupported: 'Dieses Design zeigt einige gespeicherte Details nicht an. Sie bleiben für andere Designs erhalten.', digital: 'Digitale Antworten',
 };
 export function invitationWorkspaceCopy(locale: Locale) { return locale === 'hr' ? hr : locale === 'de' ? de : en; }

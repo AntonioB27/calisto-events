@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAppUi } from '@/components/AppUiProvider';
 import type { AppUiDict } from '@/lib/app-ui';
 import { AppBtn } from '@/components/app-ui/AppBtn';
@@ -162,6 +163,7 @@ export function InvitationsEditor({ eventId, eventKind, eventDisplayName, eventD
         <button type="button" disabled={busy || !dirty} onClick={() => { if (window.confirm(copy.discardConfirm)) { setFields(saved); setError(null); } }}>{copy.discard}</button>
       </div>
       <div className="invitation-workspace__toolbar-actions">
+        <AppBtn variant="outline" size="sm" href={`/events/${eventId}/invitations/digital`} as={Link}>{copy.digital}</AppBtn>
         <AppBtn variant="outline" size="sm" disabled={busy || !dirty} onClick={() => void save()}>{copy.save}</AppBtn>
         <AppBtn variant="gold" size="sm" disabled={busy || photoPending} onClick={async () => { if (await save()) router.push(`/events/${eventId}/print?template=${activeId}&posterLang=${contentLocale}`); }}>{copy.export}</AppBtn>
       </div>

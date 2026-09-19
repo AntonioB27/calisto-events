@@ -283,6 +283,7 @@
   .invitation-workspace__toolbar { display: grid; gap: 10px; align-items: stretch; min-height: 0; padding: 12px 0 16px; }
   .invitation-workspace__toolbar-state { min-height: 26px; }
   .invitation-workspace__toolbar-actions { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.15fr); gap: 8px; padding-top: 10px; border-top: 1px solid var(--invite-line-quiet); }
+  .invitation-workspace__toolbar-actions .app-btn:first-child { grid-column: 1 / -1; }
   .invitation-workspace__toolbar-actions .app-btn { justify-content: center; min-height: 46px; padding-inline: 9px; font-size: 12px; white-space: nowrap; }
   .invitation-workspace__mobile-switch { display: flex; margin-top: 20px; border-bottom: 1px solid var(--invite-line); }
   .invitation-workspace__mobile-switch button { flex: 1; min-height: 48px; border-bottom: 2px solid transparent; }

@@ -1,0 +1,32 @@
+.digital-invitations { max-width: 980px; margin: 0 auto; padding: 30px 0 80px; color: var(--app-text); }
+.digital-invitations__masthead { display: flex; align-items: end; justify-content: space-between; gap: 28px; padding: 34px 0 26px; border-bottom: 1px solid color-mix(in srgb, var(--app-gold) 35%, var(--app-border)); }
+.digital-invitations__back { display: inline-block; margin-bottom: 24px; color: var(--app-muted); font-size: 13px; text-decoration: none; }
+.digital-invitations__back:hover { color: var(--app-gold); }
+.digital-invitations__masthead p { color: var(--app-muted); font-size: 13px; }
+.digital-invitations__masthead h1 { margin-top: 5px; font-family: "Cormorant Garamond", Georgia, serif; font-size: clamp(2.7rem, 7vw, 4.8rem); font-weight: 600; line-height: .9; letter-spacing: -.045em; }
+.digital-invitations__count { display: grid; min-width: 132px; padding: 14px 0 10px 20px; border-left: 1px solid color-mix(in srgb, var(--app-gold) 55%, transparent); }
+.digital-invitations__count strong { color: var(--app-gold); font-family: "Cormorant Garamond", Georgia, serif; font-size: 3rem; line-height: .8; }
+.digital-invitations__count span, .digital-invitations__totals span { margin-top: 7px; color: var(--app-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .11em; }
+.digital-invitations__intro { max-width: 58ch; margin: 24px 0 32px; color: var(--app-text-sub); line-height: 1.65; }
+.digital-invitations__error { margin-bottom: 16px; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--app-danger) 45%, transparent); color: var(--app-danger); }
+.digital-invitations__publish, .digital-invitations__recipients { border-top: 1px solid color-mix(in srgb, var(--app-gold) 32%, var(--app-border)); }
+.digital-invitations__publish { display: flex; justify-content: space-between; gap: 24px; padding: 22px 0; align-items: center; }
+.digital-invitations__publish span { color: var(--app-gold); font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+.digital-invitations__publish p { max-width: 62ch; margin-top: 7px; color: var(--app-muted); font-size: 13px; line-height: 1.5; }
+.digital-invitations__recipients { margin-top: 22px; padding-top: 30px; }
+.digital-invitations__section-head { display: flex; justify-content: space-between; gap: 24px; align-items: end; }
+.digital-invitations__section-head h2 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 2.2rem; font-weight: 600; letter-spacing: -.025em; }
+.digital-invitations__section-head p { max-width: 56ch; margin-top: 6px; color: var(--app-muted); font-size: 13px; line-height: 1.5; }
+.digital-invitations__totals { display: grid; text-align: right; }
+.digital-invitations__totals strong { font-family: "Cormorant Garamond", Georgia, serif; font-size: 2rem; font-weight: 600; }
+.digital-invitations__new-household { display: grid; grid-template-columns: minmax(0, 1fr) 130px auto; gap: 12px; margin-top: 24px; padding: 18px; background: color-mix(in srgb, var(--app-surface) 86%, var(--app-gold)); border: 1px solid color-mix(in srgb, var(--app-gold) 38%, var(--app-border)); }
+.digital-invitations__new-household label { display: grid; gap: 7px; color: var(--app-text-sub); font-size: 12px; }
+.digital-invitations__new-household input { min-height: 43px; width: 100%; padding: 0 12px; border: 1px solid var(--app-border); border-radius: 4px; background: var(--app-bg); color: var(--app-text); }
+.digital-invitations__new-household .app-btn { align-self: end; min-height: 43px; }
+.digital-invitations__empty { margin: 24px 0; color: var(--app-muted); font-size: 13px; }
+.digital-invitations__list { margin-top: 22px; border-top: 1px solid var(--app-border); }
+.digital-invitations__list li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 18px; align-items: center; padding: 16px 4px; border-bottom: 1px solid var(--app-border); }
+.digital-invitations__list h3 { font-size: 15px; font-weight: 600; }.digital-invitations__list p { margin-top: 4px; color: var(--app-muted); font-size: 12px; }
+.digital-invitations__list span { padding: 5px 9px; border-radius: 999px; background: color-mix(in srgb, var(--app-muted) 13%, transparent); color: var(--app-muted); font-size: 11px; }.digital-invitations__list span[data-status=attending] { background: color-mix(in srgb, var(--app-success) 15%, transparent); color: var(--app-success); }.digital-invitations__list span[data-status=declined] { background: color-mix(in srgb, var(--app-danger) 12%, transparent); color: var(--app-danger); }
+.digital-invitations__list button { color: var(--app-gold); font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 640px) { .digital-invitations { padding-top: 10px; }.digital-invitations__masthead { align-items: start; }.digital-invitations__count { min-width: 0; }.digital-invitations__publish { align-items: start; flex-direction: column; }.digital-invitations__new-household { grid-template-columns: 1fr 100px; }.digital-invitations__new-household .app-btn { grid-column: 1 / -1; }.digital-invitations__list li { grid-template-columns: minmax(0, 1fr) auto; }.digital-invitations__list button { grid-column: 1 / -1; justify-self: start; } }
