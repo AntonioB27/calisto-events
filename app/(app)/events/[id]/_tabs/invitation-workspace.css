@@ -56,19 +56,14 @@
 }
 
 .invitation-workspace__toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 40;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: 58px;
-  padding: 9px 0;
-  background: color-mix(in srgb, var(--app-bg, #17131b) 94%, transparent);
-  border-bottom: 1px solid var(--invite-line-quiet);
-  box-shadow: 0 12px 28px -24px rgba(0, 0, 0, .9);
-  backdrop-filter: blur(14px);
+  min-height: 54px;
+  padding: 10px 2px 16px;
+  border-bottom: 1px solid var(--invite-line);
 }
 .invitation-workspace__toolbar-state {
   display: flex;
@@ -253,9 +248,9 @@
   .invitation-workspace__masthead h1 { font-size: clamp(2.5rem, 13vw, 4rem); }
   .invitation-workspace__masthead > span { width: 74px; }
   .invitation-workspace__layout { grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 20px; }
-  .invitation-workspace__toolbar { display: grid; gap: 8px; align-items: stretch; top: 0; min-height: 0; padding: 10px 0 12px; }
+  .invitation-workspace__toolbar { display: grid; gap: 10px; align-items: stretch; min-height: 0; padding: 12px 0 16px; }
   .invitation-workspace__toolbar-state { min-height: 26px; }
-  .invitation-workspace__toolbar-actions { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.15fr); gap: 8px; }
+  .invitation-workspace__toolbar-actions { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.15fr); gap: 8px; padding-top: 10px; border-top: 1px solid var(--invite-line-quiet); }
   .invitation-workspace__toolbar-actions .app-btn { justify-content: center; min-height: 46px; padding-inline: 9px; font-size: 12px; white-space: nowrap; }
   .invitation-workspace__mobile-switch { display: flex; margin-top: 20px; border-bottom: 1px solid var(--invite-line); }
   .invitation-workspace__mobile-switch button { flex: 1; min-height: 48px; border-bottom: 2px solid transparent; }
