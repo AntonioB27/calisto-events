@@ -1,6 +1,7 @@
 "use client";
 
 import { useCalistoTheme } from "@/hooks/useCalistoTheme";
+import { DARK_MODE_ENABLED } from "@/lib/calisto-theme";
 import type { LandingCopy } from "@/lib/i18n";
 
 type ThemeToggleButtonProps = { copy: Pick<LandingCopy, "themeLight" | "themeDark">; className?: string };
@@ -8,6 +9,9 @@ type ThemeToggleButtonProps = { copy: Pick<LandingCopy, "themeLight" | "themeDar
 export function ThemeToggleButton({ copy, className }: ThemeToggleButtonProps) {
   const { theme, toggleTheme } = useCalistoTheme();
   const label = theme === "light" ? copy.themeDark : copy.themeLight;
+
+  // Dark mode is disabled app-wide — hide the toggle rather than offer a switch to nowhere.
+  if (!DARK_MODE_ENABLED) return null;
 
   return (
     <button

@@ -8,7 +8,7 @@ import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { AppInput } from "@/components/app-ui/AppInput";
 import { Moon, Sun } from "lucide-react";
-import { applyCalistoTheme, readCalistoTheme, type CalistoTheme } from "@/lib/calisto-theme";
+import { applyCalistoTheme, readCalistoTheme, DARK_MODE_ENABLED, type CalistoTheme } from "@/lib/calisto-theme";
 import type { Locale } from "@/lib/i18n";
 import { setUiLocaleCookieClient } from "@/lib/set-ui-locale-cookie-client";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
@@ -215,43 +215,48 @@ export function SettingsClient({ email, initialDisplayName }: SettingsClientProp
         </div>
       </div>
 
-      {/* ── 03 Appearance ──────────────────────────── */}
-      <div>
-        <SectionMark n="03" label={ui.settingsClient.appearanceEyebrow} />
-        <div style={{ ...glass, borderRadius: 18, padding: '20px 18px 24px' }}>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            {(
-              [
-                { key: "dark" as CalistoTheme, Icon: Moon, label: ui.settingsClient.themeDarkLabel },
-                { key: "light" as CalistoTheme, Icon: Sun, label: ui.settingsClient.themeLightLabel },
-              ]
-            ).map(({ key: t, Icon, label }) => {
-              const active = theme === t;
-              return (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => applyTheme(t)}
-                  style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                    padding: '12px 24px', borderRadius: 12, cursor: 'pointer',
-                    background: active ? 'rgba(197,146,42,0.14)' : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.55)',
-                    border: active ? `1.5px solid ${GOLD}` : `1px solid ${BORDER}`,
-                    boxShadow: active ? `0 0 0 1px ${GOLD}22` : 'none',
-                    transition: 'all 0.15s',
-                  }}
-                >
-                  <Icon size={22} color={active ? GOLD : isDark ? '#b5ab99' : '#9a8570'} strokeWidth={1.6} />
-                  <span style={{ fontFamily: FB, fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: '0.06em', color: active ? GOLD_DK : MUTED, textTransform: 'uppercase' }}>{label}</span>
-                </button>
-              );
-            })}
+      {/* ── 03 Appearance ────────────────────────────
+          Dark mode is disabled app-wide right now, so this whole picker is
+          hidden rather than offering a switch to a theme that isn't available.
+          Flip DARK_MODE_ENABLED in lib/calisto-theme.ts to bring it back. */}
+      {DARK_MODE_ENABLED && (
+        <div>
+          <SectionMark n="03" label={ui.settingsClient.appearanceEyebrow} />
+          <div style={{ ...glass, borderRadius: 18, padding: '20px 18px 24px' }}>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              {(
+                [
+                  { key: "dark" as CalistoTheme, Icon: Moon, label: ui.settingsClient.themeDarkLabel },
+                  { key: "light" as CalistoTheme, Icon: Sun, label: ui.settingsClient.themeLightLabel },
+                ]
+              ).map(({ key: t, Icon, label }) => {
+                const active = theme === t;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => applyTheme(t)}
+                    style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                      padding: '12px 24px', borderRadius: 12, cursor: 'pointer',
+                      background: active ? 'rgba(197,146,42,0.14)' : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.55)',
+                      border: active ? `1.5px solid ${GOLD}` : `1px solid ${BORDER}`,
+                      boxShadow: active ? `0 0 0 1px ${GOLD}22` : 'none',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <Icon size={22} color={active ? GOLD : isDark ? '#b5ab99' : '#9a8570'} strokeWidth={1.6} />
+                    <span style={{ fontFamily: FB, fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: '0.06em', color: active ? GOLD_DK : MUTED, textTransform: 'uppercase' }}>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <p style={{ margin: '12px 0 0', fontFamily: FS, fontStyle: 'italic', fontSize: 12, color: MUTED, lineHeight: 1.45 }}>
+              {ui.settingsClient.appliesNote}
+            </p>
           </div>
-          <p style={{ margin: '12px 0 0', fontFamily: FS, fontStyle: 'italic', fontSize: 12, color: MUTED, lineHeight: 1.45 }}>
-            {ui.settingsClient.appliesNote}
-          </p>
         </div>
-      </div>
+      )}
 
       {/* ── Account actions ────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', paddingTop: 4 }}>
