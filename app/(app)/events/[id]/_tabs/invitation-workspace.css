@@ -256,7 +256,63 @@
   .invitation-workspace__mobile-switch button { flex: 1; min-height: 48px; border-bottom: 2px solid transparent; }
   .invitation-workspace__mobile-switch button[aria-pressed=true] { border-color: var(--app-gold); color: var(--app-gold); }
   .invitation-workspace[data-view=preview] .invitation-workspace__inspector, .invitation-workspace[data-view=edit] .invitation-workspace__studio { display: none; }
-  .invitation-workspace__inspector { position: static; padding: 24px 18px 8px; border-radius: 20px 20px 6px 6px; }
+  .invitation-workspace__recovery {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin: 12px 0 0;
+    border-color: color-mix(in srgb, var(--app-gold) 75%, transparent);
+    background: color-mix(in srgb, var(--app-surface) 88%, var(--app-gold));
+    box-shadow: 0 18px 34px -28px rgba(0, 0, 0, .9);
+  }
+  .invitation-workspace__layout { margin-top: 14px; }
+  .invitation-workspace__inspector {
+    position: static;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .invitation-workspace__inspector > fieldset > h2 {
+    margin: 0 0 16px;
+    padding: 24px 4px 14px;
+    border-bottom: 1px solid var(--invite-line);
+    font-size: 2.25rem;
+  }
+  .invitation-workspace__inspector details {
+    margin-bottom: 10px;
+    padding-inline: 18px;
+    border: 1px solid var(--invite-line-quiet);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--app-surface) 73%, transparent);
+    box-shadow: inset 0 1px color-mix(in srgb, white 7%, transparent);
+  }
+  .invitation-workspace__inspector details[open] {
+    border-color: color-mix(in srgb, var(--app-gold) 42%, var(--invite-line-quiet));
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--app-gold) 10%, transparent), transparent 130px),
+      color-mix(in srgb, var(--app-surface) 78%, transparent);
+  }
+  .invitation-workspace__inspector summary {
+    padding-block: 19px;
+    color: var(--app-text);
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+  .invitation-workspace__inspector .invitation-fields { gap: 18px; padding: 4px 0 24px; }
+  .invitation-workspace__inspector .invitation-field { gap: 9px; font-size: 13px; color: var(--app-text-sub); }
+  .invitation-workspace__inspector .invitation-field input:not([type=range]), .invitation-workspace__inspector .invitation-field select {
+    min-height: 52px;
+    padding-inline: 14px;
+    border-color: color-mix(in srgb, var(--app-muted) 42%, transparent);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--app-bg) 46%, transparent);
+    font-size: 16px;
+  }
+  .invitation-workspace__inspector .invitation-field small { margin-top: -2px; }
   .invitation-workspace__proof-head { padding-bottom: 14px; }
   .invitation-workspace__proof-stage { min-height: 0; margin-top: 16px; padding: 24px 14px; border-radius: 9px; }
   .invitation-workspace__proof-stage::before { inset: 8px; border-radius: 4px; }

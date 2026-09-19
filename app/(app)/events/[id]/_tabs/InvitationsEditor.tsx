@@ -167,7 +167,7 @@ export function InvitationsEditor({ eventId, eventKind, eventDisplayName, eventD
       </div>
     </div>
     {error && <p className="invitation-notice" role="alert">{error}</p>}
-    {recovery && <div className="invitation-notice"><p>{copy.recovered}</p><button type="button" onClick={() => { setFields(recovery); setRecovery(null); }}>{copy.restore}</button><button type="button" onClick={() => setRecovery(null)}>{copy.dismiss}</button></div>}
+    {recovery && <div className="invitation-notice invitation-workspace__recovery"><p>{copy.recovered}</p><button type="button" onClick={() => { setFields(recovery); setRecovery(null); }}>{copy.restore}</button><button type="button" onClick={() => setRecovery(null)}>{copy.dismiss}</button></div>}
     <div className="invitation-workspace__mobile-switch"><button type="button" aria-pressed={mobileView === 'edit'} onClick={() => setMobileView('edit')}>{copy.edit}</button><button type="button" aria-pressed={mobileView === 'preview'} onClick={() => setMobileView('preview')}>{copy.preview}</button></div>
     <div className="invitation-workspace__layout">
       <aside className="invitation-workspace__inspector">
