@@ -16,6 +16,8 @@ import {
 } from "@/lib/plan-limits";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { AuroraHourglass } from "@/components/app-ui/AuroraHourglass";
+import { digitalInvitationCopy } from "@/lib/digital-invitation-copy";
+import type { EventKind } from "@/lib/event-kind";
 import { UpgradeBanner, UpgradeReturnHandler } from "../_components/UpgradePlan";
 
 // ── Aurora Theater palette ────────────────────────────────────────────────────
@@ -58,6 +60,8 @@ export type OverviewTabProps = Readonly<{
   accessCode: string;
   publicOrigin: string;
   adminRoleLabel: string;
+  eventKind: EventKind;
+  canManageInvitations: boolean;
 }>;
 
 function isVideoMime(mime: string | null | undefined) {
@@ -763,6 +767,23 @@ function AccessCard({ accessCode, publicOrigin }: { accessCode: string; publicOr
   );
 }
 
+function DigitalInvitationShortcut({ eventId }: { eventId: string }) {
+  const ui = useAppUi();
+  const copy = digitalInvitationCopy(ui.locale);
+  const isDark = React.useContext(DarkCtx);
+  return <Link href={`/events/${eventId}/invitations/digital`} style={{ display: "block", position: "relative", overflow: "hidden", padding: "18px 17px 16px", borderRadius: 18, textDecoration: "none", color: TEXT, background: isDark ? "linear-gradient(135deg, rgba(83,50,100,.62), rgba(197,146,42,.12)), #1d1723" : "linear-gradient(135deg, rgba(112,70,143,.16), rgba(245,230,195,.75)), #f8f2e9", border: `1px solid ${isDark ? "rgba(224,181,93,.32)" : "rgba(168,117,40,.3)"}`, boxShadow: isDark ? "0 15px 32px -20px rgba(0,0,0,.9), inset 0 1px rgba(255,255,255,.08)" : "0 16px 30px -23px rgba(54,30,20,.46), inset 0 1px rgba(255,255,255,.86)" }}>
+    <div aria-hidden style={{ position: "absolute", right: -31, top: -38, width: 145, height: 145, borderRadius: "50%", border: "1px solid rgba(197,146,42,.26)", boxShadow: "inset 0 0 0 16px rgba(197,146,42,.045)" }} />
+    <div aria-hidden style={{ position: "absolute", left: 23, top: 0, width: 54, height: 9, background: "rgba(197,146,42,.46)", transform: "rotate(-2deg)", border: "1px solid rgba(197,146,42,.48)", boxShadow: "0 2px 4px rgba(0,0,0,.12)" }} />
+    <div style={{ position: "relative", display: "grid", gridTemplateColumns: "54px minmax(0, 1fr)", gap: 15, alignItems: "center" }}>
+      <div aria-hidden style={{ width: 54, height: 66, padding: 4, background: isDark ? "#eee0cd" : "#fffaf1", border: "1px solid rgba(146,99,38,.5)", boxShadow: "4px 5px 0 rgba(91,45,142,.16)", transform: "rotate(-3deg)" }}>
+        <div style={{ height: "100%", border: "1px solid rgba(197,146,42,.6)", display: "grid", placeItems: "center", color: "#6a3b72", fontFamily: FS, fontSize: 25, fontStyle: "italic" }}>R</div>
+      </div>
+      <div><p style={{ margin: 0, color: GOLD, fontSize: 9.5, fontWeight: 700, letterSpacing: ".19em", textTransform: "uppercase", fontFamily: FB }}>{copy.shortcutKicker}</p><h2 style={{ maxWidth: "29ch", margin: "5px 0 7px", fontFamily: FS, fontSize: 22, fontStyle: "italic", fontWeight: 700, lineHeight: 1.03, letterSpacing: "-.02em" }}>{copy.shortcutTitle}</h2><p style={{ maxWidth: "57ch", margin: 0, color: isDark ? "rgba(244,230,210,.7)" : TEXT_S, fontFamily: FB, fontSize: 12.5, lineHeight: 1.45 }}>{copy.shortcutBody}</p></div>
+    </div>
+    <div style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: 7, marginTop: 15, color: PURPLE, fontFamily: FB, fontSize: 12, fontWeight: 700 }}>{copy.shortcutAction}<span aria-hidden style={{ fontSize: 16, lineHeight: .7 }}>→</span></div>
+  </Link>;
+}
+
 // ── Photo carousel ────────────────────────────────────────────────────────────
 function PhotoCarousel({ eventId }: { eventId: string }) {
   const ui = useAppUi();
@@ -906,6 +927,8 @@ export function OverviewTab({
   accessCode,
   publicOrigin,
   adminRoleLabel,
+  eventKind,
+  canManageInvitations,
 }: OverviewTabProps) {
   const planId = normalizePlanId(plan);
   const [isDark, setIsDark] = useState(false);
@@ -945,6 +968,7 @@ export function OverviewTab({
           <CountdownGauges eventDate={eventDate} planId={planId} scheduledDeletionAt={scheduledDeletionAt} />
         )}
         <StatsTiles eventId={eventId} planId={planId} />
+        {eventKind === "wedding" && canManageInvitations && <DigitalInvitationShortcut eventId={eventId} />}
         <AccessCard accessCode={accessCode} publicOrigin={publicOrigin} />
         <PhotoCarousel eventId={eventId} />
       </div>

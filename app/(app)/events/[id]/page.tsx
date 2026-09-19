@@ -176,6 +176,8 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             adminRoleLabel={
               isPrimaryOrganizer ? uiCopy.dashboard.roleOrganizer : uiCopy.dashboard.roleCoOrganizer
             }
+            eventKind={storedEventKind}
+            canManageInvitations={isPrimaryOrganizer}
           />
         )}
         {selectedTab === "guests" && <GuestsTab eventId={id} />}

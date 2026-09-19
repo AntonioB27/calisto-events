@@ -71,6 +71,15 @@ export function DigitalInvitationsDashboard({ eventId, eventName, origin, locale
     <p className="digital-invitations__intro">{copy.description}</p>
     {error && <p role="alert" className="digital-invitations__error">{error}</p>}
 
+    {!publishedAt && <section className="digital-invitations__guide">
+      <p>{copy.guideKicker}</p><h2>{copy.guideTitle}</h2>
+      <ol>
+        <li><span>01</span><div><h3>{copy.guidePublish}</h3><p>{copy.guidePublishBody}</p></div></li>
+        <li><span>02</span><div><h3>{copy.guideHouseholds}</h3><p>{copy.guideHouseholdsBody}</p></div></li>
+        <li><span>03</span><div><h3>{copy.guideResponses}</h3><p>{copy.guideResponsesBody}</p></div></li>
+      </ol>
+    </section>}
+
     <section className="digital-invitations__publish">
       <div><span>{publishedAt ? copy.published : copy.title}</span><p>{copy.publishHint}</p></div>
       <AppBtn variant="gold" loading={publishing} onClick={() => void publish()}>{publishedAt ? copy.republish : copy.publish}</AppBtn>
