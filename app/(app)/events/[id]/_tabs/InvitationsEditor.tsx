@@ -157,9 +157,11 @@ export function InvitationsEditor({ eventId, eventKind, eventDisplayName, eventD
       <span aria-hidden="true" />
     </header>
     <div className="invitation-workspace__toolbar">
-      <span role="status">{saving ? copy.saving : dirty ? copy.unsaved : copy.saved}</span>
-      <div className="invitation-workspace__actions">
+      <div className="invitation-workspace__toolbar-state">
+        <span role="status">{saving ? copy.saving : dirty ? copy.unsaved : copy.saved}</span>
         <button type="button" disabled={busy || !dirty} onClick={() => { if (window.confirm(copy.discardConfirm)) { setFields(saved); setError(null); } }}>{copy.discard}</button>
+      </div>
+      <div className="invitation-workspace__toolbar-actions">
         <AppBtn variant="outline" size="sm" disabled={busy || !dirty} onClick={() => void save()}>{copy.save}</AppBtn>
         <AppBtn variant="gold" size="sm" disabled={busy || photoPending} onClick={async () => { if (await save()) router.push(`/events/${eventId}/print?template=${activeId}&posterLang=${contentLocale}`); }}>{copy.export}</AppBtn>
       </div>
@@ -196,7 +198,7 @@ export function InvitationsEditor({ eventId, eventKind, eventDisplayName, eventD
       <div className="invitation-workspace__studio">
         <div className="invitation-workspace__proof-head"><h2>{copy.proof}</h2><span>{INVITATION_FORMATS[fields.print_format === '5x7' ? '5x7' : 'a5'].label}</span></div>
         <div className="invitation-workspace__proof-stage">
-          <div id="invitation-editor-proof" className="invitation-workspace__proof"><InvitationCanvas fields={fields} guides><InvitationArtwork templateId={activeId} fields={fields} eventDateIso={eventDateIso} locale={contentLocale} photoUrl={photoUrl} /></InvitationCanvas></div>
+          <div id="invitation-editor-proof" className="invitation-workspace__proof"><InvitationCanvas fields={fields} preview><InvitationArtwork templateId={activeId} fields={fields} eventDateIso={eventDateIso} locale={contentLocale} photoUrl={photoUrl} /></InvitationCanvas></div>
         </div>
         <p className="invitation-workspace__caption">{templateCardTitle(activeId, ui.printsTab)}</p>
         {unsupported && <p className="invitation-notice">{copy.unsupported}</p>}

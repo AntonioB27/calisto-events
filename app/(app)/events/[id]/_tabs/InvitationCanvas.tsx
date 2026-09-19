@@ -4,9 +4,11 @@ import { invitationFormat } from '@/lib/event-print/invitation-document';
 import './invitation-workspace.css';
 
 /** A fixed physical layout scaled only for display, shared by editor and print. */
-export function InvitationCanvas({ fields, children, guides = false }: { fields: Record<string, string>; children: ReactNode; guides?: boolean }) {
+export function InvitationCanvas({ fields, children, guides = false, preview = false }: { fields: Record<string, string>; children: ReactNode; guides?: boolean; preview?: boolean }) {
   const format = invitationFormat(fields);
-  const bleed = fields.print_bleed === '0' ? 0 : 3;
+  // A proof preview shows the finished, trimmed card. The print route retains
+  // the full bleed sheet, so artwork never appears cut off at the card edge.
+  const bleed = preview || fields.print_bleed === '0' ? 0 : 3;
   const outerW = format.width + bleed * 2;
   const outerH = format.height + bleed * 2;
   // Keep the original A4 artwork's exact geometry in preview and export.
