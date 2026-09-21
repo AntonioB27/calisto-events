@@ -12,6 +12,20 @@
         ],
         "createdAt": "2026-09-08T14:17:53.318Z",
         "reason": "false positive on .app-nav-link (line ~1231): border-bottom:3px solid is paired with border-radius:0 in the same rule, so there is no rounded corner to clash with"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "helvetica",
+        "files": [
+          "lib/rsvp-email.ts"
+        ],
+        "createdAt": "2026-09-19T18:46:11.541Z",
+        "reason": "matches existing lib/welcome-email.ts email-safe font stack; email HTML is outside app DESIGN.md scope"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "helvetica",
+        "createdAt": "2026-09-21T07:09:49.046Z"
       }
     ]
   }
