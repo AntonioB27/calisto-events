@@ -15,6 +15,7 @@ import { OverviewTab } from "./_tabs/OverviewTab";
 import { SettingsTab } from "./_tabs/SettingsTab";
 import { PrintsTab } from "./_tabs/PrintsTab";
 import { ShareTab } from "./_tabs/ShareTab";
+import { RsvpTab } from "./_tabs/RsvpTab";
 import { normalizeEventKind } from "@/lib/event-kind";
 
 type EventPageProps = Readonly<{
@@ -221,6 +222,9 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             accessCode={event.access_code}
             publicOrigin={publicOrigin}
           />
+        )}
+        {selectedTab === "rsvp" && (
+          <RsvpTab eventId={id} plan={event.plan} publicOrigin={publicOrigin} />
         )}
         {selectedTab === "prints" && isPrimaryOrganizer && (
           <PrintsTab

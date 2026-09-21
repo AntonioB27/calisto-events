@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Home, Calendar, Images, Users, Plus, Camera, QrCode } from "lucide-react";
+import { Home, Calendar, Images, Users, Plus, Camera, QrCode, CheckCircle2 } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
@@ -29,6 +29,7 @@ const NAV_ICONS: Record<string, React.ComponentType<{ size: number }>> = {
   gallery: Images,
   guests: Users,
   prints: Camera,
+  rsvp: CheckCircle2,
 };
 
 function NavLinks({ eventId }: { eventId: string | null }) {
@@ -50,6 +51,7 @@ function NavLinks({ eventId }: { eventId: string | null }) {
           { id: "event",   href: `/events/${eventId}?tab=overview`, label: ui.shell.navEvent          },
           { id: "gallery", href: `/events/${eventId}?tab=gallery`,  label: ui.shell.navGallery         },
           { id: "guests",  href: `/events/${eventId}?tab=guests`,   label: ui.shell.navGuests          },
+          { id: "rsvp",    href: `/events/${eventId}?tab=rsvp`,     label: ui.eventNav.tabRsvp         },
           { id: "prints",  href: `/events/${eventId}?tab=prints`,   label: ui.eventNav.tabPrints       },
         ]
       : []),
@@ -60,6 +62,7 @@ function NavLinks({ eventId }: { eventId: string | null }) {
     if (linkId === "event")   return isEventScreen && (!currentTab || currentTab === "overview");
     if (linkId === "gallery") return isEventScreen && currentTab === "gallery";
     if (linkId === "guests")  return isEventScreen && currentTab === "guests";
+    if (linkId === "rsvp")    return isEventScreen && currentTab === "rsvp";
     if (linkId === "prints")  return isEventScreen && currentTab === "prints";
     return false;
   }

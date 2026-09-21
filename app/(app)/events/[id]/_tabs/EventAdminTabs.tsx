@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Camera, Home, Images, Palette, Settings, Share2, Users } from "lucide-react";
+import { ArrowLeft, Camera, CheckSquare, Home, Images, Palette, Settings, Share2, Users } from "lucide-react";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
@@ -36,6 +36,8 @@ function labelForTab(tab: EventAdminTabId, t: ReturnType<typeof useAppUi>): stri
       return t.eventNav.tabGallery;
     case "share":
       return t.eventNav.tabShare;
+    case "rsvp":
+      return t.eventNav.tabRsvp;
     case "prints":
       return t.eventNav.tabPrints;
     case "settings":
@@ -617,6 +619,17 @@ function TabsInner({
               color: MUTED_T_, textDecoration: 'none', flexShrink: 0,
             }} title={ui.eventNav.tabShare}>
               <Share2 size={15} />
+            </Link>
+            <Link href={`/events/${eventId}?tab=rsvp`} style={{
+              width: 32, height: 32, borderRadius: 10,
+              background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)',
+              border: `1px solid ${DIVIDER_}`,
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: MUTED_T_, textDecoration: 'none', flexShrink: 0,
+            }} title={ui.eventNav.tabRsvp} aria-current={selectedTab === "rsvp" ? "page" : undefined}>
+              <CheckSquare size={15} />
             </Link>
             {showOrganizerOnlyTabs && (
               <Link href={`/events/${eventId}?tab=settings`} style={{

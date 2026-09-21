@@ -63,6 +63,7 @@ describe("EventAdminTabs", () => {
       guests: en.eventNav.tabGuests,
       gallery: en.eventNav.tabGallery,
       share: en.eventNav.tabShare,
+      rsvp: en.eventNav.tabRsvp,
       prints: en.eventNav.tabPrints,
       settings: en.eventNav.tabSettings,
     };
