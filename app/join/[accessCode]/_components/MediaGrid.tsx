@@ -481,21 +481,36 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
           );
         };
 
+        // `items` is already newest-first. CSS multi-column layout (columnCount) fills one
+        // column top-to-bottom before moving to the next, which buries newest items down the
+        // first column instead of across the top row. Distributing round-robin across N column
+        // buckets keeps the newest items in the top row while still allowing per-column masonry
+        // (variable tile heights) below it.
+        const columnCount = 3;
+        const columnBuckets: MediaItem[][] = Array.from({ length: columnCount }, () => []);
+        items.forEach((item, index) => {
+          columnBuckets[index % columnCount].push(item);
+        });
+
         return (
-          <div style={{ columnCount: 3, columnGap: 4 }}>
-            {items.map((item) => {
-              const isVideo = isVideoMime(item.mime_type);
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => setLightbox(item)}
-                  style={{ position: "relative", breakInside: "avoid", marginBottom: 4, borderRadius: 8, overflow: "hidden", cursor: "pointer" }}
-                >
-                  {renderMedia(item)}
-                  {renderOverlay(item)}
-                </div>
-              );
-            })}
+          <div style={{ display: "flex", gap: 4 }}>
+            {columnBuckets.map((columnItems, columnIndex) => (
+              <div key={columnIndex} style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0 }}>
+                {columnItems.map((item) => {
+                  const isVideo = isVideoMime(item.mime_type);
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => setLightbox(item)}
+                      style={{ position: "relative", borderRadius: 8, overflow: "hidden", cursor: "pointer" }}
+                    >
+                      {renderMedia(item)}
+                      {renderOverlay(item)}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         );
       })() : null}
