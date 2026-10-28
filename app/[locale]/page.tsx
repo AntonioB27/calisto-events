@@ -10,7 +10,6 @@ import { AppPreviewWindow } from "@/components/AppPreviewWindow";
 import { PlanCards } from "@/components/PlanCards";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { LaunchAnnouncement } from "@/components/LaunchOffer";
 import { StatBar } from "@/components/StatBar";
 import { WaitlistForm } from "@/components/WaitlistForm";
 import { WebMcpTools } from "@/components/WebMcpTools";
@@ -85,7 +84,6 @@ export default async function LocalePage({ params }: LocalePageProps) {
       <WebMcpTools />
       <div className="page-vignette" aria-hidden />
       <LanguageSelectorPopup copy={copy} locale={locale as Locale} />
-      <LaunchAnnouncement copy={copy} />
       <SiteHeader copy={copy} locale={locale as Locale} isLoggedIn={isLoggedIn} />
       <main className="flex-1">
         <Hero copy={copy} isLoggedIn={isLoggedIn} locale={locale as Locale} />

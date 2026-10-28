@@ -2,8 +2,6 @@ import Image from "next/image";
 import { ScanLine, UserCheck, QrCode, type LucideIcon } from "lucide-react";
 import type { LandingCopy, Locale } from "@/lib/i18n";
 import { HeroEventBuilder } from "@/components/HeroEventBuilder";
-import { LaunchHeroOffer } from "@/components/LaunchOffer";
-import { isFoundingEventsPromotionActive } from "@/lib/founding-events-promotion";
 
 type HeroProps = { copy: LandingCopy; isLoggedIn: boolean; locale: Locale };
 
@@ -62,18 +60,16 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
             </p>
 
             {/* CTAs */}
-            {isFoundingEventsPromotionActive() ? (
-              <LaunchHeroOffer copy={copy} href={`/${locale}/offer`} />
-            ) : (
-            <div className="flex items-center flex-wrap" style={{ marginTop: 28, gap: 14 }}>
+            <div className="flex items-center flex-wrap" style={{ marginTop: 32, gap: 12 }}>
               <a
                 href={isLoggedIn ? "/dashboard" : `/${locale}/start`}
                 className="inline-flex items-center gap-2.5"
                 style={{
                   fontFamily: "var(--font-sans)",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  padding: "11px 22px",
+                  fontSize: 15,
+                  fontWeight: 600,
+                  minHeight: 50,
+                  padding: "13px 28px",
                   borderRadius: 999,
                   background: "linear-gradient(135deg, var(--gold) 0%, var(--amber) 45%, var(--gold-deep) 100%)",
                   color: "#1b1208",
@@ -91,9 +87,10 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
                 className="inline-flex items-center"
                 style={{
                   fontFamily: "var(--font-sans)",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  padding: "11px 22px",
+                  fontSize: 15,
+                  fontWeight: 600,
+                  minHeight: 50,
+                  padding: "13px 28px",
                   borderRadius: 999,
                   background: "transparent",
                   color: "var(--cream)",
@@ -107,24 +104,24 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
                 {copy.heroSecondaryCta}
               </a>
             </div>
-            )}
 
             {/* Trust bar: the three core differentiators */}
-            <div className="v2-trust-row flex flex-wrap" style={{ marginTop: 28, gap: 14 }}>
+            <div className="v2-trust-row flex flex-wrap" style={{ marginTop: 28, gap: 10 }}>
               {copy.heroSignals.map((signal, i) => {
                 const Icon = SIGNAL_ICONS[i] ?? ScanLine;
                 return (
                   <div
                     key={signal}
-                    className={`v2-chip v2-chip-${i} flex items-center`}
+                    className="v2-chip flex items-center"
                     style={{
                       flex: "1 1 160px",
                       gap: 10,
-                      padding: "14px 16px",
-                      borderRadius: 18,
-                      border: "1px solid var(--hair-2)",
-                      background: "var(--glass-bg)",
-                      boxShadow: "0 8px 20px rgba(0,0,0,0.16)",
+                      padding: "12px 14px",
+                      borderRadius: 14,
+                      border: "1px solid rgba(240,179,75,0.22)",
+                      background: "linear-gradient(180deg, rgba(255,236,200,0.55) 0%, rgba(245,199,107,0.12) 100%)",
+                      backdropFilter: "blur(10px)",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 6px 18px -8px rgba(120,80,20,0.25)",
                     }}
                   >
                     <span
@@ -144,23 +141,6 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
                 );
               })}
             </div>
-            <style>{`
-              .v2-chip {
-                rotate: -3deg;
-                animation: v2-float 5s ease-in-out infinite;
-                transition: rotate 300ms ease, box-shadow 300ms ease;
-              }
-              .v2-chip-1 { rotate: 1.5deg; animation-delay: 0.5s; }
-              .v2-chip-2 { rotate: -1.8deg; animation-delay: 1s; }
-              .v2-chip:hover { rotate: 0deg; box-shadow: 0 14px 32px rgba(0,0,0,0.24); }
-              @keyframes v2-float {
-                0%, 100% { translate: 0 0; }
-                50% { translate: 0 -8px; }
-              }
-              @media (prefers-reduced-motion: reduce) {
-                .v2-chip { animation: none !important; }
-              }
-            `}</style>
 
             {/* Aurora introduction, with a piece of photographic evidence */}
             <div

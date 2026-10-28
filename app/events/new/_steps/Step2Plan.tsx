@@ -8,11 +8,7 @@ import { writeCreateEventDraftToStorage } from "@/lib/create-event-draft";
 import { useEffect, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
-import {
-  formatEuroCents,
-  getFoundingEventsPrice,
-  isFoundingEventsPromotionActive,
-} from "@/lib/founding-events-promotion";
+import { formatEuroCents, planPriceEuroCents } from "@/lib/event-stripe-checkout";
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const INK    = '#221509';
@@ -43,10 +39,6 @@ const PLAN_STRIPE: Record<PlanId, string> = {
   max:      'linear-gradient(90deg,#8B5FCC,#5B2D8E40)',
 };
 
-const PLAN_LIST_PRICE_EURO_CENTS: Record<PlanId, number> = {
-  free: 0, standard: 1500, plus: 3500, premium: 6500, max: 9000,
-};
-
 type Step2PlanProps = {
   name: string;
   emoji: string;
@@ -66,7 +58,6 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
 
   const [selected, setSelected] = useState<PlanId>(selectedPlanId);
   const [expanded, setExpanded] = useState<PlanId | null>(null);
-  const isFoundingEventsOfferActive = isFoundingEventsPromotionActive();
 
   function formatCap(n: number): string {
     return n >= PLAN_DB_INT_MAX ? ui.createStep2.unlimited : String(n);
@@ -80,17 +71,13 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
     setExpanded(current => current === planId ? null : planId);
   };
 
-  const cards = planOptions.map(planId => {
-    const price = getFoundingEventsPrice(PLAN_LIST_PRICE_EURO_CENTS[planId]);
-    return {
-      planId,
-      limits: getPlanLimits(planId),
-      price: formatEuroCents(price.amountEuroCents),
-      originalPrice: price.promotionId ? formatEuroCents(price.listAmountEuroCents) : undefined,
-      accent: PLAN_ACCENT[planId],
-      stripe: PLAN_STRIPE[planId],
-    };
-  });
+  const cards = planOptions.map(planId => ({
+    planId,
+    limits: getPlanLimits(planId),
+    price: formatEuroCents(planPriceEuroCents(planId)),
+    accent: PLAN_ACCENT[planId],
+    stripe: PLAN_STRIPE[planId],
+  }));
 
   return (
     <div className="welcome-reveal welcome-reveal--d1">
@@ -108,11 +95,6 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
         <p style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 14, color: INK_S, lineHeight: 1.5, marginTop: 6, marginBottom: 0 }}>
           {ui.createStep2.description}
         </p>
-        {isFoundingEventsOfferActive && (
-          <p style={{ display: 'inline-flex', margin: '10px 0 0', padding: '5px 8px', borderRadius: 6, background: `${GOLD}18`, color: GOLD_DK, fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', fontFamily: FB }}>
-            {ui.createStep2.foundingEventsOffer}
-          </p>
-        )}
       </div>
 
       <form action="/events/new" method="get">
@@ -128,7 +110,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
         )}
 
         <div role="radiogroup" style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-          {cards.map(({ planId, limits, price, originalPrice, accent, stripe }) => {
+          {cards.map(({ planId, limits, price, accent, stripe }) => {
             const on = selected === planId;
             const isExpanded = expanded === planId;
             const detailsId = `plan-details-${planId}`;
@@ -187,12 +169,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
                     </div>
                     <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.05 }}>
-                        {originalPrice && (
-                          <div style={{ fontSize: 11, fontWeight: 700, color: MUTED, textDecoration: 'line-through', textDecorationThickness: '1.5px', opacity: 0.85, fontFamily: FB }}>
-                            {originalPrice}
-                          </div>
-                        )}
-                        <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 18, color: accent, marginTop: originalPrice ? 1 : 0, lineHeight: 1 }}>
+                        <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 18, color: accent, lineHeight: 1 }}>
                           {price}
                         </div>
                       </div>

@@ -7,15 +7,10 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { clearCreateEventDraftFromStorage, writeCreateEventDraftToStorage } from "@/lib/create-event-draft";
-import { isPaidPlanForCheckout } from "@/lib/event-stripe-checkout";
+import { formatEuroCents, isPaidPlanForCheckout, planPriceEuroCents } from "@/lib/event-stripe-checkout";
 import { useAppUi } from "@/components/AppUiProvider";
 import { usePostHog } from "posthog-js/react";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
-import {
-  formatEuroCents,
-  getFoundingEventsPrice,
-  isFoundingEventsPromotionActive,
-} from "@/lib/founding-events-promotion";
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const INK    = '#221509';
@@ -46,10 +41,6 @@ const PLAN_STAMP_BG: Record<PlanId, string> = {
   max:      'linear-gradient(135deg,#8B5FCC 0%,#5B2D8E 45%,#A87FD8 70%,#3D1A6E 100%)',
 };
 
-const PLAN_LIST_PRICE_EURO_CENTS: Record<PlanId, number> = {
-  free: 0, standard: 1500, plus: 3500, premium: 6500, max: 9000,
-};
-
 type Step3PaymentProps = {
   name: string;
   emoji: string;
@@ -76,8 +67,6 @@ export function Step3Payment({ name, emoji, date, planId, moderationEnabled, val
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [requiresAuth, setRequiresAuth] = useState(false);
   const posthog = usePostHog();
-  const isFoundingEventsOfferActive = isFoundingEventsPromotionActive();
-  const planPrice = getFoundingEventsPrice(PLAN_LIST_PRICE_EURO_CENTS[planId]);
 
   useEffect(() => {
     posthog.capture(ANALYTICS_EVENTS.CREATE_STEP3_VIEWED, { plan_id: planId });
@@ -288,13 +277,8 @@ export function Step3Payment({ name, emoji, date, planId, moderationEnabled, val
                 <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 13, letterSpacing: '0.04em', lineHeight: 1 }}>{ui.plans[planId]}</span>
               </span>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.05 }}>
-                {planPrice.promotionId && (
-                  <span style={{ fontSize: 11, fontWeight: 700, color: MUTED, textDecoration: 'line-through', textDecorationThickness: '1.5px', fontFamily: FB }}>
-                    {formatEuroCents(planPrice.listAmountEuroCents)}
-                  </span>
-                )}
                 <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 20, color: accent, lineHeight: 1 }}>
-                  {formatEuroCents(planPrice.amountEuroCents)}
+                  {formatEuroCents(planPriceEuroCents(planId))}
                 </span>
               </div>
             </div>
@@ -325,11 +309,6 @@ export function Step3Payment({ name, emoji, date, planId, moderationEnabled, val
           <p style={{ margin: '0 0 14px', fontSize: 11.5, color: MUTED, fontFamily: FB }}>
             {isPaidPlanForCheckout(planId) ? ui.createStep3.footnotePaid : ui.createStep3.footnoteFree}
           </p>
-          {isFoundingEventsOfferActive && isPaidPlanForCheckout(planId) && (
-            <p style={{ margin: '-6px 0 14px', fontSize: 11.5, color: GOLD_DK, fontWeight: 700, fontFamily: FB }}>
-              {ui.createStep3.foundingEventsOffer}
-            </p>
-          )}
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>

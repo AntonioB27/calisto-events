@@ -752,7 +752,6 @@ export const APP_UI_HR: AppUiDict = {
     description: "Odaberite paket koji odgovara veličini događaja.",
     priceEyebrow: "Cijena",
     sale: "Akcija",
-    foundingEventsOffer: "Founding Events: 50% popusta na plaćene pakete do 17. listopada.",
     popularBadge: "Popularno",
     unlimited: "Neograničeno",
     guestsPhotosVideos:
@@ -796,7 +795,6 @@ export const APP_UI_HR: AppUiDict = {
       "Besplatna razina je potvrđena ovdje bez naplate — odmah pozovite goste.",
     selectedPlanEyebrow: "Odabrani paket",
     saleBadge: "Akcija",
-    foundingEventsOffer: "Founding Events popust: 50% popusta već je primijenjeno pri plaćanju.",
     priceNotePaid: "U cijeni je PDV ako vrijedi — naplata jednokratno kod potvrde u Stripeu.",
     priceNoteFree: "Besplatni paket ostaje besplatan.",
     footnotePaid: "Prijeći ćete na Stripe za plaćanje; kad uspije, događaj je otvoren.",

@@ -2,7 +2,7 @@
 
 import type React from "react";
 import type { LandingCopy } from "@/lib/i18n";
-import { formatEuroCents, getFoundingEventsPlanPrice } from "@/lib/founding-events-promotion";
+import { formatEuroCents, planPriceEuroCents } from "@/lib/event-stripe-checkout";
 
 export type PlanCompareTableProps = {
   plans: LandingCopy["plans"];
@@ -37,7 +37,7 @@ export function PlanCompareTable({ plans, onChoose, copy }: PlanCompareTableProp
               />
               {plans.map((plan) => {
                 const featured = plan.id === FEATURED_PLAN_ID;
-                const price = getFoundingEventsPlanPrice(plan.id);
+                const price = planPriceEuroCents(plan.id);
                 return (
                   <th
                     key={plan.id}
@@ -63,13 +63,7 @@ export function PlanCompareTable({ plans, onChoose, copy }: PlanCompareTableProp
                       )}
                     </div>
                     <div style={{ fontSize: 14, color: "var(--cream-3)", marginTop: 4, fontFamily: "var(--font-sans)" }}>
-                      {price.promotionId && (
-                        <span style={{ textDecoration: "line-through", color: "var(--cream-4)", marginRight: 6 }}>
-                          {formatEuroCents(price.listAmountEuroCents)}
-                        </span>
-                      )}
-                      {formatEuroCents(price.amountEuroCents)} {plan.id !== "free" && copy.plansPerEventSuffix}
-                      {price.promotionId && <span className="launch-discount-badge" style={{ marginLeft: 6 }}>−50%</span>}
+                      {formatEuroCents(price)} {plan.id !== "free" && copy.plansPerEventSuffix}
                     </div>
                   </th>
                 );

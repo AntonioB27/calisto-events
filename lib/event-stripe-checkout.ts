@@ -26,6 +26,15 @@ export function planUnitAmountEuroCents(planId: PaidPlanId): number {
   }
 }
 
+/** List price for any plan, including free. */
+export function planPriceEuroCents(planId: PlanId): number {
+  return isPaidPlanForCheckout(planId) ? planUnitAmountEuroCents(planId as PaidPlanId) : 0;
+}
+
+export function formatEuroCents(amountEuroCents: number): string {
+  return `${(amountEuroCents / 100).toFixed(2).replace(/\.00$/, "")}€`;
+}
+
 /** Credit toward a plan upgrade — the list price of whatever paid plan the event is already on. */
 export function planCreditEuroCents(currentPlanId: PlanId): number {
   return currentPlanId === "free" ? 0 : planUnitAmountEuroCents(currentPlanId as PaidPlanId);

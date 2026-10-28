@@ -34,7 +34,7 @@ describe("POST /api/stripe/checkout-create-event", () => {
     vi.clearAllMocks();
   });
 
-  it("applies the Founding Events price server-side and records it in Stripe metadata", async () => {
+  it("charges the plan list price and allows promotion codes", async () => {
     const response = await POST(new Request("https://calisto-events.com/api/stripe/checkout-create-event", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -46,13 +46,8 @@ describe("POST /api/stripe/checkout-create-event", () => {
     expect(createCheckoutSession).toHaveBeenCalledTimes(1);
 
     const session = createCheckoutSession.mock.calls[0]?.[0];
-    expect(session.allow_promotion_codes).toBe(false);
-    expect(session.line_items[0].price_data.unit_amount).toBe(1750);
-    expect(session.line_items[0].price_data.product_data.description).toContain("50% off");
-    expect(session.metadata).toMatchObject({
-      promotion: "founding_events_2026",
-      list_price_eur_cents: "3500",
-      discount_eur_cents: "1750",
-    });
+    expect(session.allow_promotion_codes).toBe(true);
+    expect(session.line_items[0].price_data.unit_amount).toBe(3500);
+    expect(session.metadata).toMatchObject({ plan: "plus", organizer_id: "organizer_1" });
   });
 });

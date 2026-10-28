@@ -7,7 +7,6 @@ import {
   truncateStripeMetadataTitle,
   type PaidPlanId,
 } from "@/lib/event-stripe-checkout";
-import { getFoundingEventsPrice } from "@/lib/founding-events-promotion";
 import { normalizePlanId, type PlanId } from "@/lib/plan-limits";
 import { getStripe } from "@/lib/stripe-server";
 import { getSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
@@ -88,7 +87,6 @@ export async function POST(request: Request) {
 
   const title = buildEventTitle(name, emoji);
   const paidPlanId = planId as PaidPlanId;
-  const checkoutPrice = getFoundingEventsPrice(planUnitAmountEuroCents(paidPlanId));
   const accessCode = crypto.randomUUID().slice(0, 8).toUpperCase();
   const origin = getAppOrigin(request);
 
@@ -97,20 +95,13 @@ export async function POST(request: Request) {
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
-    // The launch offer is applied by this trusted server route. Do not let a
-    // separate promotion code stack on top of the 50% campaign price.
-    allow_promotion_codes: checkoutPrice.promotionId === null,
+    allow_promotion_codes: true,
     line_items: [
       {
         price_data: {
           currency: "eur",
-          unit_amount: checkoutPrice.amountEuroCents,
-          product_data: {
-            name: `Calisto event — ${displayPlan}`,
-            ...(checkoutPrice.promotionId
-              ? { description: "Founding Events offer — 50% off already applied" }
-              : {}),
-          },
+          unit_amount: planUnitAmountEuroCents(paidPlanId),
+          product_data: { name: `Calisto event — ${displayPlan}` },
         },
         quantity: 1,
       },
@@ -124,9 +115,6 @@ export async function POST(request: Request) {
       access_code: accessCode,
       event_title: truncateStripeMetadataTitle(title, 480),
       locale,
-      list_price_eur_cents: String(checkoutPrice.listAmountEuroCents),
-      discount_eur_cents: String(checkoutPrice.discountEuroCents),
-      ...(checkoutPrice.promotionId ? { promotion: checkoutPrice.promotionId } : {}),
       ...(user.email ? { organizer_email: user.email } : {}),
     },
     client_reference_id: user.id,
