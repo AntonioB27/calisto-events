@@ -9,6 +9,8 @@ export const EVENT_ADMIN_TABS = [
   { id: "prints", visibleTo: "organizer" as const },
   /** Primary organizer only — hidden for other roles if they ever get event access */
   { id: "settings", visibleTo: "organizer" as const },
+  /** Hub linking to everything outside the four bottom-nav tabs; rows inside are role-filtered. */
+  { id: "more", visibleTo: "all" as const },
 ] as const;
 
 export type EventAdminTabId = (typeof EVENT_ADMIN_TABS)[number]["id"];

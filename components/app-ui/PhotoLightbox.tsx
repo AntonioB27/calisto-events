@@ -42,6 +42,9 @@ type Props = Readonly<{
   hasNext?: boolean;
   onPrev?: () => void;
   onNext?: () => void;
+  /** Admin-only: shows a delete button; the caller confirms and deletes. */
+  onDelete?: () => void;
+  deleteLabel?: string;
 }>;
 
 // Minimum horizontal travel (px) that counts as a deliberate swipe.
@@ -71,10 +74,11 @@ export function PhotoLightbox({
   hasNext = false,
   onPrev,
   onNext,
+  onDelete,
+  deleteLabel,
 }: Props) {
   const isVideo = Boolean(mimeType?.startsWith("video/"));
   const [controlsVisible, setControlsVisible] = useState(true);
-  const [mounted, setMounted] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -86,8 +90,6 @@ export function PhotoLightbox({
     clearTimer();
     timerRef.current = setTimeout(() => setControlsVisible(false), AUTO_HIDE_MS);
   }, [clearTimer]);
-
-  useEffect(() => { setMounted(true); }, []);
 
   // Arrow keys navigate between photos; Escape closes.
   useEffect(() => {
@@ -144,9 +146,7 @@ export function PhotoLightbox({
     pointerEvents: controlsVisible ? "auto" : "none",
   };
 
-  if (!mounted) return null;
-
-  return createPortal(
+  const content = (
     <div
       role="dialog"
       aria-modal="true"
@@ -195,8 +195,8 @@ export function PhotoLightbox({
           position: "absolute",
           top: 16,
           right: 16,
-          width: 36,
-          height: 36,
+          width: 44,
+          height: 44,
           borderRadius: "50%",
           background: "rgba(0,0,0,0.55)",
           border: "1px solid rgba(255,255,255,0.18)",
@@ -341,8 +341,8 @@ export function PhotoLightbox({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: 40,
-                height: 40,
+                width: 44,
+                height: 44,
                 borderRadius: "50%",
                 border: "none",
                 cursor: togglePending ? "wait" : "pointer",
@@ -367,10 +367,38 @@ export function PhotoLightbox({
               </span>
             ) : null}
           </div>
-          {footerActions}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {onDelete ? (
+              <button
+                type="button"
+                aria-label={deleteLabel}
+                title={deleteLabel}
+                onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: "50%",
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  background: "rgba(0,0,0,0.5)",
+                  color: "#fff",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            ) : null}
+            {footerActions}
+          </div>
         </div>
       </div>
-    </div>,
-    document.body
+    </div>
   );
+
+  // No document while rendering on the server (tests); in the browser the lightbox only opens after a click.
+  return typeof document === "undefined" ? content : createPortal(content, document.body);
 }

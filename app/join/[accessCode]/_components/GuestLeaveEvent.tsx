@@ -12,7 +12,8 @@ import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 export function GuestLeaveEvent({
   eventId,
   canShow,
-}: Readonly<{ eventId: string; canShow: boolean }>) {
+  asMenuItem = false,
+}: Readonly<{ eventId: string; canShow: boolean; /** Render as a row inside the album's options menu. */ asMenuItem?: boolean }>) {
   const ui = useAppUi();
   const router = useRouter();
   const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
@@ -39,7 +40,7 @@ export function GuestLeaveEvent({
   }
 
   return (
-    <section style={{ marginBottom: 24 }}>
+    <section style={{ marginBottom: asMenuItem ? 0 : 24 }}>
       <ConfirmDialog
         open={open}
         title={ui.leave.title}
@@ -69,9 +70,15 @@ export function GuestLeaveEvent({
           {error}
         </div>
       ) : null}
-      <AppBtn type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
-        {ui.leave.guestCtaSame}
-      </AppBtn>
+      {asMenuItem ? (
+        <button type="button" className="guest-album-menu__item guest-album-menu__item--danger" onClick={() => setOpen(true)}>
+          {ui.leave.guestCtaSame}
+        </button>
+      ) : (
+        <AppBtn type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
+          {ui.leave.guestCtaSame}
+        </AppBtn>
+      )}
     </section>
   );
 }

@@ -3,10 +3,14 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { ChevronRight } from "lucide-react";
+
 import { useAppUi } from "@/components/AppUiProvider";
+import { Aurora } from "@/components/app-ui/Aurora";
 import { interpolate } from "@/lib/app-ui";
 import { planCreditEuroCents, planUnitAmountEuroCents } from "@/lib/event-stripe-checkout";
 import { getPlanLimits, PLAN_DB_INT_MAX, normalizePlanId, PLAN_ORDER, planRank, type PlanId } from "@/lib/plan-limits";
+import "../_tabs/event-shell.css";
 
 // ── Palette (Aurora Theater, matches Overview/Settings) ────────────────────────
 const GOLD = "#C5922A";
@@ -360,10 +364,9 @@ function UpgradeDialog({
   );
 }
 
-// ── Overview banner ────────────────────────────────────────────────────────────
+// ── Home card: Aurora with a present, opens the plan picker ────────────────────
 export function UpgradeBanner({ eventId, plan }: { eventId: string; plan: string }) {
   const ui = useAppUi();
-  const isDark = useIsDark();
   const [open, setOpen] = useState(false);
   const currentPlan = normalizePlanId(plan);
 
@@ -371,54 +374,24 @@ export function UpgradeBanner({ eventId, plan }: { eventId: string; plan: string
 
   return (
     <>
-      <div
-        style={{
-          position: "relative", borderRadius: 20, overflow: "hidden", padding: "18px 16px 16px",
-          background: isDark
-            ? "linear-gradient(140deg, rgba(197,146,42,0.28), rgba(139,79,216,0.14) 70%, transparent), rgba(255,255,255,0.06)"
-            : "linear-gradient(140deg, rgba(197,146,42,0.20), rgba(139,79,216,0.10) 70%, transparent), rgba(255,255,255,0.72)",
-          backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
-          border: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(255,255,255,0.78)",
-          boxShadow: isDark ? "0 14px 32px -10px rgba(0,0,0,0.5)" : "0 14px 32px -10px rgba(40,25,15,0.22), inset 0 1px 0 rgba(255,255,255,0.7)",
-        }}
-      >
-        <div aria-hidden style={{ position: "absolute", top: -40, right: -30, width: 150, height: 150, borderRadius: "50%", background: "radial-gradient(circle, rgba(197,146,42,0.45), transparent 65%)", filter: "blur(8px)", pointerEvents: "none" }} />
-
-        <div style={{ position: "relative" }}>
-          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: GOLD_DK, fontFamily: FB }}>
-            {ui.upgrade.bannerEyebrow}
-          </div>
-          <div style={{ fontFamily: FS, fontStyle: "italic", fontWeight: 700, fontSize: 20, color: TEXT, marginTop: 4, lineHeight: 1.15 }}>
-            {ui.upgrade.bannerTitle}
-          </div>
-          <p style={{ margin: "8px 0 0", fontFamily: FB, fontSize: 13, color: TEXT_S, lineHeight: 1.55 }}>
-            {ui.upgrade.bannerBody}
-          </p>
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            style={{
-              marginTop: 14, display: "inline-flex", alignItems: "center", gap: 7,
-              background: GOLD_FOIL, color: "#fff", border: "none", borderRadius: 12,
-              padding: "11px 18px", fontFamily: FB, fontSize: 13, fontWeight: 700,
-              cursor: "pointer", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 12px rgba(148,108,24,0.32)",
-              textShadow: "0 1px 2px rgba(100,60,0,0.3)",
-            }}
-          >
-            {ui.upgrade.bannerCta}
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
+      <section className="event-upgrade" aria-labelledby="home-upgrade-title">
+        <Aurora pose="present" size={100} style={{ position: "absolute", left: 10, bottom: 10 }} />
+        <h2 id="home-upgrade-title" style={{ margin: 0, fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 21, lineHeight: 1.15, color: TEXT }}>
+          {ui.eventShell.upgradeTitle}
+        </h2>
+        <p style={{ margin: "6px 0 0", fontSize: 14, lineHeight: 1.4, color: TEXT_S }}>{ui.eventShell.upgradeBody}</p>
+        <button type="button" className="event-link" aria-haspopup="dialog" onClick={() => setOpen(true)} style={{ marginTop: 10 }}>
+          {ui.upgrade.bannerCta}
+          <ChevronRight size={18} strokeWidth={2.2} aria-hidden />
+        </button>
+      </section>
       {open && <UpgradeDialog eventId={eventId} currentPlan={currentPlan} onClose={() => setOpen(false)} />}
     </>
   );
 }
 
-// ── Settings button ────────────────────────────────────────────────────────────
-export function UpgradeSettingsButton({ eventId, plan }: { eventId: string; plan: string }) {
+// ── Settings button (or, with `link`, a quiet text link like More's plan card) ──
+export function UpgradeSettingsButton({ eventId, plan, link = false }: { eventId: string; plan: string; link?: boolean }) {
   const ui = useAppUi();
   const [open, setOpen] = useState(false);
   const currentPlan = normalizePlanId(plan);
@@ -427,22 +400,28 @@ export function UpgradeSettingsButton({ eventId, plan }: { eventId: string; plan
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        style={{
-          marginTop: 12, display: "inline-flex", alignItems: "center", gap: 7,
-          background: GOLD_FOIL, color: "#fff", border: "none", borderRadius: 11,
-          padding: "10px 16px", fontFamily: FB, fontSize: 13, fontWeight: 700,
-          cursor: "pointer", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4), 0 3px 10px rgba(148,108,24,0.3)",
-          textShadow: "0 1px 2px rgba(100,60,0,0.3)",
-        }}
-      >
-        {ui.upgrade.settingsCta}
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
+      {link ? (
+        <button type="button" className="event-link" aria-haspopup="dialog" onClick={() => setOpen(true)}>
+          {ui.upgrade.settingsCta}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          style={{
+            marginTop: 12, display: "inline-flex", alignItems: "center", gap: 7,
+            background: GOLD_FOIL, color: "#fff", border: "none", borderRadius: 11,
+            padding: "10px 16px", fontFamily: FB, fontSize: 13, fontWeight: 700,
+            cursor: "pointer", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4), 0 3px 10px rgba(148,108,24,0.3)",
+            textShadow: "0 1px 2px rgba(100,60,0,0.3)",
+          }}
+        >
+          {ui.upgrade.settingsCta}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      )}
       {open && <UpgradeDialog eventId={eventId} currentPlan={currentPlan} onClose={() => setOpen(false)} />}
     </>
   );

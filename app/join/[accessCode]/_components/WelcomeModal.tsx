@@ -1,25 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
-import { AppCard } from "@/components/app-ui/AppCard";
+import { Aurora, AuroraSays } from "@/components/app-ui/Aurora";
 import { AppFormRow } from "@/components/app-ui/AppFormRow";
 import { AppInput } from "@/components/app-ui/AppInput";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type Props = {
   eventTitle: string;
+  /** Already formatted for display; omitted when the date can't be parsed. */
+  eventDateLabel?: string | null;
   accessCode: string;
   onSessionReady: () => void;
 };
 
-export function WelcomeModal({ eventTitle, accessCode, onSessionReady }: Props) {
+export function WelcomeModal({ eventTitle, eventDateLabel, accessCode, onSessionReady }: Props) {
   const ui = useAppUi();
-  const router = useRouter();
-  const [showNicknameInput, setShowNicknameInput] = useState(false);
   const [nickname, setNickname] = useState("");
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -65,80 +65,93 @@ export function WelcomeModal({ eventTitle, accessCode, onSessionReady }: Props) 
 
   return (
     <div
+      className="welcome-sheet-backdrop"
       style={{
         position: "fixed",
         inset: 0,
         zIndex: 50,
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-        background: "color-mix(in srgb, var(--app-text) 55%, transparent)",
-        backdropFilter: "blur(6px)",
+        overflowY: "auto",
+        background: "color-mix(in srgb, var(--app-bg) 72%, transparent)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
       }}
     >
-      <AppCard pad="lg" style={{ width: "100%", maxWidth: 384, borderRadius: 16, boxShadow: "var(--app-shadow-lg)" }}>
-        <p
+      <div className="welcome-sheet-hero" style={{ position: "relative", width: "100%", maxWidth: 440, display: "flex", alignItems: "center", gap: 2, padding: "24px 18px 8px 4px" }}>
+        <div aria-hidden className="welcome-sheet-hero__glow" />
+        <Aurora pose="waving" size={160} priority style={{ position: "relative", flexShrink: 0 }} />
+        <AuroraSays size={21} style={{ position: "relative", lineHeight: 1.3 }}>{ui.aurora.welcome}</AuroraSays>
+      </div>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="welcome-title"
+        className="welcome-sheet"
+        style={{
+          width: "100%",
+          maxWidth: 440,
+          background: "var(--app-surface)",
+          border: "1px solid var(--app-border)",
+          boxShadow: "0 -18px 40px -16px rgba(120, 80, 30, 0.3), inset 0 1px 0 rgba(255, 253, 246, 0.9)",
+          padding: "14px 22px calc(28px + env(safe-area-inset-bottom, 0px))",
+        }}
+      >
+        <div aria-hidden style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+          <div style={{ width: 40, height: 4, borderRadius: 99, background: "var(--app-border-strong)" }} />
+        </div>
+        <p style={{ margin: 0, fontSize: 15, color: "var(--app-text-sub)" }}>{ui.aurora.welcomeInvited}</p>
+        <h1
+          id="welcome-title"
           style={{
-            fontSize: 11,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.16em",
-            color: "var(--app-gold)",
+            margin: "2px 0 0",
+            fontFamily: "'DM Serif Display', serif",
+            fontWeight: 400,
+            fontSize: 42,
+            lineHeight: 1,
+            letterSpacing: "-0.02em",
+            color: "var(--app-text)",
+            textWrap: "balance",
+            overflowWrap: "anywhere",
           }}
         >
-          {ui.welcomeModal.eyebrow}
-        </p>
-        <h1 style={{ marginTop: 4, fontSize: "1.5rem", fontWeight: 600, color: "var(--app-text)" }}>{eventTitle}</h1>
-        <p style={{ marginTop: 8, fontSize: 14, color: "var(--app-muted)" }}>{ui.welcomeModal.body}</p>
+          {eventTitle}
+        </h1>
+        {eventDateLabel ? (
+          <p className="guest-date" style={{ margin: "8px 0 0", fontSize: 15, fontWeight: 600 }}>{eventDateLabel}</p>
+        ) : null}
 
-        {!showNicknameInput ? (
-          <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12 }}>
-            <AppBtn
-              type="button"
-              variant="gold"
-              className="w-full"
-              onClick={() => router.push(`/auth/login?mode=register&returnTo=${encodeURIComponent(returnTo)}`)}
-            >
-              {ui.welcomeModal.createAccount}
-            </AppBtn>
-            <AppBtn
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => router.push(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`)}
-            >
-              {ui.welcomeModal.logIn}
-            </AppBtn>
-            <AppBtn type="button" variant="ghost" className="w-full" onClick={() => setShowNicknameInput(true)}>
-              {ui.welcomeModal.continueGuest}
-            </AppBtn>
-          </div>
-        ) : (
-          <form onSubmit={handleGuestSubmit} style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12 }}>
-            <AppFormRow label={ui.welcomeModal.nicknameLabel} labelFor="nickname" errorText={nicknameError}>
-              <AppInput
-                id="nickname"
-                type="text"
-                value={nickname}
-                onChange={(v) => {
-                  setNickname(v);
-                  if (nicknameError) setNicknameError(null);
-                }}
-                placeholder={ui.welcomeModal.nicknamePlaceholder}
-                maxLength={30}
-                autoFocus
-              />
-            </AppFormRow>
-            <AppBtn type="submit" variant="gold" className="w-full" disabled={busy} loading={busy}>
-              {ui.welcomeModal.enterGuest}
-            </AppBtn>
-            <AppBtn type="button" variant="ghost" size="sm" onClick={() => setShowNicknameInput(false)}>
-              {ui.common.back}
-            </AppBtn>
-          </form>
-        )}
-      </AppCard>
+        <form onSubmit={handleGuestSubmit} style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+          <AppFormRow label={ui.welcomeModal.nicknameLabel} labelFor="nickname" errorText={nicknameError}>
+            <AppInput
+              id="nickname"
+              type="text"
+              value={nickname}
+              onChange={(v) => {
+                setNickname(v);
+                if (nicknameError) setNicknameError(null);
+              }}
+              placeholder={ui.welcomeModal.nicknamePlaceholder}
+              maxLength={30}
+              autoComplete="nickname"
+            />
+          </AppFormRow>
+          <AppBtn type="submit" variant="gold" size="lg" className="w-full" disabled={busy} loading={busy}>
+            {ui.welcomeModal.startSharing}
+          </AppBtn>
+        </form>
+
+        <p style={{ margin: "8px 0 0", textAlign: "center", fontSize: 14, color: "var(--app-muted)" }}>
+          {ui.welcomeModal.haveAccount}{" "}
+          <Link
+            href={`/auth/login?returnTo=${encodeURIComponent(returnTo)}`}
+            style={{ display: "inline-block", padding: "10px 4px", fontWeight: 700, color: "var(--app-purple)", textDecoration: "underline", textUnderlineOffset: 3 }}
+          >
+            {ui.welcomeModal.logIn}
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

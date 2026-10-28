@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Home, Calendar, Images, Users, Plus, Camera, QrCode, CheckCircle2 } from "lucide-react";
+import { Home, Calendar, Images, Users, Plus, Camera, QrCode, CheckCircle2, Ellipsis } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
@@ -30,6 +30,7 @@ const NAV_ICONS: Record<string, React.ComponentType<{ size: number }>> = {
   guests: Users,
   prints: Camera,
   rsvp: CheckCircle2,
+  more: Ellipsis,
 };
 
 function NavLinks({ eventId }: { eventId: string | null }) {
@@ -53,6 +54,7 @@ function NavLinks({ eventId }: { eventId: string | null }) {
           { id: "guests",  href: `/events/${eventId}?tab=guests`,   label: ui.shell.navGuests          },
           { id: "rsvp",    href: `/events/${eventId}?tab=rsvp`,     label: ui.eventNav.tabRsvp         },
           { id: "prints",  href: `/events/${eventId}?tab=prints`,   label: ui.eventNav.tabPrints       },
+          { id: "more",    href: `/events/${eventId}?tab=more`,     label: ui.aurora.navMore           },
         ]
       : []),
   ];
@@ -64,6 +66,7 @@ function NavLinks({ eventId }: { eventId: string | null }) {
     if (linkId === "guests")  return isEventScreen && currentTab === "guests";
     if (linkId === "rsvp")    return isEventScreen && currentTab === "rsvp";
     if (linkId === "prints")  return isEventScreen && currentTab === "prints";
+    if (linkId === "more")    return isEventScreen && currentTab === "more";
     return false;
   }
 
@@ -100,10 +103,12 @@ function AppShellInner({ userName, userInitial, children }: AppShellProps) {
   const eventMatch = pathname.match(/^\/events\/([^/]+)/);
   const isEventScreen = Boolean(eventMatch && eventMatch[1] !== "new");
   const eventId = isEventScreen ? eventMatch![1] : null;
+  // Phones: the event's own glass bar is the only top bar on /events/[id] (not its print subpages).
+  const isEventDetail = isEventScreen && /^\/events\/[^/]+\/?$/.test(pathname);
 
   return (
     <div className="app-shell flex flex-col">
-      <header className="app-shell-header relative flex shrink-0 items-center overflow-visible">
+      <header className={`app-shell-header relative ${isEventDetail ? "hidden md:flex" : "flex"} shrink-0 items-center overflow-visible`}>
         {/* Design 03 top gold sheen line */}
         <div
           aria-hidden
@@ -159,7 +164,7 @@ function AppShellInner({ userName, userInitial, children }: AppShellProps) {
         </nav>
 
         {/* Right side: Join + New Event + rule + avatar */}
-        <div className="ml-auto flex shrink-0 items-center gap-4 md:gap-5">
+        <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-5">
           <Link
             href="/join"
             className={`app-shell-text-link app-shell-join-link${pendingActionHref === "/join" ? " app-shell-text-link--pending" : ""}`}
@@ -171,14 +176,13 @@ function AppShellInner({ userName, userInitial, children }: AppShellProps) {
           </Link>
           <Link
             href="/events/new"
-            className={`app-shell-text-link app-shell-new-event-link${pendingActionHref === "/events/new" ? " app-shell-text-link--pending" : ""}`}
-            aria-label={ui.shell.newEventAria}
+            className={`app-shell-new-event-link${pendingActionHref === "/events/new" ? " app-shell-text-link--pending" : ""}`}
             onClick={() => setPendingActionHref("/events/new")}
           >
-            <Plus size={16} strokeWidth={2.5} />
-            <span className="hidden md:inline">{ui.shell.newEventLabel}</span>
+            <Plus size={16} strokeWidth={2.5} aria-hidden />
+            {ui.shell.newEventLabel}
           </Link>
-          <div className="app-shell-rule" aria-hidden />
+          <div className="app-shell-rule hidden md:block" aria-hidden />
           <AppShellAccountMenu userName={userName} userInitial={userInitial} />
         </div>
       </header>

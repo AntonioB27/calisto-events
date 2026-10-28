@@ -1,13 +1,19 @@
 "use client";
 
+import Link from "next/link";
+import { MoreHorizontal, RefreshCw, Search } from "lucide-react";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { startTransition, useCallback, useEffect, useMemo, useState } from "react";
 import { interpolate } from "@/lib/app-ui";
+import { plural } from "@/lib/app-ui/plural";
+import { bcp47FromUiLocale } from "@/lib/locale-bcp47";
 import { useAppUi } from "@/components/AppUiProvider";
-import { GoldBar } from "@/components/app-ui/GoldBar";
+import { Aurora, AuroraSays } from "@/components/app-ui/Aurora";
 import { AuroraHourglass } from "@/components/app-ui/AuroraHourglass";
-import { AppBtn } from "@/components/app-ui/AppBtn";
 import { ConfirmDialog } from "@/components/app-ui/ConfirmDialog";
+import { FilterChips, type FilterChip } from "@/components/app-ui/FilterChips";
+import { TabHeader } from "@/components/app-ui/TabHeader";
+import "./guests-share.css";
 
 type MembershipRole = "organizer" | "guest" | "co_organizer" | string;
 
@@ -26,7 +32,14 @@ type ProfileRow = {
 type MediaRow = {
   uploaded_by: string;
   mime_type: string | null;
+  storage_path: string;
+  thumbnail_path: string | null;
 };
+
+type Filter = "all" | "added" | "co";
+
+// Guest avatars: warm tones that all keep white initials above 4.5:1.
+const GUEST_TONES = ["#6f5c47", "#8b6a8c", "#8a5f12"];
 
 function isVideoMime(mime: string | null | undefined) {
   return Boolean(mime && mime.startsWith("video/"));
@@ -34,6 +47,8 @@ function isVideoMime(mime: string | null | undefined) {
 
 export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
   const ui = useAppUi();
+  const t = ui.guestsTab;
+  const locale = bcp47FromUiLocale(ui.locale);
   const supabase = useMemo(() => maybeCreateSupabaseBrowserClient(), []);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,9 +56,14 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [profileNameById, setProfileNameById] = useState<Map<string, string>>(() => new Map());
   const [organizerId, setOrganizerId] = useState<string | null>(null);
+  const [accessCode, setAccessCode] = useState<string | null>(null);
   const [myUserId, setMyUserId] = useState<string | null>(null);
   const [mediaByUser, setMediaByUser] = useState<Map<string, { photos: number; videos: number }>>(() => new Map());
+  const [printsByUser, setPrintsByUser] = useState<Map<string, string[]>>(() => new Map());
   const [pendingRemoveUserId, setPendingRemoveUserId] = useState<string | null>(null);
+  const [openMenuFor, setOpenMenuFor] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<Filter>("all");
 
   const load = useCallback(async () => {
     if (!supabase) return;
@@ -56,20 +76,26 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
 
       const [{ data: ev, error: evErr }, { data: mems, error: memErr }, { data: media, error: mediaErr }] =
         await Promise.all([
-          supabase.from("events").select("organizer_id").eq("id", eventId).single(),
+          supabase.from("events").select("organizer_id, access_code").eq("id", eventId).single(),
           supabase
             .from("event_memberships")
             .select("user_id, role, joined_at, display_name_at_event")
             .eq("event_id", eventId)
             .order("joined_at", { ascending: true }),
-          supabase.from("media_items").select("uploaded_by, mime_type").eq("event_id", eventId),
+          supabase
+            .from("media_items")
+            .select("uploaded_by, mime_type, storage_path, thumbnail_path")
+            .eq("event_id", eventId)
+            .order("created_at", { ascending: false }),
         ]);
 
       if (evErr) throw new Error(evErr.message);
       if (memErr) throw new Error(memErr.message);
       if (mediaErr) throw new Error(mediaErr.message);
 
-      setOrganizerId((ev as { organizer_id: string } | null)?.organizer_id ?? null);
+      const evRow = ev as { organizer_id: string; access_code: string | null } | null;
+      setOrganizerId(evRow?.organizer_id ?? null);
+      setAccessCode(evRow?.access_code ?? null);
       setMembers((mems ?? []) as MemberRow[]);
 
       const userIds = Array.from(new Set(((mems ?? []) as MemberRow[]).map((m) => m.user_id)));
@@ -89,14 +115,34 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
       }
 
       const map = new Map<string, { photos: number; videos: number }>();
+      const picks = new Map<string, string[]>();
       for (const row of (media ?? []) as MediaRow[]) {
         const key = row.uploaded_by;
         const current = map.get(key) ?? { photos: 0, videos: 0 };
         if (isVideoMime(row.mime_type)) current.videos += 1;
-        else current.photos += 1;
+        else {
+          current.photos += 1;
+          const mine = picks.get(key) ?? [];
+          if (mine.length < 2) picks.set(key, [...mine, row.thumbnail_path ?? row.storage_path]);
+        }
         map.set(key, current);
       }
       setMediaByUser(map);
+
+      // Each member's two newest photos as tiny prints, signed in one batch. Decorative: on any failure the rows just show none.
+      const paths = [...picks.values()].flat();
+      if (paths.length) {
+        void supabase.storage
+          .from("event-media")
+          .createSignedUrls(paths, 3600)
+          .then(({ data }: { data: { path: string | null; signedUrl: string }[] | null }) => {
+            const byPath = new Map((data ?? []).filter((s) => s.path && s.signedUrl).map((s) => [s.path, s.signedUrl] as const));
+            setPrintsByUser(
+              new Map([...picks].map(([user, ps]) => [user, ps.map((p) => byPath.get(p)).filter((u): u is string => Boolean(u))] as const)),
+            );
+          })
+          .catch(() => {});
+      } else setPrintsByUser(new Map());
     } catch (e) {
       setError(e instanceof Error ? e.message : ui.guests.loadFailed);
     } finally {
@@ -107,6 +153,30 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
   useEffect(() => {
     void load();
   }, [load]);
+
+  // Row menu: focus the first item on open; Escape (back to the ⋯ button), Tab or a tap outside closes it.
+  useEffect(() => {
+    if (!openMenuFor) return;
+    const menu = document.getElementById(`guest-menu-${openMenuFor}`);
+    const trigger = document.getElementById(`guest-more-${openMenuFor}`);
+    menu?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpenMenuFor(null);
+        trigger?.focus();
+      } else if (e.key === "Tab") setOpenMenuFor(null);
+    };
+    const onDown = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (!menu?.contains(target) && !trigger?.contains(target)) setOpenMenuFor(null);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onDown);
+    };
+  }, [openMenuFor]);
 
   const isPrimaryOrganizer = Boolean(myUserId && organizerId && myUserId === organizerId);
 
@@ -186,8 +256,40 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
     }
   }
 
+  function closeMenu(userId: string) {
+    setOpenMenuFor(null);
+    document.getElementById(`guest-more-${userId}`)?.focus();
+  }
+
+  const rows = members.map((m) => {
+    const isPrimary = organizerId === m.user_id;
+    const display =
+      m.display_name_at_event?.trim() ||
+      profileNameById.get(m.user_id) ||
+      (isPrimary ? ui.guests.organizerLabelFallback : ui.guests.guestLabelFallback);
+    const uploads = mediaByUser.get(m.user_id) ?? { photos: 0, videos: 0 };
+    return { m, isPrimary, display, uploads, hasUploads: uploads.photos + uploads.videos > 0 };
+  });
+  const guests = rows.filter((r) => !r.isPrimary);
+  const addedCount = guests.filter((r) => r.hasUploads).length;
+  const chipCounts = { added: rows.filter((r) => r.hasUploads).length, co: rows.filter((r) => r.m.role === "co_organizer").length };
+  const chips: FilterChip<Filter>[] = [
+    { id: "all", label: interpolate(t.filterAll, { count: rows.length }) },
+    ...(chipCounts.added ? [{ id: "added" as const, label: interpolate(t.filterAdded, { count: chipCounts.added }) }] : []),
+    ...(chipCounts.co ? [{ id: "co" as const, label: interpolate(t.filterCo, { count: chipCounts.co }) }] : []),
+  ];
+  const activeFilter = chips.some((c) => c.id === filter) ? filter : "all";
+  const q = query.trim().toLocaleLowerCase();
+  const visible = rows.filter(
+    (r) =>
+      (activeFilter === "all" || (activeFilter === "added" ? r.hasUploads : r.m.role === "co_organizer")) &&
+      (!q || r.display.toLocaleLowerCase().includes(q)),
+  );
+  // After a failed first load, show the error alone instead of an "empty" sentence.
+  const loaded = (!loading && !error) || members.length > 0;
+
   return (
-    <section>
+    <section style={{ paddingTop: 6 }}>
       <ConfirmDialog
         open={pendingRemoveUserId !== null}
         title={ui.guests.removeDialogTitle}
@@ -202,32 +304,42 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
           setPendingRemoveUserId(null);
         }}
       />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <GoldBar vertical />
-            <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, fontSize: 20, color: 'var(--app-text)' }}>
-              {ui.guests.title}
-            </span>
-          </div>
-          <p style={{ fontSize: 13, color: "var(--app-muted)" }}>
-            {members.length === 1 ? ui.guests.membersOne : interpolate(ui.guests.membersMany, { n: members.length })}
-          </p>
-        </div>
-        <AppBtn variant="ghost" small onClick={() => void load()}>
-          {ui.common.refresh}
-        </AppBtn>
-      </div>
+
+      <TabHeader
+        title={ui.guests.title}
+        pose="guests"
+        actions={
+          <button
+            type="button"
+            className="guest-cover-btn guest-cover-btn--round guest-cover-btn--solid"
+            aria-label={ui.common.refresh}
+            disabled={loading}
+            onClick={() => void load()}
+          >
+            <RefreshCw size={18} strokeWidth={2} aria-hidden className={loading ? "gs-spin" : undefined} />
+          </button>
+        }
+      >
+        {!loaded ? null : guests.length === 0 ? (
+          ui.guests.empty
+        ) : (
+          <>
+            <b>{plural(locale, guests.length, t.joined)}</b>
+            {addedCount > 0 ? `, ${plural(locale, addedCount, t.added)}` : null}
+          </>
+        )}
+      </TabHeader>
 
       {error ? (
         <p
+          role="alert"
           style={{
-            fontSize: 13,
+            fontSize: 14,
             color: "var(--app-danger)",
             background: "color-mix(in srgb, var(--app-danger) 10%, transparent)",
             padding: "10px 14px",
-            borderRadius: 10,
-            marginBottom: 16,
+            borderRadius: 12,
+            margin: "16px 0 0",
             border: "1.5px solid color-mix(in srgb, var(--app-danger) 35%, transparent)",
           }}
         >
@@ -235,146 +347,160 @@ export function GuestsManager({ eventId }: Readonly<{ eventId: string }>) {
         </p>
       ) : null}
 
-      {loading ? (
+      {loading && members.length === 0 ? (
         <AuroraHourglass size={72} caption={ui.guests.loadingGuests} style={{ marginTop: 24 }} />
       ) : null}
 
-      {!loading && members.length === 0 ? (
-        <p style={{ fontSize: 13, color: "var(--app-muted)", marginTop: 24 }}>{ui.guests.empty}</p>
+      {members.length > 0 ? (
+        <>
+          <label className="guests-search">
+            <Search size={18} strokeWidth={2} aria-hidden />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t.searchPlaceholder}
+              aria-label={t.searchPlaceholder}
+            />
+          </label>
+
+          {chips.length > 1 ? (
+            <div style={{ marginTop: 12 }}>
+              <FilterChips chips={chips} value={activeFilter} onChange={setFilter} ariaLabel={t.filterLabel} />
+            </div>
+          ) : null}
+
+          {visible.length === 0 ? (
+            <p style={{ margin: "16px 4px 0", fontSize: 14, color: "var(--app-muted)" }}>{t.noMatches}</p>
+          ) : (
+            <ul className="warm-list" style={{ marginTop: 14 }}>
+              {visible.map(({ m, isPrimary, display, uploads }) => {
+                const isMe = myUserId === m.user_id;
+                const canManage = isPrimaryOrganizer && !isPrimary;
+                const canPromoteDemote = canManage && (m.role === "guest" || m.role === "co_organizer");
+                const menuOpen = openMenuFor === m.user_id;
+                const prints = printsByUser.get(m.user_id) ?? [];
+                const avatar: React.CSSProperties = isPrimary
+                  ? { background: "linear-gradient(135deg, #f5c76b, #c9912e)", color: "#1b1208" }
+                  : m.role === "co_organizer"
+                    ? { background: "#5b2d8e" }
+                    : { background: GUEST_TONES[m.user_id.charCodeAt(m.user_id.length - 1) % GUEST_TONES.length] };
+                const counts = [
+                  uploads.photos ? plural(locale, uploads.photos, t.photos) : null,
+                  uploads.videos ? plural(locale, uploads.videos, t.videos) : null,
+                ].filter(Boolean);
+                const meta = [isPrimary ? ui.dashboard.roleOrganizer : null, counts.length ? counts.join(" · ") : t.noUploads]
+                  .filter(Boolean)
+                  .join(" · ");
+                return (
+                  <li key={`${m.user_id}-${m.joined_at}`} className="guest-row" aria-busy={busyUserId === m.user_id}>
+                    <span aria-hidden className="guest-row__avatar" style={avatar}>
+                      {display.trim()[0]?.toUpperCase() ?? "?"}
+                    </span>
+                    <span className="guest-row__body">
+                      <span className="guest-row__name">
+                        <span className="guest-row__name-text">
+                          {display}
+                          {isMe ? <span className="guest-row__you"> {ui.guests.youBadge}</span> : null}
+                        </span>
+                        {m.role === "co_organizer" ? <span className="guest-row__pill">{ui.dashboard.roleCoOrganizer}</span> : null}
+                      </span>
+                      <span className="guest-row__meta">{meta}</span>
+                    </span>
+                    {prints.length ? (
+                      <span aria-hidden className="guest-row__prints">
+                        {prints.map((src) => (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            key={src}
+                            src={src}
+                            alt=""
+                            loading="lazy"
+                            className="print-photo"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ))}
+                      </span>
+                    ) : null}
+                    {canManage ? (
+                      <>
+                        <button
+                          type="button"
+                          id={`guest-more-${m.user_id}`}
+                          className="guest-row__more"
+                          aria-label={interpolate(t.optionsFor, { name: display })}
+                          aria-haspopup="menu"
+                          aria-expanded={menuOpen}
+                          aria-controls={menuOpen ? `guest-menu-${m.user_id}` : undefined}
+                          disabled={busyUserId !== null}
+                          onClick={() => setOpenMenuFor(menuOpen ? null : m.user_id)}
+                        >
+                          <MoreHorizontal size={20} strokeWidth={2.2} aria-hidden />
+                        </button>
+                        {menuOpen ? (
+                          <div
+                            id={`guest-menu-${m.user_id}`}
+                            role="menu"
+                            aria-label={interpolate(t.optionsFor, { name: display })}
+                            className="guest-row__menu"
+                            onKeyDown={(e) => {
+                              if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+                              e.preventDefault();
+                              const items = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+                              const i = items.indexOf(document.activeElement as HTMLElement);
+                              items[(i + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]?.focus();
+                            }}
+                          >
+                            {canPromoteDemote ? (
+                              <button
+                                type="button"
+                                role="menuitem"
+                                className="guest-album-menu__item"
+                                onClick={() => {
+                                  closeMenu(m.user_id);
+                                  void setCoOrganizer(m.user_id, m.role === "guest");
+                                }}
+                              >
+                                {m.role === "guest" ? ui.guests.promoteCo : ui.guests.demoteGuest}
+                              </button>
+                            ) : null}
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="guest-album-menu__item guest-album-menu__item--danger"
+                              onClick={() => {
+                                closeMenu(m.user_id);
+                                setPendingRemoveUserId(m.user_id);
+                              }}
+                            >
+                              {t.removeFromEvent}
+                            </button>
+                          </div>
+                        ) : null}
+                      </>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </>
       ) : null}
 
-      {members.length > 0 ? (
-        <ul style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {members.map((m, idx) => {
-            const isMe = myUserId === m.user_id;
-            const isPrimary = organizerId === m.user_id;
-            const uploads = mediaByUser.get(m.user_id) ?? { photos: 0, videos: 0 };
-            const canRemove = isPrimaryOrganizer && !isPrimary;
-            const canPromoteDemote = isPrimaryOrganizer && !isPrimary;
-            const busy = busyUserId === m.user_id;
-            const display =
-              m.display_name_at_event?.trim() ||
-              profileNameById.get(m.user_id) ||
-              (isPrimary ? ui.guests.organizerLabelFallback : ui.guests.guestLabelFallback);
-            const roleLabel =
-              m.role === "organizer"
-                ? ui.dashboard.roleOrganizer
-                : m.role === "co_organizer"
-                  ? ui.dashboard.roleCoOrganizer
-                  : ui.guests.guestLabelFallback;
-            const isOrgRole = m.role === "organizer" || m.role === "co_organizer";
-            const avatarLetter = display.trim()[0]?.toUpperCase() ?? "?";
-            const avatarColor = isPrimary
-              ? "var(--app-gold)"
-              : m.role === "co_organizer"
-                ? "var(--app-purple)"
-                : "var(--app-muted)";
-            const avatarBg = isPrimary
-              ? "linear-gradient(135deg, color-mix(in srgb, var(--app-gold) 22%, transparent), color-mix(in srgb, var(--app-gold) 10%, transparent))"
-              : m.role === "co_organizer"
-                ? "linear-gradient(135deg, color-mix(in srgb, var(--app-purple) 22%, transparent), color-mix(in srgb, var(--app-purple) 10%, transparent))"
-                : "color-mix(in srgb, var(--app-muted) 10%, transparent)";
-            return (
-              <li
-                key={`${m.user_id}-${m.joined_at}`}
-                className="welcome-reveal guest-member-row"
-                style={{
-                  animationDelay: `${0.05 + idx * 0.04}s`,
-                  background: 'var(--app-card)',
-                  borderRadius: 16,
-                  border: '1.5px solid var(--app-border)',
-                  padding: '14px 18px',
-                  fontSize: 14,
-                  transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div
-                    aria-hidden="true"
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: "50%",
-                      flexShrink: 0,
-                      background: avatarBg,
-                      border: `1.5px solid color-mix(in srgb, ${avatarColor} 30%, var(--app-border))`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontFamily: "var(--font-display)",
-                      fontStyle: "italic",
-                      fontWeight: 700,
-                      fontSize: 16,
-                      color: avatarColor,
-                    }}
-                  >
-                    {avatarLetter}
-                  </div>
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
-                      <p style={{ fontWeight: 700, color: 'var(--app-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
-                        {display}
-                        {isMe ? (
-                          <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 600, color: "var(--app-gold)" }}>{ui.guests.youBadge}</span>
-                        ) : null}
-                      </p>
-                      <span style={{
-                        flexShrink: 0,
-                        padding: '3px 10px',
-                        borderRadius: 20,
-                        fontSize: 10,
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.08em',
-                        background: isOrgRole
-                          ? 'color-mix(in srgb, var(--app-gold) 12%, transparent)'
-                          : 'color-mix(in srgb, var(--app-muted) 12%, transparent)',
-                        border: isOrgRole
-                          ? '1.5px solid color-mix(in srgb, var(--app-gold) 30%, transparent)'
-                          : '1.5px solid var(--app-border)',
-                        color: isOrgRole ? 'var(--app-gold)' : 'var(--app-muted)',
-                      }}>
-                        {roleLabel}
-                      </span>
-                    </div>
-                    <p style={{ marginTop: 4, fontSize: 11, color: "var(--app-muted)", margin: "4px 0 0" }}>
-                      {interpolate(ui.guests.uploadsLine, { photos: uploads.photos, videos: uploads.videos })}
-                    </p>
-                  </div>
-                </div>
-
-                {isPrimaryOrganizer ? (
-                  <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--app-border)", display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {canPromoteDemote && (m.role === "guest" || m.role === "co_organizer") ? (
-                      <AppBtn
-                        variant="ghost"
-                        small
-                        disabled={busyUserId !== null}
-                        loading={busy}
-                        onClick={() => void setCoOrganizer(m.user_id, m.role === "guest")}
-                      >
-                        {m.role === "guest" ? ui.guests.promoteCo : ui.guests.demoteGuest}
-                      </AppBtn>
-                    ) : null}
-                    {canRemove ? (
-                      <AppBtn
-                        variant="danger"
-                        size="sm"
-                        type="button"
-                        disabled={busyUserId !== null}
-                        loading={busy}
-                        onClick={() => setPendingRemoveUserId(m.user_id)}
-                      >
-                        {ui.common.remove}
-                      </AppBtn>
-                    ) : null}
-                  </div>
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
+      {loaded && accessCode ? (
+        <div
+          className="tab-card tab-card--raised"
+          style={{ position: "relative", marginTop: 20, minHeight: 110, padding: "16px 16px 16px 104px", boxSizing: "border-box" }}
+        >
+          <Aurora pose="waving" size={80} style={{ position: "absolute", left: 12, bottom: 12 }} />
+          <AuroraSays size={19}>{guests.length === 0 ? t.emptySays : t.missingSays}</AuroraSays>
+          <Link href={`/events/${eventId}?tab=share`} className="gs-link" style={{ marginTop: 4 }}>
+            {interpolate(t.shareCode, { code: accessCode })}
+            <span aria-hidden> ›</span>
+          </Link>
+        </div>
       ) : null}
     </section>
   );

@@ -15,7 +15,7 @@ export default async function JoinEventPage({ params }: JoinEventPageProps) {
 
   const { data: event } = await db
     .from("events")
-    .select("id, title, plan, event_date, access_code, organizer_id")
+    .select("id, title, plan, event_date, access_code, organizer_id, banner_theme")
     .eq("access_code", normalizedAccessCode)
     .maybeSingle();
 
@@ -46,6 +46,7 @@ export default async function JoinEventPage({ params }: JoinEventPageProps) {
       organizerUserId={String(event.organizer_id ?? "")}
       planId={plan as PlanId}
       eventDate={(event.event_date as string) ?? new Date().toISOString()}
+      bannerTheme={(event.banner_theme as string | null) ?? null}
     />
   );
 }

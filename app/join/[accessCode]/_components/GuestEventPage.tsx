@@ -1,58 +1,45 @@
 "use client";
 
 import Link from "next/link";
-import { startTransition, useEffect, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
+import { Aurora, AuroraSays } from "@/components/app-ui/Aurora";
 import { AuroraHourglass } from "@/components/app-ui/AuroraHourglass";
-import type { AppUiDict } from "@/lib/app-ui";
+import { interpolate, type AppUiDict } from "@/lib/app-ui";
+import { plural } from "@/lib/app-ui/plural";
+import { bcp47FromUiLocale } from "@/lib/locale-bcp47";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { canGuestUpload, type PlanId } from "@/lib/plan-limits";
 import { displayNavEmoji, splitEventTitleStored } from "@/lib/event-title";
-
-// ── Editorial Almanac palette (matches dashboard) ─────────────────────────────
-const TEXT_S = 'var(--app-text-sub)';
-const MUTED  = 'var(--app-muted)';
-const GOLD   = '#C5922A';
-const GOLD_DK = '#A37118';
-const PURPLE = '#5B2D8E';
-const BORDER = 'var(--app-border)';
-const RUST   = '#B5461B';
-const FB = "'DM Sans', sans-serif";
-const FS = "'DM Serif Display', serif";
-
-const GLASS_LIGHT: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.62)',
-  backdropFilter: 'blur(14px)',
-  WebkitBackdropFilter: 'blur(14px)',
-  border: '1px solid rgba(255,255,255,0.78)',
-  boxShadow: '0 10px 30px -8px rgba(40,25,15,0.18), inset 0 1px 0 rgba(255,255,255,0.7)',
-};
-const GLASS_DARK: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.06)',
-  backdropFilter: 'blur(14px)',
-  WebkitBackdropFilter: 'blur(14px)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  boxShadow: '0 10px 30px -8px rgba(0,0,0,0.4)',
-};
-
-function parseDateDisplay(dateStr: string | null | undefined) {
-  if (!dateStr) return null;
-  try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return null;
-    return {
-      mon: d.toLocaleDateString('en', { month: 'short', timeZone: 'UTC' }),
-      day: d.getUTCDate(),
-      year: d.getUTCFullYear(),
-    };
-  } catch { return null; }
-}
+import { bannerCoverBackground } from "@/lib/banner-theme";
 
 import { GuestLeaveEvent } from "./GuestLeaveEvent";
 import { MediaGrid } from "./MediaGrid";
 import { UploadZone } from "./UploadZone";
 import { WelcomeModal } from "./WelcomeModal";
+
+const GOLD = "#C5922A";
+const RUST = "#B5461B";
+const FB = "'DM Sans', sans-serif";
+
+function ChevronLeft() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Dots() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <circle cx="5" cy="12" r="1.8" />
+      <circle cx="12" cy="12" r="1.8" />
+      <circle cx="19" cy="12" r="1.8" />
+    </svg>
+  );
+}
 
 type GuestEventPageProps = Readonly<{
   accessCode: string;
@@ -61,6 +48,7 @@ type GuestEventPageProps = Readonly<{
   organizerUserId: string;
   planId: PlanId;
   eventDate: string;
+  bannerTheme?: string | null;
 }>;
 
 function guestJoinErrorMessage(
@@ -80,24 +68,24 @@ export function GuestEventPage({
   organizerUserId,
   planId,
   eventDate,
+  bannerTheme,
 }: GuestEventPageProps) {
   const ui = useAppUi();
-  const [isDark, setIsDark] = useState(false);
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [membershipReady, setMembershipReady] = useState(false);
   const [membershipRpcError, setMembershipRpcError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [canManageEvent, setCanManageEvent] = useState(false);
-
-  useEffect(() => {
-    setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
-    const obs = new MutationObserver(() => {
-      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
-    });
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    return () => obs.disconnect();
-  }, []);
+  const [mediaCount, setMediaCount] = useState<number | null>(null);
+  const [mineCount, setMineCount] = useState(0);
+  const [onlyMine, setOnlyMine] = useState(false);
+  const [latestPrints, setLatestPrints] = useState<string[]>([]);
+  const [scrolled, setScrolled] = useState(false);
+  const [pastCover, setPastCover] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const topSentinelRef = useRef<HTMLDivElement>(null);
+  const coverRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const supabase = maybeCreateSupabaseBrowserClient();
@@ -130,6 +118,21 @@ export function GuestEventPage({
       const { error } = await supabase.rpc("join_event_with_code", {
         p_code: accessCode.toUpperCase(),
       });
+      if (!error) {
+        // The nickname typed on the welcome screen lives on the login account; the album and the
+        // organizer's guest list read the membership, so copy it there once (own row, guests only).
+        const { data: auth } = await supabase.auth.getUser();
+        const nickname = String(auth.user?.user_metadata?.display_name ?? "").trim();
+        if (auth.user && nickname) {
+          await supabase
+            .from("event_memberships")
+            .update({ display_name_at_event: nickname })
+            .eq("event_id", eventId)
+            .eq("user_id", auth.user.id)
+            .eq("role", "guest")
+            .is("display_name_at_event", null);
+        }
+      }
       if (!cancelled) {
         if (error) {
           setMembershipRpcError(guestJoinErrorMessage(error.message ?? "", ui.guestJoin));
@@ -144,7 +147,7 @@ export function GuestEventPage({
     return () => {
       cancelled = true;
     };
-  }, [hasSession, accessCode]);
+  }, [hasSession, accessCode, eventId]);
 
   useEffect(() => {
     if (!hasSession) {
@@ -193,12 +196,85 @@ export function GuestEventPage({
     };
   }, [userId, organizerUserId, eventId]);
 
+  // Album and "mine" counts for the cover line and the All / Mine switch.
+  useEffect(() => {
+    if (!hasSession || !membershipReady) return;
+    const supabase = maybeCreateSupabaseBrowserClient();
+    if (!supabase) return;
+    let cancelled = false;
+    // shortcut: guests can't count other members under RLS, so the cover shows media only; add a guest-count RPC to show "from N guests".
+    void supabase
+      .from("media_items")
+      .select("id", { count: "exact", head: true })
+      .eq("event_id", eventId)
+      .then((res: { count: number | null }) => {
+        if (!cancelled) setMediaCount(res.count ?? null);
+      });
+    if (userId) {
+      void supabase
+        .from("media_items")
+        .select("id", { count: "exact", head: true })
+        .eq("event_id", eventId)
+        .eq("uploaded_by", userId)
+        .then((res: { count: number | null }) => {
+          if (!cancelled) setMineCount(res.count ?? 0);
+        });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [hasSession, membershipReady, eventId, userId, refreshKey]);
+
+  const showAlbum = Boolean(hasSession && membershipReady);
+
+  // Scroll states without a scroll listener: a sentinel at the very top (Aurora leaves as soon as
+  // the page moves) and the cover itself (the slim bar arrives once the cover is fully under it).
+  useEffect(() => {
+    if (!showAlbum) return;
+    const sentinel = topSentinelRef.current;
+    const cover = coverRef.current;
+    if (!sentinel || !cover) return;
+    const topObserver = new IntersectionObserver(([entry]) => setScrolled(!entry.isIntersecting));
+    const coverObserver = new IntersectionObserver(([entry]) => setPastCover(!entry.isIntersecting), {
+      rootMargin: "-64px 0px 0px 0px",
+    });
+    topObserver.observe(sentinel);
+    coverObserver.observe(cover);
+    return () => {
+      topObserver.disconnect();
+      coverObserver.disconnect();
+    };
+  }, [showAlbum]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
   const canLeaveAsGuest =
     Boolean(membershipReady && hasSession && userId && organizerUserId && userId !== organizerUserId);
+  const hasMenu = canManageEvent || canLeaveAsGuest;
 
+  const locale = bcp47FromUiLocale(ui.locale);
   const { emoji: storedEmoji, name: eventName } = splitEventTitleStored(eventTitle);
-  const displayEmoji = displayNavEmoji(storedEmoji);
-  const parsedDate = parseDateDisplay(eventDate);
+  const eventDay = new Date(eventDate.length === 10 ? eventDate + "T00:00:00Z" : eventDate);
+  const validDate = !Number.isNaN(eventDay.getTime());
+  const dateLabel = validDate
+    ? eventDay.toLocaleDateString(locale, {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        ...(eventDay.getUTCFullYear() !== new Date().getUTCFullYear() ? { year: "numeric" } : {}),
+        timeZone: "UTC",
+      })
+    : null;
+  const countLabel = mediaCount && mediaCount > 0 ? plural(locale, mediaCount, ui.eventsList.memories) : null;
+  const coverLine = [dateLabel, countLabel].filter(Boolean).join(" · ");
+  const coverPhoto = latestPrints[0];
 
   const uploadsOpen =
     hasSession &&
@@ -224,157 +300,109 @@ export function GuestEventPage({
     );
   }
 
+  const menuButton = (extraClass: string) =>
+    hasMenu ? (
+      <button
+        type="button"
+        className={`guest-cover-btn guest-cover-btn--round ${extraClass}`}
+        aria-label={ui.guestFlow.moreOptions}
+        aria-haspopup="true"
+        aria-expanded={menuOpen}
+        aria-controls="guest-album-menu"
+        onClick={() => setMenuOpen((o) => !o)}
+      >
+        <Dots />
+      </button>
+    ) : null;
+
   return (
-    <main className="join-shell min-h-screen px-4 pb-16 pt-10 sm:px-6">
+    <main
+      className="join-shell relative min-h-screen px-3 pt-3 sm:px-6 sm:pt-6"
+      style={{ paddingBottom: hasSession && uploadsOpen ? "calc(170px + env(safe-area-inset-bottom, 0px))" : 48 }}
+    >
+      <div ref={topSentinelRef} aria-hidden style={{ position: "absolute", top: 0, left: 0, width: 1, height: 8 }} />
+
       {!hasSession && (
-        <WelcomeModal eventTitle={eventTitle} accessCode={accessCode} onSessionReady={() => setHasSession(true)} />
+        <WelcomeModal eventTitle={eventTitle} eventDateLabel={dateLabel ?? undefined} accessCode={accessCode} onSessionReady={() => setHasSession(true)} />
       )}
 
-      <div className="mx-auto max-w-3xl">
-        {/* Nav */}
-        {hasSession ? (
-          <nav aria-label={ui.guestJoin.signedInNavAria} style={{ marginBottom: 18, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-            <Link href="/dashboard" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)', border: `1px solid ${BORDER}`, color: PURPLE, padding: '7px 12px', borderRadius: 9, fontFamily: FB, fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-              ← {ui.guestJoin.myEvents}
+      {/* Slim bar: slides in once the cover has scrolled away */}
+      {showAlbum ? (
+        <div className={`guest-album-bar${pastCover ? " is-visible" : ""}`} inert={!pastCover}>
+          <div className="guest-album-bar__inner">
+            <Link href="/dashboard" className="guest-cover-btn guest-cover-btn--round guest-cover-btn--solid" aria-label={ui.guestJoin.myEvents}>
+              <ChevronLeft />
             </Link>
-            {canManageEvent ? (
-              <Link href={`/events/${eventId}`} style={{ background: PURPLE, color: '#fff', border: 'none', padding: '7px 12px', borderRadius: 9, fontFamily: FB, fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none', boxShadow: '0 2px 8px rgba(91,45,142,0.28)' }}>
-                {ui.guestJoin.manageEvent} →
-              </Link>
-            ) : null}
-          </nav>
-        ) : null}
-
-        {/* Event hero banner */}
-        <div style={{ ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 14, overflow: 'hidden', position: 'relative', height: 128, marginBottom: 0 }}>
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg,rgba(197,146,42,0.22),rgba(91,45,142,0.14))' }} />
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,0.12) 0 2px,transparent 2px 12px)' }} />
-          {/* Big emoji */}
-          <div style={{ position: 'absolute', right: -8, bottom: -14, fontSize: 120, lineHeight: 1, opacity: 0.9, transform: 'rotate(-8deg)', filter: 'drop-shadow(0 4px 12px rgba(40,25,15,0.18))', pointerEvents: 'none' }}>
-            {displayEmoji}
-          </div>
-          {/* Name pill */}
-          <div style={{ position: 'absolute', bottom: 10, left: 10, right: 48, background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: 100, padding: '5px 14px', border: '1px solid rgba(255,255,255,0.38)', overflow: 'hidden' }}>
-            <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 14, color: 'rgba(255,255,255,0.95)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: '0 1px 4px rgba(40,25,15,0.5)', display: 'block' }}>
-              {eventName}
-            </span>
-          </div>
-        </div>
-
-        {/* Date + tagline row */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginTop: 14, marginBottom: 24 }}>
-          {parsedDate && (
-            <div style={{ width: 52, flexShrink: 0, textAlign: 'center', fontFamily: FB, borderRight: `1px dashed ${BORDER}`, paddingRight: 12 }}>
-              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: MUTED }}>{parsedDate.mon}</div>
-              <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 36, lineHeight: 0.9, color: GOLD, letterSpacing: '-0.03em', marginTop: 1 }}>{parsedDate.day}</div>
-              <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 10.5, color: MUTED, marginTop: 1 }}>{parsedDate.year}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 20, lineHeight: 1.1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: "var(--app-text)" }}>
+                {eventName}
+              </div>
+              {countLabel ? <div style={{ fontSize: 12, color: "var(--app-muted)" }}>{countLabel}</div> : null}
             </div>
-          )}
-          <div style={{ flex: 1, paddingTop: parsedDate ? 4 : 0 }}>
-            <p style={{ margin: 0, fontFamily: FS, fontStyle: 'italic', fontSize: 14, color: TEXT_S, lineHeight: 1.5 }}>
-              {ui.guestJoin.tagline}
-            </p>
+            {menuButton("guest-cover-btn--solid")}
           </div>
         </div>
+      ) : null}
 
-        {hasSession ? <GuestLeaveEvent eventId={eventId} canShow={canLeaveAsGuest} /> : null}
+      <div className="mx-auto max-w-3xl">
+        {/* Cover: the newest photo, the event name over it */}
+        <header
+          ref={coverRef}
+          className={`guest-cover${coverPhoto ? "" : " guest-cover--empty"}`}
+          style={coverPhoto ? undefined : bannerCoverBackground(bannerTheme)}
+        >
+          {coverPhoto ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={coverPhoto} alt="" className="guest-cover__photo" />
+          ) : (
+            <span aria-hidden className="guest-cover__emoji">{displayNavEmoji(storedEmoji)}</span>
+          )}
+          <div aria-hidden className="guest-cover__shade" />
+          {hasSession ? (
+            <Link href="/dashboard" className="guest-cover-btn guest-cover__back">
+              <ChevronLeft />
+              {ui.guestJoin.myEvents}
+            </Link>
+          ) : null}
+          {menuButton("guest-cover__menu")}
+          <div className="guest-cover__text">
+            <h1 className="guest-cover__title">{eventName}</h1>
+            {coverLine ? <p className="guest-cover__line">{coverLine}</p> : null}
+          </div>
+        </header>
 
         {membershipRpcError ? (
-          <div role="alert" style={{ marginBottom: 20, borderRadius: 12, border: `1.5px solid ${RUST}55`, background: `${RUST}15`, padding: '12px 16px', fontSize: 13, color: RUST, fontFamily: FB }}>
+          <div role="alert" style={{ marginTop: 16, borderRadius: 14, border: `1.5px solid ${RUST}55`, background: `${RUST}15`, padding: "12px 16px", fontSize: 14, color: RUST, fontFamily: FB }}>
             {membershipRpcError}
           </div>
         ) : null}
 
         {!uploadsOpen && hasSession ? (
-          <div style={{ marginBottom: 28, borderRadius: 12, border: `1.5px solid ${GOLD}55`, background: `${GOLD}18`, padding: '12px 16px', fontSize: 13, color: GOLD_DK, fontFamily: FB }}>
+          <div style={{ marginTop: 16, borderRadius: 14, border: `1.5px solid ${GOLD}55`, background: `${GOLD}18`, padding: "12px 16px", fontSize: 14, lineHeight: 1.45, color: "var(--app-gold-ink)", fontFamily: FB }}>
             {ui.guestJoin.uploadClosedBanner}
           </div>
         ) : null}
 
-        {hasSession ? (
+        {showAlbum ? (
           <>
-            <section style={{ marginBottom: 40 }}>
-              {/* Polaroid-style upload affordance */}
-              <div style={{ position: "relative" }}>
-                {/* Washi tape */}
-                <div
-                  aria-hidden
-                  style={{
-                    position: "absolute",
-                    top: -8,
-                    left: "33%",
-                    width: 64,
-                    height: 14,
-                    background: "rgba(212,168,67,0.48)",
-                    border: "0.5px solid rgba(212,168,67,0.6)",
-                    transform: "rotate(-3deg)",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.22)",
-                    zIndex: 2,
-                    borderRadius: 2,
-                    pointerEvents: "none",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "relative",
-                    background: uploadsOpen ? "#f4f0ea" : "rgba(244,240,234,0.55)",
-                    borderRadius: 2,
-                    boxShadow: "0 8px 28px rgba(0,0,0,0.42), 0 2px 6px rgba(0,0,0,0.2)",
-                    transform: "rotate(-0.5deg)",
-                    padding: "14px 14px 18px",
-                    opacity: uploadsOpen ? 1 : 0.7,
-                    cursor: uploadsOpen ? "pointer" : "not-allowed",
-                    overflow: "visible",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, pointerEvents: "none" }}>
-                    <div
-                      style={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: 4,
-                        background: "rgba(0,0,0,0.07)",
-                        border: "1.5px dashed rgba(0,0,0,0.18)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-                        <path d="M12 5v14M5 12h14" stroke="rgba(60,40,20,0.5)" strokeWidth="2.4" strokeLinecap="round" />
-                      </svg>
-                    </div>
-                    <div style={{ flex: 1, textAlign: "left" }}>
-                      <p style={{ margin: 0, fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 16, fontWeight: 700, color: "#2a1d0f", lineHeight: 1.2 }}>
-                        {ui.gallery.addMemory}
-                      </p>
-                      <p style={{ margin: "3px 0 0", fontSize: 11, color: "rgba(60,40,20,0.55)" }}>
-                        {uploadsOpen ? ui.gallery.addMemoryHint : ui.guestJoin.uploadClosedBanner}
-                      </p>
-                    </div>
-                  </div>
-                  <UploadZone
-                    eventId={eventId}
-                    disabled={!uploadsOpen}
-                    ghost
-                    onUploaded={() => setRefreshKey((k) => k + 1)}
-                  />
+            <div style={{ margin: "14px 0 12px", minHeight: 48, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+              {mineCount > 0 ? (
+                <div role="group" aria-label={ui.guestFlow.viewAria} className="guest-album-switch">
+                  <button type="button" aria-pressed={!onlyMine} onClick={() => setOnlyMine(false)}>
+                    {interpolate(ui.guestFlow.allTab, { count: mediaCount ?? 0 })}
+                  </button>
+                  <button type="button" aria-pressed={onlyMine} onClick={() => setOnlyMine(true)}>
+                    {interpolate(ui.guestFlow.mineTab, { count: mineCount })}
+                  </button>
                 </div>
-              </div>
-            </section>
+              ) : (
+                <span />
+              )}
+              <span style={{ fontSize: 13, color: "var(--app-muted)" }}>{ui.guestFlow.newestFirst}</span>
+            </div>
 
-            <section>
-              <h2
-                style={{
-                  marginBottom: 16,
-                  fontSize: 12,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.2em",
-                  color: "var(--app-muted)",
-                }}
-              >
+            <section aria-labelledby="guest-gallery-title">
+              <h2 id="guest-gallery-title" className="sr-only">
                 {ui.guestJoin.sectionGallery}
               </h2>
               <MediaGrid
@@ -383,11 +411,57 @@ export function GuestEventPage({
                 userId={userId}
                 organizerUserId={organizerUserId}
                 canManageEvent={canManageEvent}
+                onlyMine={onlyMine}
+                onLatestPhotos={onlyMine ? undefined : setLatestPrints}
               />
             </section>
+
+            {uploadsOpen ? (
+              <div className={`guest-upload-dock${scrolled ? " is-scrolled" : ""}`}>
+                <Aurora pose="camera" size={78} className="guest-upload-dock__aurora" />
+                <div className="guest-upload-dock__say" aria-hidden={scrolled}>
+                  <div>
+                    <AuroraSays size={18} style={{ paddingLeft: 86, minHeight: 40, marginBottom: 10, display: "flex", alignItems: "center", lineHeight: 1.2 }}>
+                      {ui.aurora.guestDock}
+                    </AuroraSays>
+                  </div>
+                </div>
+                <div className="guest-upload-dock__target" style={{ position: "relative" }}>
+                  <div className="guest-upload-dock__btn" aria-hidden>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.2-1.8A1.5 1.5 0 0 1 10.55 3.5h2.9a1.5 1.5 0 0 1 1.25.7L15.9 6h1.6A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                      <circle cx="12" cy="12.5" r="3.2" stroke="currentColor" strokeWidth="1.8" />
+                    </svg>
+                    {ui.guestJoin.addPhotos}
+                  </div>
+                  <UploadZone
+                    eventId={eventId}
+                    ghost
+                    celebrate
+                    label={ui.guestJoin.addPhotos}
+                    onUploaded={() => setRefreshKey((k) => k + 1)}
+                  />
+                </div>
+              </div>
+            ) : null}
           </>
         ) : null}
       </div>
+
+      {/* Options menu: page level (not inside the sliding bar) so the leave dialog positions against the viewport */}
+      {hasMenu ? (
+        <div hidden={!menuOpen}>
+          <div aria-hidden className="guest-album-menu__backdrop" onClick={() => setMenuOpen(false)} />
+          <div id="guest-album-menu" className="guest-album-menu">
+            {canManageEvent ? (
+              <Link href={`/events/${eventId}`} className="guest-album-menu__item" onClick={() => setMenuOpen(false)}>
+                {ui.guestJoin.manageEvent}
+              </Link>
+            ) : null}
+            <GuestLeaveEvent eventId={eventId} canShow={canLeaveAsGuest} asMenuItem />
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

@@ -3,8 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePostHog } from "posthog-js/react";
+import { useAppUi } from "@/components/AppUiProvider";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
+import { interpolate, type AppUiDict } from "@/lib/app-ui";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+
+import { UploadSuccess } from "./UploadSuccess";
 
 const EVENT_MEDIA_BUCKET = "event-media";
 
@@ -21,53 +25,59 @@ type Props = {
   disabled?: boolean;
   /** When true the drop zone renders as an invisible overlay so a parent can act as the visual affordance. */
   ghost?: boolean;
+  /** Accessible name for the ghost overlay, which acts as the button. */
+  label?: string;
+  /** Show the full-screen success moment after a batch finishes with at least one upload (guest flow). */
+  celebrate?: boolean;
 };
 
-function mapUploadError(status: number, raw: unknown, mimeType?: string): string {
+type FlowCopy = AppUiDict["guestFlow"];
+
+function mapUploadError(status: number, raw: unknown, t: FlowCopy, mimeType?: string): string {
   const code = typeof raw === "object" && raw !== null && "error" in raw
     ? (raw as { error?: string }).error
     : undefined;
 
   switch (status) {
     case 401:
-      return "You're not signed in. Please sign in and try again.";
+      return t.errNotSignedIn;
 
     case 400:
-      if (code === "Invalid form data.") return "The file couldn't be read by the server. Try selecting it again.";
-      if (code === "No file provided.")  return "No file was attached to the request. Please try again.";
-      return "The upload request was invalid. Please try again.";
+      if (code === "Invalid form data.") return t.errInvalidForm;
+      if (code === "No file provided.")  return t.errNoFile;
+      return t.errBadRequest;
 
     case 403:
       if (code === "UPLOADS_CLOSED")
-        return "The upload window for this event has closed. New files can no longer be added by guests.";
+        return t.errUploadsClosed;
       if (code === "QUOTA_REACHED")
-        return "This event has reached its media limit. The organizer's plan doesn't allow any more photos or videos.";
-      return "You don't have permission to upload to this event.";
+        return t.errQuota;
+      return t.errForbidden;
 
     case 404:
-      return "Event not found. It may have been deleted or the link is incorrect.";
+      return t.errNotFound;
 
     case 413: {
       const isVideo = mimeType?.startsWith("video/");
       return isVideo
-        ? "This video is too large. Videos must be under 280 MB."
-        : "This photo is too large. Photos must be under 50 MB.";
+        ? t.errVideoTooLarge
+        : t.errPhotoTooLarge;
     }
 
     case 415:
-      return "Unsupported file type. Only photos (JPG, PNG, HEIC, WebP…) and videos (MP4, MOV, WebM…) are accepted.";
+      return t.errUnsupported;
 
     case 429:
-      return "Too many uploads at once. Please wait a moment and try again.";
+      return t.errTooMany;
 
     case 500:
-      if (code === "Upload failed.")       return "The file reached the server but couldn't be saved to storage. Please try again.";
-      if (code === "Failed to save upload.") return "The file was stored but couldn't be recorded. Please try again.";
-      if (code === "Could not start upload.") return "Couldn't start the upload. Please try again.";
-      return "A server error occurred. Please try again in a moment.";
+      if (code === "Upload failed.")       return t.errStorage;
+      if (code === "Failed to save upload.") return t.errRecord;
+      if (code === "Could not start upload.") return t.errStart;
+      return t.errServer;
 
     default:
-      return `Upload failed (HTTP ${status}). Please try again.`;
+      return interpolate(t.errHttp, { status });
   }
 }
 
@@ -142,7 +152,9 @@ function UploadLog({
   onClearDone,
   expandedId,
   onToggleExpand,
+  t,
 }: {
+  t: FlowCopy;
   queue: UploadItem[];
   open: boolean;
   onClose: () => void;
@@ -182,7 +194,7 @@ function UploadLog({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Upload log"
+        aria-label={t.logTitle}
         style={{
           position: "fixed",
           left: 0,
@@ -211,12 +223,12 @@ function UploadLog({
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 18px 12px", borderBottom: "1px solid var(--app-border)" }}>
           <div>
             <span style={{ fontFamily: "var(--font-display, serif)", fontStyle: "italic", fontWeight: 700, fontSize: 18, color: "var(--app-text)" }}>
-              Upload log
+              {t.logTitle}
             </span>
             <span style={{ marginLeft: 10, fontSize: 11, color: "var(--app-muted)", fontWeight: 600 }}>
               {done}/{total}
-              {hasErrors ? ` · ${queue.filter(i => i.status === "error").length} failed` : ""}
-              {uploading.length > 0 ? " · uploading…" : ""}
+              {hasErrors ? ` · ${interpolate(t.statusFailed, { count: queue.filter(i => i.status === "error").length })}` : ""}
+              {uploading.length > 0 ? ` · ${t.statusUploading}` : ""}
             </span>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -226,13 +238,13 @@ function UploadLog({
                 onClick={onClearDone}
                 style={{ fontSize: 11, fontWeight: 600, color: "var(--app-muted)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", borderRadius: 6 }}
               >
-                Clear done
+                {t.clearDone}
               </button>
             )}
             <button
               type="button"
               onClick={onClose}
-              aria-label="Close upload log"
+              aria-label={t.closeLog}
               style={{ width: 28, height: 28, borderRadius: 8, background: "var(--app-surface-2)", border: "1px solid var(--app-border)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--app-muted)", fontSize: 16 }}
             >
               ×
@@ -280,7 +292,7 @@ function UploadLog({
                 {isExpanded && isError && (
                   <div style={{ margin: "0 8px 6px", padding: "10px 12px", borderRadius: 8, background: "color-mix(in srgb, var(--app-danger, #e04a4a) 10%, var(--app-surface))", border: "1px solid color-mix(in srgb, var(--app-danger, #e04a4a) 30%, transparent)" }}>
                     <p style={{ margin: "0 0 8px", fontSize: 12, color: "var(--app-danger, #e04a4a)", lineHeight: 1.5 }}>
-                      {item.errorMessage ?? "Upload failed."}
+                      {item.errorMessage ?? t.errFailed}
                     </p>
                     <button
                       type="button"
@@ -297,7 +309,7 @@ function UploadLog({
                         letterSpacing: "0.02em",
                       }}
                     >
-                      Retry
+                      {t.retry}
                     </button>
                   </div>
                 )}
@@ -316,7 +328,7 @@ function UploadLog({
 }
 
 // ── Floating status button (portalled) ───────────────────────────────────────
-function UploadStatusButton({ queue, onClick }: { queue: UploadItem[]; onClick: () => void }) {
+function UploadStatusButton({ queue, onClick, t }: { queue: UploadItem[]; onClick: () => void; t: FlowCopy }) {
   const done     = queue.filter((i) => i.status === "done").length;
   const errors   = queue.filter((i) => i.status === "error").length;
   const pending  = queue.filter((i) => i.status === "pending").length;
@@ -329,18 +341,18 @@ function UploadStatusButton({ queue, onClick }: { queue: UploadItem[]; onClick: 
   const label  = isActive
     ? `${done}/${total}`
     : errors > 0
-      ? `${errors} failed`
-      : `${done} uploaded`;
+      ? interpolate(t.statusFailed, { count: errors })
+      : interpolate(t.statusUploaded, { count: done });
 
   return createPortal(
     <button
       type="button"
       onClick={onClick}
-      aria-label={`Upload log: ${label}`}
+      aria-label={interpolate(t.logAria, { label })}
       style={{
         position: "fixed",
         right: 18,
-        bottom: "calc(92px + env(safe-area-inset-bottom, 0px))",
+        bottom: "var(--upload-pill-bottom, calc(104px + env(safe-area-inset-bottom, 0px)))",
         zIndex: 8999,
         display: "flex",
         alignItems: "center",
@@ -367,8 +379,8 @@ function UploadStatusButton({ queue, onClick }: { queue: UploadItem[]; onClick: 
       <span style={{ fontSize: 12, fontWeight: 700, color: accent, letterSpacing: "0.02em" }}>
         {label}
       </span>
-      <span style={{ fontSize: 10, color: "var(--app-muted)", fontWeight: 500 }}>
-        uploads
+      <span style={{ fontSize: 12, color: "var(--app-muted)", fontWeight: 500 }}>
+        {t.uploadsPill}
       </span>
     </button>,
     document.body,
@@ -376,8 +388,14 @@ function UploadStatusButton({ queue, onClick }: { queue: UploadItem[]; onClick: 
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
+export function UploadZone({ eventId, onUploaded, disabled, ghost, label, celebrate }: Props) {
   const posthog = usePostHog();
+  const ui = useAppUi();
+  const t = ui.guestFlow;
+  const tRef = useRef(t);
+  // Files that succeeded since the queue last went idle; shown in the success moment.
+  const batchDoneRef = useRef<File[]>([]);
+  const [celebration, setCelebration] = useState<File[] | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [queue, setQueue] = useState<UploadItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -387,7 +405,7 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
   const processingRef = useRef(false);
   const onUploadedRef = useRef(onUploaded);
 
-  useEffect(() => { onUploadedRef.current = onUploaded; });
+  useEffect(() => { onUploadedRef.current = onUploaded; tRef.current = t; });
 
   useEffect(() => {
     if (processingRef.current || disabled) return;
@@ -409,12 +427,13 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
           setQueue((prev) =>
             prev.map((item) =>
               item.id === pending.id
-                ? { ...item, status: "error", errorMessage: mapUploadError(result.status, result.body, pending.file.type) }
+                ? { ...item, status: "error", errorMessage: mapUploadError(result.status, result.body, tRef.current, pending.file.type) }
                 : item,
             ),
           );
         } else {
           setQueue((prev) => prev.map((item) => (item.id === pending.id ? { ...item, status: "done" } : item)));
+          batchDoneRef.current.push(pending.file);
           posthog.capture(ANALYTICS_EVENTS.GUEST_MEDIA_UPLOADED, {
             event_id: eventId,
             file_type: isVideo ? "video" : "photo",
@@ -427,7 +446,7 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
         setQueue((prev) =>
           prev.map((item) =>
             item.id === pending.id
-              ? { ...item, status: "error", errorMessage: "Connection lost. Check your internet and try again." }
+              ? { ...item, status: "error", errorMessage: tRef.current.errConnection }
               : item,
           ),
         );
@@ -437,6 +456,14 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
         setUploadingId(null);
       });
   }, [queue, eventId, disabled]);
+
+  // uploadingId clears after the last item settles, so this fires once per finished batch.
+  useEffect(() => {
+    if (uploadingId || queue.some((i) => i.status === "pending") || batchDoneRef.current.length === 0) return;
+    const files = batchDoneRef.current;
+    batchDoneRef.current = [];
+    if (celebrate) setCelebration(files);
+  }, [queue, uploadingId, celebrate]);
 
   const enqueue = useCallback(
     (files: File[]) => {
@@ -500,7 +527,7 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
   const portalElements = (
     <>
       <style>{`@keyframes uz-spin { to { transform: rotate(360deg); } }`}</style>
-      <UploadStatusButton queue={queue} onClick={() => setLogOpen(true)} />
+      <UploadStatusButton queue={queue} onClick={() => setLogOpen(true)} t={t} />
       <UploadLog
         queue={queue}
         open={logOpen}
@@ -509,7 +536,18 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
         onClearDone={clearDone}
         expandedId={expandedId}
         onToggleExpand={toggleExpand}
+        t={t}
       />
+      {celebration ? (
+        <UploadSuccess
+          files={celebration}
+          onClose={() => setCelebration(null)}
+          onAddMore={() => {
+            setCelebration(null);
+            inputRef.current?.click();
+          }}
+        />
+      ) : null}
     </>
   );
 
@@ -518,6 +556,16 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
       <div style={{ position: "absolute", inset: 0, zIndex: 10, overflow: "visible" }}>
         <div
           {...sharedDropHandlers}
+          role="button"
+          tabIndex={disabled ? -1 : 0}
+          aria-label={label}
+          aria-disabled={disabled || undefined}
+          onKeyDown={(e) => {
+            if (!disabled && (e.key === "Enter" || e.key === " ")) {
+              e.preventDefault();
+              inputRef.current?.click();
+            }
+          }}
           style={{
             position: "absolute",
             inset: 0,
@@ -542,8 +590,8 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost }: Props) {
         style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, borderRadius: 20, padding: "40px 24px", textAlign: "center", transition: "border-color 0.2s, background 0.2s", ...dropSurface }}
       >
         <span style={{ fontSize: "1.875rem" }}>📷</span>
-        <p style={{ fontSize: 14, fontWeight: 600, color: "var(--app-text)" }}>Drag &amp; drop photos or videos here</p>
-        <p style={{ fontSize: 12, color: "var(--app-subtle)" }}>or tap to browse</p>
+        <p style={{ fontSize: 14, fontWeight: 600, color: "var(--app-text)" }}>{ui.upload.dropPrompt}</p>
+        <p style={{ fontSize: 12, color: "var(--app-subtle)" }}>{ui.upload.tapBrowse}</p>
         {fileInput}
       </div>
       {portalElements}

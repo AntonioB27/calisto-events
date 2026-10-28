@@ -50,3 +50,15 @@ export function normalizeBannerTheme(value: string | null | undefined): BannerTh
   const valid: BannerThemeId[] = ['aurora', 'golden', 'midnight', 'rose', 'emerald'];
   return valid.includes(value as BannerThemeId) ? (value as BannerThemeId) : 'aurora';
 }
+
+/**
+ * Cover background for an event without photos yet: the theme's tint and pattern over a warm base,
+ * dark enough at the bottom (with .guest-cover__shade) for the white title.
+ */
+export function bannerCoverBackground(value: string | null | undefined): { backgroundImage: string; backgroundSize?: string } {
+  const theme = getBannerTheme(normalizeBannerTheme(value));
+  return {
+    backgroundImage: `${theme.pattern}, ${theme.gradient}, linear-gradient(160deg, #dcb987, #9f6d3e)`,
+    backgroundSize: theme.patternSize ? `${theme.patternSize}, auto, auto` : undefined,
+  };
+}

@@ -1,0 +1,114 @@
+/* Organizer event shell: reuses the guest album's cover and slim bar (globals.css), plus Home's pieces. */
+
+/* Slim bar pinned on every tab but Home, full bleed over the page gutter */
+.guest-album-bar.event-bar { position: sticky; left: auto; right: auto; transform: none; opacity: 1; margin: 0 -16px; }
+.event-bar__title { font-family: var(--font-display); font-size: 20px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--app-text); }
+.event-bar__line { font-size: 12px; color: var(--app-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (min-width: 768px) {
+  .guest-album-bar.event-bar { margin: 0 -28px; padding-top: 0; }
+  /* Home's slide-in bar sits under the desktop app header */
+  .guest-album-bar.event-home-bar { top: 56px; padding-top: 0; }
+}
+
+.event-cover { margin-top: 12px; }
+.event-cover__live {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f5c76b, #f0b34b);
+  font-size: 13px;
+  font-weight: 700;
+  color: #1b1208;
+}
+
+/* Home: next step, a solid panel like the guest upload dock, Aurora peeking over its top edge */
+.event-next {
+  position: relative;
+  margin-top: 54px;
+  padding: 14px 16px 16px;
+  border-radius: 24px;
+  background: rgba(255, 248, 236, 0.96);
+  border: 1px solid rgba(214, 176, 112, 0.5);
+  box-shadow: 0 16px 34px -16px rgba(90, 60, 20, 0.4), inset 0 1px 0 #fffdf6;
+}
+html[data-theme="dark"] .event-next { background: color-mix(in srgb, var(--app-surface) 96%, transparent); border-color: var(--app-border); box-shadow: 0 16px 34px -16px rgba(0, 0, 0, 0.6); }
+.event-next__print {
+  position: absolute;
+  object-fit: cover;
+  border: 3px solid #fffaf2;
+  border-radius: 5px;
+  box-shadow: 0 8px 14px -8px rgba(60, 35, 10, 0.5);
+}
+
+/* Home: guest code ticket */
+.event-ticket {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px 12px 18px;
+  border-radius: 20px;
+  border: 2px dashed rgba(201, 145, 46, 0.5);
+  background: rgba(255, 250, 240, 0.55);
+}
+html[data-theme="dark"] .event-ticket { background: color-mix(in srgb, var(--app-surface) 55%, transparent); border-color: rgba(240, 179, 75, 0.35); }
+.event-ticket__qr {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fffaf2;
+  border: 1px solid rgba(214, 176, 112, 0.5);
+  color: var(--app-gold-ink);
+}
+html[data-theme="dark"] .event-ticket__qr { background: var(--app-surface); border-color: var(--app-border-strong); }
+.event-ticket__qr:focus-visible, .event-link:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 2px; border-radius: 10px; }
+
+.event-link { min-height: 44px; display: inline-flex; align-items: center; gap: 2px; font-size: 15px; font-weight: 700; color: var(--app-purple); text-decoration: none; background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; }
+
+/* Home: upgrade card, Aurora with a present on the left */
+.event-upgrade {
+  position: relative;
+  min-height: 150px;
+  box-sizing: border-box;
+  padding: 18px 18px 18px 120px;
+  border-radius: 22px;
+  background: radial-gradient(120% 100% at 0% 100%, rgba(245, 199, 107, 0.35), transparent 60%), rgba(255, 246, 228, 0.75);
+  border: 1px solid rgba(214, 176, 112, 0.45);
+}
+html[data-theme="dark"] .event-upgrade { background: radial-gradient(120% 100% at 0% 100%, rgba(240, 179, 75, 0.16), transparent 60%), var(--app-surface); border-color: var(--app-border); }
+
+/* More: list rows */
+.event-row {
+  width: 100%;
+  min-height: 62px;
+  padding: 8px 14px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  text-decoration: none;
+  color: var(--app-text);
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+}
+.event-row:focus-visible { outline: 3px solid var(--app-focus); outline-offset: -3px; border-radius: 22px; }
+.event-row__icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(214, 176, 112, 0.22);
+  color: var(--app-gold-ink);
+}
+.event-row__label { display: block; font-size: 16px; font-weight: 600; }
+.event-row__sub { display: block; margin-top: 1px; font-size: 13px; color: var(--app-muted); }

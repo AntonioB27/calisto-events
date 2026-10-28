@@ -4,32 +4,19 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 
 import { useAppUi } from "@/components/AppUiProvider";
+import { AppBtn } from "@/components/app-ui/AppBtn";
+import { Aurora } from "@/components/app-ui/Aurora";
+import { AuroraHourglass } from "@/components/app-ui/AuroraHourglass";
+import { ConfirmDialog } from "@/components/app-ui/ConfirmDialog";
+import { FilterChips } from "@/components/app-ui/FilterChips";
+import { Switch } from "@/components/app-ui/Switch";
+import { TabHeader } from "@/components/app-ui/TabHeader";
 import { interpolate } from "@/lib/app-ui";
+import { plural } from "@/lib/app-ui/plural";
 import type { RsvpAttendee } from "@/lib/rsvp-duplicate";
 
-const GOLD = "#C5922A";
-const PURPLE = "#5B2D8E";
-const FB = "'DM Sans', sans-serif";
-const FS = "'DM Serif Display', serif";
-const FM = "'JetBrains Mono', ui-monospace, monospace";
-
-const GLASS_LIGHT: React.CSSProperties = {
-  background:
-    "linear-gradient(155deg, rgba(139,79,216,0.16) 0%, rgba(197,146,42,0.1) 55%, transparent 100%), rgba(255,255,255,0.72)",
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
-  border: "1px solid rgba(255,255,255,0.82)",
-  boxShadow: "0 16px 48px -12px rgba(40,25,15,0.2), inset 0 1px 0 rgba(255,255,255,0.75)",
-};
-
-const GLASS_DARK: React.CSSProperties = {
-  background:
-    "linear-gradient(155deg, rgba(139,79,216,0.28) 0%, rgba(197,146,42,0.16) 55%, transparent 100%), rgba(255,255,255,0.06)",
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  boxShadow: "0 16px 48px -12px rgba(0,0,0,0.5)",
-};
+import { relativeTime } from "./AlbumReview";
+import "./rsvp-prints.css";
 
 type RsvpRow = {
   id: string;
@@ -48,13 +35,17 @@ type RsvpManagerProps = Readonly<{
   publicOrigin: string;
 }>;
 
+type Filter = "all" | "confirmed" | "declined";
+type PendingConfirm = { kind: "regen" } | { kind: "delete"; row: RsvpRow } | null;
+
 function getRsvpUrl(publicOrigin: string, code: string): string {
   return `${publicOrigin.replace(/\/$/, "")}/rsvp/${encodeURIComponent(code)}`;
 }
 
 export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
   const ui = useAppUi();
-  const [isDark, setIsDark] = useState(false);
+  const t = ui.rsvpTab;
+  const locale = ui.locale;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rsvpCode, setRsvpCode] = useState<string | null>(null);
@@ -64,15 +55,9 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [toggleBusy, setToggleBusy] = useState(false);
   const [regenBusy, setRegenBusy] = useState(false);
-
-  useEffect(() => {
-    setIsDark(document.documentElement.getAttribute("data-theme") === "dark");
-    const obs = new MutationObserver(() => {
-      setIsDark(document.documentElement.getAttribute("data-theme") === "dark");
-    });
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => obs.disconnect();
-  }, []);
+  const [filter, setFilter] = useState<Filter>("all");
+  const [openRowId, setOpenRowId] = useState<string | null>(null);
+  const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -100,7 +85,6 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
     let confirmedParties = 0;
     let declinedParties = 0;
     let attendees = 0;
-    let flaggedDuplicates = 0;
     for (const row of rows) {
       if (row.status === "confirmed") {
         confirmedParties += 1;
@@ -108,9 +92,8 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
       } else {
         declinedParties += 1;
       }
-      if (row.duplicate_status === "flagged") flaggedDuplicates += 1;
     }
-    return { confirmedParties, declinedParties, attendees, flaggedDuplicates };
+    return { confirmedParties, declinedParties, attendees };
   }, [rows]);
 
   async function copyLink() {
@@ -158,7 +141,6 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
   }
 
   async function regenerateCode() {
-    if (!window.confirm(ui.rsvpTab.regenerateConfirm)) return;
     setRegenBusy(true);
     setError(null);
     try {
@@ -196,7 +178,6 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
   }
 
   async function handleDelete(rowId: string) {
-    if (!window.confirm(ui.rsvpTab.deleteConfirm)) return;
     setBusyId(rowId);
     setError(null);
     try {
@@ -210,294 +191,223 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
     }
   }
 
-  const textColor = isDark ? "rgba(255,255,255,0.9)" : "var(--app-text)";
-  const mutedColor = isDark ? "rgba(255,255,255,0.45)" : "var(--app-muted)";
-  const borderColor = isDark ? "rgba(255,255,255,0.14)" : "var(--app-border)";
-  const inputBg = isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.88)";
-  const dangerColor = isDark ? "#fca5a5" : "var(--app-danger)";
-  const glass = isDark ? GLASS_DARK : GLASS_LIGHT;
+  async function runConfirmed() {
+    if (!pendingConfirm) return;
+    if (pendingConfirm.kind === "regen") await regenerateCode();
+    else await handleDelete(pendingConfirm.row.id);
+    setPendingConfirm(null);
+  }
 
   if (loading) {
-    return <div style={{ padding: "40px 0", textAlign: "center", color: mutedColor }}>{ui.rsvpPublic.loading}</div>;
+    return <AuroraHourglass caption={ui.rsvpPublic.loading} style={{ padding: "48px 0" }} />;
   }
 
   const rsvpUrl = rsvpCode ? getRsvpUrl(publicOrigin, rsvpCode) : null;
+  const flagged = rows.filter((r) => r.duplicate_status === "flagged");
+  const visibleRows = filter === "all" ? rows : rows.filter((r) => r.status === filter);
 
   return (
-    <section className="welcome-reveal" style={{ display: "flex", flexDirection: "column", gap: 16, padding: "2px 0 32px" }}>
-      <div>
-        <p style={{ margin: 0, fontFamily: FS, fontStyle: "italic", fontWeight: 700, fontSize: 22, color: textColor }}>
-          {ui.rsvpTab.title}
-        </p>
-        <p style={{ margin: "4px 0 0", fontFamily: FB, fontSize: 13, color: mutedColor }}>{ui.rsvpTab.subtitle}</p>
-      </div>
+    <section className="rsvp-tab welcome-reveal">
+      <TabHeader title={t.title} pose="planning">
+        {rows.length === 0 ? (
+          t.subtitle
+        ) : (
+          <>
+            <b>{plural(locale, stats.attendees, t.summaryComing)}</b>{" "}
+            {interpolate(t.summaryRest, {
+              confirmed: plural(locale, stats.confirmedParties, t.summaryConfirmed),
+              declined: plural(locale, stats.declinedParties, t.summaryDeclined),
+            })}
+          </>
+        )}
+      </TabHeader>
+      {rows.length > 0 && (
+        <div className="rsvp-bar" aria-hidden>
+          <span className="rsvp-bar__yes" style={{ width: `${(stats.confirmedParties / rows.length) * 100}%` }} />
+          <span className="rsvp-bar__no" />
+        </div>
+      )}
 
       {error && (
-        <p
-          style={{
-            fontSize: 13,
-            color: dangerColor,
-            background: "color-mix(in srgb, var(--app-danger) 10%, transparent)",
-            border: "1.5px solid color-mix(in srgb, var(--app-danger) 30%, transparent)",
-            padding: "10px 14px",
-            borderRadius: 10,
-            margin: 0,
-          }}
-        >
+        <p className="rsvp-error" role="alert">
           {error}
         </p>
       )}
 
-      {/* ── Link card ── */}
-      <div style={{ ...glass, borderRadius: 20, padding: "20px 22px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <span style={{ fontFamily: FB, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: mutedColor }}>
-            {ui.rsvpTab.linkLabel}
-          </span>
-          <button
-            type="button"
-            onClick={() => void toggleOpen()}
-            disabled={toggleBusy}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "5px 10px",
-              borderRadius: 100,
-              border: `1px solid ${rsvpOpen ? GOLD : borderColor}`,
-              background: rsvpOpen ? "rgba(197,146,42,0.12)" : "transparent",
-              color: rsvpOpen ? GOLD : mutedColor,
-              fontFamily: FB,
-              fontSize: 11,
-              fontWeight: 700,
-              cursor: toggleBusy ? "wait" : "pointer",
-            }}
-          >
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: rsvpOpen ? GOLD : mutedColor }} />
-            {rsvpOpen ? ui.rsvpTab.openToggleOn : ui.rsvpTab.openToggleOff}
-          </button>
-        </div>
-
+      <section className="tab-card tab-card--raised" aria-label={t.linkLabel}>
+        <Switch
+          checked={rsvpOpen}
+          onChange={() => void toggleOpen()}
+          busy={toggleBusy}
+          label={t.openToggleOn}
+          description={rsvpOpen ? t.openToggleDesc : t.openToggleOff}
+        />
         {rsvpUrl && (
-          <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
-            <div style={{ background: "#fff", borderRadius: 12, padding: 8, boxShadow: "0 8px 24px rgba(40,25,15,0.15)" }}>
-              <QRCode value={rsvpUrl} size={96} />
-            </div>
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <div
-                style={{
-                  fontFamily: FM,
-                  fontSize: 13,
-                  color: textColor,
-                  background: inputBg,
-                  border: "1px dashed rgba(197,146,42,0.4)",
-                  borderRadius: 10,
-                  padding: "8px 10px",
-                  wordBreak: "break-all",
-                  marginBottom: 10,
-                }}
-              >
-                {rsvpUrl}
+          <>
+            <div className="rsvp-link__row">
+              <div className="rsvp-link__qr" role="img" aria-label={t.scanQr}>
+                <QRCode value={rsvpUrl} size={58} />
               </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <button
-                  type="button"
-                  onClick={() => void copyLink()}
-                  style={{
-                    padding: "8px 14px",
-                    borderRadius: 10,
-                    border: `1px solid ${copied ? GOLD : borderColor}`,
-                    background: copied ? "rgba(197,146,42,0.12)" : inputBg,
-                    color: copied ? GOLD : textColor,
-                    fontFamily: FB,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                  }}
-                >
-                  {copied ? ui.common.copied : ui.rsvpTab.copyLink}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void shareLink()}
-                  style={{
-                    padding: "8px 14px",
-                    borderRadius: 10,
-                    border: "none",
-                    background: `linear-gradient(135deg, #7B3FBE, ${PURPLE})`,
-                    color: "#fff",
-                    fontFamily: FB,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                  }}
-                >
-                  {ui.rsvpTab.shareLink}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void regenerateCode()}
-                  disabled={regenBusy}
-                  style={{
-                    padding: "8px 14px",
-                    borderRadius: 10,
-                    border: `1px solid ${borderColor}`,
-                    background: "transparent",
-                    color: mutedColor,
-                    fontFamily: FB,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: regenBusy ? "wait" : "pointer",
-                  }}
-                >
-                  {ui.rsvpTab.regenerateCode}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ── Stats ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
-        {[
-          { label: ui.rsvpTab.statConfirmed, value: stats.confirmedParties },
-          { label: ui.rsvpTab.statDeclined, value: stats.declinedParties },
-          { label: ui.rsvpTab.statAttendees, value: stats.attendees },
-          { label: ui.rsvpTab.statPending, value: stats.flaggedDuplicates },
-        ].map((stat) => (
-          <div key={stat.label} style={{ ...glass, borderRadius: 14, padding: "12px 10px", textAlign: "center" }}>
-            <div style={{ fontFamily: FS, fontStyle: "italic", fontWeight: 700, fontSize: 22, color: GOLD, lineHeight: 1 }}>{stat.value}</div>
-            <div style={{ fontFamily: FB, fontSize: 9.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: mutedColor, marginTop: 4 }}>
-              {stat.label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Responses list ── */}
-      {rows.length === 0 ? (
-        <p style={{ textAlign: "center", color: mutedColor, fontFamily: FB, fontSize: 13, padding: "20px 0" }}>
-          {ui.rsvpTab.emptyState}
-        </p>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {rows.map((row) => {
-            const duplicateTarget = row.possible_duplicate_of ? rowById.get(row.possible_duplicate_of) : undefined;
-            const isFlagged = row.duplicate_status === "flagged";
-            const adults = row.attendees?.filter((a) => a.type === "adult").length ?? 0;
-            const children = row.attendees?.filter((a) => a.type === "child").length ?? 0;
-            const dateLabel = interpolate(row.updated_at !== row.created_at ? ui.rsvpTab.listUpdatedOn : ui.rsvpTab.listSubmittedOn, {
-              date: new Date(row.created_at).toLocaleDateString(),
-            });
-
-            return (
-              <div key={row.id} style={{ ...glass, borderRadius: 14, padding: "14px 16px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
-                  <div>
-                    <span style={{ fontFamily: FB, fontSize: 14, fontWeight: 700, color: textColor }}>{row.submitter_name}</span>
-                    <span
-                      style={{
-                        marginLeft: 8,
-                        fontFamily: FB,
-                        fontSize: 10,
-                        fontWeight: 700,
-                        padding: "2px 8px",
-                        borderRadius: 100,
-                        color: row.status === "confirmed" ? "#4E7C3A" : dangerColor,
-                        background: row.status === "confirmed" ? "rgba(78,124,58,0.12)" : "color-mix(in srgb, var(--app-danger) 10%, transparent)",
-                      }}
-                    >
-                      {row.status === "confirmed" ? ui.rsvpTab.listStatusConfirmed : ui.rsvpTab.listStatusDeclined}
-                    </span>
-                    <p style={{ margin: "4px 0 0", fontFamily: FB, fontSize: 11, color: mutedColor }}>{dateLabel}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => void handleDelete(row.id)}
-                    disabled={busyId === row.id}
-                    style={{ background: "none", border: "none", color: mutedColor, fontFamily: FB, fontSize: 11, cursor: "pointer" }}
-                  >
-                    {ui.rsvpTab.deleteEntry}
-                  </button>
+              <div className="rsvp-link__body">
+                <p className="rsvp-link__url" title={rsvpUrl}>
+                  {rsvpUrl.replace(/^https?:\/\//, "")}
+                </p>
+                <div className="rsvp-link__actions">
+                  <AppBtn variant="secondary" className="rsvp-btn" onClick={() => void copyLink()}>
+                    {copied ? ui.common.copied : t.copyLink}
+                  </AppBtn>
+                  <AppBtn variant="gold" className="rsvp-btn" onClick={() => void shareLink()}>
+                    {t.shareLink}
+                  </AppBtn>
                 </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="rsvp-textbtn"
+              disabled={regenBusy}
+              onClick={() => setPendingConfirm({ kind: "regen" })}
+            >
+              {t.regenerateCode}
+            </button>
+          </>
+        )}
+      </section>
 
-                {row.status === "confirmed" && row.attendees?.length > 0 && (
-                  <div style={{ marginTop: 8, fontFamily: FB, fontSize: 12, color: textColor }}>
-                    {row.attendees.map((a) => a.name).join(", ")}
-                    <span style={{ color: mutedColor }}>
-                      {" · "}
-                      {interpolate(ui.rsvpTab.listAdults, { count: adults })}
-                      {children > 0 ? `, ${interpolate(ui.rsvpTab.listChildren, { count: children })}` : ""}
-                    </span>
-                  </div>
-                )}
+      {flagged.map((row) => {
+        const other = row.possible_duplicate_of ? rowById.get(row.possible_duplicate_of) : undefined;
+        const busy = busyId === row.id;
+        return (
+          <section key={row.id} className="rsvp-dup" aria-label={t.duplicateTitle}>
+            <p className="rsvp-dup__title">{t.duplicateTitle}</p>
+            <p className="rsvp-dup__body">
+              {other ? interpolate(t.duplicatePair, { a: row.submitter_name, b: other.submitter_name }) : row.submitter_name}
+              {other ? ` · ${t.duplicateMergeHint}` : null}
+            </p>
+            <div className="rsvp-dup__actions">
+              <AppBtn
+                variant="secondary"
+                className="rsvp-btn rsvp-btn--ink"
+                loading={busy}
+                onClick={() => void handleDuplicateAction(row.id, "merge")}
+              >
+                {t.duplicateMerge}
+              </AppBtn>
+              <AppBtn
+                variant="ghost"
+                className="rsvp-btn"
+                disabled={busy}
+                onClick={() => void handleDuplicateAction(row.id, "dismiss")}
+              >
+                {t.duplicateDismiss}
+              </AppBtn>
+            </div>
+          </section>
+        );
+      })}
 
-                {row.contact && (
-                  <p style={{ margin: "6px 0 0", fontFamily: FB, fontSize: 12, color: mutedColor }}>
-                    {ui.rsvpTab.listContact}: {row.contact}
-                  </p>
-                )}
-
-                {isFlagged && (
-                  <div
-                    style={{
-                      marginTop: 10,
-                      padding: "8px 10px",
-                      borderRadius: 10,
-                      background: "rgba(197,146,42,0.1)",
-                      border: "1px solid rgba(197,146,42,0.3)",
-                    }}
-                  >
-                    <p style={{ margin: "0 0 6px", fontFamily: FB, fontSize: 11.5, fontWeight: 700, color: GOLD }}>
-                      {ui.rsvpTab.duplicateBadge}
-                      {duplicateTarget ? ` · ${interpolate(ui.rsvpTab.duplicateOf, { name: duplicateTarget.submitter_name })}` : ""}
-                    </p>
-                    <div style={{ display: "flex", gap: 8 }}>
+      {rows.length === 0 ? (
+        <div className="tab-card rsvp-empty">
+          <Aurora pose="waving" size={96} />
+          <p>{t.emptyState}</p>
+        </div>
+      ) : (
+        <>
+          <FilterChips<Filter>
+            ariaLabel={t.filterAria}
+            value={filter}
+            onChange={setFilter}
+            chips={[
+              { id: "all", label: interpolate(t.filterAll, { count: rows.length }) },
+              { id: "confirmed", label: interpolate(t.filterConfirmed, { count: stats.confirmedParties }) },
+              { id: "declined", label: interpolate(t.filterDeclined, { count: stats.declinedParties }) },
+            ]}
+          />
+          {visibleRows.length > 0 && (
+            <ul className="warm-list">
+              {visibleRows.map((row) => {
+                const adults = row.attendees?.filter((a) => a.type === "adult").length ?? 0;
+                const children = row.attendees?.filter((a) => a.type === "child").length ?? 0;
+                const counts = [
+                  adults > 0 ? plural(locale, adults, t.adults) : null,
+                  children > 0 ? plural(locale, children, t.children) : null,
+                ]
+                  .filter(Boolean)
+                  .join(", ");
+                const updated = row.updated_at !== row.created_at;
+                const when = updated ? row.updated_at : row.created_at;
+                const confirmed = row.status === "confirmed";
+                const actionsId = `rsvp-row-actions-${row.id}`;
+                const expanded = openRowId === row.id;
+                return (
+                  <li key={row.id}>
+                    <div className="rsvp-row">
+                      <div className="rsvp-row__main">
+                        <div className="rsvp-row__head">
+                          <span className="rsvp-row__name">{row.submitter_name}</span>
+                          <span className={`rsvp-pill ${confirmed ? "rsvp-pill--yes" : "rsvp-pill--no"}`}>
+                            {confirmed ? t.listStatusConfirmed : t.listStatusDeclined}
+                          </span>
+                        </div>
+                        {confirmed && row.attendees?.length > 0 && (
+                          <span className="rsvp-row__people">
+                            {row.attendees.map((a) => a.name).join(", ")}
+                            {counts ? ` · ${counts}` : ""}
+                          </span>
+                        )}
+                        <span className="rsvp-row__meta">
+                          {row.contact ? `${row.contact} · ` : null}
+                          <time dateTime={when}>
+                            {interpolate(updated ? t.listUpdatedOn : t.listSubmittedOn, { date: relativeTime(when, locale) })}
+                          </time>
+                        </span>
+                      </div>
                       <button
                         type="button"
-                        onClick={() => void handleDuplicateAction(row.id, "merge")}
-                        disabled={busyId === row.id}
-                        style={{
-                          padding: "5px 10px",
-                          borderRadius: 8,
-                          border: "none",
-                          background: GOLD,
-                          color: "#fff",
-                          fontFamily: FB,
-                          fontSize: 11,
-                          fontWeight: 600,
-                          cursor: busyId === row.id ? "wait" : "pointer",
-                        }}
+                        className="rsvp-more"
+                        aria-label={interpolate(t.rowOptions, { name: row.submitter_name })}
+                        aria-expanded={expanded}
+                        aria-controls={actionsId}
+                        onClick={() => setOpenRowId(expanded ? null : row.id)}
                       >
-                        {ui.rsvpTab.duplicateMerge}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void handleDuplicateAction(row.id, "dismiss")}
-                        disabled={busyId === row.id}
-                        style={{
-                          padding: "5px 10px",
-                          borderRadius: 8,
-                          border: "1px solid rgba(197,146,42,0.4)",
-                          background: "transparent",
-                          color: GOLD,
-                          fontFamily: FB,
-                          fontSize: 11,
-                          fontWeight: 600,
-                          cursor: busyId === row.id ? "wait" : "pointer",
-                        }}
-                      >
-                        {ui.rsvpTab.duplicateDismiss}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <circle cx="5" cy="12" r="1.8" />
+                          <circle cx="12" cy="12" r="1.8" />
+                          <circle cx="19" cy="12" r="1.8" />
+                        </svg>
                       </button>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                    {expanded && (
+                      <div id={actionsId} className="rsvp-row__actions">
+                        <AppBtn
+                          variant="danger"
+                          className="rsvp-btn"
+                          disabled={busyId === row.id}
+                          onClick={() => setPendingConfirm({ kind: "delete", row })}
+                        >
+                          {t.deleteEntry}
+                        </AppBtn>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </>
       )}
+
+      <ConfirmDialog
+        open={pendingConfirm !== null}
+        title={pendingConfirm?.kind === "delete" ? pendingConfirm.row.submitter_name : t.regenerateCode}
+        message={pendingConfirm?.kind === "delete" ? t.deleteConfirm : t.regenerateConfirm}
+        confirmLabel={pendingConfirm?.kind === "delete" ? t.deleteEntry : t.regenerateCode}
+        cancelLabel={ui.common.cancel}
+        variant={pendingConfirm?.kind === "delete" ? "danger" : "default"}
+        busy={pendingConfirm?.kind === "delete" ? busyId === pendingConfirm.row.id : regenBusy}
+        onConfirm={() => void runConfirmed()}
+        onCancel={() => setPendingConfirm(null)}
+      />
     </section>
   );
 }

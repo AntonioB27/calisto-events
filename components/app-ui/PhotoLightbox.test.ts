@@ -58,6 +58,26 @@ describe("PhotoLightbox", () => {
     expect(html).toContain("Alex");
   });
 
+  it("shows a delete button only when onDelete is given", () => {
+    const base = {
+      signedUrl: "https://example.com/photo.jpg",
+      likeCount: 0,
+      likedByMe: false,
+      canViewLikers: false,
+      likers: [],
+      likersLoading: false,
+      togglePending: false,
+      toggleError: null,
+      copy,
+      onClose: vi.fn(),
+      onToggleLike: vi.fn(),
+    };
+    expect(renderToStaticMarkup(createElement(PhotoLightbox, base))).not.toContain('aria-label="Delete"');
+    expect(
+      renderToStaticMarkup(createElement(PhotoLightbox, { ...base, onDelete: vi.fn(), deleteLabel: "Delete" })),
+    ).toContain('aria-label="Delete"');
+  });
+
   it("hides likers section when viewer cannot see names", () => {
     const html = renderToStaticMarkup(
       createElement(PhotoLightbox, {

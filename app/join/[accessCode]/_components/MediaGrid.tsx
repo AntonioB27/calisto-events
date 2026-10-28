@@ -3,10 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
-import { AppBtn } from "@/components/app-ui/AppBtn";
+import { Aurora } from "@/components/app-ui/Aurora";
 import { AuroraHourglass } from "@/components/app-ui/AuroraHourglass";
 import { MediaLikeBadge } from "@/components/app-ui/MediaLikeBadge";
-import { MediaUploaderChip } from "@/components/app-ui/MediaUploaderChip";
 import { PhotoLightbox } from "@/components/app-ui/PhotoLightbox";
 import { buildMemberLabelMap } from "@/lib/event-member-labels";
 import { interpolate } from "@/lib/app-ui";
@@ -57,9 +56,13 @@ type Props = {
   userId: string | null;
   organizerUserId: string;
   canManageEvent: boolean;
+  /** Only the viewer's own uploads (the album's "Mine" switch). */
+  onlyMine?: boolean;
+  /** Receives display URLs of the newest (up to 2) loaded photos, for the album header prints. */
+  onLatestPhotos?: (urls: string[]) => void;
 };
 
-export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canManageEvent }: Props) {
+export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canManageEvent, onlyMine = false, onLatestPhotos }: Props) {
   const ui = useAppUi();
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,6 +77,26 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
   const [lightboxLikersLoading, setLightboxLikersLoading] = useState(false);
   const [likeToggleError, setLikeToggleError] = useState<string | null>(null);
   const [pendingLikeId, setPendingLikeId] = useState<string | null>(null);
+  const [columnCount, setColumnCount] = useState(3);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 640px)");
+    const sync = () => setColumnCount(mq.matches ? 4 : 3);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (!onLatestPhotos) return;
+    onLatestPhotos(
+      items
+        .filter((i) => !isVideoMime(i.mime_type) && (i.thumbnailUrl ?? i.signedUrl))
+        .slice(0, 2)
+        .map((i) => (i.thumbnailUrl ?? i.signedUrl) as string),
+    );
+  }, [items, onLatestPhotos]);
 
   const lightboxCopy = useMemo(
     () => ({
@@ -140,10 +163,12 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
         // ── Round-trip 1 ──────────────────────────────────────────────────────
         // Fetches 24 rows of metadata from Postgres (~50–150 ms).
         // Fast and cheap — only paths and mime types, no heavy columns.
-        const { data: rows, error: fetchErr } = await supabase
+        let query = supabase
           .from("media_items")
           .select("id, storage_path, thumbnail_path, mime_type, uploaded_by, moderation_status")
-          .eq("event_id", eventId)
+          .eq("event_id", eventId);
+        if (onlyMine && userId) query = query.eq("uploaded_by", userId);
+        const { data: rows, error: fetchErr } = await query
           .order("created_at", { ascending: false })
           .range(from, to);
         if (fetchErr) throw fetchErr;
@@ -243,7 +268,7 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
         setLoading(false);
       }
     },
-    [eventId, userId, organizerUserId, ui.gallery.loadFailed, ui.guests.guestLabelFallback, ui.guests.organizerLabelFallback, ui.supabase.galleryBody],
+    [eventId, userId, onlyMine, organizerUserId, ui.gallery.loadFailed, ui.guests.guestLabelFallback, ui.guests.organizerLabelFallback, ui.supabase.galleryBody],
   );
 
   useEffect(() => {
@@ -303,9 +328,11 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
   ]);
 
   function loadMore() {
+    if (loadingMore) return;
     const nextPage = page + 1;
     setPage(nextPage);
-    void fetchPage(nextPage, false);
+    setLoadingMore(true);
+    void fetchPage(nextPage, false).finally(() => setLoadingMore(false));
   }
 
   async function handleToggleLikeForItem(mediaItemId: string, uploadedBy: string) {
@@ -386,13 +413,7 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
       {error ? <p style={{ color: "var(--app-danger)" }}>{error}</p> : null}
       {!loading && items.length === 0 ? (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "44px 16px 64px", textAlign: "center" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/brand/mascot/aurora_gallery.png"
-            alt=""
-            aria-hidden
-            style={{ width: 100, height: 100, objectFit: "contain", marginBottom: 16, filter: "drop-shadow(0 6px 20px color-mix(in srgb, var(--app-gold) 22%, transparent))", opacity: 0.9 }}
-          />
+          <Aurora pose="gallery" size={110} style={{ marginBottom: 16 }} />
           <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontWeight: 700, fontSize: 19, color: "var(--app-text)", margin: "0 0 6px" }}>
             {ui.gallery.emptyGuest}
           </p>
@@ -451,10 +472,10 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
                       borderRadius: 999,
                       background: "rgba(197,146,42,0.22)",
                       border: "1px solid rgba(197,146,42,0.5)",
-                      fontSize: 9,
+                      fontSize: 12,
                       fontWeight: 700,
                       color: "var(--app-gold)",
-                      letterSpacing: "0.14em",
+                      letterSpacing: "0.06em",
                       textTransform: "uppercase",
                     }}
                   >
@@ -462,11 +483,9 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
                   </span>
                 </div>
               ) : null}
-              <div style={{ position: "absolute", inset: "auto 0 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4, padding: "30px 8px 8px", background: "linear-gradient(transparent, rgba(0,0,0,0.7))", pointerEvents: "none" }}>
-                <MediaUploaderChip label={item.uploaderLabel} isMine={Boolean(userId && item.uploaded_by === userId)} mineAria={ui.gallery.uploadedByYouAria} />
-              </div>
-              {!isVideo ? (
-                <div style={{ position: "absolute", top: 6, right: 6, zIndex: 1 }}>
+              {/* Hearts only once a photo has likes (or you liked it); the uploader's name lives in the full-screen view. */}
+              {!isVideo && ((likeCounts.get(item.id) ?? 0) > 0 || likedByMe.has(item.id)) ? (
+                <div style={{ position: "absolute", right: 5, bottom: 5, zIndex: 1 }}>
                   <MediaLikeBadge
                     liked={likedByMe.has(item.id)}
                     count={likeCounts.get(item.id) ?? 0}
@@ -486,23 +505,21 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
         // first column instead of across the top row. Distributing round-robin across N column
         // buckets keeps the newest items in the top row while still allowing per-column masonry
         // (variable tile heights) below it.
-        const columnCount = 3;
         const columnBuckets: MediaItem[][] = Array.from({ length: columnCount }, () => []);
         items.forEach((item, index) => {
           columnBuckets[index % columnCount].push(item);
         });
 
         return (
-          <div style={{ display: "flex", gap: 4 }}>
+          <div style={{ display: "flex", gap: 6 }}>
             {columnBuckets.map((columnItems, columnIndex) => (
-              <div key={columnIndex} style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0 }}>
+              <div key={columnIndex} style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1, minWidth: 0 }}>
                 {columnItems.map((item) => {
-                  const isVideo = isVideoMime(item.mime_type);
                   return (
                     <div
                       key={item.id}
                       onClick={() => setLightbox(item)}
-                      style={{ position: "relative", borderRadius: 8, overflow: "hidden", cursor: "pointer" }}
+                      style={{ position: "relative", borderRadius: 10, overflow: "hidden", cursor: "pointer", background: "var(--app-surface-2)", boxShadow: "0 6px 14px -10px rgba(60, 35, 10, 0.45)" }}
                     >
                       {renderMedia(item)}
                       {renderOverlay(item)}
@@ -516,9 +533,18 @@ export function MediaGrid({ eventId, refreshKey, userId, organizerUserId, canMan
       })() : null}
 
       {hasMore ? (
-        <AppBtn variant="outline" type="button" className="mt-6 w-full" onClick={loadMore}>
-          {ui.gallery.loadMore}
-        </AppBtn>
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 22 }}>
+          <button type="button" className="guest-load-more" onClick={loadMore} disabled={loadingMore} aria-busy={loadingMore}>
+            {loadingMore ? (
+              <span className="guest-load-more__spinner" aria-hidden />
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+            {loadingMore ? ui.common.loading : ui.gallery.loadMore}
+          </button>
+        </div>
       ) : null}
 
       {lightbox ? (

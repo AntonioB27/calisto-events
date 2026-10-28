@@ -2,6 +2,8 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AppUiProvider } from "@/components/AppUiProvider";
+import { getAppStrings } from "@/lib/app-ui";
 import { canGuestUpload } from "@/lib/plan-limits";
 import { UploadZone } from "./_components/UploadZone";
 
@@ -56,7 +58,14 @@ describe("guest upload eligibility", () => {
 
 describe("UploadZone", () => {
   it("renders a file input for uploads", () => {
-    const html = renderToStaticMarkup(createElement(UploadZone, { eventId: "evt_1", onUploaded: () => {} }));
+    const html = renderToStaticMarkup(
+      // AppUiProvider's props type requires children, so it can't go in the third argument.
+      // eslint-disable-next-line react/no-children-prop
+      createElement(AppUiProvider, {
+        value: { locale: "en", ...getAppStrings("en") },
+        children: createElement(UploadZone, { eventId: "evt_1", onUploaded: () => {} }),
+      }),
+    );
     expect(html).toContain('type="file"');
     expect(html).toContain("Drag &amp; drop photos or videos here");
   });

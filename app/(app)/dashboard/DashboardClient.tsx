@@ -2,427 +2,325 @@
 
 import Link from "next/link";
 import { startTransition, useEffect, useMemo, useState } from "react";
-import { Key, Plus } from "lucide-react";
+import { Download, Key, Plus } from "lucide-react";
 
 import { normalizeAccessCode } from "@/lib/access-code";
 import { useAppUi } from "@/components/AppUiProvider";
+import { AppBtn } from "@/components/app-ui/AppBtn";
+import { Aurora, AuroraSays } from "@/components/app-ui/Aurora";
 import { displayNavEmoji, splitEventTitleStored } from "@/lib/event-title";
 import type { DashboardEventRow } from "@/lib/dashboard-events";
+import { daysUntilEvent, getEventPhase } from "@/lib/event-phase";
 import { interpolate } from "@/lib/app-ui";
-import { loadSavedOrder, mergeWithSavedOrder } from "@/lib/my-events-order";
+import { plural } from "@/lib/app-ui/plural";
+import { bcp47FromUiLocale } from "@/lib/locale-bcp47";
 import { loadHiddenEventIds } from "@/lib/my-events-visibility";
 
-// ── Editorial Almanac palette (brand accents — stable across modes) ───────────
-const INK     = '#221509';   // light-mode only; use TEXT for dynamic text color
-const INK_S   = '#5A4A36';   // light-mode only; use TEXT_S for dynamic text color
-const MUTED   = '#9A8570';   // light-mode only; use MUTED_T for dynamic text color
-const GOLD    = '#C5922A';
-const GOLD_DK = '#A37118';
-const PURPLE  = '#5B2D8E';
-const BORDER  = '#DDD4C5';   // light-mode only; use DIVIDER for dynamic border color
-const GOLD_FOIL = 'linear-gradient(135deg, #E6BF66 0%, #C5922A 45%, #F4D88F 70%, #946C18 100%)';
+const SERIF = "var(--font-display)";
+const GOLD_INK = "var(--app-gold-ink)";
+const DAY_MS = 24 * 60 * 60 * 1000;
+/** An upcoming event takes the top card only when it is this close; further out it is just "coming up". */
+const SOON_DAYS = 60;
+/** Show the "download by" chip only when the deletion date is this close. */
+const URGENT_DAYS = 14;
 
-// Theme-responsive values via CSS custom properties
-const TEXT    = 'var(--app-text)';
-const TEXT_S  = 'var(--app-text-sub)';
-const MUTED_T = 'var(--app-muted)';
-const DIVIDER = 'var(--app-border)';
+// Print positions: three-print stack (top card, latest album) and two-print pair (album grid).
+const STACK3: React.CSSProperties[] = [
+  { left: 4, top: 30, width: "48%", height: 150, transform: "rotate(-6deg)" },
+  { right: 2, top: 10, width: "48%", height: 156, transform: "rotate(5deg)" },
+  { left: "23%", top: 34, width: "52%", height: 166, transform: "rotate(-1.5deg)" },
+];
+const STACK2: React.CSSProperties[] = [
+  { left: 6, top: 16, width: "70%", height: 118, borderWidth: 4, transform: "rotate(-7deg)" },
+  { right: 4, top: 6, width: "73%", height: 132, borderWidth: 4, transform: "rotate(4deg)" },
+];
 
-const FB = "'DM Sans', sans-serif";
-const FS = "'DM Serif Display', serif";
-const FM = "'Caveat', cursive";
+const byDate = (x: DashboardEventRow, y: DashboardEventRow) => Date.parse(x.event_date) - Date.parse(y.event_date);
+const isUrgent = (deletionIso: string, now = Date.now()) => {
+  const left = Date.parse(deletionIso) - now;
+  return left > 0 && left < URGENT_DAYS * DAY_MS;
+};
 
-const GLASS_LIGHT = {
-  background: 'rgba(255,255,255,0.62)',
-  backdropFilter: 'blur(14px)',
-  WebkitBackdropFilter: 'blur(14px)',
-  border: '1px solid rgba(255,255,255,0.78)',
-  boxShadow: '0 10px 30px -8px rgba(40,25,15,0.18), inset 0 1px 0 rgba(255,255,255,0.7)',
-} as React.CSSProperties;
+const titleStyle: React.CSSProperties = { margin: 0, fontFamily: SERIF, fontWeight: 400, color: "var(--app-text)" };
 
-const GLASS_DARK = {
-  background: 'rgba(255,255,255,0.06)',
-  backdropFilter: 'blur(14px)',
-  WebkitBackdropFilter: 'blur(14px)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  boxShadow: '0 10px 30px -8px rgba(0,0,0,0.4)',
-} as React.CSSProperties;
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-function parseDateDisplay(dateStr: string | null | undefined) {
-  if (!dateStr) return null;
-  try {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    if (!y || !m || !d) return null;
-    return {
-      mon: new Date(y, m - 1, d).toLocaleDateString('en', { month: 'short' }),
-      day: d,
-      year: y,
-    };
-  } catch { return null; }
-}
-
-function roleAccent(role: DashboardEventRow['membershipRole']): string {
-  if (role === 'organizer') return PURPLE;
-  if (role === 'co_organizer') return '#7B3FBE';
-  return GOLD;
-}
-
-function roleBannerBg(role: DashboardEventRow['membershipRole']): string {
-  if (role === 'organizer') return 'linear-gradient(135deg,rgba(91,45,142,0.22),rgba(123,63,190,0.18))';
-  if (role === 'co_organizer') return 'linear-gradient(135deg,rgba(123,63,190,0.18),rgba(197,146,42,0.14))';
-  return 'linear-gradient(135deg,rgba(197,146,42,0.18),rgba(197,146,42,0.10))';
-}
-
-// ── Micro components ───────────────────────────────────────────────────────────
-function SectionMark({ n, label, trailing }: { n: string; label: string; trailing?: React.ReactNode }) {
+function Chevron() {
   return (
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, paddingBottom: 6, borderBottom: `1px solid ${DIVIDER}` }}>
-      <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 26, color: GOLD, letterSpacing: '-0.02em', lineHeight: 1 }}>{n}</span>
-      <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: TEXT_S, fontFamily: FB }}>{label}</span>
-      <span style={{ flex: 1 }} />
-      {trailing}
-    </div>
-  );
-}
-
-function planStyle(tier: string): { bg: string; border: string; color: string; shadow: string } {
-  switch (tier) {
-    case 'free':
-      return { bg: 'transparent', border: `1px solid ${MUTED}55`, color: MUTED_T, shadow: 'none' };
-    case 'standard':
-      return { bg: 'linear-gradient(135deg,#4A8CB8 0%,#2D6A96 50%,#5BAACE 100%)', border: 'none', color: '#fff', shadow: 'inset 0 1px 0 rgba(255,255,255,0.35),0 1px 2px rgba(45,106,150,0.3)' };
-    case 'plus':
-      return { bg: 'linear-gradient(135deg,#D4956B 0%,#B87333 45%,#E8AF80 70%,#8C5225 100%)', border: 'none', color: '#fff', shadow: 'inset 0 1px 0 rgba(255,255,255,0.35),0 1px 2px rgba(184,115,51,0.3)' };
-    case 'premium':
-      return { bg: GOLD_FOIL, border: 'none', color: '#fff', shadow: 'inset 0 1px 0 rgba(255,255,255,0.4),inset 0 -1px 0 rgba(0,0,0,0.15),0 1px 2px rgba(148,108,24,0.25)' };
-    case 'max':
-      return { bg: 'linear-gradient(135deg,#8B5FCC 0%,#5B2D8E 45%,#A87FD8 70%,#3D1A6E 100%)', border: 'none', color: '#fff', shadow: 'inset 0 1px 0 rgba(255,255,255,0.35),0 1px 2px rgba(91,45,142,0.35)' };
-    default:
-      return { bg: `${BORDER}80`, border: 'none', color: MUTED, shadow: 'none' };
-  }
-}
-
-function PlanStamp({ tier, size = 'sm' }: { tier: string; size?: 'sm' | 'lg' }) {
-  const p = size === 'lg' ? { padding: '5px 10px', font: 13, label: 8, gap: 7 } : { padding: '3px 8px', font: 11, label: 7, gap: 5 };
-  const s = planStyle(tier);
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: p.gap,
-      background: s.bg, color: s.color, border: s.border,
-      borderRadius: 4, padding: p.padding, boxShadow: s.shadow,
-    }}>
-      <span style={{ fontSize: p.label, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', opacity: 0.82, fontFamily: FB }}>Plan</span>
-      <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: p.font, letterSpacing: '0.04em', lineHeight: 1 }}>{tier}</span>
-    </span>
-  );
-}
-
-function RoleChip({ role, label }: { role: DashboardEventRow['membershipRole']; label: string }) {
-  const accent = roleAccent(role);
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 5,
-      fontFamily: FB, fontSize: 10.5, fontWeight: 600,
-      color: accent, padding: '2px 8px 2px 6px',
-      background: `${accent}18`, border: `1px solid ${accent}30`, borderRadius: 12,
-    }}>
-      <span style={{ width: 5, height: 5, borderRadius: '50%', background: accent, flexShrink: 0 }} />
-      {label}
-    </span>
-  );
-}
-
-function DateStamp({ mon, day, year, accent, compact }: { mon: string; day: number; year: number; accent: string; compact?: boolean }) {
-  return (
-    <div style={{ width: compact ? 48 : 60, flexShrink: 0, textAlign: 'center', fontFamily: FB, borderRight: `1px dashed ${DIVIDER}`, paddingRight: compact ? 10 : 12 }}>
-      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: MUTED_T }}>{mon}</div>
-      <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: compact ? 32 : 42, lineHeight: 0.9, color: accent, letterSpacing: '-0.03em', marginTop: 1 }}>{day}</div>
-      <div style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 10.5, color: MUTED_T, marginTop: 1 }}>{year}</div>
-    </div>
-  );
-}
-
-function ArrowIcon({ size = 13, color = '#fff' }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M5 12h14M13 6l6 6-6 6" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ color: "var(--app-subtle)", flexShrink: 0 }}>
+      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-
-// ── New uploads badge ──────────────────────────────────────────────────────────
-function NewUploadsBadge({ count }: { count: number }) {
-  return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 4,
-      background: 'linear-gradient(135deg, #E6BF66 0%, #C5922A 60%)',
-      color: '#fff',
-      borderRadius: 20,
-      padding: '2px 7px 2px 5px',
-      fontSize: 10,
-      fontWeight: 700,
-      fontFamily: FB,
-      letterSpacing: '0.01em',
-      boxShadow: '0 1px 6px rgba(148,108,24,0.32)',
-      flexShrink: 0,
-      whiteSpace: 'nowrap',
-    }}>
-      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M12 19V5M5 12l7-7 7 7" />
-      </svg>
-      {count}
-    </span>
-  );
-}
-
-// ── Featured event card ────────────────────────────────────────────────────────
-function FeaturedEvent({ event, onOpen, roleLabel, glassStyle, mostRecentLabel, newCount }: { event: DashboardEventRow; onOpen: () => void; roleLabel: string; glassStyle: React.CSSProperties; mostRecentLabel: string; newCount?: number }) {
-  const { emoji: storedEmoji, name } = splitEventTitleStored(String(event.title));
-  const emoji = displayNavEmoji(storedEmoji);
-  const date = parseDateDisplay(event.event_date);
-  const accent = roleAccent(event.membershipRole);
-
-  return (
-    <div onClick={onOpen} role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onOpen(); }} style={{ marginTop: 14, cursor: 'pointer' }}>
-      {/* Banner */}
-      <div style={{ ...glassStyle, borderRadius: 14, overflow: 'hidden', position: 'relative', height: 128 }}>
-        <div style={{ position: 'absolute', inset: 0, background: roleBannerBg(event.membershipRole) }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,0.12) 0 2px,transparent 2px 12px)' }} />
-        {/* big emoji */}
-        <div style={{ position: 'absolute', right: -8, bottom: -14, fontSize: 120, lineHeight: 1, opacity: 0.9, transform: 'rotate(-8deg)', filter: 'drop-shadow(0 4px 12px rgba(40,25,15,0.18))', pointerEvents: 'none' }}>{emoji}</div>
-        {/* stamps */}
-        <div style={{ position: 'absolute', top: 10, left: 12 }}><PlanStamp tier={event.plan} size="lg" /></div>
-        <div style={{ position: 'absolute', top: 10, right: 12 }}><RoleChip role={event.membershipRole} label={roleLabel} /></div>
-        {/* name pill */}
-        <div style={{ position: 'absolute', bottom: 10, left: 10, right: 96, background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: 100, padding: '5px 14px', border: '1px solid rgba(255,255,255,0.38)', overflow: 'hidden' }}>
-          <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 14, color: 'rgba(255,255,255,0.95)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textShadow: '0 1px 4px rgba(40,25,15,0.5)', display: 'block' }}>{name}</span>
-        </div>
-        {/* arrow button */}
-        <div style={{ position: 'absolute', bottom: 10, right: 12, width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#7B3FBE,#5B2D8E)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(91,45,142,0.32)' }}>
-          <ArrowIcon size={12} color="#fff" />
-        </div>
-      </div>
-      {/* Meta row */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginTop: 12 }}>
-        {date && <DateStamp mon={date.mon} day={date.day} year={date.year} accent={accent} />}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: MUTED, fontFamily: FB }}>{mostRecentLabel}</div>
-            {newCount != null && newCount > 0 && <NewUploadsBadge count={newCount} />}
-          </div>
-          <h2 style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 24, lineHeight: 1.05, color: TEXT, letterSpacing: '-0.015em', marginTop: 4 }}>{name}</h2>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Compact event row ──────────────────────────────────────────────────────────
-function CompactEventRow({ event, onOpen, roleLabel, last, isDark, newCount }: { event: DashboardEventRow; onOpen: () => void; roleLabel: string; last: boolean; isDark: boolean; newCount?: number }) {
-  const { emoji: storedEmoji, name } = splitEventTitleStored(String(event.title));
-  const emoji = displayNavEmoji(storedEmoji);
-  const date = parseDateDisplay(event.event_date);
-  const accent = roleAccent(event.membershipRole);
-
-  return (
-    <div onClick={onOpen} role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onOpen(); }} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: last ? 'none' : `1px dashed ${DIVIDER}`, cursor: 'pointer' }}>
-      {date && <DateStamp mon={date.mon} day={date.day} year={date.year} accent={accent} compact />}
-      <div style={{ width: 40, height: 40, flexShrink: 0, borderRadius: 10, background: `${accent}18`, border: `1px solid ${DIVIDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12)' }}>{emoji}</div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 18, lineHeight: 1.05, color: TEXT, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5, flexWrap: 'wrap' }}>
-          <RoleChip role={event.membershipRole} label={roleLabel} />
-          <PlanStamp tier={event.plan} size="sm" />
-          {newCount != null && newCount > 0 && <NewUploadsBadge count={newCount} />}
-        </div>
-      </div>
-      <div style={{ width: 26, height: 26, borderRadius: '50%', background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.7)', border: `1px solid ${DIVIDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <ArrowIcon size={11} color={isDark ? '#c4b49e' : INK_S} />
-      </div>
-    </div>
-  );
-}
-
-// ── Main ───────────────────────────────────────────────────────────────────────
 type Props = Readonly<{
   organizerId: string;
-  userName: string;
   events: DashboardEventRow[];
   newUploadCounts?: Readonly<Record<string, number>>;
+  photos?: Readonly<Record<string, string[]>>;
+  memoryCounts?: Readonly<Record<string, number>>;
+  deletionDates?: Readonly<Record<string, string>>;
+  guestCounts?: Readonly<Record<string, number>>;
+  myUploadCounts?: Readonly<Record<string, number>>;
 }>;
 
-export function DashboardClient({ organizerId, userName, events, newUploadCounts = {} }: Props) {
+export function DashboardClient({
+  organizerId,
+  events,
+  newUploadCounts = {},
+  photos = {},
+  memoryCounts = {},
+  deletionDates = {},
+  guestCounts = {},
+  myUploadCounts = {},
+}: Props) {
   const ui = useAppUi();
+  const a = ui.aurora;
+  const t = ui.eventsList;
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
-  const [orderIds, setOrderIds] = useState<string[]>([]);
-  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     startTransition(() => setHiddenIds(new Set(loadHiddenEventIds(organizerId))));
-    startTransition(() => setOrderIds(loadSavedOrder(organizerId)));
   }, [organizerId]);
 
-  useEffect(() => {
-    setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
-    const obs = new MutationObserver(() => {
-      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
-    });
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    return () => obs.disconnect();
-  }, []);
+  const locale = bcp47FromUiLocale(ui.locale);
+  const fmt = (iso: string, opts: Intl.DateTimeFormatOptions) =>
+    new Date(iso.length === 10 ? iso + "T00:00:00Z" : iso).toLocaleDateString(locale, { timeZone: "UTC", ...opts });
 
-  const orderedEvents = useMemo(() => mergeWithSavedOrder(events, orderIds), [events, orderIds]);
-  const visibleEvents = useMemo(() => orderedEvents.filter((e) => !hiddenIds.has(e.id)), [orderedEvents, hiddenIds]);
+  // One timeline per section: upcoming soonest first, past newest first, own and joined events mixed by date.
+  const { live, soon, planned, past } = useMemo(() => {
+    const visible = events.filter((e) => !hiddenIds.has(e.id));
+    const own = visible.filter((e) => e.membershipRole !== "guest");
+    const live = own.filter((e) => getEventPhase(e.event_date) === "during").sort(byDate)[0];
+    const soon = live
+      ? undefined
+      : own
+          .filter((e) => getEventPhase(e.event_date) === "before" && daysUntilEvent(e.event_date) <= SOON_DAYS)
+          .sort(byDate)[0];
+    const hero = live ?? soon;
+    return {
+      live,
+      soon,
+      planned: visible.filter((e) => e !== hero && getEventPhase(e.event_date) !== "after").sort(byDate),
+      past: visible.filter((e) => getEventPhase(e.event_date) === "after").sort((x, y) => byDate(y, x)),
+    };
+  }, [events, hiddenIds]);
 
-  function handleOpen(event: DashboardEventRow) {
-    if (event.membershipRole === 'guest') {
-      window.location.href = `/join/${encodeURIComponent(normalizeAccessCode(event.access_code))}`;
-      return;
+  const nameOf = (e: DashboardEventRow) => splitEventTitleStored(String(e.title)).name;
+  const emojiOf = (e: DashboardEventRow) => displayNavEmoji(splitEventTitleStored(String(e.title)).emoji);
+  const eventHref = (e: DashboardEventRow, tab?: string) =>
+    e.membershipRole === "guest"
+      ? `/join/${encodeURIComponent(normalizeAccessCode(e.access_code))}`
+      : `/events/${e.id}${tab ? `?tab=${tab}` : ""}`;
+
+  const memoriesText = (e: DashboardEventRow) => {
+    const n = memoryCounts[e.id] ?? 0;
+    return n > 0 ? plural(locale, n, t.memories) : t.noMemories;
+  };
+  const whenText = (days: number) =>
+    days <= 0 ? a.today : days === 1 ? t.tomorrow : interpolate(a.inDays, { days: String(days) });
+  // Line under an album: guests see what they added, hosts see how many guests contributed.
+  const albumLine = (e: DashboardEventRow) => {
+    if (e.membershipRole === "guest") {
+      const mine = myUploadCounts[e.id] ?? 0;
+      return mine > 0 ? `${memoriesText(e)} · ${interpolate(t.youAdded, { count: String(mine) })}` : memoriesText(e);
     }
-    window.location.href = `/events/${event.id}`;
+    const guests = guestCounts[e.id] ?? 0;
+    return (memoryCounts[e.id] ?? 0) > 0 && guests > 0 ? `${memoriesText(e)} ${plural(locale, guests, t.fromGuests)}` : memoriesText(e);
+  };
+  const urgentDeadline = (e: DashboardEventRow) => {
+    const del = e.membershipRole !== "guest" && deletionDates[e.id];
+    return del && isUrgent(del) ? interpolate(t.downloadBy, { date: fmt(del, { day: "numeric", month: "long" }) }) : null;
+  };
+
+  // Photos as prints, or the event emoji on a warm tile when there are none yet.
+  function prints(e: DashboardEventRow, layout: React.CSSProperties[], height: number) {
+    const pics = (photos[e.id] ?? []).slice(0, layout.length);
+    return (
+      <span style={{ display: "block", position: "relative", height }}>
+        {e.membershipRole === "guest" && (
+          <span
+            style={{ position: "absolute", left: 0, top: 0, zIndex: 1, padding: "4px 10px", borderRadius: 99, background: "var(--app-surface)", border: "1px solid var(--app-border-strong)", boxShadow: "0 4px 10px -6px rgba(60,35,10,0.4)", fontSize: 12, fontWeight: 700, color: "var(--app-text-sub)" }}
+          >
+            {ui.dashboard.roleGuest}
+          </span>
+        )}
+        {pics.length > 0 ? (
+          pics.map((src, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img key={src} src={src} alt="" className="print-photo" style={{ position: "absolute", ...layout[layout.length - pics.length + i] }} />
+          ))
+        ) : (
+          <span
+            aria-hidden
+            style={{ position: "absolute", inset: "10px 8px 0", borderRadius: 18, background: "var(--app-gold-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: Math.round(height * 0.45), lineHeight: 1 }}
+          >
+            <span style={{ transform: "rotate(-6deg)" }}>{emojiOf(e)}</span>
+          </span>
+        )}
+      </span>
+    );
   }
 
-  function getRoleLabel(role: DashboardEventRow['membershipRole']): string {
-    if (role === 'organizer') return ui.dashboard.roleOrganizer;
-    if (role === 'co_organizer') return ui.dashboard.roleCoOrganizer;
-    return ui.dashboard.roleGuest;
+  function deadlineChip(e: DashboardEventRow) {
+    const text = urgentDeadline(e);
+    if (!text) return null;
+    return (
+      <span
+        style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 10, padding: "6px 12px", borderRadius: 99, background: "rgba(240,179,75,0.22)", border: "1px solid rgba(201,145,46,0.45)", fontSize: 13, fontWeight: 700, color: GOLD_INK }}
+      >
+        <Download size={14} aria-hidden /> {text}
+      </span>
+    );
   }
 
-  const isEmpty = visibleEvents.length === 0;
-  const [featured, ...rest] = visibleEvents;
+  const rowStyle: React.CSSProperties = { minHeight: 76, display: "flex", alignItems: "center", gap: 14, padding: "6px 2px", textDecoration: "none", color: "var(--app-text)" };
+  const subStyle: React.CSSProperties = { display: "block", marginTop: 2, fontSize: 14, color: "var(--app-muted)" };
 
-  // used to avoid lint warning — helloTemplate contains the name placeholder
-  void interpolate;
+  const [latest, ...older] = past;
 
   return (
-    <div className="welcome-reveal" style={{ padding: '18px 16px 48px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div className="welcome-reveal" style={{ maxWidth: 640, margin: "0 auto", padding: "22px 2px 48px" }}>
+      <h1 style={{ ...titleStyle, fontSize: 42, lineHeight: 1, letterSpacing: "-0.02em" }}>{ui.dashboard.yourEvents}</h1>
 
-      {/* ── Masthead ─────────────────────────────────────────────── */}
-      <div style={{ padding: '8px 0 4px', position: 'relative' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/mascot/aurora.png" alt="" style={{ position: 'absolute', top: 0, right: -8, width: 110, height: 110, objectFit: 'contain', objectPosition: 'top right', pointerEvents: 'none', transform: 'scale(1.35)', transformOrigin: 'top right' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 18, height: 2, background: GOLD, borderRadius: 1, flexShrink: 0 }} />
-          <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: GOLD_DK, fontFamily: FB }}>{ui.dashboard.eyebrow}</span>
-        </div>
-
-        <h1 style={{ marginTop: 12, lineHeight: 0.95, letterSpacing: '-0.025em', paddingRight: 96 }}>
-          <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 48, color: TEXT }}>Hello,{' '}</span>
-          <span style={{ fontFamily: FM, fontWeight: 700, color: PURPLE, fontSize: 54 }}>{userName}</span>
-          <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 48, color: GOLD }}>.</span>
-        </h1>
-
-        <p style={{ marginTop: 10, fontFamily: FS, fontStyle: 'italic', fontSize: 14, color: TEXT_S, lineHeight: 1.45 }}>
-          {ui.dashboard.subtitle}
-        </p>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9, marginTop: 16 }}>
-          <Link href="/join" style={{
-            background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)',
-            border: `1px solid ${DIVIDER}`,
-            color: 'var(--app-purple)', padding: '12px 10px', borderRadius: 11,
-            fontFamily: FB, fontSize: 13, fontWeight: 600,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-            textDecoration: 'none',
-            backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-          }}>
-            <Key size={14} /> {ui.dashboard.joinWithCode}
-          </Link>
-          <Link href="/events/new" style={{
-            background: 'linear-gradient(135deg,#7B3FBE,#5B2D8E)', border: 'none',
-            color: '#fff', padding: '12px 10px', borderRadius: 11,
-            fontFamily: FB, fontSize: 13, fontWeight: 600,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-            textDecoration: 'none',
-            boxShadow: '0 4px 12px rgba(91,45,142,0.32)',
-          }}>
-            <Plus size={14} /> {ui.dashboard.createEvent}
-          </Link>
-        </div>
-      </div>
-
-      {/* ── Events section ───────────────────────────────────────── */}
-      {!isEmpty && (
-        <div>
-          <SectionMark
-            n="01"
-            label={ui.dashboard.yourEvents}
-            trailing={
-              <span style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 18, color: GOLD, letterSpacing: '-0.02em', lineHeight: 1 }}>
-                {visibleEvents.length}
-              </span>
-            }
-          />
-          <FeaturedEvent event={featured} onOpen={() => handleOpen(featured)} roleLabel={getRoleLabel(featured.membershipRole)} glassStyle={isDark ? GLASS_DARK : GLASS_LIGHT} mostRecentLabel={ui.dashboard.mostRecent} newCount={newUploadCounts[featured.id]} />
-          {rest.length > 0 && (
-            <div style={{ marginTop: 18 }}>
-              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: MUTED_T, fontFamily: FB, marginBottom: 8 }}>
-                {ui.dashboard.earlierSeason}
-              </div>
-              {rest.map((ev, i) => (
-                <CompactEventRow key={ev.id} event={ev} onOpen={() => handleOpen(ev)} roleLabel={getRoleLabel(ev.membershipRole)} last={i === rest.length - 1} isDark={isDark} newCount={newUploadCounts[ev.id]} />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── Empty state ──────────────────────────────────────────── */}
-      {isEmpty && (
-        <div style={{ ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 18, padding: '32px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/mascot/aurora_key.png" alt="" style={{ width: 88, height: 132, objectFit: 'contain' }} />
-          <p style={{ fontFamily: FS, fontStyle: 'italic', fontSize: 15, color: MUTED_T, textAlign: 'center', lineHeight: 1.6, margin: 0 }}>
-            {ui.dashboard.emptyHint}
+      {/* ── Top card: live event, an event coming up soon, or an invitation to plan one ── */}
+      {live ? (
+        <Link href={eventHref(live, "gallery")} className="warm-card" style={{ display: "block", marginTop: 20, padding: "16px 16px 18px", textDecoration: "none", color: "var(--app-text)" }}>
+          <span style={{ display: "block", position: "relative" }}>
+            {prints(live, STACK3, 196)}
+            <span style={{ position: "absolute", left: 0, top: 0, padding: "5px 12px", borderRadius: 99, background: "linear-gradient(135deg,#f5c76b,#f0b34b)", fontSize: 13, fontWeight: 700, color: "#1b1208", boxShadow: "0 6px 12px -6px rgba(150,100,20,0.6)" }}>
+              {a.liveNow}
+            </span>
+          </span>
+          <span style={{ display: "block", marginTop: 14, fontFamily: SERIF, fontSize: 30, lineHeight: 1 }}>{nameOf(live)}</span>
+          <span style={{ display: "block", marginTop: 6, fontSize: 15, color: "var(--app-text-sub)" }}>
+            {interpolate(t.soFar, { memories: memoriesText(live) })}
+            {(newUploadCounts[live.id] ?? 0) > 0 && (
+              <>
+                {", "}
+                <span style={{ fontWeight: 700, color: GOLD_INK }}>{interpolate(a.waitingForYou, { count: String(newUploadCounts[live.id]) })}</span>
+              </>
+            )}
+          </span>
+          <span className="app-btn app-btn--gold app-btn--md" style={{ display: "flex", marginTop: 14, minHeight: 50, borderRadius: 15 }}>
+            {(newUploadCounts[live.id] ?? 0) > 0 ? t.seeNew : a.nextDuringSecondary}
+          </span>
+        </Link>
+      ) : soon ? (
+        <section aria-labelledby="soon-title" className="warm-card" style={{ position: "relative", marginTop: 20, padding: 20 }}>
+          <Aurora pose="qr" size={112} style={{ position: "absolute", right: 10, top: 10 }} />
+          <h2 id="soon-title" style={{ ...titleStyle, paddingRight: 116, fontSize: 30, lineHeight: 1.02 }}>
+            <Link href={eventHref(soon)} style={{ color: "inherit", textDecoration: "none" }}>{nameOf(soon)}</Link>
+          </h2>
+          <p style={{ margin: "6px 0 0", paddingRight: 116, fontSize: 14, fontWeight: 700, color: GOLD_INK }}>
+            {fmt(soon.event_date, { weekday: "long", day: "numeric", month: "long" })} · {whenText(daysUntilEvent(soon.event_date))}
           </p>
-          <Link href="/events/new" style={{
-            background: 'linear-gradient(135deg,#7B3FBE,#5B2D8E)', color: '#fff',
-            padding: '12px 24px', borderRadius: 12,
-            fontFamily: FB, fontSize: 14, fontWeight: 600, textDecoration: 'none',
-            boxShadow: '0 4px 14px rgba(91,45,142,0.32)',
-          }}>
-            {ui.dashboard.createEvent}
+          <AuroraSays size={21} style={{ marginTop: 18 }}>{a.nextBefore}</AuroraSays>
+          <p style={{ margin: "6px 0 0", fontSize: 14, lineHeight: 1.45, color: "var(--app-text-sub)" }}>{a.nextBeforeDetail}</p>
+          <div style={{ marginTop: 14, display: "flex", gap: 10 }}>
+            <AppBtn as={Link} href={eventHref(soon, soon.membershipRole === "organizer" ? "prints" : "share")} variant="gold" style={{ flex: 1, minHeight: 50, borderRadius: 15 }}>
+              {soon.membershipRole === "organizer" ? a.nextBeforePrimary : a.nextBeforeSecondary}
+            </AppBtn>
+            {soon.membershipRole === "organizer" && (
+              <AppBtn as={Link} href={eventHref(soon, "share")} variant="outline" style={{ flex: 1, minHeight: 50, borderRadius: 15 }}>
+                {a.nextBeforeSecondary}
+              </AppBtn>
+            )}
+          </div>
+        </section>
+      ) : (
+        <section aria-labelledby="plan-title" className="warm-card" style={{ position: "relative", marginTop: 92, padding: "22px 20px 16px" }}>
+          <Aurora pose="planning" size={150} priority style={{ position: "absolute", right: 4, top: -104 }} />
+          <AuroraSays size={24} style={{ paddingRight: 128, lineHeight: 1.15 }}>
+            <span id="plan-title">{t.ctaSays}</span>
+          </AuroraSays>
+          <p style={{ margin: "12px 0 0", fontSize: 15, lineHeight: 1.5, color: "var(--app-text-sub)" }}>{t.ctaBody}</p>
+          <AppBtn as={Link} href="/events/new" variant="gold" size="lg" style={{ width: "100%", marginTop: 18, minHeight: 56, borderRadius: 17, fontSize: 17, gap: 8 }}>
+            <Plus size={20} aria-hidden /> {a.planNewEvent}
+          </AppBtn>
+          <Link
+            href="/join"
+            style={{ marginTop: 4, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontSize: 15, fontWeight: 600, color: "var(--app-purple)", textUnderlineOffset: 3 }}
+          >
+            <Key size={15} aria-hidden /> {t.haveCode}
           </Link>
-        </div>
+        </section>
       )}
 
-      {/* ── Add-another nudge ────────────────────────────────────── */}
-      {!isEmpty && (
-        <div>
-          <SectionMark n="02" label={ui.dashboard.addAnother} />
-          <div style={{ marginTop: 22, position: 'relative' }}>
-            {/* Washi tape */}
-            <div aria-hidden style={{ position: 'absolute', top: -8, left: '33%', width: 64, height: 14, background: 'rgba(212,168,67,0.48)', border: '0.5px solid rgba(212,168,67,0.6)', transform: 'rotate(-3deg)', boxShadow: '0 2px 6px rgba(0,0,0,0.22)', zIndex: 2, borderRadius: 2, pointerEvents: 'none' }} />
-            {/* Polaroid card */}
-            <div style={{ position: 'relative', background: '#f4f0ea', borderRadius: 2, boxShadow: '0 8px 28px rgba(0,0,0,0.42), 0 2px 6px rgba(0,0,0,0.2)', transform: 'rotate(-0.5deg)', padding: '16px 100px 20px 16px' }}>
-              {/* Camera mascot */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/mascot/aurora_camera.png" alt="" style={{ position: 'absolute', top: '50%', right: 0, width: 112, height: 112, objectFit: 'contain', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-              <div style={{ fontFamily: FS, fontStyle: 'italic', fontWeight: 700, fontSize: 17, color: '#2a1d0f', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
-                {ui.dashboard.oneMoreHeading}
-              </div>
-              <p style={{ marginTop: 6, fontSize: 11, color: 'rgba(60,40,20,0.55)', fontFamily: FB, lineHeight: 1.45, margin: '6px 0 0' }}>
-                {ui.dashboard.moreHint}
-              </p>
-              <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-                <Link href="/join" style={{ background: 'transparent', border: `1px solid ${PURPLE}80`, color: PURPLE, padding: '6px 11px', borderRadius: 8, fontFamily: FB, fontSize: 11.5, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none' }}>
-                  <Key size={12} /> {ui.dashboard.joinWithCode}
-                </Link>
-                <Link href="/events/new" style={{ background: PURPLE, border: 'none', color: '#fff', padding: '6px 11px', borderRadius: 8, fontFamily: FB, fontSize: 11.5, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none' }}>
-                  <Plus size={12} /> {ui.dashboard.createEvent}
-                </Link>
-              </div>
-            </div>
-          </div>
-          <div style={{ marginTop: 20, textAlign: 'center', fontFamily: FS, fontStyle: 'italic', fontSize: 11.5, color: MUTED_T }}>
-            Vol. I · Calisto
-          </div>
-        </div>
+      {/* ── Coming up ── */}
+      {planned.length > 0 && (
+        <section aria-labelledby="planned-title">
+          <h2 id="planned-title" style={{ ...titleStyle, margin: "30px 0 4px", fontSize: 24 }}>{t.planned}</h2>
+          <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+            {planned.map((e, i) => {
+              const days = daysUntilEvent(e.event_date);
+              const when = getEventPhase(e.event_date) === "during" ? a.happeningNow : whenText(days);
+              const dateLine =
+                e.membershipRole === "guest"
+                  ? `${ui.dashboard.roleGuest} · ${fmt(e.event_date, { weekday: "long", day: "numeric", month: "long" })} · ${when}`
+                  : days <= SOON_DAYS
+                    ? `${fmt(e.event_date, { weekday: "long", day: "numeric", month: "long" })} · ${when}`
+                    : `${fmt(e.event_date, { month: "long", year: "numeric" })} · ${t.qrReady}`;
+              return (
+                <li key={e.id} style={{ borderTop: i > 0 ? "1px solid var(--app-border)" : "none" }}>
+                  <Link href={eventHref(e)} style={rowStyle}>
+                    <span
+                      aria-hidden
+                      style={{ width: 56, height: 60, flexShrink: 0, borderRadius: 12, background: "var(--app-surface)", border: "1px solid var(--app-border-strong)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}
+                    >
+                      <span style={{ fontFamily: SERIF, fontSize: 26, lineHeight: 1, color: GOLD_INK }}>{fmt(e.event_date, { day: "numeric" }).replace(".", "")}</span>
+                      <span style={{ marginTop: 2, fontSize: 12, fontWeight: 700, color: "var(--app-muted)" }}>{fmt(e.event_date, { month: "short" }).replace(".", "")}</span>
+                    </span>
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span style={{ display: "block", fontFamily: SERIF, fontSize: 21, lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nameOf(e)}</span>
+                      <span style={subStyle}>{dateLine}</span>
+                    </span>
+                    <Chevron />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       )}
+
+      {/* ── Memories: past events as albums ── */}
+      {latest && (
+        <section aria-labelledby="memories-title">
+          <div style={{ margin: "30px 0 0", display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+            <h2 id="memories-title" style={{ ...titleStyle, fontSize: 30 }}>{t.memoriesTitle}</h2>
+            <span style={{ fontSize: 14, color: "var(--app-muted)" }}>{plural(locale, past.length, t.albums)}</span>
+          </div>
+
+          <Link href={eventHref(latest)} style={{ display: "block", marginTop: 14, textDecoration: "none", color: "var(--app-text)" }}>
+            {prints(latest, STACK3, 206)}
+            <span style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, marginTop: 12 }}>
+              <span style={{ fontFamily: SERIF, fontSize: 25, lineHeight: 1.05, minWidth: 0 }}>{nameOf(latest)}</span>
+              <span style={{ fontSize: 14, color: "var(--app-muted)", whiteSpace: "nowrap" }}>{fmt(latest.event_date, { month: "long", year: "numeric" })}</span>
+            </span>
+            <span style={{ display: "block", marginTop: 4, fontSize: 14, color: "var(--app-text-sub)" }}>
+              {albumLine(latest)}
+            </span>
+            {deadlineChip(latest)}
+          </Link>
+
+          {older.length > 0 && (
+            <ul style={{ listStyle: "none", margin: "26px 0 0", padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "22px 16px" }}>
+              {older.map((e) => (
+                <li key={e.id}>
+                  <Link href={eventHref(e)} style={{ display: "block", textDecoration: "none", color: "var(--app-text)" }}>
+                    {prints(e, STACK2, 150)}
+                    <span style={{ display: "block", marginTop: 8, fontFamily: SERIF, fontSize: 20, lineHeight: 1.1 }}>{nameOf(e)}</span>
+                    <span style={{ display: "block", marginTop: 2, fontSize: 13, color: "var(--app-muted)" }}>
+                      {memoriesText(e)} · {fmt(e.event_date, { month: "long", year: "numeric" })}
+                    </span>
+                    {deadlineChip(e)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
     </div>
   );
 }
