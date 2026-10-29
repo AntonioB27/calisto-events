@@ -80,19 +80,6 @@ function TabsInner({
   const isHome = selectedTab === "overview";
   const locale = bcp47FromUiLocale(ui.locale);
 
-  const [pendingTab, setPendingTab] = useState<EventAdminTabId | null>(null);
-  useEffect(() => { setPendingTab(null); }, [selectedTab]);
-
-  const [isDark, setIsDark] = useState(false);
-  useEffect(() => {
-    setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
-    const obs = new MutationObserver(() => {
-      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
-    });
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    return () => obs.disconnect();
-  }, []);
-
   // Home: the slim bar slides in once the cover has scrolled under it (same as the guest album).
   const coverRef = useRef<HTMLElement>(null);
   const [pastCover, setPastCover] = useState(false);
@@ -176,7 +163,32 @@ function TabsInner({
       <div className="guest-album-bar event-bar">{barInner}</div>
     )}
 
-    {/* ── Floating warm-glass bottom nav — mobile only; desktop uses the shell's top nav ── */}
+    <EventBottomNav eventId={eventId} selectedTab={selectedTab} albumBadge={showAlbumBadge ? pendingReviewCount : null} />
+    </>
+  );
+}
+
+/** Floating warm-glass bottom nav, mobile only; desktop uses the shell's top nav. Also used by the print screen. */
+export function EventBottomNav({
+  eventId,
+  selectedTab,
+  albumBadge = null,
+}: Readonly<{ eventId: string; selectedTab: EventAdminTabId; albumBadge?: number | null }>) {
+  const ui = useAppUi();
+  const [pendingTab, setPendingTab] = useState<EventAdminTabId | null>(null);
+  useEffect(() => { setPendingTab(null); }, [selectedTab]);
+
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    const obs = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
+
+  return (
     <nav
       aria-label={ui.eventNav.tabsAria}
       className="grid md:hidden"
@@ -205,7 +217,7 @@ function TabsInner({
         const active = id === selectedTab;
         const pending = !active && pendingTab === id;
         const text = label(ui);
-        const badge = id === "gallery" && showAlbumBadge ? pendingReviewCount : null;
+        const badge = id === "gallery" ? albumBadge : null;
         return (
           <Link
             key={id}
@@ -252,7 +264,6 @@ function TabsInner({
         );
       })}
     </nav>
-    </>
   );
 }
 

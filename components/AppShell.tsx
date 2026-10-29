@@ -103,8 +103,8 @@ function AppShellInner({ userName, userInitial, children }: AppShellProps) {
   const eventMatch = pathname.match(/^\/events\/([^/]+)/);
   const isEventScreen = Boolean(eventMatch && eventMatch[1] !== "new");
   const eventId = isEventScreen ? eventMatch![1] : null;
-  // Phones: the event's own glass bar is the only top bar on /events/[id] (not its print subpages).
-  const isEventDetail = isEventScreen && /^\/events\/[^/]+\/?$/.test(pathname);
+  // Phones: the event's own glass bar (or the print toolbar) is the only top bar on /events/[id] and its print screen.
+  const isEventDetail = isEventScreen && /^\/events\/[^/]+(\/print)?\/?$/.test(pathname);
 
   return (
     <div className="app-shell flex flex-col">

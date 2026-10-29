@@ -2978,270 +2978,146 @@
   .ps-print-layout .qr-themed-desktop-only { display: block !important; }
 }
 
-/* ── Full-screen shell ───────────────────────────────────────────── */
-.ps-ui {
-  display: flex;
-  flex-direction: column;
-  min-height: 100svh;
-  background: transparent;
+/* ── Screen UI: slim event bar, card stage, theme strip, dock (mobile first) ── */
+.ps-ui { display: flex; flex-direction: column; }
+
+/* Full bleed; clipped sideways only, so the peeking cards stop at the screen edge but shadows and glow fall freely */
+.ps-stage { position: relative; height: 340px; margin: 0 -16px; overflow-x: clip; }
+.ps-stage__glow {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 420px;
+  height: 380px;
+  margin-left: -210px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(245, 199, 107, 0.5), rgba(245, 199, 107, 0));
+  pointer-events: none;
 }
-
-/* Header removed — back button lives in the action bar now */
-
-/* ── Preview stage ──────────────────────────────────────────────── */
-.ps-stage {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  background: transparent;
-  overflow: hidden;
-  padding: max(16px, env(safe-area-inset-top, 16px)) 20px 16px;
-  min-height: 0;
-}
-
+html[data-theme="dark"] .ps-stage__glow { background: radial-gradient(closest-side, rgba(240, 179, 75, 0.22), rgba(240, 179, 75, 0)); }
+.ps-stage__card { position: absolute; left: 50%; top: 18px; z-index: 1; transform: translateX(-50%); touch-action: pan-y; }
 .ps-card-shadow {
   border-radius: 6px;
   overflow: hidden;
-  box-shadow:
-    0 1px 2px rgba(80, 60, 30, 0.18),
-    0 26px 44px -20px rgba(80, 55, 20, 0.45);
+  box-shadow: 0 1px 2px rgba(80, 60, 30, 0.18), 0 26px 44px -20px rgba(80, 55, 20, 0.5);
 }
-
-.ps-chip {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid #E2D8C8;
-  padding: 7px 13px;
-  border-radius: 30px;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-.ps-chip__dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #C5922A;
-  flex-shrink: 0;
-  display: inline-block;
-}
-
-.ps-chip__text {
-  font-size: 12.5px;
-  color: #6f614c;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  white-space: nowrap;
-}
-
-/* ── Options panel ──────────────────────────────────────────────── */
-.ps-panel {
-  background: #FBF8F3;
-  border-top-left-radius: 26px;
-  border-top-right-radius: 26px;
-  box-shadow: 0 -10px 30px -18px rgba(60, 40, 10, 0.25);
-  flex-shrink: 0;
-  padding: 0 18px max(30px, env(safe-area-inset-bottom, 30px));
-}
-
-/* Extra bottom padding on mobile to clear the floating nav pill */
-@media (max-width: 767px) {
-  .ps-panel {
-    padding-bottom: max(108px, calc(env(safe-area-inset-bottom, 0px) + 108px));
-  }
-}
-
-/* ── Action bar: back · download · print ────────────────────────── */
-.ps-action-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 0 14px;
-  border-bottom: 1px solid #E2D8C8;
-  margin-bottom: 16px;
-}
-
-.ps-action-back {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1.5px solid #E2D8C8;
-  background: #FBF8F3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.ps-action-buttons {
-  display: flex;
-  gap: 8px;
-  flex: 1;
-}
-
-.ps-action-download {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 40px;
-  padding: 0 14px;
-  border-radius: 11px;
-  border: 1.5px solid #E2D8C8;
-  background: #FBF8F3;
-  color: #221509;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  text-decoration: none;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.ps-action-download__text {
-  display: none;
-}
-
-@media (min-width: 400px) {
-  .ps-action-download__text {
-    display: inline;
-  }
-}
-
-.ps-action-print {
-  flex: 1;
-  height: 40px;
-  border-radius: 11px;
+.ps-peek {
+  position: absolute;
+  top: 52px;
+  padding: 0;
   border: none;
+  border-radius: 6px;
+  overflow: hidden;
+  background: none;
+  opacity: 0.9;
   cursor: pointer;
-  background: linear-gradient(180deg, #C5922A, #A8791D);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  font-family: inherit;
+  box-shadow: 0 16px 30px -14px rgba(60, 35, 10, 0.55);
+}
+.ps-peek--prev { left: calc(50% - 327px); transform: rotate(-5deg); }
+.ps-peek--next { left: calc(50% + 151px); transform: rotate(5deg); }
+.ps-stage__aurora { position: absolute; left: calc(50% + 97px); bottom: 0; z-index: 2; pointer-events: none; }
+
+/* Switching designs: the new card slides in from the side you are heading to; peeks and name fade in */
+.ps-card-in { animation: ps-card-in 440ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.ps-card-in--next { --ps-from-x: 64px; --ps-from-r: 6deg; }
+.ps-card-in--prev { --ps-from-x: -64px; --ps-from-r: -6deg; }
+@keyframes ps-card-in {
+  from { opacity: 0; transform: translateX(var(--ps-from-x, 64px)) rotate(var(--ps-from-r, 6deg)) scale(0.95); }
+  to { opacity: 1; transform: none; }
+}
+.ps-peek__in { display: block; animation: ps-fade-in 360ms ease-out both; }
+@keyframes ps-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ps-name-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Theme name with previous / next */
+.ps-caption { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 480px; margin: 6px auto 0; }
+.ps-caption__text { flex: 1; min-width: 0; text-align: center; }
+.ps-caption__name { display: block; font-family: var(--font-display); font-size: 26px; line-height: 1; color: var(--app-text); animation: ps-name-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.ps-caption__count { display: block; margin-top: 4px; font-size: 13px; color: var(--app-muted); }
+
+/* Theme carousel on an arc: snaps to the middle; JS sets --s (-1 left edge .. 1 right edge) and --d = |--s| on each thumb */
+.ps-rail {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 7px;
-  box-shadow: 0 4px 14px -4px rgba(168, 121, 29, 0.55);
-}
-
-.ps-section-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  padding: 0 2px;
-}
-
-.ps-section-label {
-  font-size: 12px;
-  letter-spacing: 1.5px;
-  color: #9A8570;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.ps-active-name {
-  font-size: 13px;
-  color: #221509;
-  font-weight: 600;
-}
-
-/* ── Theme rail ─────────────────────────────────────────────────── */
-.ps-rail {
-  display: flex;
-  gap: 12px;
+  gap: 4px;
   overflow-x: auto;
-  padding: 2px 4px 10px;
-  margin-bottom: 4px;
-  -ms-overflow-style: none;
+  margin: 8px -16px 0;
+  padding: 12px calc(50% - 26px) 30px;
+  scroll-snap-type: x mandatory;
   scrollbar-width: none;
+  overscroll-behavior-x: contain;
 }
 .ps-rail::-webkit-scrollbar { display: none; }
-
 .ps-rail-btn {
   flex-shrink: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
   padding: 0;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.ps-rail-frame {
-  border-radius: 9px;
-  overflow: hidden;
-  outline: 1px solid #E2D8C8;
-  outline-offset: 0;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
-  transition: outline 0.15s, outline-offset 0.15s, box-shadow 0.15s;
-}
-
-.ps-rail-frame--active {
-  outline: 2.5px solid #C5922A;
-  outline-offset: 2px;
-  box-shadow: 0 6px 14px -6px rgba(168, 121, 29, 0.5);
-}
-
-.ps-rail-label {
-  font-size: 11px;
-  font-weight: 500;
-  color: #9A8570;
-  white-space: nowrap;
-}
-
-.ps-rail-label--active {
-  font-weight: 700;
-  color: #221509;
-}
-
-/* ── Paper size toggle ──────────────────────────────────────────── */
-.ps-paper-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 14px 2px 16px;
-}
-
-.ps-paper-toggle {
-  display: flex;
-  background: #ECE4D9;
-  border-radius: 11px;
-  padding: 3px;
-  gap: 2px;
-}
-
-.ps-paper-btn {
   border: none;
+  border-radius: 5px;
+  background: none;
   cursor: pointer;
-  padding: 7px 18px;
-  border-radius: 8px;
+  scroll-snap-align: center;
+  -webkit-tap-highlight-color: transparent;
+  /* y grows with d² so the row bends into an arc; the tilt follows the curve outward */
+  transform:
+    translateY(calc(var(--d, 1) * var(--d, 1) * 34px))
+    rotate(calc(var(--s, 0) * 26deg))
+    scale(calc(1 - var(--d, 1) * 0.32));
+  opacity: calc(1 - var(--d, 1) * 0.5);
+}
+.ps-rail-frame {
+  display: block;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(214, 176, 112, 0.45), 0 8px 14px -8px rgba(60, 35, 10, 0.5);
+  transition: box-shadow 160ms ease-out;
+}
+.ps-rail-btn[aria-pressed="true"] .ps-rail-frame { box-shadow: 0 0 0 2px var(--app-surface), 0 0 0 4px #c9912e, 0 12px 18px -8px rgba(60, 35, 10, 0.5); }
+.ps-rail-btn:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 5px; }
+
+/* Dock: a solid warm panel like the guest upload dock. In flow, not sticky: pinned, it covered the theme strip on short phones. */
+.ps-dock {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 24px;
+  background: rgba(255, 248, 236, 0.96);
+  border: 1px solid rgba(214, 176, 112, 0.5);
+  box-shadow: 0 -10px 34px -12px rgba(90, 60, 20, 0.38), inset 0 1px 0 #fffdf6;
+}
+html[data-theme="dark"] .ps-dock { background: color-mix(in srgb, var(--app-surface) 96%, transparent); border-color: var(--app-border); box-shadow: 0 -10px 34px -12px rgba(0, 0, 0, 0.6); }
+.ps-dock__options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.ps-dock__label { display: block; margin: 0 0 6px 2px; font-size: 13px; font-weight: 600; color: var(--app-text-sub); }
+.ps-dock .app-btn { width: 100%; min-height: 54px; border-radius: 16px; font-size: 17px; gap: 8px; }
+
+/* Segmented switch, same as the guest album's All / Mine */
+.ps-seg { display: flex; padding: 4px; border-radius: 14px; background: rgba(214, 176, 112, 0.24); }
+.ps-seg__btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 6px;
+  border: none;
+  border-radius: 11px;
+  background: transparent;
+  font: inherit;
   font-size: 14px;
   font-weight: 600;
-  font-family: inherit;
-  background: transparent;
-  color: #9A8570;
-  box-shadow: none;
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  color: var(--app-text-sub);
+  text-decoration: none;
+  cursor: pointer;
+}
+.ps-seg__btn[aria-pressed="true"], .ps-seg__btn[aria-current] { background: var(--app-surface); color: var(--app-text); font-weight: 700; box-shadow: 0 4px 10px -4px rgba(90, 60, 20, 0.35); }
+.ps-seg__btn:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 2px; }
+
+@media (min-width: 768px) {
+  .ps-stage, .ps-rail { margin-left: -28px; margin-right: -28px; }
+  .ps-dock { width: 100%; max-width: 480px; margin-left: auto; margin-right: auto; box-sizing: border-box; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ps-rail-frame { transition: none; }
+  .ps-card-in, .ps-peek__in, .ps-caption__name { animation: none; }
 }
 
-.ps-paper-btn--active {
-  background: #FBF8F3;
-  color: #221509;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-}
 
-/* ps-actions / ps-download-btn / ps-print-btn removed — replaced by ps-action-bar */

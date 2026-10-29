@@ -1,0 +1,72 @@
+/* Create-event flow. Shared pieces (.tab-header, .tab-card, .warm-card, .app-switch) live in globals.css. */
+.create-flow { display: flex; flex-direction: column; gap: 14px; }
+.create-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: var(--app-text-sub); }
+.create-note { margin: 0 2px; font-size: 13px; line-height: 1.4; color: var(--app-muted); }
+.create-error { margin: 0; padding: 12px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; color: var(--app-danger); background: color-mix(in srgb, var(--app-danger) 7%, transparent); border: 1px solid color-mix(in srgb, var(--app-danger) 28%, transparent); }
+.create-actions { display: flex; gap: 10px; margin-top: 4px; }
+.create-actions .app-btn { min-height: 56px; border-radius: 17px; font-size: 16px; }
+
+/* Step progress: three gold segments */
+.create-progress { display: flex; gap: 6px; margin: 0 0 22px; }
+.create-progress > span { flex: 1; height: 5px; border-radius: 99px; background: rgba(214, 176, 112, 0.3); }
+.create-progress > span[data-on] { background: linear-gradient(135deg, #f5c76b, #f0b34b 55%, #c9912e); }
+html[data-theme="dark"] .create-progress > span { background: var(--app-border); }
+html[data-theme="dark"] .create-progress > span[data-on] { background: var(--app-gold); }
+
+.create-emoji {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 18px;
+  border: 1.5px solid var(--app-border-strong);
+  background: var(--app-gold-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+}
+.create-emoji:focus-visible, .create-plan:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 2px; }
+
+/* Plan picker */
+.create-plans { display: flex; flex-direction: column; gap: 10px; }
+.create-plan {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: rgba(255, 250, 240, 0.7);
+  border: 1px solid rgba(214, 176, 112, 0.4);
+  font: inherit;
+  text-align: left;
+  color: var(--app-text);
+  cursor: pointer;
+  transition: border-color 160ms ease-out, box-shadow 160ms ease-out, background 160ms ease-out;
+}
+.create-plan[aria-checked="true"] {
+  background: var(--app-surface);
+  border-color: var(--app-gold);
+  box-shadow: 0 0 0 1px var(--app-gold), 0 12px 24px -16px rgba(90, 60, 20, 0.55);
+}
+html[data-theme="dark"] .create-plan { background: var(--app-surface); border-color: var(--app-border); }
+html[data-theme="dark"] .create-plan[aria-checked="true"] { border-color: var(--app-gold); }
+.create-plan__radio { width: 22px; height: 22px; flex-shrink: 0; border-radius: 99px; border: 2px solid var(--app-border-strong); box-sizing: border-box; }
+.create-plan[aria-checked="true"] .create-plan__radio { border: 7px solid var(--app-gold); }
+.create-plan__name { font-family: var(--font-display); font-size: 21px; line-height: 1.1; }
+.create-plan__line { display: block; margin-top: 3px; font-size: 14px; line-height: 1.35; color: var(--app-text-sub); }
+.create-plan__price { flex-shrink: 0; font-family: var(--font-display); font-size: 22px; line-height: 1; color: var(--app-gold-ink); }
+.create-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  vertical-align: 3px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1b1208;
+  background: linear-gradient(135deg, #f5c76b, #f0b34b);
+}
+@media (prefers-reduced-motion: reduce) { .create-plan { transition: none; } }

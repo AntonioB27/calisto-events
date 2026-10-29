@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
-import { AppCard } from "@/components/app-ui/AppCard";
 import { clearCreateEventDraftFromStorage } from "@/lib/create-event-draft";
 import { usePostHog } from "posthog-js/react";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
@@ -68,7 +67,7 @@ export function CompleteCheckoutClient() {
   }, [sessionId, router, ui.locale, posthog]);
 
   return (
-    <AppCard pad="lg" className="mt-8">
+    <div className="tab-card" style={{ marginTop: 14 }}>
       {!sessionId ? (
         <p style={{ margin: 0, fontSize: 14, color: "var(--app-danger)" }}>{ui.stripeComplete.missingSession}</p>
       ) : error ? (
@@ -87,8 +86,8 @@ export function CompleteCheckoutClient() {
           </div>
         </>
       ) : (
-        <p style={{ margin: 0, fontSize: 14, color: "var(--app-muted)" }}>{ui.stripeComplete.finalizing}</p>
+        <p style={{ margin: 0, fontSize: 15, color: "var(--app-muted)" }} aria-live="polite">{ui.stripeComplete.finalizing}</p>
       )}
-    </AppCard>
+    </div>
   );
 }

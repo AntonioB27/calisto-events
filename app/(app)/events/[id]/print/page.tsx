@@ -131,20 +131,18 @@ export default async function EventPrintPage({ params, searchParams }: Props) {
     const joinUrl = getWebJoinUrl(publicOrigin, event.access_code);
     const { name: eventDisplayName } = splitEventTitleStored(String(event.title ?? ""));
     return (
-      <div className="join-shell">
-        <PrintScreen
-          eventId={id}
-          eventTitle={eventDisplayName}
-          accessCode={event.access_code}
-          joinUrl={joinUrl}
-          initialTemplate={routeTemplate as QrThemedTemplateId}
-          initialPaper={paper}
-          posterLang={posterLocale}
-          backHref={`/events/${id}?tab=prints`}
-          chromePrint={uiDict.print}
-          posterPrint={posterDict.print}
-        />
-      </div>
+      <PrintScreen
+        eventId={id}
+        eventTitle={eventDisplayName}
+        accessCode={event.access_code}
+        joinUrl={joinUrl}
+        initialTemplate={routeTemplate as QrThemedTemplateId}
+        initialPaper={paper}
+        posterLang={posterLocale}
+        backHref={`/events/${id}?tab=prints`}
+        chromePrint={uiDict.print}
+        posterPrint={posterDict.print}
+      />
     );
   }
 

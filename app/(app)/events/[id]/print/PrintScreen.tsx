@@ -2,25 +2,18 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Home, Users, Images, Camera } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 
+import { useAppUi } from "@/components/AppUiProvider";
+import { AppBtn } from "@/components/app-ui/AppBtn";
+import { Aurora } from "@/components/app-ui/Aurora";
 import type { AppUiDict } from "@/lib/app-ui/en";
 import { interpolate } from "@/lib/app-ui";
 import type { PrintPaperId } from "@/lib/event-print/print-options";
 import { LOCALES, type Locale } from "@/lib/i18n";
 import { QR_THEMED_PRINT_TEMPLATE_IDS, type QrThemedTemplateId } from "@/lib/event-print/template-catalog";
+import { EventBottomNav } from "../_tabs/EventAdminTabs";
 import { pickQrCard, QrThemedPrintSheet, buildQrCardCopy } from "./QrThemedPrintSheet";
-
-// ── Calisto warm palette ──────────────────────────────────────────────────────
-const C = {
-  bg:      "#ECE4D9",
-  surface: "#FBF8F3",
-  text:    "#221509",
-  muted:   "#9A8570",
-  gold:    "#C5922A",
-  goldDk:  "#A8791D",
-  line:    "#E2D8C8",
-} as const;
 
 // ── Scaled card thumbnail ─────────────────────────────────────────────────────
 function CardThumb({
@@ -47,105 +40,6 @@ function CardThumb({
         {pickQrCard(templateId, { eventTitle, accessCode, joinUrl, copy })}
       </div>
     </div>
-  );
-}
-
-// ── Icons ─────────────────────────────────────────────────────────────────────
-function ChevronIcon() {
-  return (
-    <svg width="10" height="16" viewBox="0 0 10 16" fill="none" aria-hidden="true">
-      <path d="M8 1 1.5 8 8 15" stroke={C.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function DownloadIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 19h16" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-// ── Mobile bottom nav (mirrors EventAdminTabs, prints = active) ───────────────
-const NAV_TABS = [
-  { id: "overview", Icon: Home,   label: "Home"    },
-  { id: "guests",   Icon: Users,  label: "Guests"  },
-  { id: "gallery",  Icon: Images, label: "Gallery" },
-  { id: "prints",   Icon: Camera, label: "Prints"  },
-] as const;
-
-function MobileNav({ eventId }: { eventId: string }) {
-  return (
-    <nav
-      aria-label="Event navigation"
-      className="flex md:hidden print:hidden"
-      style={{
-        position: "fixed",
-        left: 18, right: 18,
-        bottom: "calc(20px + env(safe-area-inset-bottom, 0px))",
-        background: "rgba(255,252,248,0.38)",
-        backdropFilter: "blur(48px) saturate(180%) brightness(1.04)",
-        WebkitBackdropFilter: "blur(48px) saturate(180%) brightness(1.04)",
-        borderRadius: 28,
-        padding: 5,
-        border: "1px solid rgba(255,255,255,0.38)",
-        boxShadow: [
-          "0 16px 40px rgba(0,0,0,0.28)",
-          "0 4px 12px rgba(0,0,0,0.14)",
-          "inset 0 1.5px 0 rgba(255,255,255,0.72)",
-          "inset 0 -1px 0 rgba(255,255,255,0.10)",
-        ].join(", "),
-        gap: 4,
-        zIndex: 100,
-      }}
-    >
-      {NAV_TABS.map(({ id, Icon, label }) => {
-        const active = id === "prints";
-        return (
-          <Link
-            key={id}
-            href={`/events/${eventId}?tab=${id}`}
-            role="tab"
-            aria-selected={active}
-            aria-current={active ? "page" : undefined}
-            aria-label={label}
-            style={{
-              flex: active ? 1.4 : 1,
-              background: active ? "rgba(255,252,248,0.52)" : "transparent",
-              borderRadius: 22,
-              padding: "9px 6px",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-              boxShadow: active ? [
-                "0 2px 10px rgba(0,0,0,0.18)",
-                "inset 0 1.5px 0 rgba(255,255,255,0.95)",
-                "inset 0 -0.5px 0 rgba(0,0,0,0.06)",
-              ].join(", ") : "none",
-              transition: "flex 200ms ease",
-              textDecoration: "none",
-              outline: "none",
-            }}
-          >
-            <Icon size={18} color={active ? "#946C18" : "#5A4A36"} strokeWidth={active ? 2.2 : 1.7} />
-            {active && (
-              <span style={{
-                fontFamily: "'DM Serif Display', serif",
-                fontStyle: "italic",
-                fontWeight: 400,
-                fontSize: 14.7,
-                letterSpacing: "-0.005em",
-                color: C.text,
-                whiteSpace: "nowrap",
-              }}>
-                {label}
-              </span>
-            )}
-          </Link>
-        );
-      })}
-    </nav>
   );
 }
 
@@ -176,22 +70,103 @@ export function PrintScreen({
   posterPrint,
 }: PrintScreenProps) {
   const [selected, setSelected] = useState<QrThemedTemplateId>(initialTemplate);
+  // Which way the last change went; the new card slides in from that side.
+  const [dir, setDir] = useState<1 | -1>(1);
   const [paper, setPaper] = useState<PrintPaperId>(initialPaper);
   const [pdfDownloading, setPdfDownloading] = useState(false);
+  const ui = useAppUi();
   const p = chromePrint;
   const railRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const cardRef = useRef<HTMLDivElement>(null);
   const activeIdx = QR_THEMED_PRINT_TEMPLATE_IDS.indexOf(selected);
+  const total = QR_THEMED_PRINT_TEMPLATE_IDS.length;
+  const themeAt = (offset: number) => QR_THEMED_PRINT_TEMPLATE_IDS[(activeIdx + offset + total) % total];
+  const touchX = useRef<number | null>(null);
   const copy = buildQrCardCopy(selected, posterPrint);
+  const selectedRef = useRef(selected);
+  // Set when the strip itself picked the theme (so it must not be scrolled again).
+  const fromRail = useRef(false);
+  // True while the strip glides to a theme picked elsewhere; it picks nothing on the way.
+  const autoScroll = useRef(false);
+
+  const go = (id: QrThemedTemplateId, d: 1 | -1) => {
+    selectedRef.current = id;
+    setDir(d);
+    setSelected(id);
+  };
 
   useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
+
+  useEffect(() => {
+    if (fromRail.current) {
+      fromRail.current = false;
+      return;
+    }
     const rail = railRef.current;
     const btn = btnRefs.current[activeIdx];
     if (!rail || !btn) return;
-    const target = btn.offsetLeft - rail.clientWidth / 2 + btn.offsetWidth / 2;
-    rail.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+    const target = Math.max(0, btn.offsetLeft - rail.clientWidth / 2 + btn.offsetWidth / 2);
+    if (Math.abs(target - rail.scrollLeft) < 1) return;
+    autoScroll.current = true;
+    rail.scrollTo({ left: target, behavior: "smooth" });
   }, [activeIdx]);
+
+  // Theme carousel on an arc: thumbs drop, tilt outward, shrink and fade with distance from the
+  // middle; while you swipe, whichever thumb crosses the middle becomes the chosen theme.
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const centreOf = (btn: HTMLElement) => btn.offsetLeft + btn.offsetWidth / 2;
+    const pick = () => {
+      const mid = rail.scrollLeft + rail.clientWidth / 2;
+      let best = -1;
+      let bestDist = Infinity;
+      btnRefs.current.forEach((btn, i) => {
+        const dist = btn ? Math.abs(centreOf(btn) - mid) : Infinity;
+        if (dist < bestDist) { bestDist = dist; best = i; }
+      });
+      const id = QR_THEMED_PRINT_TEMPLATE_IDS[best];
+      if (best < 0 || id === selectedRef.current) return;
+      const d = best > QR_THEMED_PRINT_TEMPLATE_IDS.indexOf(selectedRef.current) ? 1 : -1;
+      fromRail.current = true;
+      selectedRef.current = id;
+      setDir(d);
+      setSelected(id);
+    };
+    const paint = () => {
+      const mid = rail.scrollLeft + rail.clientWidth / 2;
+      for (const btn of btnRefs.current) {
+        if (!btn) continue;
+        const side = Math.max(-1, Math.min(1, (centreOf(btn) - mid) / (rail.clientWidth / 2)));
+        btn.style.setProperty("--s", side.toFixed(3));
+        btn.style.setProperty("--d", Math.abs(side).toFixed(3));
+      }
+      if (!autoScroll.current) pick();
+    };
+    let frame = 0;
+    let settle = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(paint);
+      window.clearTimeout(settle);
+      settle = window.setTimeout(() => {
+        autoScroll.current = false;
+        pick();
+      }, 140);
+    };
+    paint();
+    rail.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", paint);
+    return () => {
+      rail.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", paint);
+      cancelAnimationFrame(frame);
+      window.clearTimeout(settle);
+    };
+  }, []);
 
   const thumbProps = { eventTitle, accessCode, joinUrl, posterPrint };
 
@@ -223,11 +198,10 @@ export function PrintScreen({
         ...(fontEmbedCSS ? { fontEmbedCSS } : {}),
       });
 
-      const A4_W = 210;
-      const A4_H = 297;
+      const [pageW, pageH] = paper === "letter" ? [215.9, 279.4] : [210, 297];
       const margin = 10;
-      const maxW = A4_W - 2 * margin;
-      const maxH = A4_H - 2 * margin;
+      const maxW = pageW - 2 * margin;
+      const maxH = pageH - 2 * margin;
       const aspect = 559 / 793;
       let imgW = maxW;
       let imgH = imgW / aspect;
@@ -236,8 +210,8 @@ export function PrintScreen({
         imgW = imgH * aspect;
       }
 
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      pdf.addImage(dataUrl, "PNG", (A4_W - imgW) / 2, (A4_H - imgH) / 2, imgW, imgH);
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: paper });
+      pdf.addImage(dataUrl, "PNG", (pageW - imgW) / 2, (pageH - imgH) / 2, imgW, imgH);
 
       const slug = eventTitle
         .toLowerCase()
@@ -249,7 +223,7 @@ export function PrintScreen({
     } finally {
       setPdfDownloading(false);
     }
-  }, [pdfDownloading, selected, eventTitle]);
+  }, [pdfDownloading, selected, eventTitle, paper]);
 
   const themeLabel = (tid: QrThemedTemplateId): string => ({
     "qr-simple":     p.templateQrSimple,
@@ -274,105 +248,125 @@ export function PrintScreen({
     <>
       {/* ── Screen UI (hidden on @media print) ───────────────────── */}
       <div className="ps-ui print:hidden">
-
-        {/* Preview stage — bigger card, tight padding */}
-        <div className="ps-stage">
-          <div className="ps-card-shadow">
-            <CardThumb templateId={selected} w={300} {...thumbProps} />
-          </div>
-        </div>
-
-        {/* Options panel */}
-        <div className="ps-panel">
-
-          {/* ── Action bar: back | download | print ── */}
-          <div className="ps-action-bar">
-            <Link href={backHref} className="ps-action-back" aria-label={p.backPrints}>
-              <ChevronIcon />
+        <div className="guest-album-bar event-bar">
+          <div className="guest-album-bar__inner">
+            <Link href={backHref} aria-label={p.backPrints.replace(/^←\s*/, "")} className="guest-cover-btn guest-cover-btn--round guest-cover-btn--solid">
+              <ChevronLeft size={20} strokeWidth={2.2} aria-hidden />
             </Link>
-            <div className="ps-action-buttons">
-              <button
-                type="button"
-                onClick={handleDownloadPdf}
-                className="ps-action-print"
-                disabled={pdfDownloading}
-              >
-                {pdfDownloading ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ animation: "spin 0.9s linear infinite" }}>
-                    <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeDasharray="28 56" strokeLinecap="round" />
-                  </svg>
-                ) : (
-                  <DownloadIcon />
-                )}
-                {p.downloadPdf}
-              </button>
+            <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+              <span className="event-bar__title">{ui.printsTab.qrCardsTitle}</span>
+              <span className="event-bar__line">{eventTitle}</span>
             </div>
           </div>
-
-          {/* Theme rail */}
-          <div className="ps-section-header">
-            <span className="ps-section-label">{p.printThemeLabel}</span>
-            <span className="ps-active-name">{themeLabel(selected)}</span>
-          </div>
-          <div ref={railRef} className="ps-rail">
-            {QR_THEMED_PRINT_TEMPLATE_IDS.map((tid, i) => (
-              <button
-                key={tid}
-                ref={el => { btnRefs.current[i] = el; }}
-                onClick={() => setSelected(tid)}
-                className="ps-rail-btn"
-                aria-pressed={tid === selected}
-                aria-label={themeLabel(tid)}
-              >
-                <div className={`ps-rail-frame${tid === selected ? " ps-rail-frame--active" : ""}`}>
-                  <CardThumb templateId={tid} w={52} {...thumbProps} />
-                </div>
-                <span className={`ps-rail-label${tid === selected ? " ps-rail-label--active" : ""}`}>
-                  {themeLabel(tid)}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Paper size */}
-          <div className="ps-paper-row">
-            <span className="ps-section-label">{p.paperSectionLabel}</span>
-            <div className="ps-paper-toggle">
-              {(["a4", "letter"] as const).map((sz) => (
-                <button
-                  key={sz}
-                  onClick={() => setPaper(sz)}
-                  className={`ps-paper-btn${paper === sz ? " ps-paper-btn--active" : ""}`}
-                >
-                  {sz === "a4" ? "A4" : "Letter"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Card language */}
-          <div className="ps-paper-row">
-            <span className="ps-section-label">{p.posterLanguageLabel}</span>
-            <div className="ps-paper-toggle">
-              {LOCALES.map((loc) => (
-                <Link
-                  key={loc}
-                  href={`/events/${eventId}/print?template=${selected}&paper=${paper}&posterLang=${loc}`}
-                  prefetch={false}
-                  className={`ps-paper-btn${loc === posterLang ? " ps-paper-btn--active" : ""}`}
-                  style={{ textDecoration: "none" }}
-                >
-                  {loc.toUpperCase()}
-                </Link>
-              ))}
-            </div>
-          </div>
-
         </div>
+
+        {/* The card on a warm glow; neighbouring themes peek in from the sides */}
+        <div className="ps-stage">
+          <span className="ps-stage__glow" aria-hidden />
+          {([-1, 1] as const).map((d) => (
+            <button
+              key={d}
+              type="button"
+              tabIndex={-1}
+              aria-hidden
+              className={`ps-peek ps-peek--${d < 0 ? "prev" : "next"}`}
+              onClick={() => go(themeAt(d), d)}
+            >
+              <span key={themeAt(d)} className="ps-peek__in">
+                <CardThumb templateId={themeAt(d)} w={176} {...thumbProps} />
+              </span>
+            </button>
+          ))}
+          <div
+            className="ps-stage__card"
+            onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
+            onTouchEnd={(e) => {
+              const start = touchX.current;
+              touchX.current = null;
+              if (start === null) return;
+              const dx = e.changedTouches[0].clientX - start;
+              if (Math.abs(dx) > 40) go(themeAt(dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+            }}
+          >
+            <div key={selected} className={`ps-card-shadow ps-card-in ps-card-in--${dir > 0 ? "next" : "prev"}`}>
+              <CardThumb templateId={selected} w={216} {...thumbProps} />
+            </div>
+          </div>
+          <Aurora pose="qr" size={92} className="ps-stage__aurora" />
+        </div>
+
+        <div className="ps-caption">
+          <button type="button" className="guest-cover-btn guest-cover-btn--round guest-cover-btn--solid" aria-label={ui.printsTab.inviteCarouselPrev} onClick={() => go(themeAt(-1), -1)}>
+            <ChevronLeft size={20} strokeWidth={2.2} aria-hidden />
+          </button>
+          <div className="ps-caption__text" aria-live="polite">
+            <span key={selected} className="ps-caption__name">{themeLabel(selected)}</span>
+            <span className="ps-caption__count">
+              {interpolate(ui.printsTab.inviteCarouselCounter, { current: activeIdx + 1, total })}
+            </span>
+          </div>
+          <button type="button" className="guest-cover-btn guest-cover-btn--round guest-cover-btn--solid" aria-label={ui.printsTab.inviteCarouselNext} onClick={() => go(themeAt(1), 1)}>
+            <ChevronRight size={20} strokeWidth={2.2} aria-hidden />
+          </button>
+        </div>
+
+        <div ref={railRef} className="ps-rail">
+          {QR_THEMED_PRINT_TEMPLATE_IDS.map((tid, i) => (
+            <button
+              key={tid}
+              ref={el => { btnRefs.current[i] = el; }}
+              type="button"
+              onClick={() => { if (i !== activeIdx) go(tid, i > activeIdx ? 1 : -1); }}
+              className="ps-rail-btn"
+              aria-pressed={tid === selected}
+              aria-label={themeLabel(tid)}
+            >
+              <span className="ps-rail-frame">
+                <CardThumb templateId={tid} w={52} {...thumbProps} />
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Dock: paper and card language, then the one action */}
+        <section className="ps-dock">
+          <div className="ps-dock__options">
+            <div>
+              <span id="ps-paper-label" className="ps-dock__label">{p.paperSectionLabel}</span>
+              <div className="ps-seg" role="group" aria-labelledby="ps-paper-label">
+                {(["a4", "letter"] as const).map((sz) => (
+                  <button key={sz} type="button" onClick={() => setPaper(sz)} aria-pressed={paper === sz} className="ps-seg__btn">
+                    {sz === "a4" ? "A4" : "Letter"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <span id="ps-lang-label" className="ps-dock__label">{p.posterLanguageLabel}</span>
+              <div className="ps-seg" role="group" aria-labelledby="ps-lang-label">
+                {LOCALES.map((loc) => (
+                  <Link
+                    key={loc}
+                    href={`/events/${eventId}/print?template=${selected}&paper=${paper}&posterLang=${loc}`}
+                    prefetch={false}
+                    aria-current={loc === posterLang ? "true" : undefined}
+                    className="ps-seg__btn"
+                  >
+                    {loc.toUpperCase()}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+          <AppBtn type="button" variant="gold" size="lg" loading={pdfDownloading} onClick={handleDownloadPdf}>
+            {!pdfDownloading && <Download size={20} strokeWidth={2.2} aria-hidden />}
+            {p.downloadPdf}
+          </AppBtn>
+        </section>
       </div>
 
-      {/* Mobile nav — fixed floating pill, prints tab active */}
-      <MobileNav eventId={eventId} />
+      {/* Prints opens from More, so More is the active tab */}
+      <EventBottomNav eventId={eventId} selectedTab="more" />
 
       {/* Off-screen wrapper keeps the card out of the viewport.
           ref targets the inner div so cloneCSSStyle copies position:static
