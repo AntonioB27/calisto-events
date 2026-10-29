@@ -7,7 +7,8 @@ import { CalendarDays, ChevronRight, Hourglass, QrCode } from "lucide-react";
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { Aurora, AuroraSays, type AuroraPose } from "@/components/app-ui/Aurora";
-import { getEventPhase } from "@/lib/event-phase";
+import { plural } from "@/lib/app-ui/plural";
+import { daysUntilEvent, getEventPhase } from "@/lib/event-phase";
 import { bcp47FromUiLocale } from "@/lib/locale-bcp47";
 import {
   PLAN_ORDER,
@@ -17,6 +18,8 @@ import {
   planRank,
 } from "@/lib/plan-limits";
 import { UpgradeBanner, UpgradeReturnHandler } from "../_components/UpgradePlan";
+import { PrepChecklist } from "./PrepChecklist";
+import type { PrepData } from "./prep-items";
 import "./event-shell.css";
 
 const BTN: React.CSSProperties = { flex: 1, minWidth: 0, height: 50, padding: '0 10px', borderRadius: 15, fontSize: 16 };
@@ -37,6 +40,8 @@ export type OverviewTabProps = Readonly<{
   latestPhotos?: readonly HomePhoto[];
   /** Up to three of the new uploads, shown as small prints in the next-step card. */
   newPhotos?: readonly HomePhoto[];
+  /** Before the event: the prep list replaces the next-step card. Null if it couldn't load. */
+  prep?: PrepData | null;
 }>;
 
 /** Small prints fanned out beside the detail line. */
@@ -120,6 +125,72 @@ function RetentionRows({
   );
 }
 
+// ── Before the event: today, the day, last upload day, keep-until ─────────────
+function AheadTimeline({ eventDate, uploadEndMs, deletionEndMs }: { eventDate: string; uploadEndMs: number | null; deletionEndMs: number | null }) {
+  const ui = useAppUi();
+  const t = ui.soon;
+  const locale = bcp47FromUiLocale(ui.locale);
+  const days = daysUntilEvent(eventDate);
+  const thisYear = new Date().getUTCFullYear();
+  const day = (ms: number, weekday: boolean, timeZone?: string) =>
+    new Date(ms).toLocaleDateString(locale, {
+      ...(weekday ? { weekday: "long" } : {}),
+      day: "numeric",
+      month: "long",
+      ...(new Date(ms).getUTCFullYear() !== thisYear ? { year: "numeric" } : {}),
+      timeZone,
+    });
+  const eventMs = Date.parse(eventDate.slice(0, 10) + "T00:00:00Z");
+  if (Number.isNaN(eventMs)) return null;
+
+  return (
+    <section aria-labelledby="home-ahead-title">
+      <h2 id="home-ahead-title" style={{ margin: '30px 2px 12px', fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 26, color: 'var(--app-text)' }}>
+        {t.aheadTitle}
+      </h2>
+      <ol className="ahead">
+        <li className="ahead__step ahead__step--today">
+          <span aria-hidden className="ahead__rail"><span className="ahead__dot ahead__dot--today" /></span>
+          <div className="ahead__body">
+            <div className="ahead__title">
+              {t.aheadToday}
+              <span className="ahead__here">{t.aheadHere}</span>
+            </div>
+            <p className="ahead__text">{t.aheadTodayBody}</p>
+            <p className="ahead__gap">{days <= 1 ? t.aheadGapTomorrow : plural(locale, days, t.aheadGap)}</p>
+          </div>
+        </li>
+        <li className="ahead__step">
+          <span aria-hidden className="ahead__rail"><span className="ahead__dot ahead__dot--event" /></span>
+          <div className="ahead__body">
+            <div className="ahead__title ahead__title--event">{day(eventMs, true, "UTC")}</div>
+            <p className="ahead__text">{t.aheadEventBody}</p>
+          </div>
+        </li>
+        {uploadEndMs ? (
+          <li className="ahead__step">
+            <span aria-hidden className="ahead__rail"><span className="ahead__dot" /></span>
+            <div className="ahead__body">
+              {/* The window closes at midnight UTC, so the last whole day is the one before. */}
+              <div className="ahead__title">{t.aheadUntil.replace("{date}", day(uploadEndMs - 1, false, "UTC"))}</div>
+              <p className="ahead__text">{t.aheadUploadsBody}</p>
+            </div>
+          </li>
+        ) : null}
+        {deletionEndMs ? (
+          <li className="ahead__step">
+            <span aria-hidden className="ahead__rail"><span className="ahead__dot" /></span>
+            <div className="ahead__body">
+              <div className="ahead__title">{t.aheadUntil.replace("{date}", day(deletionEndMs, false))}</div>
+              <p className="ahead__text">{t.aheadKeptBody}</p>
+            </div>
+          </li>
+        ) : null}
+      </ol>
+    </section>
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export function OverviewTab({
   eventId,
@@ -131,6 +202,7 @@ export function OverviewTab({
   newUploadsCount = 0,
   latestPhotos = [],
   newPhotos = [],
+  prep = null,
 }: OverviewTabProps) {
   const ui = useAppUi();
   const a = ui.aurora;
@@ -186,40 +258,44 @@ export function OverviewTab({
     <div className="welcome-reveal">
       <UpgradeReturnHandler />
 
-      <section aria-label={t.nextStep} className="event-next">
-        <Aurora pose={next.pose} size={96} style={{ position: 'absolute', left: 10, top: -54 }} />
-        <AuroraSays size={20} style={{ paddingLeft: 108, minHeight: 44, display: 'flex', alignItems: 'center', lineHeight: 1.18 }}>
-          {next.say}
-        </AuroraSays>
-        {newPhotos.length > 0 ? (
-          <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div aria-hidden style={{ position: 'relative', width: 132, height: 62, flexShrink: 0 }}>
-              {newPhotos.slice(0, 3).map((p, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={p.id} src={p.src} alt="" className="event-next__print" style={NEW_PRINT_SLOTS[i]} />
-              ))}
+      {phase === "before" && prep ? (
+        <PrepChecklist eventId={eventId} accessCode={accessCode} isPrimaryOrganizer={isPrimaryOrganizer} prep={prep} />
+      ) : (
+        <section aria-label={t.nextStep} className="event-next">
+          <Aurora pose={next.pose} size={96} style={{ position: 'absolute', left: 10, top: -54 }} />
+          <AuroraSays size={20} style={{ paddingLeft: 108, minHeight: 44, display: 'flex', alignItems: 'center', lineHeight: 1.18 }}>
+            {next.say}
+          </AuroraSays>
+          {newPhotos.length > 0 ? (
+            <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div aria-hidden style={{ position: 'relative', width: 132, height: 62, flexShrink: 0 }}>
+                {newPhotos.slice(0, 3).map((p, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={p.id} src={p.src} alt="" className="event-next__print" style={NEW_PRINT_SLOTS[i]} />
+                ))}
+              </div>
+              {detail}
             </div>
-            {detail}
+          ) : (
+            <div style={{ marginTop: 10 }}>{detail}</div>
+          )}
+          <div style={{ marginTop: 14, display: 'flex', gap: 10 }}>
+            <AppBtn as={Link} href={next.primary.href} variant="gold" style={{ ...BTN, fontWeight: 700 }}>
+              {next.primary.label}
+            </AppBtn>
+            {next.secondary &&
+              (next.secondary.external ? (
+                <AppBtn href={next.secondary.href} target="_blank" rel="noopener noreferrer" variant="secondary" style={BTN}>
+                  {next.secondary.label}
+                </AppBtn>
+              ) : (
+                <AppBtn as={Link} href={next.secondary.href} variant="secondary" style={BTN}>
+                  {next.secondary.label}
+                </AppBtn>
+              ))}
           </div>
-        ) : (
-          <div style={{ marginTop: 10 }}>{detail}</div>
-        )}
-        <div style={{ marginTop: 14, display: 'flex', gap: 10 }}>
-          <AppBtn as={Link} href={next.primary.href} variant="gold" style={{ ...BTN, fontWeight: 700 }}>
-            {next.primary.label}
-          </AppBtn>
-          {next.secondary &&
-            (next.secondary.external ? (
-              <AppBtn href={next.secondary.href} target="_blank" rel="noopener noreferrer" variant="secondary" style={BTN}>
-                {next.secondary.label}
-              </AppBtn>
-            ) : (
-              <AppBtn as={Link} href={next.secondary.href} variant="secondary" style={BTN}>
-                {next.secondary.label}
-              </AppBtn>
-            ))}
-        </div>
-      </section>
+        </section>
+      )}
 
       <div className="event-ticket" style={{ marginTop: 16 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -260,7 +336,9 @@ export function OverviewTab({
         </section>
       )}
 
-      {phase !== "before" && (
+      {phase === "before" ? (
+        <AheadTimeline eventDate={eventDate} uploadEndMs={getUploadWindowEndMs({ planId, eventDate })} deletionEndMs={deletionEndMs} />
+      ) : (
         <RetentionRows eventDate={eventDate} planId={planId} deletionEndMs={deletionEndMs} />
       )}
 

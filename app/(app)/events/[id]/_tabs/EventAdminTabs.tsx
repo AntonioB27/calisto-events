@@ -6,6 +6,7 @@ import { ChevronLeft, Ellipsis, Eye, Home, Images, Users } from "lucide-react";
 import { Suspense, useEffect, useRef, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
+import { CoverCountdown } from "@/components/app-ui/CoverCountdown";
 import { plural } from "@/lib/app-ui/plural";
 import { daysUntilEvent, getEventPhase } from "@/lib/event-phase";
 import { bcp47FromUiLocale } from "@/lib/locale-bcp47";
@@ -36,6 +37,8 @@ type EventAdminTabsProps = Readonly<{
   accessCode: string;
   mediaCount?: number;
   guestCount?: number;
+  /** Guests (not organizers) who joined; the save-the-date cover line before the event. */
+  waitingGuests?: number;
   eventDate?: string | null;
   /** Newest photo, signed; Home's cover. */
   coverPhoto?: string | null;
@@ -70,6 +73,7 @@ function TabsInner({
   accessCode,
   mediaCount = 0,
   guestCount = 0,
+  waitingGuests = 0,
   eventDate,
   coverPhoto = null,
   bannerTheme,
@@ -99,8 +103,13 @@ function TabsInner({
   const memoriesLine = mediaCount > 0
     ? [plural(locale, mediaCount, ui.eventsList.memories), guestCount > 0 ? plural(locale, guestCount, ui.eventsList.fromGuests) : null].filter(Boolean).join(" ")
     : null;
+  // Until the event day the cover is a save-the-date; its count already says "in N days".
+  const daysToGo = phase === "before" && eventDate ? daysUntilEvent(eventDate) : NaN;
+  const soon = Number.isFinite(daysToGo);
   // The live pill already says "happening now" on the cover.
-  const coverLine = [dayLabel, memoriesLine ?? (phase === "during" ? null : when)].filter(Boolean).join(" · ");
+  const coverLine = soon
+    ? [dayLabel, waitingGuests > 0 ? plural(locale, waitingGuests, ui.soon.guestsWaiting) : null].filter(Boolean).join(" · ")
+    : [dayLabel, memoriesLine ?? (phase === "during" ? null : when)].filter(Boolean).join(" · ");
   const barLine = [dayLabel, when].filter(Boolean).join(" · ");
 
   const back = BACK_TO_MORE.has(selectedTab)
@@ -128,16 +137,18 @@ function TabsInner({
         </div>
         <header
           ref={coverRef}
-          className={`guest-cover event-cover${coverPhoto ? "" : " guest-cover--empty"}`}
-          style={coverPhoto ? undefined : bannerCoverBackground(bannerTheme)}
+          className={`guest-cover event-cover${soon ? " guest-cover--soon" : coverPhoto ? "" : " guest-cover--empty"}`}
+          style={soon || coverPhoto ? undefined : bannerCoverBackground(bannerTheme)}
         >
-          {coverPhoto ? (
+          {soon ? (
+            <CoverCountdown days={daysToGo} />
+          ) : coverPhoto ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={coverPhoto} alt="" className="guest-cover__photo" />
           ) : (
             <span aria-hidden className="guest-cover__emoji">{eventEmoji}</span>
           )}
-          <div aria-hidden className="guest-cover__shade" />
+          {soon ? null : <div aria-hidden className="guest-cover__shade" />}
           <Link href="/dashboard" className="guest-cover-btn guest-cover__back">
             <ChevronLeft size={20} strokeWidth={2.2} aria-hidden />
             {ui.eventShell.yourEvents}

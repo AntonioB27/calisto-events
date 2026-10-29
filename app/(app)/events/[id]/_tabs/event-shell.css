@@ -41,6 +41,94 @@ html[data-theme="dark"] .event-next { background: color-mix(in srgb, var(--app-s
   box-shadow: 0 8px 14px -8px rgba(60, 35, 10, 0.5);
 }
 
+/* Home before the event: prep checklist inside the next-step panel */
+.prep-progress { margin-top: 10px; padding-right: 112px; display: flex; align-items: center; gap: 10px; }
+.prep-progress__bar { flex: 1; height: 6px; border-radius: 3px; background: rgba(214, 176, 112, 0.28); overflow: hidden; }
+.prep-progress__bar > span { display: block; height: 100%; background: linear-gradient(90deg, #f5c76b, #c9912e); transform-origin: left; transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1); }
+.prep-progress__text { font-size: 13px; font-weight: 700; color: var(--app-gold-ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.prep-list { margin: 14px 0 0; padding: 0; list-style: none; }
+.prep-list--own { margin-top: 2px; }
+.prep-item { min-height: 56px; display: flex; align-items: center; gap: 6px; border-top: 1px solid rgba(214, 176, 112, 0.3); }
+.prep-list--own .prep-item { min-height: 52px; border-top: none; }
+.prep-check { width: 44px; height: 44px; margin-left: -9px; padding: 0; flex-shrink: 0; border: none; background: none; display: flex; align-items: center; justify-content: center; color: #1b1208; cursor: pointer; }
+.prep-check:disabled { cursor: default; }
+.prep-check:focus-visible { outline: 3px solid var(--app-focus); outline-offset: -2px; border-radius: 999px; }
+.prep-check__box {
+  width: 26px;
+  height: 26px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fffaf2;
+  border: 2px solid rgba(180, 138, 48, 0.6);
+  transition: background 160ms ease-out, border-color 160ms ease-out;
+}
+.prep-check[aria-pressed="true"] .prep-check__box { background: linear-gradient(135deg, #f5c76b, #c9912e); border-color: transparent; box-shadow: 0 4px 10px -4px rgba(150, 100, 20, 0.6); }
+.prep-item__text { flex: 1; min-width: 0; padding: 8px 0; }
+.prep-item__title { display: block; font-size: 15px; line-height: 1.3; font-weight: 600; color: var(--app-text); overflow-wrap: anywhere; }
+.prep-item.is-done .prep-item__title { color: var(--app-muted); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--app-muted) 60%, transparent); }
+.prep-item__meta { display: block; margin-top: 2px; font-size: 13px; line-height: 1.35; color: var(--app-muted); }
+.prep-item__action { min-height: 44px; padding: 0 2px 0 8px; display: inline-flex; align-items: center; flex-shrink: 0; font-size: 14px; font-weight: 700; color: var(--app-purple); text-decoration: none; }
+.prep-remove { width: 44px; height: 44px; margin-right: -8px; flex-shrink: 0; border: none; border-radius: 12px; background: none; display: flex; align-items: center; justify-content: center; color: var(--app-muted); cursor: pointer; }
+.prep-item__action:focus-visible, .prep-remove:focus-visible { outline: 3px solid var(--app-focus); outline-offset: -2px; border-radius: 10px; }
+.prep-own-label { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(214, 176, 112, 0.3); font-size: 13px; font-weight: 700; color: var(--app-muted); }
+.prep-add { margin-top: 6px; display: flex; gap: 8px; }
+.prep-add input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1.5px dashed rgba(201, 145, 46, 0.6);
+  background: rgba(255, 250, 240, 0.8);
+  font: inherit;
+  font-size: 16px; /* 16px keeps iOS from zooming in on focus */
+  color: var(--app-text);
+}
+.prep-add input::placeholder { color: var(--app-muted); }
+.prep-add input:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 1px; border-style: solid; }
+.prep-add button {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1b1208;
+  background: linear-gradient(135deg, #f5c76b, #f0b34b 55%, #c9912e);
+  box-shadow: 0 8px 16px -8px rgba(150, 100, 20, 0.6), inset 0 1px 0 rgba(255, 244, 214, 0.9);
+  cursor: pointer;
+}
+.prep-add button:disabled { opacity: 0.5; cursor: default; }
+.prep-add button:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 2px; }
+html[data-theme="dark"] .prep-check__box { background: var(--app-surface-2); }
+html[data-theme="dark"] .prep-add input { background: var(--app-surface); }
+html[data-theme="dark"] .prep-item, html[data-theme="dark"] .prep-own-label { border-top-color: var(--app-border); }
+
+/* Home before the event: what happens from today to the keep-until date */
+.ahead { margin: 0; padding: 18px 16px 6px; list-style: none; border-radius: 20px; background: rgba(255, 250, 240, 0.6); border: 1px solid rgba(214, 176, 112, 0.35); }
+html[data-theme="dark"] .ahead { background: var(--app-surface); border-color: var(--app-border); }
+.ahead__step { display: flex; gap: 14px; }
+.ahead__rail { width: 22px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+.ahead__rail::after { content: ""; flex: 1; margin: 6px 0 4px; border-left: 2px solid rgba(196, 184, 159, 0.8); }
+.ahead__step:last-child .ahead__rail::after { content: none; }
+.ahead__step--today .ahead__rail::after { margin-top: 10px; border-left: 2px dashed rgba(201, 145, 46, 0.6); }
+.ahead__dot { margin-top: 6px; width: 10px; height: 10px; flex-shrink: 0; border-radius: 999px; background: #b9a98c; }
+.ahead__dot--today { margin-top: 4px; width: 14px; height: 14px; background: linear-gradient(135deg, #f5c76b, #c9912e); box-shadow: 0 0 0 5px rgba(240, 179, 75, 0.28); }
+.ahead__dot--event { margin-top: 3px; width: 18px; height: 18px; box-sizing: border-box; background: #fffaf2; border: 3px solid #c9912e; }
+.ahead__body { flex: 1; min-width: 0; padding-bottom: 20px; }
+.ahead__step:last-child .ahead__body { padding-bottom: 14px; }
+.ahead__title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: var(--app-text); }
+.ahead__title--event { font-family: var(--font-display); font-weight: 400; font-size: 21px; line-height: 1.1; }
+.ahead__here { padding: 3px 9px; border-radius: 999px; background: #5b2d8e; font-size: 12px; font-weight: 700; color: #ffffff; }
+.ahead__text { margin: 4px 0 0; font-size: 14px; line-height: 1.4; color: var(--app-text-sub); }
+.ahead__gap { margin: 14px 0 0; font-size: 13px; font-weight: 700; color: var(--app-gold-ink); }
+
 /* Home: guest code ticket */
 .event-ticket {
   display: flex;

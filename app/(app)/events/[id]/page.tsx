@@ -17,6 +17,9 @@ import { ShareTab } from "./_tabs/ShareTab";
 import { RsvpTab } from "./_tabs/RsvpTab";
 import { MoreTab } from "./_tabs/MoreTab";
 import { normalizeEventKind } from "@/lib/event-kind";
+import { getEventPhase } from "@/lib/event-phase";
+import { normalizePlanId, planRank } from "@/lib/plan-limits";
+import { PREP_COLS, type PrepData, type PrepItem } from "./_tabs/prep-items";
 
 type EventPageProps = Readonly<{
   params: Promise<{
@@ -193,6 +196,30 @@ export default async function EventPage({ params, searchParams }: EventPageProps
     }
   }
 
+  // Home before the event: the prep list, plus what Calisto already knows to tick on it.
+  let prep: PrepData | null = null;
+  if (event && selectedTab === "overview" && getEventPhase(event.event_date) === "before") {
+    const members = (role: string) =>
+      supabase.from("event_memberships").select("*", { count: "exact", head: true }).eq("event_id", id).eq("role", role);
+    const hasRsvp = planRank(normalizePlanId(event.plan)) >= planRank("standard");
+    const [items, guests, coOrganizers, rsvps] = await Promise.all([
+      supabase.from("event_checklist_items").select(PREP_COLS).eq("event_id", id).order("created_at"),
+      members("guest"),
+      members("co_organizer"),
+      hasRsvp ? supabase.from("rsvps").select("*", { count: "exact", head: true }).eq("event_id", id).eq("status", "confirmed") : null,
+    ]);
+    // No table yet (migration not applied): Home keeps the plain next-step card.
+    if (!items.error) {
+      prep = {
+        rows: (items.data ?? []) as PrepItem[],
+        guests: guests.count ?? 0,
+        coOrganizers: coOrganizers.count ?? 0,
+        rsvpConfirmed: rsvps ? rsvps.count ?? 0 : null,
+        moderationEnabled,
+      };
+    }
+  }
+
   let photoCount = 0;
   if (event && selectedTab === "more") {
     const { count } = await supabase
@@ -248,6 +275,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
         accessCode={event.access_code}
         mediaCount={mediaCountResult.count ?? 0}
         guestCount={guestCount}
+        waitingGuests={prep?.guests ?? 0}
         eventDate={event.event_date ?? null}
         coverPhoto={latestPhotos[0]?.src ?? null}
         bannerTheme={bannerTheme}
@@ -267,6 +295,7 @@ export default async function EventPage({ params, searchParams }: EventPageProps
             newUploadsCount={newUploadsCount}
             latestPhotos={latestPhotos}
             newPhotos={newPhotos}
+            prep={prep}
           />
         )}
         {selectedTab === "more" && (

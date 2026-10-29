@@ -1,16 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { CalendarPlus, Camera } from "lucide-react";
 import { startTransition, useEffect, useRef, useState } from "react";
 
 import { useAppUi } from "@/components/AppUiProvider";
+import { AppBtn } from "@/components/app-ui/AppBtn";
 import { Aurora, AuroraSays } from "@/components/app-ui/Aurora";
 import { AuroraHourglass } from "@/components/app-ui/AuroraHourglass";
+import { CoverCountdown } from "@/components/app-ui/CoverCountdown";
 import { interpolate, type AppUiDict } from "@/lib/app-ui";
 import { plural } from "@/lib/app-ui/plural";
 import { bcp47FromUiLocale } from "@/lib/locale-bcp47";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { canGuestUpload, type PlanId } from "@/lib/plan-limits";
+import { daysUntilEvent, getEventPhase } from "@/lib/event-phase";
 import { displayNavEmoji, splitEventTitleStored } from "@/lib/event-title";
 import { bannerCoverBackground } from "@/lib/banner-theme";
 
@@ -22,6 +26,13 @@ import { WelcomeModal } from "./WelcomeModal";
 const GOLD = "#C5922A";
 const RUST = "#B5461B";
 const FB = "'DM Sans', sans-serif";
+
+/** Before the event: empty frames in real photo shapes, three masonry columns. */
+const GHOST_COLUMNS = [
+  ["3 / 2", "16 / 9", "4 / 5"],
+  ["1 / 1", "2 / 3", "3 / 2"],
+  ["2 / 3", "3 / 2", "1 / 1"],
+] as const;
 
 function ChevronLeft() {
   return (
@@ -275,6 +286,13 @@ export function GuestEventPage({
   const countLabel = mediaCount && mediaCount > 0 ? plural(locale, mediaCount, ui.eventsList.memories) : null;
   const coverLine = [dateLabel, countLabel].filter(Boolean).join(" · ");
   const coverPhoto = latestPrints[0];
+  // Until the event day the cover is a save-the-date and uploads wait.
+  const soon = validDate && getEventPhase(eventDate) === "before";
+  const daysToGo = soon ? daysUntilEvent(eventDate) : 0;
+  const seeYou =
+    daysToGo <= 1
+      ? ui.soon.seeYouTomorrow
+      : interpolate(ui.soon.seeYouOn, { date: eventDay.toLocaleDateString(locale, { day: "numeric", month: "long", timeZone: "UTC" }) });
 
   const uploadsOpen =
     hasSession &&
@@ -318,7 +336,9 @@ export function GuestEventPage({
   return (
     <main
       className="join-shell relative min-h-screen px-3 pt-3 sm:px-6 sm:pt-6"
-      style={{ paddingBottom: hasSession && uploadsOpen ? "calc(170px + env(safe-area-inset-bottom, 0px))" : 48 }}
+      style={{
+        paddingBottom: !hasSession ? 48 : uploadsOpen ? "calc(170px + env(safe-area-inset-bottom, 0px))" : soon ? "calc(200px + env(safe-area-inset-bottom, 0px))" : 48,
+      }}
     >
       <div ref={topSentinelRef} aria-hidden style={{ position: "absolute", top: 0, left: 0, width: 1, height: 8 }} />
 
@@ -348,16 +368,18 @@ export function GuestEventPage({
         {/* Cover: the newest photo, the event name over it */}
         <header
           ref={coverRef}
-          className={`guest-cover${coverPhoto ? "" : " guest-cover--empty"}`}
-          style={coverPhoto ? undefined : bannerCoverBackground(bannerTheme)}
+          className={`guest-cover${soon ? " guest-cover--soon" : coverPhoto ? "" : " guest-cover--empty"}`}
+          style={soon || coverPhoto ? undefined : bannerCoverBackground(bannerTheme)}
         >
-          {coverPhoto ? (
+          {soon ? (
+            <CoverCountdown days={daysToGo} />
+          ) : coverPhoto ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={coverPhoto} alt="" className="guest-cover__photo" />
           ) : (
             <span aria-hidden className="guest-cover__emoji">{displayNavEmoji(storedEmoji)}</span>
           )}
-          <div aria-hidden className="guest-cover__shade" />
+          {soon ? null : <div aria-hidden className="guest-cover__shade" />}
           {hasSession ? (
             <Link href="/dashboard" className="guest-cover-btn guest-cover__back">
               <ChevronLeft />
@@ -377,13 +399,31 @@ export function GuestEventPage({
           </div>
         ) : null}
 
-        {!uploadsOpen && hasSession ? (
+        {!uploadsOpen && hasSession && !soon ? (
           <div style={{ marginTop: 16, borderRadius: 14, border: `1.5px solid ${GOLD}55`, background: `${GOLD}18`, padding: "12px 16px", fontSize: 14, lineHeight: 1.45, color: "var(--app-gold-ink)", fontFamily: FB }}>
             {ui.guestJoin.uploadClosedBanner}
           </div>
         ) : null}
 
-        {showAlbum ? (
+        {showAlbum && soon && !mediaCount ? (
+          <section aria-labelledby="guest-gallery-title" style={{ margin: "20px 4px 0" }}>
+            <h2 id="guest-gallery-title" style={{ margin: 0, fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 24, lineHeight: 1.1, color: "var(--app-text)" }}>
+              {ui.soon.albumTitle}
+            </h2>
+            <p style={{ margin: "4px 0 0", fontSize: 14, lineHeight: 1.4, color: "var(--app-text-sub)" }}>{ui.soon.albumBody}</p>
+            <div aria-hidden className="guest-ghost-album">
+              {GHOST_COLUMNS.map((col, c) => (
+                <div key={c}>
+                  {col.map((ratio, i) => (
+                    <span key={ratio} style={{ aspectRatio: ratio }}>
+                      {(c + i) % 3 === 1 ? <Camera size={22} strokeWidth={1.6} /> : null}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : showAlbum ? (
           <>
             <div style={{ margin: "14px 0 12px", minHeight: 48, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
               {mineCount > 0 ? (
@@ -445,6 +485,24 @@ export function GuestEventPage({
               </div>
             ) : null}
           </>
+        ) : null}
+
+        {showAlbum && soon ? (
+          <div className="guest-upload-dock guest-upload-dock--soon">
+            <Aurora pose="waving" size={88} className="guest-upload-dock__aurora" />
+            <AuroraSays size={20} style={{ paddingLeft: 96, minHeight: 40, display: "flex", alignItems: "center", lineHeight: 1.15 }}>
+              {seeYou}
+            </AuroraSays>
+            <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.4, color: "var(--app-text-sub)" }}>{ui.soon.dockDetail}</p>
+            <AppBtn
+              href={`/api/join/calendar?code=${encodeURIComponent(accessCode)}`}
+              variant="secondary"
+              style={{ marginTop: 12, width: "100%", height: 50, borderRadius: 15, fontSize: 16, gap: 8 }}
+            >
+              <CalendarPlus size={20} strokeWidth={1.8} aria-hidden style={{ color: "var(--app-gold-ink)" }} />
+              {ui.soon.addToCalendar}
+            </AppBtn>
+          </div>
         ) : null}
       </div>
 
