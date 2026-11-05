@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { getEventAdminAccess } from "@/lib/event-admin-access";
 import { getSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { generateRsvpCode } from "@/lib/rsvp-code";
@@ -10,7 +11,12 @@ async function checkOrganizer(eventId: string, userId: string): Promise<{ isOrga
   const { data } = await db.from("events").select("organizer_id, plan").eq("id", eventId).maybeSingle();
   if (!data) return { isOrganizer: false, planEligible: false };
   const row = data as { organizer_id?: unknown; plan?: unknown };
-  const isOrganizer = row.organizer_id === userId;
+  // Co-organizers see the RSVP tab too, so they get the same access as the primary organizer.
+  const { canAccess: isOrganizer } = await getEventAdminAccess(db, {
+    eventId,
+    userId,
+    organizerId: String(row.organizer_id ?? ""),
+  });
   const planEligible = planRank(normalizePlanId(row.plan)) >= planRank("standard");
   return { isOrganizer, planEligible };
 }
@@ -92,6 +98,7 @@ export async function PATCH(request: Request, ctx: { params: Promise<{ id: strin
   const db = getSupabaseServerClient();
 
   if (body.action === "toggle_open") {
+    if (typeof body.open !== "boolean") return NextResponse.json({ error: "Invalid body." }, { status: 400 });
     const { error } = await db.from("events").update({ rsvp_open: body.open }).eq("id", eventId);
     if (error) return NextResponse.json({ error: "UPDATE_FAILED" }, { status: 500 });
     return NextResponse.json({ ok: true });

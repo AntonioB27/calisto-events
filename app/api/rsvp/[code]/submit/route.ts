@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { normalizeRsvpCode } from "@/lib/rsvp-code";
 import { normalizePlanId, planRank } from "@/lib/plan-limits";
 import { findPossibleDuplicate, type RsvpAttendee } from "@/lib/rsvp-duplicate";
 import { sendRsvpNotificationEmail } from "@/lib/rsvp-email";
+import { clientIpFromRequest, consumeRateLimitToken } from "@/lib/simple-ip-rate-limit";
 
 type SubmitBody = {
   clientToken: string;
@@ -16,6 +17,10 @@ type SubmitBody = {
 
 const MAX_NAME_LENGTH = 120;
 const MAX_ATTENDEES = 30;
+/** Hard ceiling on parties per event so a leaked link can't grow the table without bound. */
+const MAX_RSVPS_PER_EVENT = 2000;
+// shortcut: per-instance window (see lib/simple-ip-rate-limit.ts), move to a shared store if spam gets past it.
+const SUBMIT_RATE_LIMIT = { max: 10, windowMs: 10 * 60 * 1000 } as const;
 
 function sanitizeName(value: unknown): string {
   return typeof value === "string" ? value.trim().slice(0, MAX_NAME_LENGTH) : "";
@@ -25,6 +30,7 @@ function parseBody(raw: unknown): SubmitBody | null {
   if (!raw || typeof raw !== "object") return null;
   const body = raw as Record<string, unknown>;
   const clientToken = typeof body.clientToken === "string" ? body.clientToken.trim() : "";
+  if (clientToken.length < 16 || clientToken.length > 64) return null;
   const status = body.status === "confirmed" || body.status === "declined" ? body.status : null;
   const submitterName = sanitizeName(body.submitterName);
   if (!clientToken || !status || !submitterName) return null;
@@ -51,6 +57,14 @@ function parseBody(raw: unknown): SubmitBody | null {
 
 export async function POST(request: Request, ctx: { params: Promise<{ code: string }> }) {
   const { code } = await ctx.params;
+
+  const rl = consumeRateLimitToken(`rsvp-submit:${clientIpFromRequest(request)}`, SUBMIT_RATE_LIMIT);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "RATE_LIMITED" },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfterSec) } },
+    );
+  }
 
   let raw: unknown;
   try {
@@ -107,29 +121,34 @@ export async function POST(request: Request, ctx: { params: Promise<{ code: stri
     updated_at: new Date().toISOString(),
   };
 
-  let rsvpId: string;
-  if (existingMine) {
-    const { data, error } = await db
+  if (isNewSubmission) {
+    const { count } = await db.from("rsvps").select("id", { count: "exact", head: true }).eq("event_id", eventRow.id);
+    if ((count ?? 0) >= MAX_RSVPS_PER_EVENT) {
+      return NextResponse.json({ error: "RSVP_FULL" }, { status: 409 });
+    }
+  }
+
+  const updateByToken = () =>
+    db
       .from("rsvps")
       .update(record)
-      .eq("id", (existingMine as { id: string }).id)
+      .eq("event_id", eventRow.id)
+      .eq("client_token", body.clientToken)
       .select("id")
       .single();
-    if (error || !data) {
-      return NextResponse.json({ error: "SUBMIT_FAILED" }, { status: 500 });
-    }
-    rsvpId = (data as { id: string }).id;
-  } else {
-    const { data, error } = await db.from("rsvps").insert(record).select("id").single();
-    if (error || !data) {
-      return NextResponse.json({ error: "SUBMIT_FAILED" }, { status: 500 });
-    }
-    rsvpId = (data as { id: string }).id;
+
+  let result = isNewSubmission ? await db.from("rsvps").insert(record).select("id").single() : await updateByToken();
+  // Two tabs submitting at once: the unique (event_id, client_token) index rejects the second insert, so update instead.
+  const raceLost = isNewSubmission && result.error?.code === "23505";
+  if (raceLost) result = await updateByToken();
+  if (result.error || !result.data) {
+    return NextResponse.json({ error: "SUBMIT_FAILED" }, { status: 500 });
   }
+  const rsvpId = (result.data as { id: string }).id;
 
   // Duplicate detection only makes sense for brand-new submissions — an edit to
   // your own existing RSVP is not a duplicate of itself.
-  if (isNewSubmission) {
+  if (isNewSubmission && !raceLost) {
     const { data: others } = await db
       .from("rsvps")
       .select("id, submitter_name, contact, attendees")
@@ -152,16 +171,20 @@ export async function POST(request: Request, ctx: { params: Promise<{ code: stri
       await db.from("rsvps").update({ possible_duplicate_of: duplicate.id, duplicate_status: "flagged" }).eq("id", rsvpId);
     }
 
-    // Fire-and-forget: a failed notification email should never block the guest's submission.
-    void sendRsvpNotificationEmail({
-      organizerId: eventRow.organizer_id,
-      eventId: eventRow.id,
-      eventTitle: eventRow.title,
-      locale: "en",
-      status: body.status,
-      submitterName: body.submitterName,
-      attendees: body.attendees ?? [],
-    }).catch(() => undefined);
+    // after(): send once the guest has their response, but keep the function alive until it's done.
+    after(async () => {
+      const sent = await sendRsvpNotificationEmail({
+        organizerId: eventRow.organizer_id,
+        eventId: eventRow.id,
+        eventTitle: eventRow.title,
+        // shortcut: organizer locale isn't stored anywhere yet, store it on the event to localize this.
+        locale: "en",
+        status: body.status,
+        submitterName: body.submitterName,
+        attendees: body.attendees ?? [],
+      }).catch((error: unknown) => ({ ok: false, skipped: false, error: String(error) }));
+      if (!sent.ok && !sent.skipped) console.error("[rsvp] notification email failed", eventRow.id, sent.error);
+    });
   }
 
   return NextResponse.json({ ok: true, id: rsvpId });

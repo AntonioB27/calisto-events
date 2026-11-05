@@ -34,17 +34,22 @@ function clientTokenKey(eventId: string): string {
   return `calisto_rsvp_${eventId}`;
 }
 
+/** randomUUID is missing on non-HTTPS origins (e.g. testing over the LAN). */
+function newToken(): string {
+  return crypto.randomUUID?.() ?? `${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+}
+
 function getOrCreateClientToken(eventId: string): string {
   const key = clientTokenKey(eventId);
   try {
     const existing = window.localStorage.getItem(key);
     if (existing) return existing;
-    const created = crypto.randomUUID();
+    const created = newToken();
     window.localStorage.setItem(key, created);
     return created;
   } catch {
-    // Storage may be unavailable (private mode) — fall back to a session-only token.
-    return crypto.randomUUID();
+    // Storage may be unavailable (private mode), so fall back to a session-only token.
+    return newToken();
   }
 }
 
@@ -94,6 +99,8 @@ export function RsvpForm({ code, eventId, eventTitle }: Readonly<{ code: string;
             setEditing(false);
           }
         }
+      } catch {
+        // Offline or server error: show an empty form, the guest can still submit.
       } finally {
         setLoadingMine(false);
       }
@@ -144,7 +151,19 @@ export function RsvpForm({ code, eventId, eventTitle }: Readonly<{ code: string;
           attendees: status === "confirmed" ? cleanedAttendees : undefined,
         }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const code = ((await res.json().catch(() => null)) as { error?: string } | null)?.error;
+        setError(
+          code === "RSVP_CLOSED" || code === "RSVP_FULL"
+            ? ui.rsvpPublic.closedBody
+            : code === "NOT_FOUND"
+              ? ui.rsvpPublic.notFoundBody
+              : code === "RATE_LIMITED"
+                ? ui.rsvpPublic.errorRateLimited
+                : ui.rsvpPublic.errorGeneric,
+        );
+        return;
+      }
       setSubmitted(true);
       setEditing(false);
     } catch {
@@ -169,7 +188,7 @@ export function RsvpForm({ code, eventId, eventTitle }: Readonly<{ code: string;
   }
 
   return (
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: "48px 20px 64px" }}>
+    <main style={{ width: "100%", boxSizing: "border-box", maxWidth: 480, margin: "0 auto", padding: "48px 16px 64px" }}>
       <div style={{ ...(isDark ? GLASS_DARK : GLASS_LIGHT), borderRadius: 24, padding: "28px 24px" }}>
         <h1 style={{ margin: "0 0 8px", fontFamily: FS, fontStyle: "italic", fontWeight: 700, fontSize: 24, color: textColor }}>
           {heading}
@@ -179,7 +198,7 @@ export function RsvpForm({ code, eventId, eventTitle }: Readonly<{ code: string;
         </p>
 
         {submitted && !editing ? (
-          <div style={{ textAlign: "center", padding: "12px 0" }}>
+          <div role="status" style={{ textAlign: "center", padding: "12px 0" }}>
             <p style={{ margin: "0 0 6px", fontFamily: FB, fontSize: 15, fontWeight: 700, color: "#4E7C3A" }}>{ui.rsvpPublic.submitted}</p>
             <p style={{ margin: "0 0 18px", fontFamily: FB, fontSize: 13, color: mutedColor }}>{ui.rsvpPublic.submittedEdit}</p>
             <button
@@ -206,6 +225,7 @@ export function RsvpForm({ code, eventId, eventTitle }: Readonly<{ code: string;
               <button
                 type="button"
                 onClick={() => setStatus("confirmed")}
+                aria-pressed={status === "confirmed"}
                 style={{
                   flex: 1,
                   padding: "12px",
@@ -224,6 +244,7 @@ export function RsvpForm({ code, eventId, eventTitle }: Readonly<{ code: string;
               <button
                 type="button"
                 onClick={() => setStatus("declined")}
+                aria-pressed={status === "declined"}
                 style={{
                   flex: 1,
                   padding: "12px",
@@ -246,13 +267,18 @@ export function RsvpForm({ code, eventId, eventTitle }: Readonly<{ code: string;
               <input
                 value={submitterName}
                 onChange={(e) => setSubmitterName(e.target.value)}
+                autoComplete="name"
+                maxLength={120}
+                required
+                aria-invalid={error === ui.rsvpPublic.errorRequired || undefined}
+                aria-describedby={error ? "rsvp-error" : undefined}
                 placeholder={ui.rsvpPublic.submitterNamePlaceholder}
                 style={{
                   padding: "10px 12px",
                   borderRadius: 10,
                   border: `1px solid ${borderColor}`,
                   fontFamily: FB,
-                  fontSize: 14,
+                  fontSize: 16,
                   color: textColor,
                   background: inputBg,
                 }}
@@ -260,34 +286,38 @@ export function RsvpForm({ code, eventId, eventTitle }: Readonly<{ code: string;
             </label>
 
             {status === "confirmed" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <span style={{ fontFamily: FB, fontSize: 12, fontWeight: 700, color: mutedColor }}>{ui.rsvpPublic.attendeesLabel}</span>
+              <div role="group" aria-labelledby="rsvp-attendees-label" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <span id="rsvp-attendees-label" style={{ fontFamily: FB, fontSize: 12, fontWeight: 700, color: mutedColor }}>{ui.rsvpPublic.attendeesLabel}</span>
                 {attendees.map((attendee, index) => (
                   <div key={index} style={{ display: "flex", gap: 6, alignItems: "center" }}>
                     <input
                       value={attendee.name}
                       onChange={(e) => updateAttendee(index, { name: e.target.value })}
+                      aria-label={interpolate(ui.rsvpPublic.attendeeNameAria, { n: index + 1 })}
+                      maxLength={120}
                       placeholder={ui.rsvpPublic.attendeeNamePlaceholder}
                       style={{
                         flex: 1,
+                        minWidth: 0,
                         padding: "9px 10px",
                         borderRadius: 10,
                         border: `1px solid ${borderColor}`,
                         fontFamily: FB,
-                        fontSize: 13,
+                        fontSize: 16,
                         color: textColor,
                         background: inputBg,
                       }}
                     />
                     <select
                       value={attendee.type}
+                      aria-label={interpolate(ui.rsvpPublic.attendeeTypeAria, { n: index + 1 })}
                       onChange={(e) => updateAttendee(index, { type: e.target.value === "child" ? "child" : "adult" })}
                       style={{
                         padding: "9px 8px",
                         borderRadius: 10,
                         border: `1px solid ${borderColor}`,
                         fontFamily: FB,
-                        fontSize: 12.5,
+                        fontSize: 16,
                         color: textColor,
                         background: inputBg,
                       }}
@@ -299,7 +329,7 @@ export function RsvpForm({ code, eventId, eventTitle }: Readonly<{ code: string;
                       <button
                         type="button"
                         onClick={() => removeAttendee(index)}
-                        aria-label={ui.rsvpPublic.removeAttendee}
+                        aria-label={interpolate(ui.rsvpPublic.removeAttendeeAria, { n: index + 1 })}
                         style={{ background: "none", border: "none", color: mutedColor, cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 4 }}
                       >
                         ×
@@ -324,20 +354,25 @@ export function RsvpForm({ code, eventId, eventTitle }: Readonly<{ code: string;
               <input
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
+                maxLength={200}
                 placeholder={ui.rsvpPublic.contactPlaceholder}
                 style={{
                   padding: "10px 12px",
                   borderRadius: 10,
                   border: `1px solid ${borderColor}`,
                   fontFamily: FB,
-                  fontSize: 14,
+                  fontSize: 16,
                   color: textColor,
                   background: inputBg,
                 }}
               />
             </label>
 
-            {error && <p style={{ margin: 0, fontSize: 13, color: dangerColor }}>{error}</p>}
+            {error && (
+              <p id="rsvp-error" role="alert" style={{ margin: 0, fontSize: 13, color: dangerColor }}>
+                {error}
+              </p>
+            )}
 
             <button
               type="submit"

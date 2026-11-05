@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "react-qr-code";
 
 import { useAppUi } from "@/components/AppUiProvider";
@@ -13,6 +13,7 @@ import { Switch } from "@/components/app-ui/Switch";
 import { TabHeader } from "@/components/app-ui/TabHeader";
 import { interpolate } from "@/lib/app-ui";
 import { plural } from "@/lib/app-ui/plural";
+import { csvCell } from "@/lib/rsvp-csv";
 import type { RsvpAttendee } from "@/lib/rsvp-duplicate";
 
 import { relativeTime } from "./AlbumReview";
@@ -42,6 +43,15 @@ function getRsvpUrl(publicOrigin: string, code: string): string {
   return `${publicOrigin.replace(/\/$/, "")}/rsvp/${encodeURIComponent(code)}`;
 }
 
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
   const ui = useAppUi();
   const t = ui.rsvpTab;
@@ -58,6 +68,7 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
   const [filter, setFilter] = useState<Filter>("all");
   const [openRowId, setOpenRowId] = useState<string | null>(null);
   const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm>(null);
+  const qrRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -85,15 +96,17 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
     let confirmedParties = 0;
     let declinedParties = 0;
     let attendees = 0;
+    let children = 0;
     for (const row of rows) {
       if (row.status === "confirmed") {
         confirmedParties += 1;
         attendees += row.attendees?.length ?? 0;
+        children += row.attendees?.filter((a) => a.type === "child").length ?? 0;
       } else {
         declinedParties += 1;
       }
     }
-    return { confirmedParties, declinedParties, attendees };
+    return { confirmedParties, declinedParties, attendees, adults: attendees - children, children };
   }, [rows]);
 
   async function copyLink() {
@@ -103,8 +116,42 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard can fail silently (permissions); the link is still shown on screen to copy manually.
+      // The on-screen URL is truncated, so spell it out where it can be selected.
+      setError(interpolate(t.copyFail, { url: getRsvpUrl(publicOrigin, rsvpCode) }));
     }
+  }
+
+  function downloadQr() {
+    const svg = qrRef.current?.querySelector("svg");
+    if (!svg) return;
+    const clone = svg.cloneNode(true) as SVGSVGElement;
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    clone.setAttribute("width", "1024");
+    clone.setAttribute("height", "1024");
+    downloadBlob(new Blob([clone.outerHTML], { type: "image/svg+xml" }), "rsvp-qr.svg");
+  }
+
+  function exportCsv() {
+    const lines = [t.csvHeaders];
+    for (const row of rows) {
+      const people = row.status === "confirmed" ? (row.attendees ?? []) : [];
+      const children = people.filter((a) => a.type === "child").length;
+      lines.push(
+        [
+          row.submitter_name,
+          row.status === "confirmed" ? t.listStatusConfirmed : t.listStatusDeclined,
+          people.map((a) => a.name).join("; "),
+          people.length - children,
+          children,
+          row.contact ?? "",
+          row.updated_at.slice(0, 10),
+        ]
+          .map(csvCell)
+          .join(","),
+      );
+    }
+    // BOM so Excel reads accented names (č, ü) as UTF-8.
+    downloadBlob(new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" }), "rsvp.csv");
   }
 
   async function shareLink() {
@@ -114,7 +161,8 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
       try {
         await navigator.share({ url });
         return;
-      } catch {
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
         // Fall through to clipboard.
       }
     }
@@ -218,6 +266,13 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
               confirmed: plural(locale, stats.confirmedParties, t.summaryConfirmed),
               declined: plural(locale, stats.declinedParties, t.summaryDeclined),
             })}
+            {stats.attendees > 0 &&
+              ` ${[
+                plural(locale, stats.adults, t.adults),
+                stats.children > 0 ? plural(locale, stats.children, t.children) : null,
+              ]
+                .filter(Boolean)
+                .join(", ")}.`}
           </>
         )}
       </TabHeader>
@@ -245,7 +300,7 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
         {rsvpUrl && (
           <>
             <div className="rsvp-link__row">
-              <div className="rsvp-link__qr" role="img" aria-label={t.scanQr}>
+              <div className="rsvp-link__qr" role="img" aria-label={t.scanQr} ref={qrRef}>
                 <QRCode value={rsvpUrl} size={58} />
               </div>
               <div className="rsvp-link__body">
@@ -269,6 +324,9 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
               onClick={() => setPendingConfirm({ kind: "regen" })}
             >
               {t.regenerateCode}
+            </button>
+            <button type="button" className="rsvp-textbtn" onClick={downloadQr}>
+              {t.downloadQr}
             </button>
           </>
         )}
@@ -323,6 +381,9 @@ export function RsvpManager({ eventId, publicOrigin }: RsvpManagerProps) {
               { id: "declined", label: interpolate(t.filterDeclined, { count: stats.declinedParties }) },
             ]}
           />
+          <button type="button" className="rsvp-textbtn" onClick={exportCsv}>
+            {t.exportCsv}
+          </button>
           {visibleRows.length > 0 && (
             <ul className="warm-list">
               {visibleRows.map((row) => {
