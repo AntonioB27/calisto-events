@@ -31,6 +31,24 @@ export function planPriceEuroCents(planId: PlanId): number {
   return isPaidPlanForCheckout(planId) ? planUnitAmountEuroCents(planId as PaidPlanId) : 0;
 }
 
+/** Black Month 2026: 50% off every paid plan, Nov 5 through the end of Nov 30, Central European Time. */
+const BLACK_MONTH_STARTS_AT = "2026-11-05T00:00:00+01:00";
+export const BLACK_MONTH_ENDS_AT = "2026-12-01T00:00:00+01:00";
+
+export function isBlackMonthActive(nowMs: number = Date.now()): boolean {
+  return nowMs >= Date.parse(BLACK_MONTH_STARTS_AT) && nowMs < Date.parse(BLACK_MONTH_ENDS_AT);
+}
+
+/** Whole days left in the sale, counting today (1 = last day). */
+export function blackMonthDaysLeft(nowMs: number = Date.now()): number {
+  return Math.ceil((Date.parse(BLACK_MONTH_ENDS_AT) - nowMs) / (24 * 60 * 60 * 1000));
+}
+
+/** What the buyer actually pays for a list amount right now. */
+export function saleEuroCents(listEuroCents: number, nowMs: number = Date.now()): number {
+  return isBlackMonthActive(nowMs) ? Math.round(listEuroCents / 2) : listEuroCents;
+}
+
 export function formatEuroCents(amountEuroCents: number): string {
   return `${(amountEuroCents / 100).toFixed(2).replace(/\.00$/, "")}€`;
 }

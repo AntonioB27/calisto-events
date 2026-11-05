@@ -8,7 +8,7 @@ import { ChevronRight } from "lucide-react";
 import { useAppUi } from "@/components/AppUiProvider";
 import { Aurora } from "@/components/app-ui/Aurora";
 import { interpolate } from "@/lib/app-ui";
-import { planCreditEuroCents, planUnitAmountEuroCents } from "@/lib/event-stripe-checkout";
+import { formatEuroCents, planCreditEuroCents, planUnitAmountEuroCents, saleEuroCents } from "@/lib/event-stripe-checkout";
 import { getPlanLimits, PLAN_DB_INT_MAX, normalizePlanId, PLAN_ORDER, planRank, type PlanId } from "@/lib/plan-limits";
 import "../_tabs/event-shell.css";
 
@@ -49,10 +49,6 @@ const PLAN_PRICE: Record<PaidPlanId, { now: string; was?: string }> = {
   premium: { now: "65€", was: "70€" },
   max: { now: "90€", was: "100€" },
 };
-
-function formatEuroCents(cents: number): string {
-  return `${Math.round(cents / 100)}€`;
-}
 
 function useIsDark(): boolean {
   const [isDark, setIsDark] = useState(false);
@@ -261,11 +257,12 @@ function UpgradeDialog({
               {availablePlans.map((planId, cardIndex) => {
             const limits = getPlanLimits(planId);
             const accent = PLAN_ACCENT[planId];
-            const fullPrice = PLAN_PRICE[planId];
-            const priceNowCents = planUnitAmountEuroCents(planId) - creditEuroCents;
-            const price = creditEuroCents > 0
-              ? { now: formatEuroCents(priceNowCents), was: fullPrice.now }
-              : fullPrice;
+            const listCents = planUnitAmountEuroCents(planId);
+            // Must match checkout-upgrade-event: sale halves the difference after credit.
+            const priceNowCents = saleEuroCents(listCents - creditEuroCents);
+            const price = priceNowCents !== listCents
+              ? { now: formatEuroCents(priceNowCents), was: formatEuroCents(listCents) }
+              : PLAN_PRICE[planId];
             const busy = busyPlan === planId;
             const anyBusy = busyPlan !== null;
             return (

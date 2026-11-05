@@ -7,7 +7,8 @@ import EmojiPicker, { type EmojiClickData, Theme } from "emoji-picker-react";
 import type { Locale } from "@/lib/i18n";
 import { buildPlanStartUrl } from "@/lib/landing-event-form";
 import type { StartPageCopy } from "@/lib/i18n-start";
-import { formatEuroCents, planPriceEuroCents } from "@/lib/event-stripe-checkout";
+import { SalePrice } from "@/components/SalePrice";
+import { planPriceEuroCents } from "@/lib/event-stripe-checkout";
 
 // ── Design tokens (warm theme — exact values from spec) ───────────
 const SERIF = "'Playfair Display', serif";
@@ -582,7 +583,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                           <span aria-hidden style={{ color: sel ? "#805900" : "transparent" }}>✓</span>
                         </span>
                         <span style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: 5 }}>
-                          <strong style={{ fontSize: 16 }}>{formatEuroCents(price)}</strong>
+                          <strong style={{ fontSize: 16 }}><SalePrice listEuroCents={price} /></strong>
                         </span>
                       </button>
                     );
@@ -733,7 +734,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                             lineHeight: 1,
                           }}
                         >
-                          {formatEuroCents(price)}
+                          <SalePrice listEuroCents={price} />
                         </div>
                         <div
                           style={{
@@ -1165,7 +1166,7 @@ export function StartPageClient({ copy, locale }: StartPageClientProps) {
                         lineHeight: 1,
                       }}
                     >
-                      {formatEuroCents(price)}
+                      <SalePrice listEuroCents={price} />
                     </div>
                     <div
                       style={{

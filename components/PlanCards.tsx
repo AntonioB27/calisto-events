@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import type { LandingCopy } from "@/lib/i18n";
+import type { BlackMonthCopy } from "@/lib/black-month-copy";
 import { PlanCompareTable } from "@/components/plan-cards/PlanCompareTable";
 import { PlanCardStack } from "@/components/plan-cards/PlanCardStack";
 
-type PlanCardsProps = { copy: LandingCopy };
+type PlanCardsProps = { copy: LandingCopy; sale: BlackMonthCopy | null };
 
-export function PlanCards({ copy }: PlanCardsProps) {
+export function PlanCards({ copy, sale }: PlanCardsProps) {
+  const popularBadge = sale ? `${copy.popularBadge} · -50%` : copy.popularBadge;
 
   function handleChoose(e: React.MouseEvent) {
     e.stopPropagation();
@@ -50,7 +52,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
                   minWidth: 0,
                 }}
               >
-                {copy.plansTitle}
+                {sale ? sale.plansTitle : copy.plansTitle}
               </h2>
               <div className="ml-auto shrink-0">
                 <Image
@@ -62,6 +64,11 @@ export function PlanCards({ copy }: PlanCardsProps) {
                 />
               </div>
             </div>
+            {sale && (
+              <p style={{ margin: "14px 0 0", fontFamily: "var(--font-sans)", fontSize: 15, color: "var(--cream-3)" }}>
+                {sale.plansNote}
+              </p>
+            )}
           </div>
         </div>
 
@@ -73,7 +80,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
               plansFormChooseBtn: copy.plansFormChooseBtn,
               plansPerEventSuffix: copy.plansPerEventSuffix,
               planFootnote: copy.planFootnote,
-              popularBadge: copy.popularBadge,
+              popularBadge,
             }}
           />
         </div>
@@ -85,7 +92,7 @@ export function PlanCards({ copy }: PlanCardsProps) {
               plansFormChooseBtn: copy.plansFormChooseBtn,
               plansPerEventSuffix: copy.plansPerEventSuffix,
               planFootnote: copy.planFootnote,
-              popularBadge: copy.popularBadge,
+              popularBadge,
             }}
           />
         </div>

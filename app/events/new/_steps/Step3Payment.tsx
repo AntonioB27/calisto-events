@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { clearCreateEventDraftFromStorage, writeCreateEventDraftToStorage } from "@/lib/create-event-draft";
-import { formatEuroCents, isPaidPlanForCheckout, planPriceEuroCents } from "@/lib/event-stripe-checkout";
+import { SalePrice } from "@/components/SalePrice";
+import { isPaidPlanForCheckout, planPriceEuroCents } from "@/lib/event-stripe-checkout";
 import { useAppUi } from "@/components/AppUiProvider";
 import { AppBtn } from "@/components/app-ui/AppBtn";
 import { TabHeader } from "@/components/app-ui/TabHeader";
@@ -200,7 +201,7 @@ export function Step3Payment({ name, emoji, date, planId, moderationEnabled, val
             <span className="sr-only">{ui.createStep3.selectedPlanEyebrow}: </span>
             {ui.plans[planId]}
           </span>
-          <span className="create-plan__price">{formatEuroCents(planPriceEuroCents(planId))}</span>
+          <span className="create-plan__price"><SalePrice listEuroCents={planPriceEuroCents(planId)} /></span>
         </div>
 
         <p style={{ margin: "12px 0 0", fontSize: 15, lineHeight: 1.5, color: "var(--app-text-sub)" }}>

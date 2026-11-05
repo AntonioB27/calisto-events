@@ -13,6 +13,9 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { StatBar } from "@/components/StatBar";
 import { WaitlistForm } from "@/components/WaitlistForm";
 import { WebMcpTools } from "@/components/WebMcpTools";
+import { BlackMonthRibbon } from "@/components/BlackMonthRibbon";
+import { BLACK_MONTH_COPY } from "@/lib/black-month-copy";
+import { isBlackMonthActive } from "@/lib/event-stripe-checkout";
 import { getLandingCopy, isLocale, LOCALES, type Locale } from "@/lib/i18n";
 import { getPublicOrigin } from "@/lib/public-origin";
 import { createSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
@@ -64,6 +67,7 @@ export default async function LocalePage({ params }: LocalePageProps) {
   const supabase = await createSupabaseAuthServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   const isLoggedIn = !!user;
+  const sale = isBlackMonthActive() ? BLACK_MONTH_COPY[locale] : null;
 
   const faqSchema = {
     "@context": "https://schema.org",
@@ -84,14 +88,15 @@ export default async function LocalePage({ params }: LocalePageProps) {
       <WebMcpTools />
       <div className="page-vignette" aria-hidden />
       <LanguageSelectorPopup copy={copy} locale={locale as Locale} />
+      {sale && <BlackMonthRibbon sale={sale} />}
       <SiteHeader copy={copy} locale={locale as Locale} isLoggedIn={isLoggedIn} />
       <main className="flex-1">
-        <Hero copy={copy} isLoggedIn={isLoggedIn} locale={locale as Locale} />
+        <Hero copy={copy} isLoggedIn={isLoggedIn} locale={locale as Locale} sale={sale} />
         <StatBar copy={copy} />
         <Testimonials copy={copy} />
         <AppPreviewWindow copy={copy} />
         <FeatureGrid copy={copy} />
-        <PlanCards copy={copy} />
+        <PlanCards copy={copy} sale={sale} />
         <AuroraQuote copy={copy} />
         <FAQ copy={copy} />
         <WaitlistForm copy={copy.waitlist} mascotAlt={copy.auroraMascotAlt} locale={locale as Locale} />

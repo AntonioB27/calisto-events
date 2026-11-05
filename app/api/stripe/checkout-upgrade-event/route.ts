@@ -4,6 +4,8 @@ import {
   isPaidPlanForCheckout,
   planCreditEuroCents,
   planUnitAmountEuroCents,
+  isBlackMonthActive,
+  saleEuroCents,
   type PaidPlanId,
 } from "@/lib/event-stripe-checkout";
 import { normalizePlanId, planRank, type PlanId } from "@/lib/plan-limits";
@@ -91,13 +93,14 @@ export async function POST(request: Request) {
   const paidPlanId = planId as PaidPlanId;
   const displayPlan = `${paidPlanId.charAt(0).toUpperCase()}${paidPlanId.slice(1)}`;
   const creditEuroCents = planCreditEuroCents(currentPlan);
-  const chargeEuroCents = planUnitAmountEuroCents(paidPlanId) - creditEuroCents;
+  // Sale halves the price difference; halving only the new plan could go negative (Premium -> Max).
+  const chargeEuroCents = saleEuroCents(planUnitAmountEuroCents(paidPlanId) - creditEuroCents);
   const origin = getAppOrigin(request);
   const locale = await getUiLocale();
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
-    allow_promotion_codes: true,
+    allow_promotion_codes: !isBlackMonthActive(), // codes must not stack on the 50% sale
     line_items: [
       {
         price_data: {

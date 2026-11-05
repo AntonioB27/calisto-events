@@ -8,7 +8,8 @@ import { useAppUi } from "@/components/AppUiProvider";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { isPaidPlanForCheckout } from "@/lib/event-stripe-checkout";
 import { writeCreateEventDraftToStorage } from "@/lib/create-event-draft";
-import { formatEuroCents, planPriceEuroCents } from "@/lib/event-stripe-checkout";
+import { SalePrice } from "@/components/SalePrice";
+import { planPriceEuroCents } from "@/lib/event-stripe-checkout";
 
 type HeroEventBuilderProps = {
   copy: LandingCopy;
@@ -399,7 +400,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
                     </div>
                     <div style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--cream)", marginTop: 3 }}>{plan.name}</div>
                   </div>
-                  <div className="event-builder-plan-price" style={{ fontFamily: "var(--font-display)", fontSize: 32, color: "var(--cream)" }}>{formatEuroCents(planPrice)}</div>
+                  <div className="event-builder-plan-price" style={{ fontFamily: "var(--font-display)", fontSize: 32, color: "var(--cream)" }}><SalePrice listEuroCents={planPrice} /></div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "10px 16px", marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--hair-2)" }}>
                   {featureRows.slice(0, 5).map((row) => (
@@ -466,7 +467,7 @@ export function HeroEventBuilder({ copy, locale }: HeroEventBuilderProps) {
                       <span>{guests >= 300 ? "300+" : guests} · {b.peopleInvited}</span>
                       <span>{plan.name}</span>
                     </div>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "#1A1108" }}>{formatEuroCents(planPrice)}</div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "#1A1108" }}><SalePrice listEuroCents={planPrice} /></div>
                   </div>
                 </div>
               </div>

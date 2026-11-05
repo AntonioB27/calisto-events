@@ -50,4 +50,17 @@ describe("POST /api/stripe/checkout-create-event", () => {
     expect(session.line_items[0].price_data.unit_amount).toBe(3500);
     expect(session.metadata).toMatchObject({ plan: "plus", organizer_id: "organizer_1" });
   });
+
+  it("charges half price without promotion codes during Black Month", async () => {
+    vi.setSystemTime(new Date("2026-11-20T12:00:00+01:00"));
+    await POST(new Request("https://calisto-events.com/api/stripe/checkout-create-event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Ana and Marko", date: "2027-06-12", planId: "plus" }),
+    }));
+
+    const session = createCheckoutSession.mock.calls[0]?.[0];
+    expect(session.allow_promotion_codes).toBe(false);
+    expect(session.line_items[0].price_data.unit_amount).toBe(1750);
+  });
 });

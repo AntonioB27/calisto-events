@@ -4,6 +4,8 @@ import {
   buildEventTitle,
   isPaidPlanForCheckout,
   planUnitAmountEuroCents,
+  isBlackMonthActive,
+  saleEuroCents,
   truncateStripeMetadataTitle,
   type PaidPlanId,
 } from "@/lib/event-stripe-checkout";
@@ -95,12 +97,12 @@ export async function POST(request: Request) {
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
-    allow_promotion_codes: true,
+    allow_promotion_codes: !isBlackMonthActive(), // codes must not stack on the 50% sale
     line_items: [
       {
         price_data: {
           currency: "eur",
-          unit_amount: planUnitAmountEuroCents(paidPlanId),
+          unit_amount: saleEuroCents(planUnitAmountEuroCents(paidPlanId)),
           product_data: { name: `Calisto event — ${displayPlan}` },
         },
         quantity: 1,

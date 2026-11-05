@@ -2,12 +2,14 @@ import Image from "next/image";
 import { ScanLine, UserCheck, QrCode, type LucideIcon } from "lucide-react";
 import type { LandingCopy, Locale } from "@/lib/i18n";
 import { HeroEventBuilder } from "@/components/HeroEventBuilder";
+import type { BlackMonthCopy } from "@/lib/black-month-copy";
+import { formatEuroCents, planUnitAmountEuroCents, saleEuroCents } from "@/lib/event-stripe-checkout";
 
-type HeroProps = { copy: LandingCopy; isLoggedIn: boolean; locale: Locale };
+type HeroProps = { copy: LandingCopy; isLoggedIn: boolean; locale: Locale; sale: BlackMonthCopy | null };
 
 const SIGNAL_ICONS: LucideIcon[] = [ScanLine, UserCheck, QrCode];
 
-export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
+export function Hero({ copy, isLoggedIn, locale, sale }: HeroProps) {
   return (
     <section
       id="top"
@@ -27,7 +29,7 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
                 textTransform: "uppercase", color: "var(--gold)", marginBottom: 18,
               }}
             >
-              {copy.heroBadge}
+              {sale ? sale.badge : copy.heroBadge}
             </div>
 
             {/* Headline */}
@@ -42,7 +44,15 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
                 margin: 0,
               }}
             >
-              {copy.heroTitle}
+              {sale ? (
+                <>
+                  {sale.titleLead}
+                  <br />
+                  <em style={{ color: "var(--gold)" }}>{sale.titleAccent}</em>
+                </>
+              ) : (
+                copy.heroTitle
+              )}
             </h1>
 
             {/* Sub */}
@@ -56,7 +66,7 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
                 maxWidth: 460,
               }}
             >
-              {copy.heroDescription}
+              {sale ? sale.description : copy.heroDescription}
             </p>
 
             {/* CTAs */}
@@ -104,6 +114,11 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
                 {copy.heroSecondaryCta}
               </a>
             </div>
+            {sale && (
+              <p style={{ margin: "12px 0 0", fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--cream-3)" }}>
+                {sale.endsNote}
+              </p>
+            )}
 
             {/* Trust bar: the three core differentiators */}
             <div className="v2-trust-row flex flex-wrap" style={{ marginTop: 28, gap: 10 }}>
@@ -189,7 +204,9 @@ export function Hero({ copy, isLoggedIn, locale }: HeroProps) {
                     fontSize: 14.5, lineHeight: 1.45, color: "var(--cream-2)",
                   }}
                 >
-                  {copy.heroAuroraCardBlurb}
+                  {sale
+                    ? sale.aurora.replace("{max}", formatEuroCents(saleEuroCents(planUnitAmountEuroCents("max"))))
+                    : copy.heroAuroraCardBlurb}
                 </p>
               </blockquote>
             </div>

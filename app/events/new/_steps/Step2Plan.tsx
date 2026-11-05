@@ -10,7 +10,8 @@ import { writeCreateEventDraftToStorage } from "@/lib/create-event-draft";
 import { useEffect, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
-import { formatEuroCents, planPriceEuroCents } from "@/lib/event-stripe-checkout";
+import { SalePrice } from "@/components/SalePrice";
+import { planPriceEuroCents } from "@/lib/event-stripe-checkout";
 
 type Step2PlanProps = {
   name: string;
@@ -42,7 +43,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
   const cards = planOptions.map(planId => ({
     planId,
     limits: getPlanLimits(planId),
-    price: formatEuroCents(planPriceEuroCents(planId)),
+    price: planPriceEuroCents(planId),
   }));
 
   const choose = (planId: PlanId) => { setSelected(planId); writeStep2Draft(planId); };
@@ -88,7 +89,7 @@ export function Step2Plan({ name, emoji, date, selectedPlanId, planOptions, vali
                   {interpolate(ui.createStep2.uploadsOpenAfterDays, { n: limits.uploadDaysAfterEvent })}
                 </span>
               </span>
-              <span className="create-plan__price">{price}</span>
+              <span className="create-plan__price"><SalePrice listEuroCents={price} /></span>
             </button>
           ))}
         </div>

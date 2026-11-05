@@ -2,7 +2,8 @@
 
 import type React from "react";
 import type { LandingCopy } from "@/lib/i18n";
-import { formatEuroCents, planPriceEuroCents } from "@/lib/event-stripe-checkout";
+import { SalePrice } from "@/components/SalePrice";
+import { planPriceEuroCents } from "@/lib/event-stripe-checkout";
 
 export type PlanCompareTableProps = {
   plans: LandingCopy["plans"];
@@ -63,7 +64,7 @@ export function PlanCompareTable({ plans, onChoose, copy }: PlanCompareTableProp
                       )}
                     </div>
                     <div style={{ fontSize: 14, color: "var(--cream-3)", marginTop: 4, fontFamily: "var(--font-sans)" }}>
-                      {formatEuroCents(price)} {plan.id !== "free" && copy.plansPerEventSuffix}
+                      <SalePrice listEuroCents={price} /> {plan.id !== "free" && copy.plansPerEventSuffix}
                     </div>
                   </th>
                 );
