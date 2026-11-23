@@ -10,6 +10,10 @@ const eventMaybeSingle = vi.fn();
 const pendingMaybeSingle = vi.fn();
 const insertSingle = vi.fn();
 const mediaCountResult = vi.fn(() => Promise.resolve({ count: 2, error: null }));
+const kickOffMock = vi.fn();
+
+vi.mock("@/lib/ui-locale", () => ({ getUiLocale: async () => "hr" }));
+vi.mock("@/lib/zip-export-kickoff", () => ({ kickOffZipExport: (args: unknown) => kickOffMock(args) }));
 
 vi.mock("@/lib/supabase-auth-server", () => ({
   getSupabaseAuthServerClient: () => ({
@@ -61,6 +65,7 @@ describe("POST /api/events/[id]/zip-export", () => {
     pendingMaybeSingle.mockReset();
     insertSingle.mockReset();
     mediaCountResult.mockClear();
+    kickOffMock.mockClear();
     mediaCountResult.mockImplementation(() => Promise.resolve({ count: 2, error: null }));
 
     getUserMock.mockResolvedValue({ data: { user: { id: "org_1" } }, error: null });
@@ -111,6 +116,7 @@ describe("POST /api/events/[id]/zip-export", () => {
     expect(res.status).toBe(409);
     await expect(res.json()).resolves.toMatchObject({ error: "ZIP_JOB_ALREADY_PENDING" });
     expect(insertSingle).not.toHaveBeenCalled();
+    expect(kickOffMock).not.toHaveBeenCalled();
   });
 
   it("returns 201 with job id when queued", async () => {
@@ -124,5 +130,7 @@ describe("POST /api/events/[id]/zip-export", () => {
     );
     expect(res.status).toBe(201);
     await expect(res.json()).resolves.toMatchObject({ id: "job_1" });
+    // Packing and the "started" email kick off right away instead of waiting for the cron.
+    expect(kickOffMock).toHaveBeenCalledWith(expect.objectContaining({ eventId: "evt_1", jobId: "job_1", locale: "hr" }));
   });
 });

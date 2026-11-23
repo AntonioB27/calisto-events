@@ -1,0 +1,178 @@
+/* ZIP status page. Tokens, prints, steps and buttons come from ../../_components/zip-dock.css. */
+
+.zipstatus {
+  min-height: 100dvh;
+  color: var(--zd-ink);
+  padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+}
+
+.zipstatus-bar {
+  position: sticky;
+  top: 0;
+  margin: 0 -16px; /* full width past the app shell's side padding, like the event bar */
+  z-index: 20;
+  height: 64px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--zd-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--zd-glass-border);
+}
+.zipstatus-bar__back {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--zd-ink);
+  background: var(--zd-paper);
+  border: 1px solid var(--zd-glass-border);
+}
+.zipstatus-bar__back:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 2px; }
+.zipstatus-bar__text { min-width: 0; display: flex; flex-direction: column; }
+.zipstatus-bar__title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.zipstatus-bar__sub { font-size: 12px; color: var(--zd-muted); }
+
+.zipstatus-main { max-width: 560px; margin: 0 auto; padding: 22px 2px 0; }
+
+.zipstatus-hero { position: relative; min-height: 120px; }
+.zipstatus-hero__aurora {
+  position: absolute;
+  right: -6px;
+  top: -8px;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 14px rgba(120, 80, 30, 0.25));
+}
+.zipstatus-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 11px;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.zipstatus-tag--live { background: var(--zd-paper); border: 1px solid var(--zd-glass-border); color: var(--zd-gold-ink); }
+.zipstatus-tag--done { background: var(--zd-gold-fill); color: #1b1208; }
+.zipstatus-tag--failed { background: var(--zd-danger-soft); border: 1px solid rgba(180, 83, 42, 0.4); color: var(--zd-danger); }
+.zipstatus-tag__dot { width: 8px; height: 8px; border-radius: 99px; background: var(--zd-gold); animation: zipstatus-live 1.6s ease-in-out infinite; }
+.zipstatus-hero__title {
+  margin: 12px 0 0;
+  padding-right: 112px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+.zipstatus-hero__lead { margin: 8px 0 0; padding-right: 112px; font-size: 15px; line-height: 1.45; color: var(--zd-muted); }
+
+.zipstatus-prints { margin-top: 22px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 7px; }
+.zipstatus-prints .zipdock-print { border-radius: 8px; }
+.zipstatus-prints .zipdock-print--done { border-width: 2.5px; }
+
+.zipstatus-count { margin-top: 16px; display: flex; align-items: flex-end; gap: 14px; }
+.zipstatus-count__pct {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 64px;
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  color: var(--zd-gold-ink);
+  font-variant-numeric: tabular-nums;
+}
+.zipstatus-count__pct--failed { color: var(--zd-danger); }
+.zipstatus-count__text { flex: 1; padding-bottom: 4px; display: flex; flex-direction: column; font-size: 14px; line-height: 1.4; color: var(--zd-muted); }
+.zipstatus-count__text b { color: var(--zd-ink); }
+
+.zipstatus-download { min-height: 60px; margin-top: 20px; font-size: 18px; }
+.zipstatus-expiry { margin: 10px 0 0; text-align: center; font-size: 14px; color: var(--zd-muted); }
+.zipstatus-actions { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+
+.zipstatus-h2 { margin: 34px 0 12px; font-family: var(--font-display); font-weight: 400; font-size: 24px; }
+
+.zipstatus-timeline {
+  margin: 0;
+  padding: 16px 16px 4px;
+  list-style: none;
+  border-radius: 20px;
+  background: var(--zd-glass);
+  border: 1px solid var(--zd-glass-border);
+}
+.zipstatus-row__head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.zipstatus-row__time { flex-shrink: 0; font-size: 13px; font-weight: 600; color: var(--app-subtle); font-variant-numeric: tabular-nums; }
+.zipstatus-row--mail .zipdock-step__dot { background: #efe3f7; color: #5b2d8e; border: 1.5px solid rgba(91, 45, 142, 0.3); }
+html[data-theme="dark"] .zipstatus-row--mail .zipdock-step__dot { background: rgba(165, 132, 166, 0.2); color: #e2c9f0; }
+
+.zipstatus-facts { margin: 0; border-top: 1px solid var(--app-border-strong); }
+.zipstatus-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 2px;
+  border-bottom: 1px solid var(--app-border-strong);
+  font-size: 15px;
+}
+.zipstatus-facts dt { color: var(--zd-muted); }
+.zipstatus-facts dd { margin: 0; font-weight: 700; text-align: right; }
+
+.zipstatus-note { margin-top: 24px; padding: 14px 16px; font-size: 14px; }
+
+.zipstatus-how { display: flex; flex-direction: column; gap: 10px; }
+.zipstatus-how__item {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--zd-glass);
+  border: 1px solid var(--zd-glass-border);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--zd-muted);
+}
+.zipstatus-how__item strong { font-size: 15px; color: var(--zd-ink); }
+
+.zipstatus-what {
+  margin: 24px 0 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--zd-danger-soft);
+  border: 1px solid rgba(180, 83, 42, 0.25);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--zd-muted);
+}
+.zipstatus-what b { color: var(--zd-ink); }
+
+.zipstatus-history { margin: 0; padding: 0; list-style: none; }
+.zipstatus-history li + li { border-top: 1px solid var(--app-border-strong); }
+.zipstatus-history a {
+  min-height: 60px;
+  padding: 8px 2px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--zd-ink);
+}
+.zipstatus-history__title { font-size: 15px; font-weight: 600; }
+.zipstatus-history__sub { margin-top: 2px; font-size: 13px; color: var(--zd-muted); }
+
+.zipstatus-back { margin-top: 26px; text-decoration: none; }
+
+@keyframes zipstatus-live { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .zipstatus-tag__dot { animation: none; } }

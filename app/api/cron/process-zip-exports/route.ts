@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { ZIP_EXPORT_BATCH_LIMIT } from "@/lib/zip-export-constants";
-import { processNextZipExportJob } from "@/lib/process-zip-export-job";
+import { runZipExportBatch } from "@/lib/run-zip-export-batch";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
@@ -18,14 +18,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  const db = getSupabaseServerClient();
-  const processedIds: string[] = [];
-
-  for (let i = 0; i < ZIP_EXPORT_BATCH_LIMIT; i++) {
-    const r = await processNextZipExportJob(db);
-    if (!r.processed) break;
-    if (r.jobId) processedIds.push(r.jobId);
-  }
-
+  const processedIds = await runZipExportBatch(getSupabaseServerClient());
   return NextResponse.json({ ok: true, processedJobIds: processedIds }, { status: 200 });
 }

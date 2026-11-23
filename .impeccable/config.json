@@ -21,6 +21,24 @@
         ],
         "createdAt": "2026-10-29T19:35:46.307Z",
         "reason": "Claude: flagged line is .ahead__rail::after, the 2px vertical connector between dots in the 'What's next' timeline, not a card's side accent"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "helvetica",
+        "files": [
+          "lib/zip-export-email.ts"
+        ],
+        "createdAt": "2026-11-23T18:22:04.523Z",
+        "reason": "Claude: HTML e-mail; mail clients don't load DM Sans, so the body uses the standard e-mail-safe Helvetica/Arial stack (Georgia stands in for DM Serif Display)"
+      },
+      {
+        "rule": "overused-font",
+        "value": "helvetica",
+        "files": [
+          "lib/zip-export-email.ts"
+        ],
+        "createdAt": "2026-11-23T18:28:16.460Z",
+        "reason": "Claude: HTML e-mail; mail clients can't load the app's DM Sans, so the body uses the standard e-mail-safe Helvetica/Arial stack"
       }
     ]
   }

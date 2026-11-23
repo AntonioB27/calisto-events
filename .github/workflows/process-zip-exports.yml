@@ -9,16 +9,16 @@ on:
 jobs:
   process:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 12
     steps:
       - name: Trigger ZIP export processor
         run: |
-          curl -sf -X GET \
+          curl -sSf --location-trusted --max-time 320 \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             "${{ secrets.APP_URL }}/api/cron/process-zip-exports"
 
       - name: Expire stale ZIP jobs
         run: |
-          curl -sf -X GET \
+          curl -sSf --location-trusted --max-time 320 \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             "${{ secrets.APP_URL }}/api/cron/expire-zip-exports"

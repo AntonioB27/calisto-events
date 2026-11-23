@@ -29,6 +29,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Lets the protected layout send signed-out visitors back here after login (e-mail links, deep links).
+  request.headers.set("x-calisto-path", request.nextUrl.pathname + request.nextUrl.search);
   let supabaseResponse = NextResponse.next({ request });
 
   const firstSegment = request.nextUrl.pathname.split("/").filter(Boolean)[0] ?? "";

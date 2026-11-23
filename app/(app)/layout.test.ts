@@ -7,6 +7,11 @@ vi.mock("next/navigation", () => ({
   redirect: redirectMock,
 }));
 
+let requestPath: string | null = null;
+vi.mock("next/headers", () => ({
+  headers: async () => ({ get: (name: string) => (name === "x-calisto-path" ? requestPath : null) }),
+}));
+
 vi.mock("@/lib/onboarding-profile", () => ({
   needsOrganizerOnboarding: vi.fn().mockResolvedValue(false),
 }));
@@ -29,6 +34,7 @@ vi.mock("@/lib/supabase-auth-server", async (importOriginal) => {
 
 describe("ProtectedAppLayout", () => {
   beforeEach(() => {
+    requestPath = null;
     redirectMock.mockReset();
     requireOrganizerSessionMock.mockReset();
     redirectMock.mockImplementation(() => {
@@ -46,6 +52,15 @@ describe("ProtectedAppLayout", () => {
       }),
     ).rejects.toThrow("NEXT_REDIRECT");
     expect(redirectMock).toHaveBeenCalledWith("/auth/login");
+  });
+
+  it("sends signed-out visitors back to the page they opened after login", async () => {
+    const { default: ProtectedAppLayout } = await import("./layout");
+    requireOrganizerSessionMock.mockRejectedValue({ code: "AUTH_REQUIRED" });
+    requestPath = "/events/e1/zip/j1";
+
+    await expect(ProtectedAppLayout({ children: "content" })).rejects.toThrow("NEXT_REDIRECT");
+    expect(redirectMock).toHaveBeenCalledWith("/auth/login?returnTo=%2Fevents%2Fe1%2Fzip%2Fj1");
   });
 
   it("renders children when organizer session exists", async () => {

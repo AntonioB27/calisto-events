@@ -3,6 +3,11 @@ import { NextResponse } from "next/server";
 import { ZIP_MAX_MEDIA_ITEMS } from "@/lib/zip-export-constants";
 import { wouldExceedMediaLimit } from "@/lib/zip-export-eligibility";
 import { getSupabaseAuthServerClient } from "@/lib/supabase-auth-server";
+import { getUiLocale } from "@/lib/ui-locale";
+import { kickOffZipExport } from "@/lib/zip-export-kickoff";
+
+// Packing runs in after() on this request, so give it the full function time.
+export const maxDuration = 300;
 
 async function countMediaForZip(
   eventId: string,
@@ -55,7 +60,7 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
 
   const { data: eventRow, error: evErr } = await authClient
     .from("events")
-    .select("id, organizer_id")
+    .select("id, organizer_id, title")
     .eq("id", eventId)
     .maybeSingle();
 
@@ -101,6 +106,7 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     return NextResponse.json({ error: "ZIP_JOB_ALREADY_PENDING" }, { status: 409 });
   }
 
+  const locale = await getUiLocale();
   const { data: inserted, error: insErr } = await authClient
     .from("media_zip_exports")
     .insert({
@@ -108,6 +114,7 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
       requested_by: user.id,
       include_videos: includeVideos,
       status: "queued",
+      locale,
     })
     .select("id")
     .single();
@@ -116,6 +123,9 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     console.error("[zip-export] insert", insErr?.message);
     return NextResponse.json({ error: "Could not queue export." }, { status: 500 });
   }
+
+  const eventTitle = String((eventRow as { title?: unknown }).title ?? "");
+  kickOffZipExport({ eventId, eventTitle, jobId: inserted.id, to: user.email ?? null, locale });
 
   return NextResponse.json({ id: inserted.id }, { status: 201 });
 }

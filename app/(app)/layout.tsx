@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/AppShell";
@@ -24,7 +25,8 @@ export default async function ProtectedAppLayout({
     userInitial = (fullName?.[0] ?? email?.[0] ?? 'A').toUpperCase();
   } catch (error) {
     if (isAuthRequiredError(error)) {
-      redirect("/auth/login");
+      const path = (await headers()).get("x-calisto-path");
+      redirect(path ? `/auth/login?returnTo=${encodeURIComponent(path)}` : "/auth/login");
     }
     throw error;
   }

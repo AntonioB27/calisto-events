@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ZipExportDock } from "./_components/ZipExportDock";
 
 import { EventAdminTabs } from "./_tabs/EventAdminTabs";
 import { isEventAdminTabId, type EventAdminTabId } from "./_tabs/event-admin-tabs";
@@ -355,6 +356,8 @@ export default async function EventPage({ params, searchParams }: EventPageProps
           />
         )}
       </div>
+      {/* Gallery ZIP: start, live progress and the pill that follows the organizer across tabs. */}
+      {isPrimaryOrganizer ? <ZipExportDock eventId={id} /> : null}
     </div>
   );
 }

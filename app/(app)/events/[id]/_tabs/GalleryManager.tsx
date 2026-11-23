@@ -2,21 +2,19 @@
 
 import { UploadZone } from "@/app/join/[accessCode]/_components/UploadZone";
 import { maybeCreateSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { useSearchParams } from "next/navigation";
 
 import { interpolate } from "@/lib/app-ui";
 import { plural } from "@/lib/app-ui/plural";
 import { useAppUi } from "@/components/AppUiProvider";
-import { AppBtn, appButtonClassNames } from "@/components/app-ui/AppBtn";
+import { appButtonClassNames } from "@/components/app-ui/AppBtn";
 import { Aurora } from "@/components/app-ui/Aurora";
 import { AuroraHourglass } from "@/components/app-ui/AuroraHourglass";
 import { ConfirmDialog } from "@/components/app-ui/ConfirmDialog";
 import { FilterChips, type FilterChip } from "@/components/app-ui/FilterChips";
 import { MediaLikeBadge } from "@/components/app-ui/MediaLikeBadge";
 import { PhotoLightbox } from "@/components/app-ui/PhotoLightbox";
-import { Switch } from "@/components/app-ui/Switch";
 import { TabHeader } from "@/components/app-ui/TabHeader";
 import { AlbumReview } from "./AlbumReview";
 import "./album.css";
@@ -29,6 +27,7 @@ import {
 } from "@/lib/media-likes";
 import { canGuestUpload, normalizePlanId, type PlanId } from "@/lib/plan-limits";
 import { getCachedUrls, invalidateCachedUrl, storeCachedUrls, warmCache } from "@/lib/signed-url-cache";
+import { getZipDockServerStatus, getZipDockStatus, openZipDock, subscribeZipDockStatus } from "@/lib/zip-export-status";
 
 type MediaRow = {
   id: string;
@@ -45,15 +44,6 @@ type MediaItem = MediaRow & { signedUrl?: string; thumbnailUrl?: string; uploade
 type SignedUrlEntry = {
   path: string | null;
   signedUrl: string;
-};
-
-type ZipExportRow = {
-  id: string;
-  status: string;
-  include_videos: boolean;
-  error_message: string | null;
-  expires_at: string | null;
-  created_at: string;
 };
 
 const PAGE_SIZE = 60;
@@ -177,13 +167,7 @@ export function GalleryManager({
   const [pendingLikeId, setPendingLikeId] = useState<string | null>(null);
   const [mediaFilter, setMediaFilter] = useState<MediaFilterId>("all");
   const [pendingDelete, setPendingDelete] = useState<MediaItem | null>(null);
-  const [zipExports, setZipExports] = useState<ZipExportRow[]>([]);
-  // ?export=zip (from More / event home "Download all") opens the export dialog straight away.
-  const exportRequested = useSearchParams().get("export") === "zip";
-  const [zipModalOpen, setZipModalOpen] = useState(() => isPrimaryOrganizer && exportRequested);
-  const [zipIncludeVideos, setZipIncludeVideos] = useState(false);
-  const [zipBusy, setZipBusy] = useState(false);
-  const [zipPanelError, setZipPanelError] = useState<string | null>(null);
+  const zipStatus = useSyncExternalStore(subscribeZipDockStatus, getZipDockStatus, getZipDockServerStatus);
   const [columns, setColumns] = useState<(typeof GRID_SIZES)[number]>(3);
   const [loadingMore, setLoadingMore] = useState(false);
   // Exact album counts (header sentence and chips); null until loaded or if the count queries fail.
@@ -275,29 +259,6 @@ export function GalleryManager({
   ]);
 
   useEffect(() => {
-    if (!supabase || !isPrimaryOrganizer) return;
-    let cancelled = false;
-    const tick = async () => {
-      if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
-      const { data, error } = await supabase
-        .from("media_zip_exports")
-        .select("id, status, include_videos, error_message, expires_at, created_at")
-        .eq("event_id", eventId)
-        .order("created_at", { ascending: false })
-        .limit(5);
-      if (!cancelled && !error) {
-        setZipExports((data ?? []) as ZipExportRow[]);
-      }
-    };
-    void tick();
-    const id = window.setInterval(() => void tick(), 4000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(id);
-    };
-  }, [supabase, isPrimaryOrganizer, eventId]);
-
-  useEffect(() => {
     if (!isPrimaryOrganizer) return;
     void fetch(`/api/events/${eventId}/moderation`, {
       method: "POST",
@@ -307,64 +268,6 @@ export function GalleryManager({
       // Non-critical — ignore silently.
     });
   }, [eventId, isPrimaryOrganizer]);
-
-  const downloadZipExport = useCallback(
-    async (jobId: string) => {
-      setZipPanelError(null);
-      try {
-        const res = await fetch(`/api/events/${eventId}/zip-export/${jobId}/sign`, { method: "POST" });
-        const body = (await res.json()) as { url?: string; error?: string };
-        if (!res.ok || !body.url) throw new Error(body.error ?? ui.gallery.zipExportErrorGeneric);
-        window.location.href = body.url;
-      } catch (e) {
-        setZipPanelError(e instanceof Error ? e.message : ui.gallery.zipExportErrorGeneric);
-      }
-    },
-    [eventId, ui.gallery.zipExportErrorGeneric],
-  );
-
-  const confirmStartZip = useCallback(async () => {
-    setZipBusy(true);
-    setZipPanelError(null);
-    try {
-      const res = await fetch(`/api/events/${eventId}/zip-export`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ includeVideos: zipIncludeVideos }),
-      });
-      const body = (await res.json()) as { error?: string };
-      if (res.status === 400 && body.error === "ZIP_TOO_MANY_ITEMS") {
-        setZipPanelError(ui.gallery.zipExportErrorTooMany);
-      } else if (res.status === 409) {
-        setZipPanelError(ui.gallery.zipExportErrorPending);
-      } else if (res.status === 500 && body.error === "ZIP_QUEUE_CHECK_FAILED") {
-        setZipPanelError(ui.gallery.zipExportErrorQueue);
-      } else if (!res.ok) {
-        setZipPanelError(body.error ?? ui.gallery.zipExportErrorGeneric);
-      } else {
-        setZipModalOpen(false);
-        if (supabase) {
-          const { data } = await supabase
-            .from("media_zip_exports")
-            .select("id, status, include_videos, error_message, expires_at, created_at")
-            .eq("event_id", eventId)
-            .order("created_at", { ascending: false })
-            .limit(5);
-          setZipExports((data ?? []) as ZipExportRow[]);
-        }
-      }
-    } finally {
-      setZipBusy(false);
-    }
-  }, [
-    eventId,
-    supabase,
-    zipIncludeVideos,
-    ui.gallery.zipExportErrorGeneric,
-    ui.gallery.zipExportErrorPending,
-    ui.gallery.zipExportErrorQueue,
-    ui.gallery.zipExportErrorTooMany,
-  ]);
 
   const fetchPage = useCallback(
     async (pageIndex: number, replace: boolean) => {
@@ -921,110 +824,6 @@ export function GalleryManager({
         />
       </div>
 
-      {/* ── ZIP MODAL ── */}
-      {zipModalOpen ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="zip-export-title"
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 1200,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 20,
-            background: "rgba(34,21,9,0.5)",
-            backdropFilter: "blur(4px)",
-          }}
-          onClick={zipBusy ? undefined : () => setZipModalOpen(false)}
-        >
-          <div className="org-album-sheet" onClick={(e) => e.stopPropagation()}>
-            <h2
-              id="zip-export-title"
-              style={{ margin: 0, fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 26, lineHeight: 1.1, color: "var(--app-text)" }}
-            >
-              {ui.gallery.zipExportModalTitle}
-            </h2>
-            <p style={{ margin: "10px 0 0", fontSize: 14, lineHeight: 1.5, color: "var(--app-text-sub)" }}>
-              {ui.gallery.zipExportModalBody}
-            </p>
-            {zipExports.length > 0 ? (
-              <ul className="warm-list" style={{ marginTop: 14 }}>
-                {zipExports.map((z) => (
-                  <li key={z.id} style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 52, padding: "6px 8px 6px 14px", fontSize: 14 }}>
-                    <span
-                      aria-hidden
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        flexShrink: 0,
-                        background: z.status === "ready" ? "var(--app-success)" : z.status === "failed" ? "var(--app-danger)" : "var(--app-gold)",
-                      }}
-                    />
-                    <span style={{ flex: 1, minWidth: 0, color: "var(--app-text-sub)" }}>
-                      {z.status === "queued"
-                        ? ui.gallery.zipExportQueued
-                        : z.status === "running"
-                          ? ui.gallery.zipExportRunning
-                          : z.status === "ready"
-                            ? ui.gallery.zipExportReady
-                            : z.status === "failed"
-                              ? `${ui.gallery.zipExportFailed}${z.error_message ? `: ${z.error_message}` : ""}`
-                              : z.status === "expired"
-                                ? ui.gallery.zipExportExpired
-                                : z.status}
-                    </span>
-                    {z.status === "ready" ? (
-                      <AppBtn
-                        type="button"
-                        variant="gold"
-                        size="sm"
-                        style={{ minHeight: 44, borderRadius: 12 }}
-                        onClick={() => void downloadZipExport(z.id)}
-                      >
-                        {ui.gallery.zipExportDownload}
-                      </AppBtn>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            {zipPanelError ? (
-              <p role="alert" style={{ margin: "10px 0 0", fontSize: 13, color: "var(--app-danger)" }}>
-                {zipPanelError}
-              </p>
-            ) : null}
-            <div style={{ marginTop: 12 }}>
-              <Switch
-                checked={zipIncludeVideos}
-                onChange={setZipIncludeVideos}
-                label={ui.gallery.zipExportIncludeVideos}
-                disabled={zipBusy}
-              />
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "flex-end", marginTop: 18 }}>
-              <AppBtn type="button" variant="ghost" size="sm" style={{ minHeight: 44 }} disabled={zipBusy} onClick={() => setZipModalOpen(false)}>
-                {ui.common.cancel}
-              </AppBtn>
-              <AppBtn
-                type="button"
-                variant="gold"
-                size="sm"
-                style={{ minHeight: 44, padding: "0 18px", borderRadius: 12 }}
-                disabled={zipBusy}
-                loading={zipBusy}
-                onClick={() => void confirmStartZip()}
-              >
-                {ui.gallery.zipExportStart}
-              </AppBtn>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
       {error ? (
         <p role="alert" style={{ margin: "12px 4px 0", fontSize: 13, color: "var(--app-danger)" }}>
           {error}
@@ -1062,11 +861,15 @@ export function GalleryManager({
             </span>
             <div className="org-album-toolbar__actions">
               {isPrimaryOrganizer ? (
-                <button type="button" className="org-album-tool" aria-label={ui.gallery.zipExportPrepare} onClick={() => setZipModalOpen(true)}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <path d="M12 4v11M7 10l5 5 5-5M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  ZIP
+                <button type="button" className="org-album-tool" aria-label={ui.gallery.zipExportPrepare} onClick={openZipDock}>
+                  {zipStatus.busy ? (
+                    <span className="zipdock-spinner" aria-hidden />
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <path d="M12 4v11M7 10l5 5 5-5M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                  {zipStatus.busy ? `ZIP ${zipStatus.pct}%` : "ZIP"}
                 </button>
               ) : null}
               <button
