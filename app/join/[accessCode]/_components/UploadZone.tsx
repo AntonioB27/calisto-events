@@ -4,11 +4,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePostHog } from "posthog-js/react";
 import { useAppUi } from "@/components/AppUiProvider";
+import { Aurora } from "@/components/app-ui/Aurora";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import { interpolate, type AppUiDict } from "@/lib/app-ui";
+import { plural } from "@/lib/app-ui/plural";
+import { bcp47FromUiLocale } from "@/lib/locale-bcp47";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { formatZipSize } from "@/lib/zip-export-view";
 
+import { scheduleAutoHide, UPLOAD_DONE_HIDE_MS, uploadPillPhase, type UploadPillPhase } from "./upload-pill";
 import { UploadSuccess } from "./UploadSuccess";
+import "@/app/(app)/events/[id]/_components/zip-dock.css";
+import "./upload-dock.css";
 
 const EVENT_MEDIA_BUCKET = "event-media";
 
@@ -17,6 +24,12 @@ type UploadItem = {
   file: File;
   status: "pending" | "done" | "error";
   errorMessage?: string;
+  /** Object URL for the pill and list thumbnails (images only); revoked when the item leaves the queue. */
+  preview?: string;
+};
+
+const revokePreview = (item: UploadItem) => {
+  if (item.preview) URL.revokeObjectURL(item.preview);
 };
 
 type Props = {
@@ -125,265 +138,217 @@ async function uploadVideoDirect(eventId: string, file: File): Promise<UploadRes
   return { ok: true };
 }
 
-// ── Spinner SVG ───────────────────────────────────────────────────────────────
-function Spinner({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden style={{ animation: "uz-spin 0.75s linear infinite", flexShrink: 0 }}>
-      <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="3" strokeOpacity="0.25" />
-      <path d="M12 2a10 10 0 0 1 10 10" stroke={color} strokeWidth="3" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-// ── Status icon ───────────────────────────────────────────────────────────────
-function StatusIcon({ status, isUploading }: { status: UploadItem["status"]; isUploading: boolean }) {
-  if (isUploading) return <Spinner size={14} color="var(--app-gold, #C5922A)" />;
-  if (status === "done")  return <span style={{ color: "var(--app-success, #4caf50)", fontSize: 14, lineHeight: 1 }}>✓</span>;
-  if (status === "error") return <span style={{ color: "var(--app-danger, #e04a4a)", fontSize: 14, lineHeight: 1 }}>✕</span>;
-  return <span style={{ color: "var(--app-muted)", fontSize: 11 }}>···</span>;
-}
-
-// ── Upload log popup (portalled) ──────────────────────────────────────────────
-function UploadLog({
+// ── Upload dock: floating pill + list sheet (portalled), same family as the gallery ZIP dock ──
+function UploadDock({
   queue,
+  phase,
+  leaving,
   open,
+  onOpen,
   onClose,
   onRetry,
-  onClearDone,
-  expandedId,
-  onToggleExpand,
-  t,
+  onRetryAll,
+  onDismiss,
 }: {
-  t: FlowCopy;
   queue: UploadItem[];
+  phase: UploadPillPhase;
+  leaving: boolean;
   open: boolean;
+  onOpen: () => void;
   onClose: () => void;
   onRetry: (id: string) => void;
-  onClearDone: () => void;
-  expandedId: string | null;
-  onToggleExpand: (id: string) => void;
+  onRetryAll: () => void;
+  onDismiss: () => void;
 }) {
-  const hasDone   = queue.some((i) => i.status === "done");
-  const hasErrors = queue.some((i) => i.status === "error");
-  const uploading = queue.filter((i) => i.status === "pending");
-  const done      = queue.filter((i) => i.status === "done").length;
-  const total     = queue.length;
+  const ui = useAppUi();
+  const t = ui.guestFlow;
+  const locale = bcp47FromUiLocale(ui.locale);
+  const sheetRef = useRef<HTMLElement>(null);
 
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-  if (!mounted) return null;
+  useEffect(() => {
+    if (!open) return;
+    sheetRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  // The queue only fills after a pick in the browser, so the server render is always hidden.
+  if (phase === "hidden") return null;
+
+  const total = queue.length;
+  const done = queue.filter((i) => i.status === "done").length;
+  const errors = queue.filter((i) => i.status === "error").length;
+  const settled = done + errors;
+  const currentIdx = queue.findIndex((i) => i.status === "pending");
+  const top = currentIdx < 0 ? total - 1 : currentIdx;
+  // The top print is the file going up right now, the two under it the ones just before.
+  const stack = [top - 2, top - 1, top].map((i) => queue[i]?.preview);
+
+  const title =
+    phase === "done" ? t.pillDone : phase === "failed" ? plural(locale, errors, t.pillFailed) : t.pillUploading;
+  const sub =
+    phase === "done"
+      ? plural(locale, done, t.pillDoneSub)
+      : phase === "failed"
+        ? done > 0 ? t.pillFailedSub : t.pillFailedSubAll
+        : t.pillUploadingSub;
+  const sheetTitle = phase === "failed" ? t.sheetFailedTitle : phase === "done" ? t.pillDone : t.logTitle;
+  const sheetBody = interpolate(
+    phase === "failed" ? t.sheetFailedBody : phase === "done" ? t.sheetDoneBody : t.sheetBody,
+    { done, total },
+  );
+  const rank = (s: UploadItem["status"]) => (s === "error" ? 0 : s === "pending" ? 1 : 2);
+  const rows = queue.map((item, i) => ({ item, i })).sort((a, b) => rank(a.item.status) - rank(b.item.status) || a.i - b.i);
+  const hideBroken = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.style.visibility = "hidden"; // HEIC and friends the browser can't draw
+  };
 
   return createPortal(
     <>
-      {/* Backdrop */}
-      <div
-        aria-hidden
-        onClick={onClose}
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 9000,
-          background: open ? "rgba(0,0,0,0.45)" : "transparent",
-          backdropFilter: open ? "blur(2px)" : "none",
-          pointerEvents: open ? "auto" : "none",
-          transition: "background 200ms, backdrop-filter 200ms",
-        }}
-      />
-
-      {/* Sheet */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={t.logTitle}
-        style={{
-          position: "fixed",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 9001,
-          transform: open ? "translateY(0)" : "translateY(110%)",
-          transition: "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)",
-          background: "var(--app-surface, #1a1410)",
-          borderRadius: "20px 20px 0 0",
-          border: "1px solid var(--app-border, rgba(255,255,255,0.1))",
-          borderBottom: "none",
-          boxShadow: "0 -12px 40px rgba(0,0,0,0.4)",
-          display: "flex",
-          flexDirection: "column",
-          maxHeight: "72vh",
-          paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))",
-        }}
-      >
-        {/* Handle */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px" }}>
-          <div style={{ width: 36, height: 4, borderRadius: 99, background: "var(--app-border-strong, rgba(255,255,255,0.2))" }} />
+      {!open ? (
+        <div className={`zipdock-pill-wrap uploaddock-wrap${phase === "failed" ? " uploaddock-wrap--failed" : ""}`}>
+          <button
+            type="button"
+            className={`zipdock-pill zipdock-pill--${phase === "done" ? "ready" : phase === "failed" ? "failed" : "working"}${leaving ? " uploaddock-leaving" : ""}`}
+            aria-label={interpolate(t.logAria, { label: title })}
+            onClick={onOpen}
+          >
+            <span className="zipdock-pill__handle" aria-hidden />
+            <span className="zipdock-stack" aria-hidden>
+              {stack.map((src, i) => (
+                <span key={i} className={`zipdock-stack__photo zipdock-stack__photo--${i}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- local object URL */}
+                  {src ? <img src={src} alt="" onError={hideBroken} /> : null}
+                </span>
+              ))}
+              {phase === "done" ? (
+                <span className="zipdock-stack__badge">
+                  <CheckIcon size={11} />
+                </span>
+              ) : phase === "failed" ? (
+                <span className="zipdock-stack__badge uploaddock-badge--failed">!</span>
+              ) : null}
+            </span>
+            <span className="zipdock-pill__text">
+              <span className="zipdock-pill__title" aria-live="polite">{title}</span>
+              <span className="zipdock-pill__sub">{sub}</span>
+            </span>
+            {phase === "uploading" ? (
+              <span className="zipdock-pill__pct">
+                {settled}/{total}
+              </span>
+            ) : phase === "done" ? (
+              <span className="zipdock-pill__cta" aria-hidden>
+                <CheckIcon size={20} />
+              </span>
+            ) : null}
+            {phase === "uploading" ? (
+              <span className="zipdock-pill__track" aria-hidden>
+                <span className="zipdock-pill__fill" style={{ transform: `scaleX(${settled / total})` }} />
+              </span>
+            ) : phase === "done" ? (
+              <span className="uploaddock-drain" style={{ animationDuration: `${UPLOAD_DONE_HIDE_MS}ms` }} aria-hidden />
+            ) : null}
+          </button>
+          {phase === "failed" ? (
+            <button type="button" className="zipdock-btn zipdock-btn--gold uploaddock-retry" onClick={onRetryAll}>
+              <RetryIcon />
+              {t.retryShort}
+            </button>
+          ) : null}
         </div>
+      ) : (
+        <div className="zipdock-layer">
+          <button type="button" className="zipdock-scrim" aria-label={ui.gallery.zipDockMinimize} onClick={onClose} />
+          <section ref={sheetRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="uploaddock-title" className="zipdock-sheet">
+            <button type="button" className="zipdock-sheet__grab" aria-label={ui.gallery.zipDockMinimize} onClick={onClose}>
+              <span aria-hidden />
+            </button>
+            <Aurora pose="camera" size={96} className="zipdock-sheet__aurora" />
+            <h2 id="uploaddock-title" className="zipdock-sheet__title">
+              {sheetTitle}
+            </h2>
+            <p className="zipdock-sheet__body uploaddock-sheet-body">{sheetBody}</p>
 
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 18px 12px", borderBottom: "1px solid var(--app-border)" }}>
-          <div>
-            <span style={{ fontFamily: "var(--font-display, serif)", fontStyle: "italic", fontWeight: 700, fontSize: 18, color: "var(--app-text)" }}>
-              {t.logTitle}
-            </span>
-            <span style={{ marginLeft: 10, fontSize: 11, color: "var(--app-muted)", fontWeight: 600 }}>
-              {done}/{total}
-              {hasErrors ? ` · ${interpolate(t.statusFailed, { count: queue.filter(i => i.status === "error").length })}` : ""}
-              {uploading.length > 0 ? ` · ${t.statusUploading}` : ""}
-            </span>
-          </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            {hasDone && (
-              <button
-                type="button"
-                onClick={onClearDone}
-                style={{ fontSize: 11, fontWeight: 600, color: "var(--app-muted)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", borderRadius: 6 }}
-              >
-                {t.clearDone}
+            <ul className="uploaddock-list">
+              {rows.map(({ item, i }) => {
+                const size = formatZipSize(item.file.size, locale);
+                const current = i === currentIdx;
+                return (
+                  <li key={item.id} className={`uploaddock-row${item.status === "error" ? " uploaddock-row--error" : ""}`}>
+                    <span className="uploaddock-thumb" aria-hidden>
+                      {/* eslint-disable-next-line @next/next/no-img-element -- local object URL */}
+                      {item.preview ? <img src={item.preview} alt="" onError={hideBroken} /> : null}
+                    </span>
+                    <span className="uploaddock-row__text">
+                      <span className="uploaddock-row__name">{item.file.name}</span>
+                      <span className="uploaddock-row__sub">
+                        {item.status === "error"
+                          ? (item.errorMessage ?? t.errFailed)
+                          : interpolate(item.status === "done" ? t.rowDone : current ? t.rowUploading : t.rowQueued, { size })}
+                      </span>
+                      {item.status === "error" ? (
+                        <button type="button" className="uploaddock-row__retry" onClick={() => onRetry(item.id)}>
+                          {t.retry}
+                        </button>
+                      ) : null}
+                    </span>
+                    <span className="uploaddock-row__status" aria-hidden>
+                      {item.status === "done" ? (
+                        <span className="uploaddock-status--done">
+                          <CheckIcon size={13} />
+                        </span>
+                      ) : item.status === "error" ? (
+                        <span className="uploaddock-status--error">!</span>
+                      ) : current ? (
+                        <span className="zipdock-spinner" />
+                      ) : (
+                        <span className="uploaddock-status--queued" />
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+
+            {phase === "failed" ? (
+              <div className="zipdock-actions">
+                <button type="button" className="zipdock-btn zipdock-btn--ghost" onClick={onDismiss}>
+                  {t.dismissFailed}
+                </button>
+                <button type="button" className="zipdock-btn zipdock-btn--gold zipdock-btn--wide" onClick={onRetryAll}>
+                  {t.retryAll}
+                </button>
+              </div>
+            ) : (
+              <button type="button" className="zipdock-btn zipdock-btn--ghost zipdock-btn--block" onClick={onClose}>
+                {ui.gallery.zipDockMinimize}
               </button>
             )}
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label={t.closeLog}
-              style={{ width: 28, height: 28, borderRadius: 8, background: "var(--app-surface-2)", border: "1px solid var(--app-border)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--app-muted)", fontSize: 16 }}
-            >
-              ×
-            </button>
-          </div>
+          </section>
         </div>
-
-        {/* File list */}
-        <div style={{ overflowY: "auto", flex: 1, padding: "8px 12px" }}>
-          {queue.map((item, i) => {
-            const isUploading = item.status === "pending" && i === queue.findIndex(q => q.status === "pending");
-            const isExpanded  = expandedId === item.id;
-            const isError     = item.status === "error";
-
-            return (
-              <div key={item.id}>
-                <div
-                  onClick={() => isError && onToggleExpand(item.id)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "10px 8px",
-                    borderRadius: 10,
-                    cursor: isError ? "pointer" : "default",
-                    background: isExpanded ? "var(--app-surface-2)" : "transparent",
-                    transition: "background 150ms",
-                  }}
-                >
-                  <StatusIcon status={item.status} isUploading={isUploading} />
-                  <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: "var(--app-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {item.file.name}
-                  </span>
-                  <span style={{ fontSize: 10, color: "var(--app-muted)", flexShrink: 0, fontWeight: 600, letterSpacing: "0.04em" }}>
-                    {(item.file.size / 1024 / 1024).toFixed(1)} MB
-                  </span>
-                  {isError && (
-                    <span style={{ fontSize: 11, color: "var(--app-muted)", flexShrink: 0 }}>
-                      {isExpanded ? "▲" : "▼"}
-                    </span>
-                  )}
-                </div>
-
-                {/* Expanded error row */}
-                {isExpanded && isError && (
-                  <div style={{ margin: "0 8px 6px", padding: "10px 12px", borderRadius: 8, background: "color-mix(in srgb, var(--app-danger, #e04a4a) 10%, var(--app-surface))", border: "1px solid color-mix(in srgb, var(--app-danger, #e04a4a) 30%, transparent)" }}>
-                    <p style={{ margin: "0 0 8px", fontSize: 12, color: "var(--app-danger, #e04a4a)", lineHeight: 1.5 }}>
-                      {item.errorMessage ?? t.errFailed}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); onRetry(item.id); }}
-                      style={{
-                        padding: "6px 14px",
-                        borderRadius: 8,
-                        border: "none",
-                        background: "var(--app-gold, #C5922A)",
-                        color: "#1b1208",
-                        fontSize: 12,
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        letterSpacing: "0.02em",
-                      }}
-                    >
-                      {t.retry}
-                    </button>
-                  </div>
-                )}
-
-                {i < queue.length - 1 && (
-                  <div style={{ height: 1, background: "var(--app-border)", margin: "0 8px", opacity: 0.5 }} />
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      )}
     </>,
     document.body,
   );
 }
 
-// ── Floating status button (portalled) ───────────────────────────────────────
-function UploadStatusButton({ queue, onClick, t }: { queue: UploadItem[]; onClick: () => void; t: FlowCopy }) {
-  const done     = queue.filter((i) => i.status === "done").length;
-  const errors   = queue.filter((i) => i.status === "error").length;
-  const pending  = queue.filter((i) => i.status === "pending").length;
-  const total    = queue.length;
-  const isActive = pending > 0;
+function CheckIcon({ size }: Readonly<{ size: number }>) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
-  if (typeof document === "undefined" || queue.length === 0) return null;
-
-  const accent = errors > 0 ? "var(--app-danger, #e04a4a)" : isActive ? "var(--app-gold, #C5922A)" : "var(--app-success, #4caf50)";
-  const label  = isActive
-    ? `${done}/${total}`
-    : errors > 0
-      ? interpolate(t.statusFailed, { count: errors })
-      : interpolate(t.statusUploaded, { count: done });
-
-  return createPortal(
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={interpolate(t.logAria, { label })}
-      style={{
-        position: "fixed",
-        right: 18,
-        bottom: "var(--upload-pill-bottom, calc(104px + env(safe-area-inset-bottom, 0px)))",
-        zIndex: 8999,
-        display: "flex",
-        alignItems: "center",
-        gap: 7,
-        padding: "9px 14px",
-        borderRadius: 22,
-        border: `1px solid ${accent}`,
-        background: "var(--app-surface, #1a1410)",
-        boxShadow: `0 4px 20px rgba(0,0,0,0.35), 0 0 0 1px ${accent}30`,
-        cursor: "pointer",
-        transition: "transform 180ms, box-shadow 180ms",
-        fontFamily: "inherit",
-      }}
-      onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.04)")}
-      onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
-    >
-      {isActive ? (
-        <Spinner size={13} color={accent} />
-      ) : errors > 0 ? (
-        <span style={{ fontSize: 13, color: accent, lineHeight: 1 }}>⚠</span>
-      ) : (
-        <span style={{ fontSize: 13, color: accent, lineHeight: 1 }}>✓</span>
-      )}
-      <span style={{ fontSize: 12, fontWeight: 700, color: accent, letterSpacing: "0.02em" }}>
-        {label}
-      </span>
-      <span style={{ fontSize: 12, color: "var(--app-muted)", fontWeight: 500 }}>
-        {t.uploadsPill}
-      </span>
-    </button>,
-    document.body,
+function RetryIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M4 12a8 8 0 0 1 13.7-5.6L20 9M20 4v5h-5M20 12a8 8 0 0 1-13.7 5.6L4 15M4 20v-5h5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 
@@ -401,11 +366,36 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost, label, celebr
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [logOpen, setLogOpen] = useState(false);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [leaving, setLeaving] = useState(false);
   const processingRef = useRef(false);
   const onUploadedRef = useRef(onUploaded);
+  const queueRef = useRef(queue);
+  const phase = uploadPillPhase(queue);
 
-  useEffect(() => { onUploadedRef.current = onUploaded; tRef.current = t; });
+  useEffect(() => { onUploadedRef.current = onUploaded; tRef.current = t; queueRef.current = queue; });
+  useEffect(() => () => queueRef.current.forEach(revokePreview), []);
+
+  const removeWhere = useCallback((drop: (item: UploadItem) => boolean) => {
+    setQueue((prev) => {
+      prev.filter(drop).forEach(revokePreview);
+      return prev.filter((item) => !drop(item));
+    });
+  }, []);
+
+  // All succeeded: the gold pill waits a moment, fades, then the finished items leave the queue.
+  useEffect(
+    () =>
+      scheduleAutoHide(
+        phase,
+        logOpen,
+        () => setLeaving(true),
+        () => {
+          removeWhere((item) => item.status === "done");
+          setLeaving(false);
+        },
+      ),
+    [phase, logOpen, removeWhere],
+  );
 
   useEffect(() => {
     if (processingRef.current || disabled) return;
@@ -470,14 +460,14 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost, label, celebr
       if (disabled) return;
       const valid = files.filter((f) => f.type.startsWith("image/") || f.type.startsWith("video/"));
       if (valid.length === 0) return;
-      setQueue((prev) => [
-        ...prev,
-        ...valid.map((file) => ({
-          id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
-          file,
-          status: "pending" as const,
-        })),
-      ]);
+      setLeaving(false);
+      const added = valid.map((file) => ({
+        id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+        file,
+        status: "pending" as const,
+        preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
+      }));
+      setQueue((prev) => [...prev, ...added]);
     },
     [disabled],
   );
@@ -494,18 +484,11 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost, label, celebr
     handleFiles(e.dataTransfer.files);
   }
 
-  function retryItem(id: string) {
-    setQueue((prev) => prev.map((item) => item.id === id ? { ...item, status: "pending", errorMessage: undefined } : item));
-    setExpandedId(null);
+  function retryWhere(pick: (item: UploadItem) => boolean) {
+    setQueue((prev) => prev.map((item) => (item.status === "error" && pick(item) ? { ...item, status: "pending", errorMessage: undefined } : item)));
   }
 
-  function clearDone() {
-    setQueue((prev) => prev.filter((item) => item.status !== "done"));
-  }
-
-  function toggleExpand(id: string) {
-    setExpandedId((prev) => (prev === id ? null : id));
-  }
+  const closeLog = useCallback(() => setLogOpen(false), []);
 
   const dropSurface = (() => {
     if (disabled) return { cursor: "not-allowed" as const, opacity: 0.5, border: "2px dashed color-mix(in srgb, var(--app-border) 70%, transparent)", background: "color-mix(in srgb, var(--app-surface-2) 40%, transparent)" };
@@ -526,17 +509,23 @@ export function UploadZone({ eventId, onUploaded, disabled, ghost, label, celebr
 
   const portalElements = (
     <>
-      <style>{`@keyframes uz-spin { to { transform: rotate(360deg); } }`}</style>
-      <UploadStatusButton queue={queue} onClick={() => setLogOpen(true)} t={t} />
-      <UploadLog
+      <UploadDock
         queue={queue}
+        phase={phase}
+        leaving={leaving}
         open={logOpen}
-        onClose={() => setLogOpen(false)}
-        onRetry={retryItem}
-        onClearDone={clearDone}
-        expandedId={expandedId}
-        onToggleExpand={toggleExpand}
-        t={t}
+        onOpen={() => setLogOpen(true)}
+        onClose={closeLog}
+        onRetry={(id) => retryWhere((item) => item.id === id)}
+        onRetryAll={() => {
+          retryWhere(() => true);
+          setLogOpen(false);
+        }}
+        onDismiss={() => {
+          // Dismissing failures ends the batch: the finished ones are already in the album.
+          removeWhere((item) => item.status !== "pending");
+          setLogOpen(false);
+        }}
       />
       {celebration ? (
         <UploadSuccess

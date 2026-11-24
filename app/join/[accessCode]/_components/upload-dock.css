@@ -1,0 +1,123 @@
+/* Upload pill and list. Same family as the gallery ZIP dock: zip-dock.css supplies the tokens, pill, stack and sheet. */
+
+.zipdock-pill-wrap.uploaddock-wrap { bottom: var(--upload-pill-bottom, calc(104px + env(safe-area-inset-bottom, 0px))); }
+/* A running ZIP pill sits in the same spot: stack this one above it. */
+body:has(.zipdock-pill-wrap:not(.uploaddock-wrap)) .uploaddock-wrap { transform: translateY(-78px); }
+
+.uploaddock-wrap--failed .zipdock-pill { padding-right: 124px; }
+.uploaddock-wrap--failed .zipdock-pill__sub { white-space: normal; }
+.uploaddock-wrap .zipdock-pill--failed .zipdock-stack { filter: none; opacity: 1; }
+.uploaddock-wrap .zipdock-pill--failed .zipdock-stack__photo { filter: grayscale(0.7); opacity: 0.75; }
+.uploaddock-badge--failed { background: var(--zd-paper); border-color: #c8693f; color: var(--zd-danger); font-size: 12px; font-weight: 700; }
+
+.zipdock-btn.uploaddock-retry {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  flex: none;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  gap: 6px;
+}
+
+/* Done: a thin line drains while the pill waits, then it fades away. */
+.uploaddock-drain {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(74, 53, 23, 0.35);
+  transform-origin: left center;
+  animation: uploaddock-drain 4s linear forwards;
+}
+.zipdock-pill.uploaddock-leaving { animation: uploaddock-out 0.4s ease forwards; pointer-events: none; }
+
+/* Sheet list */
+.uploaddock-sheet-body { padding-right: 96px; }
+.uploaddock-list {
+  margin: 16px 0 0;
+  padding: 8px 14px;
+  list-style: none;
+  border-radius: 18px;
+  background: var(--zd-soft);
+  border: 1px solid var(--zd-glass-border);
+}
+.uploaddock-row { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; }
+.uploaddock-row + .uploaddock-row { border-top: 1px solid rgba(180, 138, 48, 0.16); }
+.uploaddock-thumb {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 2px solid #fffaf2;
+  border-radius: 8px;
+  background: #e8d7b8;
+  box-shadow: 0 5px 9px -5px rgba(60, 35, 10, 0.55);
+}
+.uploaddock-thumb img,
+.uploaddock-wrap .zipdock-stack__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.uploaddock-row__text { flex: 1; min-width: 0; padding-top: 2px; }
+.uploaddock-row__name {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.uploaddock-row__sub { display: block; margin-top: 2px; font-size: 13px; line-height: 1.35; color: var(--zd-muted); }
+.uploaddock-row--error .uploaddock-row__sub { color: var(--zd-danger); }
+.uploaddock-row__retry {
+  margin-top: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(201, 145, 46, 0.55);
+  background: var(--zd-paper);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--zd-gold-ink);
+  cursor: pointer;
+}
+.uploaddock-row__retry:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 2px; }
+.uploaddock-row__status { width: 28px; height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.uploaddock-status--done {
+  width: 26px;
+  height: 26px;
+  border-radius: 99px;
+  background: var(--zd-gold-fill);
+  color: #1b1208;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.uploaddock-status--queued { width: 22px; height: 22px; box-sizing: border-box; border-radius: 99px; border: 1.5px dashed rgba(150, 120, 80, 0.5); }
+.uploaddock-status--error {
+  width: 26px;
+  height: 26px;
+  box-sizing: border-box;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--zd-danger);
+  background: var(--zd-danger-soft);
+  border: 1.5px solid rgba(180, 83, 42, 0.5);
+}
+
+@keyframes uploaddock-drain { to { transform: scaleX(0); } }
+@keyframes uploaddock-out { to { opacity: 0; transform: translateY(14px) scale(0.97); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .uploaddock-drain { animation: none; }
+  .zipdock-pill.uploaddock-leaving { animation-duration: 0.01s; }
+}
