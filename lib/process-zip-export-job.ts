@@ -10,6 +10,9 @@ import { sendZipExportEmail, zipEmailLocale, type ZipExportEmailKind } from "@/l
 /** How often the worker writes "file X of Y" to the job row while packing. */
 const ZIP_PROGRESS_REPORT_MS = 1500;
 
+/** Files downloaded ahead of the one being written, so Storage and the ZIP stream work at the same time. */
+const ZIP_PREFETCH = 3;
+
 /** archiver@8 — avoid `import("archiver")` in dev: Turbopack HMR can panic with `InvalidExport` on that ESM graph. */
 const archiverRequire = createRequire(import.meta.url);
 
@@ -24,9 +27,10 @@ type ZipArchiveInstance = NodeJS.EventEmitter & {
 
 function createZipArchive(): ZipArchiveInstance {
   const { ZipArchive } = archiverRequire("archiver") as {
-    ZipArchive: new (options?: { zlib?: { level?: number } }) => ZipArchiveInstance;
+    ZipArchive: new (options?: { store?: boolean }) => ZipArchiveInstance;
   };
-  return new ZipArchive({ zlib: { level: 6 } });
+  // Photos and videos are already compressed; deflating them burns minutes of CPU for ~1% smaller files.
+  return new ZipArchive({ store: true });
 }
 
 function siteOrigin(): string {
@@ -159,13 +163,26 @@ async function streamZipToStorage(
     }
     let done = 0;
     let lastReport = Date.now();
-    for (const row of rows) {
-      const { data: blob, error: dlErr } = await db.storage.from("event-media").download(row.storage_path);
-      if (dlErr || !blob) {
-        throw new ZipItemError(dlErr?.message ?? "download failed", row.storage_path.split("/").pop() || row.storage_path);
-      }
+    const fetchRow = (row: (typeof rows)[number]) => {
+      const p = db.storage
+        .from("event-media")
+        .download(row.storage_path)
+        .then(async ({ data: blob, error: dlErr }) => {
+          if (dlErr || !blob) {
+            throw new ZipItemError(dlErr?.message ?? "download failed", row.storage_path.split("/").pop() || row.storage_path);
+          }
+          return Buffer.from(await blob.arrayBuffer());
+        });
+      p.catch(() => {}); // surfaced when awaited below; avoids an unhandled rejection for files ahead
+      return p;
+    };
+    const ahead = rows.slice(0, ZIP_PREFETCH).map(fetchRow);
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const buf = await ahead.shift()!;
+      if (i + ZIP_PREFETCH < rows.length) ahead.push(fetchRow(rows[i + ZIP_PREFETCH]));
       const entryDone = once(archive, "entry");
-      archive.append(Buffer.from(await blob.arrayBuffer()), { name: safeZipEntryName(row.storage_path, row.id) });
+      archive.append(buf, { name: safeZipEntryName(row.storage_path, row.id) });
       // Wait until the entry is written so we never hold more than one file in memory.
       await entryDone;
       done += 1;

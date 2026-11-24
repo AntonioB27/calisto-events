@@ -23,6 +23,7 @@ export async function GET(request: Request) {
       ok: true,
       expiredIds: result.expiredIds,
       storageErrors: result.storageErrors,
+      staleFailedIds: result.staleFailedIds ?? [],
     },
     { status: 200 },
   );
